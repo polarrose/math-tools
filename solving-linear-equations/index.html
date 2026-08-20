@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Solving Linear Equations</title>
+    <meta name="theme-color" content="#1b2450">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ===== MIDNIGHT SCHOLAR - navy stage, white card, violet + mint accents ===== */
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+            background:
+                radial-gradient(900px 500px at 85% -10%, rgba(124, 58, 237, 0.28), transparent 60%),
+                radial-gradient(800px 500px at -10% 110%, rgba(16, 185, 129, 0.18), transparent 55%),
+                linear-gradient(160deg, #141b3d 0%, #1b2450 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px 12px;
+            margin: 0;
+        }
+        .card {
+            background: #ffffff;
+            border-radius: 22px;
+            box-shadow: 0 24px 60px rgba(8, 12, 40, 0.55);
+            max-width: 700px;
+            width: 100%;
+            padding: 30px 24px 26px;
+            position: relative;
+            overflow: hidden;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+        }
+        h1 {
+            text-align: center;
+        }
+        h1 span.title-inline {
+            display: inline-block;
+            color: #1e2a5e;
+            margin: 4px 0 6px;
+            font-size: 25px;
+            letter-spacing: 0.3px;
+        }
+        h1::after {
+            content: none;
+        }
+        h1 span.title-inline::after {
+            content: '';
+            display: block;
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            margin: 8px 0 14px;
+            background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+        }
+        .equation {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin: 18px auto;
+            font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+            color: #1e2a5e;
+            background: #eef0fb;
+            border: 2px solid #c7cdf0;
+            border-radius: 14px;
+            padding: 14px 12px;
+            max-width: 100%;
+            overflow-wrap: break-word;
+        }
+        .input-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin: 22px 0;
+            flex-wrap: wrap;
+        }
+        input[type="number"], input[type="text"] {
+            width: 110px;
+            font-size: 26px;
+            font-weight: bold;
+            text-align: center;
+            padding: 10px;
+            border: 3px solid #7c3aed;
+            border-radius: 12px;
+            color: #1e2a5e;
+            background: #ffffff;
+        }
+        input[type="number"]:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18);
+        }
+        button {
+            padding: 12px 22px;
+            font-size: 15px;
+            font-weight: 800;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        button:active { transform: scale(0.95); }
+        .submit-btn {
+            background: linear-gradient(135deg, #2e3d8f, #4b3bbd);
+            color: white;
+            box-shadow: 0 6px 16px rgba(46, 61, 143, 0.35);
+        }
+        .submit-btn:hover { filter: brightness(1.1); }
+        .level-btns {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+        .level-btn {
+            background: #e6e9f6;
+            color: #4a5480;
+            border-radius: 999px;
+            padding: 9px 16px;
+            font-size: 13px;
+        }
+        .level-btn:hover { background: #d9def2; }
+        .level-btn.active {
+            background: linear-gradient(135deg, #1e3a5f, #0d9488) !important;
+            color: white !important;
+            box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.25), 0 6px 14px rgba(13, 148, 136, 0.35);
+        }
+        .feedback {
+            text-align: center;
+            font-size: 21px;
+            font-weight: 800;
+            margin: 16px 0 8px;
+            min-height: 32px;
+        }
+        .correct { color: #059669; }
+        .incorrect { color: #1e2a5e; font-size: 18px; font-weight: 700; }
+        .victory {
+            text-align: center;
+            font-size: 26px;
+            color: #7c3aed;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .info {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .info-item {
+            font-size: 12px;
+            font-weight: 800;
+            background: #eef0fb;
+            color: #2e3d8f !important;
+            padding: 6px 14px;
+            border-radius: 999px;
+        }
+        .toggle-row {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 8px 10px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .toggle-label { font-size: 13px; font-weight: 800; color: #4a5480; }
+        .toggle-track {
+            width: 44px; height: 24px;
+            border-radius: 999px;
+            background: #d5d9e8;
+            position: relative;
+            display: inline-block;
+            transition: background 0.2s;
+        }
+        .toggle-track.on { background: #10b981; }
+        .toggle-knob {
+            position: absolute;
+            top: 3px; left: 3px;
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+            transition: left 0.2s;
+        }
+        .toggle-track.on .toggle-knob { left: 23px; }
+        .key-btn {
+            background: #e6e9f6;
+            color: #2e3d8f;
+            padding: 12px 14px;
+            font-size: 16px;
+            font-weight: 800;
+            border-radius: 12px;
+        }
+        .key-btn:hover { background: #d9def2; }
+        .hint-btn, .answer-btn, .skip-btn, .solution-btn {
+            background: #f3eefe;
+            color: #6d28d9;
+            margin: 4px;
+            font-size: 13px;
+        }
+        .hint-btn:hover, .answer-btn:hover, .skip-btn:hover, .solution-btn:hover {
+            background: #e9defc;
+        }
+        .hint-box, .answer-box {
+            background: #f7f5ff;
+            border: 2px solid #d8ccf7;
+            border-radius: 14px;
+            padding: 15px;
+            margin: 14px 0;
+            color: #3b3568;
+        }
+        .progress-cups {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            margin: 14px 0;
+            flex-wrap: wrap;
+        }
+        .cup-container { text-align: center; }
+        .cup-label {
+            font-size: 10px;
+            font-weight: 800;
+            color: #4a5480;
+            margin-bottom: 3px;
+        }
+        .cup {
+            width: 34px;
+            height: 34px;
+            border: 2px solid #2e3d8f;
+            border-radius: 0 0 10px 10px;
+            position: relative;
+            overflow: hidden;
+            background: #f4f6fd;
+            margin: 0 auto;
+        }
+        .cup-fill {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            transition: height 0.5s ease;
+        }
+        .cup-fill.full { background: linear-gradient(to top, #059669, #34d399); }
+        .cup-fill.half { background: linear-gradient(to top, #d97706, #fbbf24); }
+        .cup-fill.partial { background: linear-gradient(to top, #7c3aed, #a78bfa); }
+        .cup-stats {
+            font-size: 9px;
+            color: #6a74a8;
+            margin-top: 2px;
+        }
+        .scaffold-container {
+            background: #f7f8fe;
+            border: 2px solid #c7cdf0;
+            border-radius: 18px;
+            padding: 18px 14px;
+            margin: 16px 0;
+        }
+        .original-equation {
+            background: #eef0fb;
+            border: 2px solid #8b96d8;
+            border-radius: 14px;
+            padding: 12px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .step-prompt {
+            background: #ffffff;
+            border: 2px solid #10b981;
+            border-radius: 14px;
+            padding: 16px 14px;
+            margin: 14px 0;
+            box-shadow: 0 4px 14px rgba(30, 42, 94, 0.08);
+        }
+        .step-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: #047857;
+            margin-bottom: 8px;
+        }
+        .step-question {
+            font-size: 15px;
+            color: #3b3568;
+            margin: 8px 0;
+        }
+        .completed-steps {
+            background: #ecfdf5;
+            border: 2px solid #34d399;
+            border-radius: 14px;
+            padding: 12px;
+            margin: 14px 0;
+        }
+        .step-hint {
+            background: #f3eefe;
+            border-left: 4px solid #7c3aed;
+            border-radius: 0 10px 10px 0;
+            padding: 10px 14px;
+            margin: 10px 0;
+            font-size: 14px;
+            color: #5b21b6;
+        }
+        .fraction-note {
+            background: #eef0fb;
+            border: 2px solid #8b96d8;
+            border-radius: 12px;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 13px;
+            color: #2e3d8f;
+        }
+        /* ===== Confetti ===== */
+        .confetti {
+            position: fixed;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        @keyframes confetti-fall {
+            0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 1; }
+        }
+        @keyframes confetti-fall-slow {
+            0% { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 1; }
+            100% { transform: translateY(115vh) rotate(1080deg) scale(0.85); opacity: 1; }
+        }
+        .sparkle {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, #fff 0%, #ffd700 50%, transparent 70%);
+            border-radius: 50%;
+            animation: sparkle 0.5s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 100;
+        }
+        @keyframes sparkle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.6); }
+        }
+        @media (max-width: 480px) {
+            .card { padding: 24px 14px 20px; }
+            h1 { font-size: 21px; }
+            .equation { font-size: 19px; padding: 12px 8px; }
+            .level-btn { padding: 8px 12px; font-size: 12px; }
+            input[type="number"], input[type="text"] { width: 92px; font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="card" id="game-card">
+        <h1><span class="title-inline">Solving Linear Equations</span></h1>
+        
+        <div class="info">
+            <div class="info-item">Problem: <span id="problemNum">1</span></div>
+            <div class="info-item" id="streak-display" >Streak: <span id="streak">0</span>/10</div>
+            <div class="info-item" id="timer-display" ></div>
+        </div>
+        
+        <div class="level-btns">
+            <button class="level-btn active" onclick="setLevel(0)">Level 0 (Guided)</button>
+            <button class="level-btn" onclick="setLevel(1)">Level 1</button>
+            <button class="level-btn" onclick="setLevel(2)">Level 2</button>
+            <button class="level-btn" onclick="setLevel(3)">Level 3</button>
+        </div>
+        
+        <div id="progress-display"></div>
+        
+        <div id="main-content">
+            <!-- Content will be inserted here -->
+        </div>
+        
+        <div class="feedback" id="feedback"></div>
+        
+        <div id="helper-buttons" style="text-align: center; margin: 20px 0;">
+            <button class="hint-btn" onclick="toggleHint()">Show Hint</button>
+            <button class="answer-btn" onclick="toggleAnswer()">Show Answer</button>
+            <button class="solution-btn" onclick="toggleSolution()">Show Solution</button>
+            <button class="skip-btn" onclick="generateProblem()">Skip</button>
+        </div>
+        
+        <div id="hint" style="display: none;"></div>
+        <div id="answer-box" style="display: none;"></div>
+        <div id="solution-box" style="display: none;"></div>
+
+        <div style="text-align: center; margin-top: 18px; border-top: 1px solid #e6e9f6; padding-top: 14px;">
+            <button class="hint-btn" onclick="toggleStats()">My Stats</button>
+            <span class="toggle-row" onclick="toggleConfetti()">
+                <span class="toggle-label">Confetti</span>
+                <span class="toggle-track" id="confetti-track"><span class="toggle-knob"></span></span>
+            </span>
+        </div>
+        <div id="stats-panel" style="display: none;"></div>
+
+        <!-- Polar Rose Studio insignia -->
+        <div style="text-align: center; margin-top: 16px;">
+            <svg width="90" height="64" viewBox="-28 -26 56 64" style="opacity: 0.9;">
+                <defs><linearGradient id="pr-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#1e3a5f"/><stop offset="100%" stop-color="#0d9488"/></linearGradient></defs>
+                <path d="M24.0,0.0 L23.9,1.3 L23.6,2.5 L23.0,3.7 L22.3,4.7 L21.4,5.7 L20.3,6.6 L19.1,7.3 L17.7,7.9 L16.3,8.3 L14.7,8.5 L13.1,8.5 L11.4,8.3 L9.7,7.9 L8.1,7.3 L6.5,6.5 L5.0,5.5 L3.5,4.4 L2.2,3.0 L1.0,1.6 L0.0,0.0 L-0.9,-1.7 L-1.5,-3.4 L-2.0,-5.2 L-2.3,-7.1 L-2.4,-8.9 L-2.3,-10.7 L-2.0,-12.4 L-1.5,-14.0 L-0.8,-15.6 L-0.0,-17.0 L1.0,-18.2 L2.0,-19.3 L3.2,-20.2 L4.4,-20.9 L5.7,-21.4 L7.1,-21.7 L8.4,-21.8 L9.6,-21.7 L10.9,-21.3 L12.0,-20.8 L13.0,-20.1 L13.9,-19.2 L14.7,-18.1 L15.3,-17.0 L15.7,-15.7 L15.9,-14.3 L15.9,-12.9 L15.7,-11.4 L15.3,-9.9 L14.7,-8.5 L13.9,-7.1 L12.9,-5.7 L11.7,-4.5 L10.4,-3.4 L8.9,-2.4 L7.3,-1.5 L5.5,-0.9 L3.7,-0.4 L1.9,-0.1 L0.0,-0.0 L-1.9,-0.1 L-3.7,-0.4 L-5.5,-0.9 L-7.3,-1.5 L-8.9,-2.4 L-10.4,-3.4 L-11.7,-4.5 L-12.9,-5.7 L-13.9,-7.1 L-14.7,-8.5 L-15.3,-9.9 L-15.7,-11.4 L-15.9,-12.9 L-15.9,-14.3 L-15.7,-15.7 L-15.3,-17.0 L-14.7,-18.1 L-13.9,-19.2 L-13.0,-20.1 L-12.0,-20.8 L-10.9,-21.3 L-9.6,-21.7 L-8.4,-21.8 L-7.1,-21.7 L-5.7,-21.4 L-4.4,-20.9 L-3.2,-20.2 L-2.0,-19.3 L-1.0,-18.2 L-0.0,-17.0 L0.8,-15.6 L1.5,-14.0 L2.0,-12.4 L2.3,-10.7 L2.4,-8.9 L2.3,-7.1 L2.0,-5.2 L1.5,-3.4 L0.9,-1.7 L0.0,-0.0 L-1.0,1.6 L-2.2,3.0 L-3.5,4.4 L-5.0,5.5 L-6.5,6.5 L-8.1,7.3 L-9.7,7.9 L-11.4,8.3 L-13.1,8.5 L-14.7,8.5 L-16.3,8.3 L-17.7,7.9 L-19.1,7.3 L-20.3,6.6 L-21.4,5.7 L-22.3,4.7 L-23.0,3.7 L-23.6,2.5 L-23.9,1.3 L-24.0,0.0 L-23.9,-1.3 L-23.6,-2.5 L-23.0,-3.7 L-22.3,-4.7 L-21.4,-5.7 L-20.3,-6.6 L-19.1,-7.3 L-17.7,-7.9 L-16.3,-8.3 L-14.7,-8.5 L-13.1,-8.5 L-11.4,-8.3 L-9.7,-7.9 L-8.1,-7.3 L-6.5,-6.5 L-5.0,-5.5 L-3.5,-4.4 L-2.2,-3.0 L-1.0,-1.6 L-0.0,-0.0 L0.9,1.7 L1.5,3.4 L2.0,5.2 L2.3,7.1 L2.4,8.9 L2.3,10.7 L2.0,12.4 L1.5,14.0 L0.8,15.6 L0.0,17.0 L-1.0,18.2 L-2.0,19.3 L-3.2,20.2 L-4.4,20.9 L-5.7,21.4 L-7.1,21.7 L-8.4,21.8 L-9.6,21.7 L-10.9,21.3 L-12.0,20.8 L-13.0,20.1 L-13.9,19.2 L-14.7,18.1 L-15.3,17.0 L-15.7,15.7 L-15.9,14.3 L-15.9,12.9 L-15.7,11.4 L-15.3,9.9 L-14.7,8.5 L-13.9,7.1 L-12.9,5.7 L-11.7,4.5 L-10.4,3.4 L-8.9,2.4 L-7.3,1.5 L-5.5,0.9 L-3.7,0.4 L-1.9,0.1 L-0.0,0.0 L1.9,0.1 L3.7,0.4 L5.5,0.9 L7.3,1.5 L8.9,2.4 L10.4,3.4 L11.7,4.5 L12.9,5.7 L13.9,7.1 L14.7,8.5 L15.3,9.9 L15.7,11.4 L15.9,12.9 L15.9,14.3 L15.7,15.7 L15.3,17.0 L14.7,18.1 L13.9,19.2 L13.0,20.1 L12.0,20.8 L10.9,21.3 L9.6,21.7 L8.4,21.8 L7.1,21.7 L5.7,21.4 L4.4,20.9 L3.2,20.2 L2.0,19.3 L1.0,18.2 L0.0,17.0 L-0.8,15.6 L-1.5,14.0 L-2.0,12.4 L-2.3,10.7 L-2.4,8.9 L-2.3,7.1 L-2.0,5.2 L-1.5,3.4 L-0.9,1.7 L0.0,-0.0 L1.0,-1.6 L2.2,-3.0 L3.5,-4.4 L5.0,-5.5 L6.5,-6.5 L8.1,-7.3 L9.7,-7.9 L11.4,-8.3 L13.1,-8.5 L14.7,-8.5 L16.3,-8.3 L17.7,-7.9 L19.1,-7.3 L20.3,-6.6 L21.4,-5.7 L22.3,-4.7 L23.0,-3.7 L23.6,-2.5 L23.9,-1.3 L24.0,-0.0" fill="none" stroke="url(#pr-grad)" stroke-width="1.6"/>
+                <text x="0" y="33" text-anchor="middle" font-family="Nunito, Segoe UI, Arial, sans-serif" font-size="6.5" fill="#6a74a8" letter-spacing="1.2">POLAR ROSE STUDIO</text>
+            </svg>
+        </div>
+    </div>
+
+    <script>
+        let currentProblem = null;
+        let level = 0;
+        let streak = 0;
+        let problemCount = 0;
+        let timer = 0;
+        let timerInterval = null;
+        let isTimerRunning = false;
+        let scaffoldStep = 0;
+        let scaffoldAnswers = [];
+        let solutionRevealed = 0;
+        let stepAttempts = 0;
+        let gameStats = loadStats();
+        let confettiEnabled = loadConfettiPref();
+        try {
+            if (confettiEnabled) document.getElementById('confetti-track').classList.add('on');
+        } catch (e) {}
+        
+        // Level 0 specific tracking
+        let problemHistory = [];
+        let typeProgress = {
+            basic: { completed: 0, required: 2, errors: 0, shown: 0, perfectStreak: 0 },
+            reversed: { completed: 0, required: 2, errors: 0, shown: 0, perfectStreak: 0 },
+            'both-sides': { completed: 0, required: 2, errors: 0, shown: 0, perfectStreak: 0 },
+            distribution: { completed: 0, required: 2, errors: 0, shown: 0, perfectStreak: 0 },
+            'dist-both': { completed: 0, required: 2, errors: 0, shown: 0, perfectStreak: 0 }
+        };
+        
+        let allowFractions = false; // Start with integers only
+
+        function createConfetti(count, tier) {
+            var host = document.body;
+            var colors = ['#ef4444', '#22c55e', '#3b82f6', '#f59e0b', '#a855f7', '#06b6d4', '#ec4899', '#84cc16'];
+            var isMassive = tier === 3;
+            for (var i = 0; i < count; i++) {
+                var piece = document.createElement('div');
+                piece.className = 'confetti';
+                var base;
+                if (tier === 1) base = 7 + Math.random() * 5;        // 7-12px
+                else if (tier === 2) base = 10 + Math.random() * 7;  // 10-17px
+                else base = 11 + Math.random() * 9;                  // 11-20px
+                var color = colors[Math.floor(Math.random() * colors.length)];
+                var shape = Math.floor(Math.random() * 4);
+                if (shape === 0) {
+                    // circle
+                    piece.style.width = base + 'px';
+                    piece.style.height = base + 'px';
+                    piece.style.background = color;
+                    piece.style.borderRadius = '50%';
+                } else if (shape === 1) {
+                    // square
+                    piece.style.width = base + 'px';
+                    piece.style.height = base + 'px';
+                    piece.style.background = color;
+                    piece.style.borderRadius = '2px';
+                } else if (shape === 2) {
+                    // thin rectangle (paper ribbon)
+                    piece.style.width = Math.max(4, base * 0.35) + 'px';
+                    piece.style.height = (base * 1.7) + 'px';
+                    piece.style.background = color;
+                    piece.style.borderRadius = '2px';
+                } else {
+                    // triangle
+                    piece.style.width = '0';
+                    piece.style.height = '0';
+                    piece.style.background = 'transparent';
+                    piece.style.borderLeft = (base * 0.6) + 'px solid transparent';
+                    piece.style.borderRight = (base * 0.6) + 'px solid transparent';
+                    piece.style.borderBottom = base + 'px solid ' + color;
+                }
+                piece.style.left = Math.random() * 100 + '%';
+                piece.style.top = '-20px';
+                var dur;
+                if (tier === 1) dur = 1.6 + Math.random() * 1.0;
+                else if (tier === 2) dur = 2.0 + Math.random() * 1.5;
+                else dur = 2.5 + Math.random() * 2.0;
+                piece.style.animation = (isMassive ? 'confetti-fall-slow' : 'confetti-fall') + ' ' + dur + 's ease-out forwards';
+                piece.style.animationDelay = (Math.random() * (isMassive ? 0.8 : 0.4)) + 's';
+                host.appendChild(piece);
+                setTimeout(function(el) {
+                    return function() { if (el.parentNode) el.parentNode.removeChild(el); };
+                }(piece), isMassive ? 6000 : 4500);
+            }
+            if (isMassive) {
+                for (var j = 0; j < 15; j++) {
+                    var sp = document.createElement('div');
+                    sp.className = 'sparkle';
+                    sp.style.left = (Math.random() * 90 + 5) + '%';
+                    sp.style.top = (Math.random() * 55 + 10) + 'vh';
+                    sp.style.animationDelay = (Math.random() * 0.5) + 's';
+                    host.appendChild(sp);
+                    setTimeout(function(el) {
+                        return function() { if (el.parentNode) el.parentNode.removeChild(el); };
+                    }(sp), 3500);
+                }
+            }
+        }
+
+        function celebrateStreak(s) {
+            if (!confettiEnabled) return;
+            // Milestones only - not every problem
+            if (s === 2) createConfetti(40, 1);                          // light dusting
+            else if (s === 4) createConfetti(100, 2);                    // fuller
+            else if (s === 6) createConfetti(140, 2);                    // larger
+            else if (s === 8) createConfetti(170, 2);                    // larger still
+            else if (s === 10) createConfetti(200, 3);                   // the huge one
+            else if (s > 10 && (s - 10) % 4 === 0) createConfetti(200, 3); // 14, 18, 22...
+        }
+
+        function setLevel(newLevel) {
+            level = newLevel;
+            document.querySelectorAll('.level-btn').forEach((btn, idx) => {
+                btn.classList.toggle('active', idx === newLevel);
+            });
+            streak = 0;
+            stopTimer();
+            
+            // Reset Level 0 tracking when switching levels
+            if (newLevel === 0) {
+                typeProgress = {
+                    basic: { completed: 0, required: 2, errors: 0, shown: 0, perfectStreak: 0 },
+                    reversed: { completed: 0, required: 2, errors: 0, shown: 0, perfectStreak: 0 },
+                    'both-sides': { completed: 0, required: 2, errors: 0, shown: 0, perfectStreak: 0 },
+                    distribution: { completed: 0, required: 2, errors: 0, shown: 0, perfectStreak: 0 },
+                    'dist-both': { completed: 0, required: 2, errors: 0, shown: 0, perfectStreak: 0 }
+                };
+                problemHistory = [];
+                allowFractions = false;
+            }
+            
+            updateDisplay();
+            generateProblem();
+        }
+        
+        function renderProgressCups() {
+            if (level !== 0) return '';
+            
+            const types = [
+                { key: 'basic', label: 'Basic' },
+                { key: 'reversed', label: 'Reversed' },
+                { key: 'both-sides', label: 'Both Sides' },
+                { key: 'distribution', label: 'Distribute' },
+                { key: 'dist-both', label: 'Dist+Both' }
+            ];
+            
+            let html = '<div class="progress-cups">';
+            
+            types.forEach(type => {
+                const progress = typeProgress[type.key];
+                const baseRequired = 2; // Always use base of 2 for fill calculation
+                const completed = progress.completed;
+                const errors = progress.errors;
+                
+                // Determine fill level and color
+                let fillHeight = 0;
+                let fillClass = 'partial';
+                
+                if (completed >= baseRequired && completed >= progress.required) {
+                    // Fully completed all requirements - check if perfect
+                    if (progress.perfectStreak >= 3) {
+                        fillHeight = 100; // Full cup - green
+                        fillClass = 'full';
+                    } else if (errors === 0) {
+                        fillHeight = 100; // Full cup - yellow (completed but not 3 perfect streak)
+                        fillClass = 'half';
+                    } else {
+                        fillHeight = 100; // Full cup - orange (completed with errors)
+                        fillClass = 'half';
+                    }
+                } else if (completed >= baseRequired) {
+                    // Met base requirement but not inflated requirement (made errors)
+                    fillHeight = 75; // Mostly full - still need more
+                    fillClass = 'partial';
+                } else {
+                    // In progress - show true proportion
+                    fillHeight = (completed / baseRequired) * 100; // 1 of 2 = 50%, 2 of 2 = 100%
+                    fillClass = 'partial';
+                }
+                
+                html += `
+                    <div class="cup-container">
+                        <div class="cup-label">${type.label}</div>
+                        <div class="cup">
+                            <div class="cup-fill ${fillClass}" style="height: ${fillHeight}%"></div>
+                        </div>
+                        <div class="cup-stats">${completed}/${progress.required}${errors > 0 ? ` (${errors} X)` : ''}</div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            return html;
+        }
+
+        function generateProblem() {
+            let equation, answer, steps, scaffoldSteps, problemType = null, solutionSteps = null;
+            scaffoldStep = 0;
+            scaffoldAnswers = [];
+            
+            if (level === 0) {
+                // Level 0 - Guided with scaffolding
+                if (typeProgress.basic.completed < typeProgress.basic.required && typeProgress.basic.shown < 3) {
+                    problemType = 'basic';
+                } else if (typeProgress.reversed.completed < typeProgress.reversed.required && typeProgress.reversed.shown < 3) {
+                    problemType = 'reversed';
+                } else if (typeProgress['both-sides'].completed < typeProgress['both-sides'].required && typeProgress['both-sides'].shown < 3) {
+                    problemType = 'both-sides';
+                } else if (typeProgress.distribution.completed < typeProgress.distribution.required && typeProgress.distribution.shown < 3) {
+                    problemType = 'distribution';
+                } else if (typeProgress['dist-both'].completed < typeProgress['dist-both'].required && typeProgress['dist-both'].shown < 3) {
+                    problemType = 'dist-both';
+                } else if (typeProgress.basic.completed < typeProgress.basic.required) {
+                    problemType = 'basic';
+                } else if (typeProgress.reversed.completed < typeProgress.reversed.required) {
+                    problemType = 'reversed';
+                } else if (typeProgress['both-sides'].completed < typeProgress['both-sides'].required) {
+                    problemType = 'both-sides';
+                } else if (typeProgress.distribution.completed < typeProgress.distribution.required) {
+                    problemType = 'distribution';
+                } else if (typeProgress['dist-both'].completed < typeProgress['dist-both'].required) {
+                    problemType = 'dist-both';
+                } else {
+                    // All completed!
+                    showCompletionMessage();
+                    return;
+                }
+                
+                typeProgress[problemType].shown++;
+                
+                if (problemType === 'basic') {
+                    const a = Math.floor(Math.random() * 7) + 2;
+                    let b = Math.floor(Math.random() * 15) - 7;
+                    if (b === 0) b = 3;
+                    const x = Math.floor(Math.random() * 10) - 5;
+                    const c = a * x + b;
+                    
+                    equation = `${a}x ${b >= 0 ? '+' : ''} ${b} = ${c}`;
+                    answer = x;
+                    
+                    scaffoldSteps = [
+                        {
+                            question: `What should we ${b >= 0 ? 'subtract' : 'add'} ${b >= 0 ? 'from' : 'to'} both sides to isolate the term with x?`,
+                            prompt: `Let's ${b >= 0 ? 'subtract' : 'add'} _____ ${b >= 0 ? 'from' : 'to'} both sides`,
+                            correctAnswer: Math.abs(b),
+                            hint: `We want to eliminate the ${b >= 0 ? '+' : ''} ${b} on the left side. ${b >= 0 ? 'Subtract' : 'Add'} ${Math.abs(b)} ${b >= 0 ? 'from' : 'to'} both sides.`,
+                            resultEquation: `${a}x = ${c} ${b >= 0 ? '-' : '+'} ${Math.abs(b)}`,
+                        },
+                        {
+                            question: `Now simplify the right side. What is ${c} ${b >= 0 ? '-' : '+'} ${Math.abs(b)}?`,
+                            prompt: `${a}x = _____`,
+                            correctAnswer: c - b,
+                            hint: `${c} ${b >= 0 ? '-' : '+'} ${Math.abs(b)} = ${c - b}`,
+                            resultEquation: `${a}x = ${c - b}`,
+                        },
+                        {
+                            question: `What should we divide both sides by to solve for x?`,
+                            prompt: `Divide both sides by _____`,
+                            correctAnswer: a,
+                            hint: `We have ${a}x, so we need to divide by ${a} to get x by itself.`,
+                            resultEquation: `${a}x / ${a} = ${c - b} / ${a}`,
+                        },
+                        {
+                            question: `What is the final value of x?`,
+                            prompt: `x = _____`,
+                            correctAnswer: x,
+                            hint: `${c - b} / ${a} = ${x}`,
+                            resultEquation: `x = ${x}`,
+                        }
+                    ];
+                } else if (problemType === 'reversed') {
+                    const a = Math.floor(Math.random() * 7) + 2;
+                    let b = Math.floor(Math.random() * 15) - 7;
+                    if (b === 0) b = 3;
+                    const x = Math.floor(Math.random() * 10) - 5;
+                    const c = a * x + b;
+                    
+                    equation = `${c} = ${a}x ${b >= 0 ? '+' : ''} ${b}`;
+                    answer = x;
+                    
+                    scaffoldSteps = [
+                        {
+                            question: `What should we ${b >= 0 ? 'subtract' : 'add'} ${b >= 0 ? 'from' : 'to'} both sides to isolate the term with x?`,
+                            prompt: `Let's ${b >= 0 ? 'subtract' : 'add'} _____ ${b >= 0 ? 'from' : 'to'} both sides`,
+                            correctAnswer: Math.abs(b),
+                            hint: `We want to eliminate the ${b >= 0 ? '+' : ''} ${b} on the right side. ${b >= 0 ? 'Subtract' : 'Add'} ${Math.abs(b)} from both sides.`,
+                            resultEquation: `${c} ${b >= 0 ? '-' : '+'} ${Math.abs(b)} = ${a}x`,
+                        },
+                        {
+                            question: `Now simplify the left side. What is ${c} ${b >= 0 ? '-' : '+'} ${Math.abs(b)}?`,
+                            prompt: `_____ = ${a}x`,
+                            correctAnswer: c - b,
+                            hint: `${c} ${b >= 0 ? '-' : '+'} ${Math.abs(b)} = ${c - b}`,
+                            resultEquation: `${c - b} = ${a}x`,
+                        },
+                        {
+                            question: `What should we divide both sides by to solve for x?`,
+                            prompt: `Divide both sides by _____`,
+                            correctAnswer: a,
+                            hint: `We have ${a}x, so we need to divide by ${a} to get x by itself.`,
+                            resultEquation: `${c - b} / ${a} = ${a}x / ${a}`,
+                        },
+                        {
+                            question: `What is the final value of x?`,
+                            prompt: `x = _____`,
+                            correctAnswer: x,
+                            hint: `${c - b} / ${a} = ${x}`,
+                            resultEquation: `x = ${x}`,
+                        }
+                    ];
+                } else if (problemType === 'both-sides') {
+                    const a = Math.floor(Math.random() * 7) + 2;
+                    let b = Math.floor(Math.random() * 15) - 7;
+                    if (b === 0) b = 3;
+                    const x = Math.floor(Math.random() * 10) - 5;
+                    
+                    const coefDiff = Math.floor(Math.random() * 4) + 2;
+                    const c_coef = Math.max(1, a - coefDiff);
+                    const d_value = a * x + b - c_coef * x;
+                    
+                    equation = `${a}x ${b >= 0 ? '+' : ''} ${b} = ${c_coef}x ${d_value >= 0 ? '+' : ''} ${d_value}`;
+                    answer = x;
+                    
+                    scaffoldSteps = [
+                        {
+                            question: `First, let's get all x terms on one side. We'll subtract ${c_coef}x from both sides. What number should we subtract?`,
+                            prompt: `Subtract _____x from both sides`,
+                            correctAnswer: c_coef,
+                            hint: `We want to move ${c_coef}x to the left side. Subtract ${c_coef}x from both sides.`,
+                            resultEquation: `${a}x - ${c_coef}x ${b >= 0 ? '+' : ''} ${b} = ${d_value}`,
+                        },
+                        {
+                            question: `Now combine the x terms on the left side. What is ${a}x - ${c_coef}x?`,
+                            prompt: `_____x ${b >= 0 ? '+' : ''} ${b} = ${d_value}`,
+                            correctAnswer: a - c_coef,
+                            hint: `${a} - ${c_coef} = ${a - c_coef}, so ${a}x - ${c_coef}x = ${a - c_coef}x`,
+                            resultEquation: `${a - c_coef}x ${b >= 0 ? '+' : ''} ${b} = ${d_value}`,
+                        },
+                        {
+                            question: `Now we need to move the constant term. What should we ${b >= 0 ? 'subtract' : 'add'} ${b >= 0 ? 'from' : 'to'} both sides?`,
+                            prompt: `${b >= 0 ? 'Subtract' : 'Add'} _____ ${b >= 0 ? 'from' : 'to'} both sides`,
+                            correctAnswer: Math.abs(b),
+                            hint: `We want to eliminate the ${b >= 0 ? '+' : ''} ${b} on the left side. ${b >= 0 ? 'Subtract' : 'Add'} ${Math.abs(b)} ${b >= 0 ? 'from' : 'to'} both sides.`,
+                            resultEquation: `${a - c_coef}x = ${d_value} ${b >= 0 ? '-' : '+'} ${Math.abs(b)}`,
+                        },
+                        {
+                            question: `Simplify the right side. What is ${d_value} ${b >= 0 ? '-' : '+'} ${Math.abs(b)}?`,
+                            prompt: `${a - c_coef}x = _____`,
+                            correctAnswer: d_value - b,
+                            hint: `${d_value} ${b >= 0 ? '-' : '+'} ${Math.abs(b)} = ${d_value - b}`,
+                            resultEquation: `${a - c_coef}x = ${d_value - b}`,
+                        },
+                        {
+                            question: `What should we divide both sides by to solve for x?`,
+                            prompt: `Divide both sides by _____`,
+                            correctAnswer: a - c_coef,
+                            hint: `We have ${a - c_coef}x, so divide by ${a - c_coef}.`,
+                            resultEquation: `x = ${d_value - b} / ${a - c_coef}`,
+                        },
+                        {
+                            question: `What is the final value of x?`,
+                            prompt: `x = _____`,
+                            correctAnswer: x,
+                            hint: `${d_value - b} / ${a - c_coef} = ${x}`,
+                            resultEquation: `x = ${x}`,
+                        }
+                    ];
+                } else if (problemType === 'distribution') {
+                    const x = Math.floor(Math.random() * 10) - 5;
+                    const outer = Math.floor(Math.random() * 4) + 2; // 2-5
+                    const inner_coef = Math.floor(Math.random() * 4) + 2; // 2-5
+                    let inner_const = Math.floor(Math.random() * 11) - 5;
+                    if (inner_const === 0) inner_const = 3;
+                    const result = outer * (inner_coef * x + inner_const);
+                    
+                    equation = `${outer}(${inner_coef}x ${inner_const >= 0 ? '+' : ''} ${inner_const}) = ${result}`;
+                    answer = x;
+                    
+                    const distributed_coef = outer * inner_coef;
+                    const distributed_const = outer * inner_const;
+                    
+                    scaffoldSteps = [
+                        {
+                            question: `First, we need to distribute (multiply) ${outer} to both terms inside the parentheses. What is ${outer} * ${inner_coef}?`,
+                            prompt: `${outer} * ${inner_coef} = _____`,
+                            correctAnswer: distributed_coef,
+                            hint: `Multiply ${outer} times ${inner_coef} to get ${distributed_coef}`,
+                            resultEquation: `${distributed_coef}x + (${outer} * ${inner_const}) = ${result}`,
+                        },
+                        {
+                            question: `Now what is ${outer} * ${inner_const}?`,
+                            prompt: `${outer} * ${inner_const} = _____`,
+                            correctAnswer: distributed_const,
+                            hint: `Multiply ${outer} times ${inner_const} to get ${distributed_const}`,
+                            resultEquation: `${distributed_coef}x ${distributed_const >= 0 ? '+' : ''} ${distributed_const} = ${result}`,
+                        },
+                        {
+                            question: `Now we have a simpler equation. What should we ${distributed_const >= 0 ? 'subtract' : 'add'} ${distributed_const >= 0 ? 'from' : 'to'} both sides?`,
+                            prompt: `${distributed_const >= 0 ? 'Subtract' : 'Add'} _____ ${distributed_const >= 0 ? 'from' : 'to'} both sides`,
+                            correctAnswer: Math.abs(distributed_const),
+                            hint: `We want to eliminate the ${distributed_const >= 0 ? '+' : ''} ${distributed_const}. ${distributed_const >= 0 ? 'Subtract' : 'Add'} ${Math.abs(distributed_const)} from both sides.`,
+                            resultEquation: `${distributed_coef}x = ${result} ${distributed_const >= 0 ? '-' : '+'} ${Math.abs(distributed_const)}`,
+                        },
+                        {
+                            question: `Simplify the right side. What is ${result} ${distributed_const >= 0 ? '-' : '+'} ${Math.abs(distributed_const)}?`,
+                            prompt: `${distributed_coef}x = _____`,
+                            correctAnswer: result - distributed_const,
+                            hint: `${result} ${distributed_const >= 0 ? '-' : '+'} ${Math.abs(distributed_const)} = ${result - distributed_const}`,
+                            resultEquation: `${distributed_coef}x = ${result - distributed_const}`,
+                        },
+                        {
+                            question: `What should we divide both sides by to solve for x?`,
+                            prompt: `Divide both sides by _____`,
+                            correctAnswer: distributed_coef,
+                            hint: `We have ${distributed_coef}x, so divide by ${distributed_coef}.`,
+                            resultEquation: `x = ${result - distributed_const} / ${distributed_coef}`,
+                        },
+                        {
+                            question: `What is the final value of x?`,
+                            prompt: `x = _____`,
+                            correctAnswer: x,
+                            hint: `${result - distributed_const} / ${distributed_coef} = ${x}`,
+                            resultEquation: `x = ${x}`,
+                        }
+                    ];
+                } else {
+                    // Distribution with x on BOTH sides - constrained so it balances with integer x
+                    var x = Math.floor(Math.random() * 8) - 4;
+                    if (x === 0) x = 2;
+                    var left_outside, left_mult, left_inner_coef, left_inner_const;
+                    var right_outside, right_mult, right_inner_coef, right_inner_const;
+                    var db_attempts = 0, db_valid = false;
+                    while (!db_valid && db_attempts < 100) {
+                        db_attempts++;
+                        left_outside = Math.floor(Math.random() * 3) + 1;
+                        left_mult = Math.floor(Math.random() * 3) + 2;
+                        left_inner_coef = Math.floor(Math.random() * 3) + 2;
+                        left_inner_const = Math.floor(Math.random() * 7) - 3;
+                        if (left_inner_const === 0) left_inner_const = 2;
+                        right_outside = Math.floor(Math.random() * 3) + 1;
+                        right_mult = Math.floor(Math.random() * 3) + 2;
+                        right_inner_coef = Math.floor(Math.random() * 3) + 1;
+                        var leftTotal = left_outside + left_mult * left_inner_coef;
+                        var rightTotal = right_outside + right_mult * right_inner_coef;
+                        if (leftTotal === rightTotal) continue;
+                        var numer = left_mult * left_inner_const + (leftTotal - rightTotal) * x;
+                        if (numer % right_mult !== 0) continue;
+                        right_inner_const = numer / right_mult;
+                        if (right_inner_const === 0 || Math.abs(right_inner_const) > 12) continue;
+                        db_valid = true;
+                    }
+                    if (!db_valid) {
+                        x = 2; left_outside = 1; left_mult = 2; left_inner_coef = 3; left_inner_const = 1;
+                        right_outside = 1; right_mult = 2; right_inner_coef = 2; right_inner_const = 3;
+                    }
+                    const left_distributed_coef = left_mult * left_inner_coef;
+                    const left_distributed_const = left_mult * left_inner_const;
+                    const right_distributed_coef = right_mult * right_inner_coef;
+                    const right_distributed_const = right_mult * right_inner_const;
+                    equation = `${left_outside}x + ${left_mult}(${left_inner_coef}x ${left_inner_const >= 0 ? '+' : ''} ${left_inner_const}) = ${right_mult}(${right_inner_coef}x ${right_inner_const >= 0 ? '+' : ''} ${right_inner_const}) + ${right_outside}x`;
+                    answer = x;
+                    
+                    scaffoldSteps = [
+                        {
+                            question: `Let's start with the LEFT side. Distribute ${left_mult} to the first term. What is ${left_mult} * ${left_inner_coef}?`,
+                            prompt: `${left_mult} * ${left_inner_coef} = _____`,
+                            correctAnswer: left_distributed_coef,
+                            hint: `Multiply ${left_mult} times ${left_inner_coef} to get ${left_distributed_coef}`,
+                            resultEquation: `${left_outside}x + ${left_distributed_coef}x + ... = ${right_mult}(${right_inner_coef}x ${right_inner_const >= 0 ? '+' : ''} ${right_inner_const}) + ${right_outside}x`,
+                        },
+                        {
+                            question: `Still on the LEFT side, what is ${left_mult} * ${left_inner_const}?`,
+                            prompt: `${left_mult} * ${left_inner_const} = _____`,
+                            correctAnswer: left_distributed_const,
+                            hint: `Multiply ${left_mult} times ${left_inner_const} to get ${left_distributed_const}`,
+                            resultEquation: `${left_outside}x + ${left_distributed_coef}x ${left_distributed_const >= 0 ? '+' : ''} ${left_distributed_const} = ${right_mult}(${right_inner_coef}x ${right_inner_const >= 0 ? '+' : ''} ${right_inner_const}) + ${right_outside}x`,
+                        },
+                        {
+                            question: `Now the RIGHT side! Distribute ${right_mult} to the first term. What is ${right_mult} * ${right_inner_coef}?`,
+                            prompt: `${right_mult} * ${right_inner_coef} = _____`,
+                            correctAnswer: right_distributed_coef,
+                            hint: `Multiply ${right_mult} times ${right_inner_coef} to get ${right_distributed_coef}`,
+                            resultEquation: `${left_outside}x + ${left_distributed_coef}x ${left_distributed_const >= 0 ? '+' : ''} ${left_distributed_const} = ${right_distributed_coef}x + ... + ${right_outside}x`,
+                        },
+                        {
+                            question: `Still on the RIGHT side, what is ${right_mult} * ${right_inner_const}?`,
+                            prompt: `${right_mult} * ${right_inner_const} = _____`,
+                            correctAnswer: right_distributed_const,
+                            hint: `Multiply ${right_mult} times ${right_inner_const} to get ${right_distributed_const}`,
+                            resultEquation: `${left_outside}x + ${left_distributed_coef}x ${left_distributed_const >= 0 ? '+' : ''} ${left_distributed_const} = ${right_distributed_coef}x ${right_distributed_const >= 0 ? '+' : ''} ${right_distributed_const} + ${right_outside}x`,
+                        },
+                        {
+                            question: `Combine x terms on the LEFT side. What is ${left_outside}x + ${left_distributed_coef}x?`,
+                            prompt: `_____x ${left_distributed_const >= 0 ? '+' : ''} ${left_distributed_const} = ${right_distributed_coef}x ${right_distributed_const >= 0 ? '+' : ''} ${right_distributed_const} + ${right_outside}x`,
+                            correctAnswer: left_outside + left_distributed_coef,
+                            hint: `${left_outside} + ${left_distributed_coef} = ${left_outside + left_distributed_coef}`,
+                            resultEquation: `${left_outside + left_distributed_coef}x ${left_distributed_const >= 0 ? '+' : ''} ${left_distributed_const} = ${right_distributed_coef}x ${right_distributed_const >= 0 ? '+' : ''} ${right_distributed_const} + ${right_outside}x`,
+                        },
+                        {
+                            question: `Combine x terms on the RIGHT side. What is ${right_distributed_coef}x + ${right_outside}x?`,
+                            prompt: `${left_outside + left_distributed_coef}x ${left_distributed_const >= 0 ? '+' : ''} ${left_distributed_const} = _____x ${right_distributed_const >= 0 ? '+' : ''} ${right_distributed_const}`,
+                            correctAnswer: right_distributed_coef + right_outside,
+                            hint: `${right_distributed_coef} + ${right_outside} = ${right_distributed_coef + right_outside}`,
+                            resultEquation: `${left_outside + left_distributed_coef}x ${left_distributed_const >= 0 ? '+' : ''} ${left_distributed_const} = ${right_distributed_coef + right_outside}x ${right_distributed_const >= 0 ? '+' : ''} ${right_distributed_const}`,
+                        },
+                        {
+                            question: `Subtract ${right_distributed_coef + right_outside}x from both sides. What number should we subtract?`,
+                            prompt: `Subtract _____x from both sides`,
+                            correctAnswer: right_distributed_coef + right_outside,
+                            hint: `Subtract ${right_distributed_coef + right_outside}x to get all x terms on the left.`,
+                            resultEquation: `${left_outside + left_distributed_coef}x - ${right_distributed_coef + right_outside}x ${left_distributed_const >= 0 ? '+' : ''} ${left_distributed_const} = ${right_distributed_const}`,
+                        },
+                        {
+                            question: `Combine the x terms. What is ${left_outside + left_distributed_coef}x - ${right_distributed_coef + right_outside}x?`,
+                            prompt: `_____x ${left_distributed_const >= 0 ? '+' : ''} ${left_distributed_const} = ${right_distributed_const}`,
+                            correctAnswer: (left_outside + left_distributed_coef) - (right_distributed_coef + right_outside),
+                            hint: `${left_outside + left_distributed_coef} - ${right_distributed_coef + right_outside} = ${(left_outside + left_distributed_coef) - (right_distributed_coef + right_outside)}`,
+                            resultEquation: `${(left_outside + left_distributed_coef) - (right_distributed_coef + right_outside)}x ${left_distributed_const >= 0 ? '+' : ''} ${left_distributed_const} = ${right_distributed_const}`,
+                        },
+                        {
+                            question: `What should we ${left_distributed_const >= 0 ? 'subtract' : 'add'} ${left_distributed_const >= 0 ? 'from' : 'to'} both sides?`,
+                            prompt: `${left_distributed_const >= 0 ? 'Subtract' : 'Add'} _____ ${left_distributed_const >= 0 ? 'from' : 'to'} both sides`,
+                            correctAnswer: Math.abs(left_distributed_const),
+                            hint: `${left_distributed_const >= 0 ? 'Subtract' : 'Add'} ${Math.abs(left_distributed_const)} to isolate the x term.`,
+                            resultEquation: `${(left_outside + left_distributed_coef) - (right_distributed_coef + right_outside)}x = ${right_distributed_const} ${left_distributed_const >= 0 ? '-' : '+'} ${Math.abs(left_distributed_const)}`,
+                        },
+                        {
+                            question: `Simplify the right side. What is ${right_distributed_const} ${left_distributed_const >= 0 ? '-' : '+'} ${Math.abs(left_distributed_const)}?`,
+                            prompt: `${(left_outside + left_distributed_coef) - (right_distributed_coef + right_outside)}x = _____`,
+                            correctAnswer: right_distributed_const - left_distributed_const,
+                            hint: `${right_distributed_const} ${left_distributed_const >= 0 ? '-' : '+'} ${Math.abs(left_distributed_const)} = ${right_distributed_const - left_distributed_const}`,
+                            resultEquation: `${(left_outside + left_distributed_coef) - (right_distributed_coef + right_outside)}x = ${right_distributed_const - left_distributed_const}`,
+                        },
+                        {
+                            question: `What should we divide both sides by?`,
+                            prompt: `Divide both sides by _____`,
+                            correctAnswer: (left_outside + left_distributed_coef) - (right_distributed_coef + right_outside),
+                            hint: `Divide by ${(left_outside + left_distributed_coef) - (right_distributed_coef + right_outside)}.`,
+                            resultEquation: `x = ${right_distributed_const - left_distributed_const} / ${(left_outside + left_distributed_coef) - (right_distributed_coef + right_outside)}`,
+                        },
+                        {
+                            question: `What is the final value of x?`,
+                            prompt: `x = _____`,
+                            correctAnswer: x,
+                            hint: `${right_distributed_const - left_distributed_const} / ${(left_outside + left_distributed_coef) - (right_distributed_coef + right_outside)} = ${x}`,
+                            resultEquation: `x = ${x}`,
+                        }
+                    ];
+                }
+                
+            } else if (level === 1) {
+                const a = Math.floor(Math.random() * 9) + 2;
+                let b = Math.floor(Math.random() * 21) - 10;
+                if (b === 0) b = 3;
+                const x = Math.floor(Math.random() * 15) - 7;
+                const c = a * x + b;
+                
+                equation = `${a}x ${b >= 0 ? '+' : ''} ${b} = ${c}`;
+                answer = x;
+                solutionSteps = [
+                    `${b >= 0 ? 'Subtract' : 'Add'} ${Math.abs(b)} ${b >= 0 ? 'from' : 'to'} both sides:  ${a}x = ${c - b}`,
+                    `Divide both sides by ${a}:  x = ${x}`
+                ];
+            } else if (level === 2) {
+                // Level 2 - Start introducing fractions after 5 integer problems
+                if (problemCount >= 5 && !allowFractions) {
+                    allowFractions = true;
+                }
+                
+                if (allowFractions && Math.random() < 0.3) {
+                    // Fraction answer problem
+                    const a = Math.floor(Math.random() * 8) + 2;
+                    let b = Math.floor(Math.random() * 21) - 10;
+                    if (b === 0) b = 3;
+                    const numerator = Math.floor(Math.random() * 20) - 10;
+                    const c = numerator + b;
+                    
+                    equation = `${a}x ${b >= 0 ? '+' : ''} ${b} = ${c}`;
+                    answer = numerator / a;
+                    solutionSteps = [
+                        `${b >= 0 ? 'Subtract' : 'Add'} ${Math.abs(b)} ${b >= 0 ? 'from' : 'to'} both sides:  ${a}x = ${numerator}`,
+                        `Divide both sides by ${a}:  x = ${formatFraction(numerator / a)}`
+                    ];
+                } else {
+                    // Integer answer
+                    const x = Math.floor(Math.random() * 15) - 7;
+                    const a = Math.floor(Math.random() * 8) + 2;
+                    let c = Math.floor(Math.random() * 7) + 1;
+                    if (a === c) c = c + 1;
+                    const b = Math.floor(Math.random() * 21) - 10;
+                    const d = (a - c) * x + b;
+                    
+                    equation = `${a}x ${b >= 0 ? '+' : ''} ${b} = ${c}x ${d >= 0 ? '+' : ''} ${d}`;
+                    answer = x;
+                    solutionSteps = [
+                        `Subtract ${c}x from both sides:  ${a - c}x ${b >= 0 ? '+' : ''} ${b} = ${d}`,
+                        `${b >= 0 ? 'Subtract' : 'Add'} ${Math.abs(b)} ${b >= 0 ? 'from' : 'to'} both sides:  ${a - c}x = ${d - b}`,
+                        `Divide both sides by ${a - c}:  x = ${x}`
+                    ];
+                }
+            } else if (level === 3) {
+                // Level 3 - three types: single distribution, double parentheses, x on both sides
+                if (problemCount >= 3 && !allowFractions) {
+                    allowFractions = true;
+                }
+                
+                var l3type = Math.random();
+                if (l3type < 0.34) {
+                    // Type A: single distribution a(bx + c) = d
+                    if (allowFractions && Math.random() < 0.4) {
+                        const a = 2 + Math.floor(Math.random() * 3);
+                        const b = 1 + Math.floor(Math.random() * 4);
+                        const c = Math.floor(Math.random() * 11) - 5;
+                        const numerator = Math.floor(Math.random() * 15) - 7;
+                        const d = numerator + a * c;
+                        equation = `${a}(${b}x ${c >= 0 ? '+' : ''} ${c}) = ${d}`;
+                        answer = numerator / (a * b);
+                        solutionSteps = [
+                            `Distribute ${a}:  ${a * b}x ${a * c >= 0 ? '+' : ''} ${a * c} = ${d}`,
+                            `${a * c >= 0 ? 'Subtract' : 'Add'} ${Math.abs(a * c)} ${a * c >= 0 ? 'from' : 'to'} both sides:  ${a * b}x = ${d - a * c}`,
+                            `Divide both sides by ${a * b}:  x = ${formatFraction(numerator / (a * b))}`
+                        ];
+                    } else {
+                        const x = Math.floor(Math.random() * 10) - 5;
+                        const a = 2 + Math.floor(Math.random() * 3);
+                        const b = 1 + Math.floor(Math.random() * 4);
+                        const c = Math.floor(Math.random() * 11) - 5;
+                        const d = a * (b * x + c);
+                        equation = `${a}(${b}x ${c >= 0 ? '+' : ''} ${c}) = ${d}`;
+                        answer = x;
+                        solutionSteps = [
+                            `Distribute ${a}:  ${a * b}x ${a * c >= 0 ? '+' : ''} ${a * c} = ${d}`,
+                            `${a * c >= 0 ? 'Subtract' : 'Add'} ${Math.abs(a * c)} ${a * c >= 0 ? 'from' : 'to'} both sides:  ${a * b}x = ${d - a * c}`,
+                            `Divide both sides by ${a * b}:  x = ${x}`
+                        ];
+                    }
+                } else if (l3type < 0.67) {
+                    // Type B: double parentheses a(bx + c) = e(fx + g)
+                    var x3 = Math.floor(Math.random() * 9) - 4;
+                    var a3, b3, c3, e3, f3, g3, ok3 = false, tries3 = 0;
+                    while (!ok3 && tries3 < 100) {
+                        tries3++;
+                        a3 = Math.floor(Math.random() * 3) + 2;
+                        b3 = Math.floor(Math.random() * 3) + 2;
+                        c3 = Math.floor(Math.random() * 9) - 4;
+                        if (c3 === 0) c3 = 3;
+                        e3 = Math.floor(Math.random() * 3) + 2;
+                        f3 = Math.floor(Math.random() * 4) + 1;
+                        if (a3 * b3 === e3 * f3) continue;
+                        var numer3 = (a3 * b3 - e3 * f3) * x3 + a3 * c3;
+                        if (numer3 % e3 !== 0) continue;
+                        g3 = numer3 / e3;
+                        if (g3 === 0 || Math.abs(g3) > 12) continue;
+                        ok3 = true;
+                    }
+                    if (!ok3) { x3 = 2; a3 = 2; b3 = 3; c3 = 1; e3 = 2; f3 = 2; g3 = 3; }
+                    equation = `${a3}(${b3}x ${c3 >= 0 ? '+' : ''} ${c3}) = ${e3}(${f3}x ${g3 >= 0 ? '+' : ''} ${g3})`;
+                    answer = x3;
+                    solutionSteps = [
+                        `Distribute both sides:  ${a3 * b3}x ${a3 * c3 >= 0 ? '+' : ''} ${a3 * c3} = ${e3 * f3}x ${e3 * g3 >= 0 ? '+' : ''} ${e3 * g3}`,
+                        `Subtract ${e3 * f3}x from both sides:  ${a3 * b3 - e3 * f3}x ${a3 * c3 >= 0 ? '+' : ''} ${a3 * c3} = ${e3 * g3}`,
+                        `${a3 * c3 >= 0 ? 'Subtract' : 'Add'} ${Math.abs(a3 * c3)} ${a3 * c3 >= 0 ? 'from' : 'to'} both sides:  ${a3 * b3 - e3 * f3}x = ${e3 * g3 - a3 * c3}`,
+                        `Divide both sides by ${a3 * b3 - e3 * f3}:  x = ${x3}`
+                    ];
+                } else {
+                    // Type C: distribution with x on both sides px + a(bx + c) = e(fx + g) + qx
+                    var x4 = Math.floor(Math.random() * 8) - 4;
+                    if (x4 === 0) x4 = 2;
+                    var p4, a4, b4, c4, e4, f4, g4, q4, ok4 = false, tries4 = 0;
+                    while (!ok4 && tries4 < 100) {
+                        tries4++;
+                        p4 = Math.floor(Math.random() * 3) + 1;
+                        a4 = Math.floor(Math.random() * 3) + 2;
+                        b4 = Math.floor(Math.random() * 3) + 2;
+                        c4 = Math.floor(Math.random() * 7) - 3;
+                        if (c4 === 0) c4 = 2;
+                        q4 = Math.floor(Math.random() * 3) + 1;
+                        e4 = Math.floor(Math.random() * 3) + 2;
+                        f4 = Math.floor(Math.random() * 3) + 1;
+                        var lt4 = p4 + a4 * b4;
+                        var rt4 = q4 + e4 * f4;
+                        if (lt4 === rt4) continue;
+                        var numer4 = a4 * c4 + (lt4 - rt4) * x4;
+                        if (numer4 % e4 !== 0) continue;
+                        g4 = numer4 / e4;
+                        if (g4 === 0 || Math.abs(g4) > 12) continue;
+                        ok4 = true;
+                    }
+                    if (!ok4) { x4 = 2; p4 = 1; a4 = 2; b4 = 3; c4 = 1; q4 = 1; e4 = 2; f4 = 2; g4 = 3; }
+                    equation = `${p4}x + ${a4}(${b4}x ${c4 >= 0 ? '+' : ''} ${c4}) = ${e4}(${f4}x ${g4 >= 0 ? '+' : ''} ${g4}) + ${q4}x`;
+                    answer = x4;
+                    solutionSteps = [
+                        `Distribute both sides:  ${p4}x + ${a4 * b4}x ${a4 * c4 >= 0 ? '+' : ''} ${a4 * c4} = ${e4 * f4}x ${e4 * g4 >= 0 ? '+' : ''} ${e4 * g4} + ${q4}x`,
+                        `Combine like terms:  ${p4 + a4 * b4}x ${a4 * c4 >= 0 ? '+' : ''} ${a4 * c4} = ${e4 * f4 + q4}x ${e4 * g4 >= 0 ? '+' : ''} ${e4 * g4}`,
+                        `Subtract ${e4 * f4 + q4}x from both sides:  ${(p4 + a4 * b4) - (e4 * f4 + q4)}x ${a4 * c4 >= 0 ? '+' : ''} ${a4 * c4} = ${e4 * g4}`,
+                        `${a4 * c4 >= 0 ? 'Subtract' : 'Add'} ${Math.abs(a4 * c4)} ${a4 * c4 >= 0 ? 'from' : 'to'} both sides:  ${(p4 + a4 * b4) - (e4 * f4 + q4)}x = ${e4 * g4 - a4 * c4}`,
+                        `Divide both sides by ${(p4 + a4 * b4) - (e4 * f4 + q4)}:  x = ${x4}`
+                    ];
+                }
+            }
+
+            equation = cleanCoef(equation);
+            if (solutionSteps) {
+                solutionSteps = solutionSteps.map(cleanCoef)
+                    .filter(function(s) { return !/Divide both sides by 1:/.test(s); });
+            }
+            if (scaffoldSteps) {
+                scaffoldSteps = scaffoldSteps.map(function(s) {
+                    return {
+                        question: cleanCoef(s.question),
+                        prompt: cleanCoef(s.prompt),
+                        correctAnswer: s.correctAnswer,
+                        hint: cleanCoef(s.hint),
+                        resultEquation: cleanCoef(s.resultEquation)
+                    };
+                });
+            }
+            currentProblem = { equation, answer, scaffoldSteps, problemType, solutionSteps: solutionSteps, isFraction: !Number.isInteger(answer) };
+            
+            if (level === 0) {
+                renderScaffoldStep();
+            } else {
+                renderNormalProblem();
+            }
+            
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('hint').style.display = 'none';
+            document.getElementById('answer-box').style.display = 'none';
+            document.getElementById('solution-box').style.display = 'none';
+            solutionRevealed = 0;
+        }
+
+        function showCompletionMessage() {
+            const mainContent = document.getElementById('main-content');
+            mainContent.innerHTML = `
+                <div style="text-align: center; padding: 40px 20px;">
+                    <div style="font-size: 40px; font-weight: bold; color: #10b981; margin-bottom: 20px;">DONE!</div>
+                    <div style="font-size: 32px; font-weight: bold; color: #10b981; margin-bottom: 15px;">
+                        Level 0 Complete!
+                    </div>
+                    <div style="font-size: 20px; color: #059669; margin-bottom: 30px;">
+                        You've mastered all five types of problems!
+                    </div>
+                    <button class="submit-btn" onclick="setLevel(1)" style="font-size: 20px; padding: 15px 40px;">
+                        Continue to Level 1 
+                    </button>
+                </div>
+            `;
+            document.getElementById('helper-buttons').style.display = 'none';
+            document.getElementById('progress-display').innerHTML = renderProgressCups();
+        }
+
+        function showCelebration() {
+            const mainContent = document.getElementById('main-content');
+            const feedback = document.getElementById('feedback');
+            
+            const encouragements = [
+                "Excellent work!", "You're doing great!", "Perfect!", "Outstanding!",
+                "Fantastic job!", "You've got this!", "Way to go!", "Brilliant!", "Superb!", "Amazing!"
+            ];
+            
+            const randomEncouragement = encouragements[Math.floor(Math.random() * encouragements.length)];
+            
+            let progressMessage = '';
+            const pType = currentProblem.problemType;
+            if (pType && typeProgress[pType].completed === typeProgress[pType].required) {
+                if (pType === 'basic') {
+                    progressMessage = `
+                        <div style="background: #f3eefe; border: 3px solid #7c3aed; border-radius: 12px; padding: 20px; margin: 20px 0;">
+                            <div style="font-size: 24px; font-weight: bold; color: #6d28d9; margin-bottom: 10px;">
+                                 Type Complete!
+                            </div>
+                            <div style="font-size: 18px; color: #5b21b6;">
+                                Great job! Next you'll see problems with x on the RIGHT side.
+                            </div>
+                        </div>
+                    `;
+                } else if (pType === 'reversed') {
+                    progressMessage = `
+                        <div style="background: #f3eefe; border: 3px solid #7c3aed; border-radius: 12px; padding: 20px; margin: 20px 0;">
+                            <div style="font-size: 24px; font-weight: bold; color: #6d28d9; margin-bottom: 10px;">
+                                 Type Complete!
+                            </div>
+                            <div style="font-size: 18px; color: #5b21b6;">
+                                Awesome! Now you'll solve problems with x on BOTH sides!
+                            </div>
+                        </div>
+                    `;
+                } else if (pType === 'both-sides') {
+                    progressMessage = `
+                        <div style="background: #f3eefe; border: 3px solid #7c3aed; border-radius: 12px; padding: 20px; margin: 20px 0;">
+                            <div style="font-size: 24px; font-weight: bold; color: #6d28d9; margin-bottom: 10px;">
+                                 Type Complete!
+                            </div>
+                            <div style="font-size: 18px; color: #5b21b6;">
+                                Fantastic! Next you'll learn to DISTRIBUTE and solve!
+                            </div>
+                        </div>
+                    `;
+                } else if (pType === 'distribution') {
+                    progressMessage = `
+                        <div style="background: #f3eefe; border: 3px solid #7c3aed; border-radius: 12px; padding: 20px; margin: 20px 0;">
+                            <div style="font-size: 24px; font-weight: bold; color: #6d28d9; margin-bottom: 10px;">
+                                 Type Complete!
+                            </div>
+                            <div style="font-size: 18px; color: #5b21b6;">
+                                Amazing! Final challenge: Distribution with x on BOTH sides!
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
+            const backButton = problemHistory.length > 0 ? `
+                <button onclick="goToPreviousProblem()" 
+                        style="background: #4a5480; color: white; padding: 12px 30px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; margin-right: 10px;">
+                     Go Back
+                </button>
+            ` : '';
+            
+            mainContent.innerHTML = `
+                <div style="text-align: center; padding: 40px 20px;">
+                    <div style="font-size: 36px; color: #059669; margin-bottom: 20px;">CORRECT!</div>
+                    <div style="font-size: 28px; font-weight: bold; color: #059669; margin-bottom: 15px;">
+                        Problem Complete!
+                    </div>
+                    <div style="font-size: 24px; color: #059669; margin-bottom: 30px;">
+                        ${randomEncouragement}
+                    </div>
+                    ${progressMessage}
+                    <div style="font-size: 18px; color: #6a74a8; margin-bottom: 30px;">
+                        You solved: <span style="font-family: monospace; font-weight: bold;">${currentProblem.equation}</span>
+                    </div>
+                    <div>
+                        ${backButton}
+                        <button class="submit-btn" onclick="nextProblem()" style="font-size: 20px; padding: 15px 40px;">
+                            Next Problem 
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            feedback.textContent = '';
+            document.getElementById('helper-buttons').style.display = 'none';
+            document.getElementById('progress-display').innerHTML = renderProgressCups();
+        }
+        
+        function nextProblem() {
+            problemCount++;
+            updateDisplay();
+            generateProblem();
+        }
+        
+        function goToPreviousProblem() {
+            if (problemHistory.length === 0) return;
+            
+            const prevProblem = problemHistory.pop();
+            currentProblem = prevProblem;
+            scaffoldStep = 0;
+            scaffoldAnswers = [];
+            
+            if (prevProblem.problemType) {
+                if (prevProblem.wasCorrect) {
+                    typeProgress[prevProblem.problemType].completed--;
+                    typeProgress[prevProblem.problemType].perfectStreak = Math.max(0, typeProgress[prevProblem.problemType].perfectStreak - 1);
+                }
+                typeProgress[prevProblem.problemType].shown--;
+            }
+            
+            problemCount--;
+            renderScaffoldStep();
+            updateDisplay();
+        }
+        
+        function skipToNextProblem() {
+            if (currentProblem) {
+                problemHistory.push({...currentProblem, wasCorrect: false, wasSkipped: true});
+            }
+            problemCount++;
+            updateDisplay();
+            generateProblem();
+        }
+
+        function renderScaffoldStep() {
+            stepAttempts = 0;
+            const step = currentProblem.scaffoldSteps[scaffoldStep];
+            const mainContent = document.getElementById('main-content');
+            
+            let completedStepsHTML = '';
+            if (scaffoldStep > 0) {
+                const lastStep = currentProblem.scaffoldSteps[scaffoldStep - 1];
+                completedStepsHTML = `
+                    <div class="completed-steps">
+                        <div style="font-size: 14px; color: #059669; margin-bottom: 8px; font-weight: bold;"> CORRECT  Last Completed Step:</div>
+                        <div style="font-size: 22px; font-weight: bold; font-family: monospace; text-align: center;">
+                            ${lastStep.resultEquation}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            mainContent.innerHTML = `
+                <div class="scaffold-container">
+                    <div class="original-equation">
+                        <div style="font-size: 14px; color: #6a74a8; margin-bottom: 5px;">Original Equation:</div>
+                        <div style="font-size: 20px; font-weight: bold; font-family: monospace; word-wrap: break-word;">${currentProblem.equation}</div>
+                    </div>
+                    
+                    ${completedStepsHTML}
+                    
+                    <div class="step-prompt">
+                        <div class="step-title">Step ${scaffoldStep + 1} of ${currentProblem.scaffoldSteps.length}</div>
+                        <div class="step-question">${step.question}</div>
+                        <div style="text-align: center; margin: 20px 0;">
+                            <div style="font-size: 20px; font-weight: bold; margin-bottom: 15px;">${step.prompt}</div>
+                            <div class="input-area">
+                                <input type="text" inputmode="decimal" autocomplete="off" id="answer" placeholder="?" 
+                                       onkeypress="if(event.key==='Enter') checkScaffoldAnswer()" 
+                                       style="width: 100px;">
+                                <button class="key-btn" onclick="toggleSign()">+/-</button>
+                                <button class="submit-btn" onclick="checkScaffoldAnswer()">Submit</button>
+                            </div>
+                        </div>
+                        <div id="step-hint" style="display: none;" class="step-hint"></div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('helper-buttons').style.display = 'none';
+            
+            const navButtonsHTML = `
+                <div style="text-align: center; margin-top: 20px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                    ${problemHistory.length > 0 ? `
+                        <button onclick="goToPreviousProblem()" 
+                                style="background: #4a5480; color: white; padding: 10px 30px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; transition: all 0.3s;"
+                                onmouseover="this.style.background='#3c4569'" 
+                                onmouseout="this.style.background='#4a5480'">
+                             Previous Problem
+                        </button>
+                    ` : ''}
+                    <button onclick="skipToNextProblem()" 
+                            style="background: #4a5480; color: white; padding: 10px 30px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; transition: all 0.3s;"
+                            onmouseover="this.style.background='#3c4569'" 
+                            onmouseout="this.style.background='#4a5480'">
+                        Skip to Next Problem 
+                    </button>
+                </div>
+            `;
+            mainContent.innerHTML += navButtonsHTML;
+            
+            document.getElementById('progress-display').innerHTML = renderProgressCups();
+            
+            setTimeout(() => document.getElementById('answer').focus(), 100);
+        }
+
+        function renderNormalProblem() {
+            const mainContent = document.getElementById('main-content');
+            
+            const fractionNote = currentProblem.isFraction ? `
+                <div class="fraction-note">
+                     This problem may have a fraction answer. Enter as a decimal (e.g., 0.5 for 1/2) or fraction (e.g., 1/2)
+                </div>
+            ` : '';
+            
+            mainContent.innerHTML = `
+                ${fractionNote}
+                <div class="equation" id="equation">${currentProblem.equation}</div>
+                <p style="text-align: center; color: #6a74a8;">Solve for x</p>
+                <div class="input-area">
+                    <span style="font-size: 24px; font-weight: bold;">x =</span>
+                    <input type="text" inputmode="decimal" autocomplete="off" id="answer" placeholder="?" onkeypress="if(event.key==='Enter') checkAnswer()">
+                    <button class="key-btn" onclick="toggleSign()">+/-</button>
+                    <button class="key-btn" onclick="insertSlash()">/</button>
+                    <button class="submit-btn" onclick="checkAnswer()">Submit</button>
+                </div>
+            `;
+            
+            document.getElementById('helper-buttons').style.display = 'block';
+            document.getElementById('progress-display').innerHTML = '';
+            
+            setTimeout(() => document.getElementById('answer').focus(), 100);
+        }
+
+        function checkScaffoldAnswer() {
+            const userAnswer = document.getElementById('answer').value;
+            if (userAnswer === '') return;
+            
+            // Check if user entered something with 'x' in it
+            if (userAnswer.toLowerCase().includes('x')) {
+                const feedback = document.getElementById('feedback');
+                feedback.textContent = ' Just enter the number, not "x". For example, enter "5" instead of "5x"';
+                feedback.className = 'feedback incorrect';
+                document.getElementById('answer').value = '';
+                return;
+            }
+            
+            const step = currentProblem.scaffoldSteps[scaffoldStep];
+            const userNum = parseFloat(userAnswer);
+            const correct = userNum === step.correctAnswer;
+            const feedback = document.getElementById('feedback');
+            
+            if (correct) {
+                scaffoldAnswers.push(userNum);
+                feedback.textContent = 'Correct!';
+                feedback.className = 'feedback correct';
+                
+                if (scaffoldStep < currentProblem.scaffoldSteps.length - 1) {
+                    setTimeout(() => {
+                        scaffoldStep++;
+                        renderScaffoldStep();
+                        feedback.textContent = '';
+                    }, 1000);
+                } else {
+                    // Problem complete!
+                    const problemType = currentProblem.problemType;
+                    typeProgress[problemType].completed++;
+                    typeProgress[problemType].perfectStreak++;
+                    
+                    problemHistory.push({...currentProblem, wasCorrect: true});
+                    
+                    streak++;
+                    updateDisplay();
+                    gameStats.l0done++;
+                    if (streak > gameStats.bestStreak) gameStats.bestStreak = streak;
+                    saveStats();
+                    celebrateStreak(streak);
+                    showCelebration();
+                }
+            } else {
+                const problemType = currentProblem.problemType;
+                typeProgress[problemType].errors++;
+                typeProgress[problemType].required += 2;
+                typeProgress[problemType].perfectStreak = 0;
+                
+                stepAttempts++;
+                gameStats.l0errors++;
+                saveStats();
+                feedback.textContent = stepAttempts >= 2 ? ' Not quite. Check the hint below!' : ' Not quite. Try again!';
+                feedback.className = 'feedback incorrect';
+                
+                if (stepAttempts >= 2) {
+                    const hintDiv = document.getElementById('step-hint');
+                    hintDiv.innerHTML = `<strong>Hint:</strong> ${step.hint}`;
+                    hintDiv.style.display = 'block';
+                }
+                
+                updateDisplay();
+                document.getElementById('progress-display').innerHTML = renderProgressCups();
+            }
+        }
+
+        function cleanCoef(s) {
+            var t = String(s);
+            // "1x" -> "x" and "-1x" -> "-x", without touching "21x", "13x", etc.
+            t = t.replace(/\b1x/g, 'x');
+            // Drop meaningless "+ 0" / "- 0" terms (but never touch "= 0", "+ 10", "-20")
+            t = t.replace(/\s*\+\s*0(?![\d.])/g, '');
+            t = t.replace(/\s*-\s*0(?![\d.])/g, '');
+            // "2x  -7" -> "2x - 7" (proper spacing after a term)
+            t = t.replace(/([\dx)])\s+-(\d)/g, '$1 - $2');
+            // Collapse any remaining double spaces
+            t = t.replace(/ {2,}/g, ' ');
+            return t;
+        }
+
+        function gcd(a, b) {
+            a = Math.abs(a); b = Math.abs(b);
+            while (b) { var t = b; b = a % b; a = t; }
+            return a || 1;
+        }
+
+        function formatFraction(value) {
+            if (Number.isInteger(value)) return String(value);
+            // Find denominator up to 48 (covers all generated problems)
+            for (var den = 2; den <= 48; den++) {
+                var num = value * den;
+                if (Math.abs(num - Math.round(num)) < 0.0001) {
+                    num = Math.round(num);
+                    var g = gcd(num, den);
+                    return (num / g) + '/' + (den / g);
+                }
+            }
+            return value.toFixed(4);
+        }
+
+        function parseFraction(str) {
+            str = str.trim();
+            if (str.includes('/')) {
+                const parts = str.split('/');
+                if (parts.length === 2) {
+                    const num = parseFloat(parts[0]);
+                    const den = parseFloat(parts[1]);
+                    if (!isNaN(num) && !isNaN(den) && den !== 0) {
+                        return num / den;
+                    }
+                }
+            }
+            return parseFloat(str);
+        }
+
+        function checkAnswer() {
+            const userAnswer = document.getElementById('answer').value;
+            if (userAnswer === '') return;
+            
+            // Check if user entered something with 'x' in it
+            if (userAnswer.toLowerCase().includes('x')) {
+                const feedback = document.getElementById('feedback');
+                feedback.textContent = ' Just enter the number, not "x". For example, enter "5" instead of "5x"';
+                feedback.className = 'feedback incorrect';
+                document.getElementById('answer').value = '';
+                return;
+            }
+            
+            const userNum = parseFraction(userAnswer);
+            const correct = Math.abs(userNum - currentProblem.answer) < 0.001;
+            const feedback = document.getElementById('feedback');
+            
+            if (correct) {
+                streak++;
+                updateDisplay();
+                gameStats.byLevel[level].right++;
+                if (streak > gameStats.bestStreak) gameStats.bestStreak = streak;
+                saveStats();
+                
+                if (streak === 1 && !isTimerRunning) {
+                    startTimer();
+                }
+                
+                if (streak === 10) {
+                    stopTimer();
+                    celebrateStreak(10);
+                    feedback.textContent = '10 IN A ROW! AMAZING! Time: ' + formatTime(timer);
+                    feedback.className = 'feedback victory';
+                    setTimeout(function() {
+                        streak = 0;
+                        problemCount++;
+                        updateDisplay();
+                        generateProblem();
+                    }, 4000);
+                } else {
+                    celebrateStreak(streak);
+                    feedback.textContent = 'Correct!';
+                    feedback.className = 'feedback correct';
+                    setTimeout(() => {
+                        problemCount++;
+                        updateDisplay();
+                        generateProblem();
+                    }, 1500);
+                }
+            } else {
+                streak = 0;
+                stopTimer();
+                updateDisplay();
+                gameStats.byLevel[level].wrong++;
+                saveStats();
+                feedback.textContent = ' Not quite right. Try again!';
+                feedback.className = 'feedback incorrect';
+            }
+        }
+
+        function loadConfettiPref() {
+            try { return localStorage.getItem('linear-eq-solver-confetti') !== '0'; } catch (e) { return true; }
+        }
+
+        function toggleConfetti() {
+            confettiEnabled = !confettiEnabled;
+            try { localStorage.setItem('linear-eq-solver-confetti', confettiEnabled ? '1' : '0'); } catch (e) {}
+            document.getElementById('confetti-track').classList.toggle('on', confettiEnabled);
+            if (confettiEnabled) createConfetti(40, 1);
+        }
+
+        const STATS_KEY = 'linear-eq-solver-stats-v1';
+
+        function freshStats() {
+            return {
+                l0done: 0, l0errors: 0,
+                byLevel: { 1: { right: 0, wrong: 0 }, 2: { right: 0, wrong: 0 }, 3: { right: 0, wrong: 0 } },
+                bestStreak: 0
+            };
+        }
+
+        function loadStats() {
+            try {
+                var s = localStorage.getItem(STATS_KEY);
+                if (s) {
+                    var parsed = JSON.parse(s);
+                    if (parsed && parsed.byLevel) return parsed;
+                }
+            } catch (e) {}
+            return freshStats();
+        }
+
+        function saveStats() {
+            try { localStorage.setItem(STATS_KEY, JSON.stringify(gameStats)); } catch (e) {}
+        }
+
+        function toggleStats() {
+            var p = document.getElementById('stats-panel');
+            if (p.style.display === 'none') {
+                resetArmed = false;
+                renderStats();
+                p.style.display = 'block';
+            } else {
+                p.style.display = 'none';
+            }
+        }
+
+        function statsRow(label, value) {
+            return '<div style="display: flex; justify-content: space-between; padding: 7px 2px; border-top: 1px dashed rgba(0,0,0,0.12);">'
+                 + '<span>' + label + '</span><span style="font-weight: bold; color: #1e2a5e;">' + value + '</span></div>';
+        }
+
+        function renderStats() {
+            var p = document.getElementById('stats-panel');
+            var s = gameStats;
+            function line(o) {
+                var t = o.right + o.wrong;
+                if (t === 0) return 'not tried yet';
+                return o.right + ' / ' + t + ' correct (' + Math.round(100 * o.right / t) + '%)';
+            }
+            var html = '<div style="font-weight: bold; margin-bottom: 8px;">My Progress</div>';
+            html += statsRow('Level 0 (Guided)', s.l0done === 0 ? 'not tried yet' : s.l0done + ' completed');
+            html += statsRow('Level 1', line(s.byLevel[1]));
+            html += statsRow('Level 2', line(s.byLevel[2]));
+            html += statsRow('Level 3', line(s.byLevel[3]));
+            html += statsRow('Best streak', s.bestStreak === 0 ? '-' : s.bestStreak + ' in a row');
+            html += '<div style="text-align: center; margin-top: 12px;">'
+                  + '<button class="skip-btn" id="reset-stats-btn" onclick="resetStats()">Reset Stats</button></div>';
+            p.className = 'answer-box';
+            p.innerHTML = html;
+        }
+
+        let resetArmed = false;
+        let resetTimer = null;
+
+        function resetStats() {
+            var btn = document.getElementById('reset-stats-btn');
+            if (!resetArmed) {
+                resetArmed = true;
+                btn.textContent = 'Tap again to confirm';
+                btn.style.background = '#1e2a5e';
+                btn.style.color = 'white';
+                resetTimer = setTimeout(function() {
+                    resetArmed = false;
+                    renderStats();
+                }, 3500);
+            } else {
+                clearTimeout(resetTimer);
+                resetArmed = false;
+                gameStats = freshStats();
+                saveStats();
+                renderStats();
+            }
+        }
+
+        function toggleSign() {
+            var el = document.getElementById('answer');
+            if (!el) return;
+            el.value = el.value.charAt(0) === '-' ? el.value.slice(1) : '-' + el.value;
+            el.focus();
+        }
+
+        function insertSlash() {
+            var el = document.getElementById('answer');
+            if (!el) return;
+            if (el.value.indexOf('/') === -1) el.value = el.value + '/';
+            el.focus();
+        }
+
+        function toggleSolution() {
+            var box = document.getElementById('solution-box');
+            if (box.style.display === 'none') {
+                if (!currentProblem || !currentProblem.solutionSteps) return;
+                solutionRevealed = 1;
+                renderSolutionBox();
+            } else {
+                box.style.display = 'none';
+            }
+        }
+
+        function showNextSolutionStep() {
+            solutionRevealed++;
+            renderSolutionBox();
+        }
+
+        function renderSolutionBox() {
+            var box = document.getElementById('solution-box');
+            var steps = currentProblem.solutionSteps;
+            var total = steps.length;
+            var shown = Math.min(solutionRevealed, total);
+            var html = '<div style="font-weight: bold; margin-bottom: 8px;">Step-by-Step Solution (' + shown + ' of ' + total + ')</div>';
+            html += '<div style="font-size: 13px;">Start with:</div>';
+            html += '<div style="font-family: monospace; font-weight: bold; font-size: 17px; margin: 4px 0 10px 22px; color: #1e2a5e;">' + currentProblem.equation + '</div>';
+            for (var i = 0; i < shown; i++) {
+                var parts = steps[i].split(':  ');
+                var stepLabel = parts[0];
+                var stepEq = parts.length > 1 ? parts.slice(1).join(':  ') : '';
+                html += '<div style="padding: 8px 0 4px; border-top: 1px dashed rgba(0,0,0,0.15);">';
+                html += '<div><b>' + (i + 1) + '.</b> ' + stepLabel + (stepEq ? ':' : '') + '</div>';
+                if (stepEq) {
+                    html += '<div style="font-family: monospace; font-weight: bold; font-size: 17px; margin: 5px 0 4px 22px; color: #1e2a5e;">' + stepEq + '</div>';
+                }
+                html += '</div>';
+            }
+            if (shown < total) {
+                html += '<div style="text-align: center; margin-top: 10px;"><button class="submit-btn" onclick="showNextSolutionStep()">Next Step</button></div>';
+            } else {
+                html += '<div style="text-align: center; margin-top: 10px; font-weight: bold; color: #059669;">That is the complete solution. Try the next one yourself!</div>';
+            }
+            box.className = 'answer-box';
+            box.style.display = 'block';
+            box.innerHTML = html;
+        }
+
+        function toggleHint() {
+            const hint = document.getElementById('hint');
+            if (hint.style.display === 'none') {
+                hint.className = 'hint-box';
+                let hintText = '';
+                if (level === 1) {
+                    hintText = '<strong>Hint:</strong><br>1. Isolate the term with x<br>2. Get x by itself by dividing';
+                } else if (level === 2) {
+                    hintText = '<strong>Hint:</strong><br>1. Get all x terms on one side<br>2. Get all numbers on the other side<br>3. Solve for x';
+                } else {
+                    hintText = '<strong>Hint:</strong><br>1. Distribute to eliminate parentheses<br>2. Combine like terms<br>3. Get x terms on one side<br>4. Solve for x';
+                }
+                hint.innerHTML = hintText;
+                hint.style.display = 'block';
+            } else {
+                hint.style.display = 'none';
+            }
+        }
+
+        function toggleAnswer() {
+            const answerBox = document.getElementById('answer-box');
+            if (answerBox.style.display === 'none') {
+                answerBox.className = 'answer-box';
+                let answerDisplay = currentProblem.answer;
+                if (currentProblem.isFraction) {
+                    answerDisplay = `${formatFraction(currentProblem.answer)} (as a decimal: ${currentProblem.answer.toFixed(3)})`;
+                }
+                answerBox.innerHTML = `<strong>Answer:</strong> x = ${answerDisplay}`;
+                answerBox.style.display = 'block';
+            } else {
+                answerBox.style.display = 'none';
+            }
+        }
+
+        function startTimer() {
+            isTimerRunning = true;
+            timer = 0;
+            timerInterval = setInterval(() => {
+                timer++;
+                updateDisplay();
+            }, 1000);
+        }
+
+        function stopTimer() {
+            isTimerRunning = false;
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateDisplay() {
+            document.getElementById('problemNum').textContent = problemCount + 1;
+            document.getElementById('streak').textContent = streak;
+            
+            const streakDisplay = document.getElementById('streak-display');
+            if (level === 0) {
+                streakDisplay.style.display = 'none';
+            } else {
+                streakDisplay.style.display = 'block';
+            }
+            
+            const timerDisplay = document.getElementById('timer-display');
+            if (isTimerRunning && level !== 0) {
+                timerDisplay.textContent = 'Time: ' + formatTime(timer);
+                timerDisplay.style.display = 'block';
+            } else {
+                timerDisplay.style.display = 'none';
+            }
+        }
+
+        generateProblem();
+        updateDisplay();
+    </script>
+</body>
+</html>
