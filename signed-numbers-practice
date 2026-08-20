@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Signed Numbers Practice</title>
+<meta name="theme-color" content="#1b2450">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+    /* ===== MIDNIGHT SCHOLAR - navy stage, white card, violet + mint accents ===== */
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+        background:
+            radial-gradient(900px 500px at 85% -10%, rgba(124, 58, 237, 0.28), transparent 60%),
+            radial-gradient(800px 500px at -10% 110%, rgba(16, 185, 129, 0.18), transparent 55%),
+            linear-gradient(160deg, #141b3d 0%, #1b2450 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 16px 12px;
+        margin: 0;
+    }
+    .card {
+        background: #ffffff;
+        border-radius: 22px;
+        box-shadow: 0 24px 60px rgba(8, 12, 40, 0.55);
+        max-width: 700px;
+        width: 100%;
+        padding: 30px 24px 20px;
+        position: relative;
+        overflow: hidden;
+    }
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+    }
+    h1 {
+        text-align: center;
+        color: #1e2a5e;
+        margin: 4px 0 6px;
+        font-size: 25px;
+        letter-spacing: 0.3px;
+    }
+    h1::after {
+        content: '';
+        display: block;
+        width: 130px;
+        height: 4px;
+        border-radius: 2px;
+        margin: 8px auto 16px;
+        background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+    }
+    /* ----- Mode buttons ----- */
+    .mode-btns {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+    }
+    .mode-btn {
+        background: #2e3d8f;
+        color: #ffffff;
+        border: none;
+        border-radius: 999px;
+        padding: 9px 16px;
+        font-size: 13px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.15s;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        font-family: inherit;
+    }
+    .mode-btn:hover { background: #1e2a5e; }
+    .mode-btn.active {
+        background: #10b981 !important;
+        color: #ffffff !important;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.25), 0 6px 14px rgba(16, 185, 129, 0.35);
+    }
+    /* Favorite gradient for the Mixed (special) mode */
+    .mode-btn.mixed { background: linear-gradient(135deg, #1e3a5f, #0d9488); }
+    .mode-btn.mixed:hover { filter: brightness(1.12); }
+    .mode-btn.mixed.active { background: #10b981 !important; }
+    /* ----- Problem chip ----- */
+    .problem {
+        font-size: 34px;
+        font-weight: 800;
+        text-align: center;
+        margin: 18px auto;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+        color: #1e2a5e;
+        background: #eef0fb;
+        border: 2px solid #c7cdf0;
+        border-radius: 14px;
+        padding: 22px 14px;
+        max-width: 100%;
+        overflow-wrap: break-word;
+        letter-spacing: 1px;
+    }
+    .problem .neg { color: #1e2a5e; }
+    .problem .op-sym { color: #6d28d9; margin: 0 6px; }
+    .instructions {
+        text-align: center;
+        color: #6a74a8;
+        font-size: 14px;
+        margin: 6px 0 12px;
+    }
+    /* ----- Input ----- */
+    .input-area {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin: 18px 0;
+        flex-wrap: wrap;
+    }
+    .eq-label { font-size: 26px; font-weight: 800; color: #1e2a5e; }
+    input[type="text"] {
+        width: 110px;
+        font-size: 26px;
+        font-weight: 800;
+        text-align: center;
+        padding: 10px;
+        border: 3px solid #7c3aed;
+        border-radius: 12px;
+        color: #1e2a5e;
+        background: #ffffff;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    }
+    input[type="text"]:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18);
+    }
+    button {
+        padding: 12px 22px;
+        font-size: 15px;
+        font-weight: 800;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.15s;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        font-family: inherit;
+    }
+    button:active { transform: scale(0.95); }
+    button:disabled { opacity: 0.5; cursor: default; }
+    button:focus-visible { outline: 3px solid #7c3aed; outline-offset: 2px; }
+    .submit-btn {
+        background: linear-gradient(135deg, #2e3d8f, #4b3bbd);
+        color: #ffffff;
+        box-shadow: 0 6px 16px rgba(46, 61, 143, 0.35);
+    }
+    .submit-btn:hover { filter: brightness(1.1); }
+    .key-btn {
+        background: #e6e9f6;
+        color: #2e3d8f;
+        padding: 12px 14px;
+        font-size: 16px;
+        border-radius: 12px;
+    }
+    .key-btn:hover { background: #d9def2; }
+    /* ----- Feedback (never red; incorrect is navy ink) ----- */
+    .feedback {
+        text-align: center;
+        font-weight: 800;
+        margin: 12px auto 8px;
+        min-height: 30px;
+        max-width: 420px;
+    }
+    .feedback:not(:empty) { padding: 9px 14px; border-radius: 12px; }
+    .feedback.correct {
+        color: #059669;
+        font-size: 21px;
+        background: #ecfdf5;
+        border: 2px solid #34d399;
+    }
+    .feedback.incorrect {
+        color: #1e2a5e;
+        font-size: 18px;
+        font-weight: 700;
+        background: #f3eefe;
+        border: 2px solid #d8ccf7;
+    }
+    /* ----- Helper buttons ----- */
+    .helper-row { text-align: center; margin: 14px 0 4px; }
+    .hint-btn, .answer-btn, .skip-btn, .explain-btn {
+        background: #f3eefe;
+        color: #6d28d9;
+        margin: 4px;
+        font-size: 13px;
+        padding: 10px 16px;
+    }
+    .hint-btn:hover, .answer-btn:hover, .skip-btn:hover, .explain-btn:hover { background: #e9defc; }
+    .hint-box, .answer-box, .explain-box {
+        background: #f7f5ff;
+        border: 2px solid #d8ccf7;
+        border-radius: 14px;
+        padding: 15px;
+        margin: 14px 0;
+        color: #3b3568;
+        font-size: 15px;
+        line-height: 1.55;
+    }
+    .hint-box b, .answer-box b, .explain-box b { color: #6d28d9; }
+    .explain-box .rewrite {
+        text-align: center;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+        font-size: 22px;
+        font-weight: 800;
+        color: #1e2a5e;
+        margin: 12px 0;
+    }
+    .explain-box .rewrite .old { color: #6a74a8; text-decoration: line-through; }
+    .explain-box .rewrite .new { color: #059669; }
+    .explain-box .rewrite .arrow { color: #7c3aed; margin: 0 10px; }
+    .rules-card {
+        background: #ffffff;
+        border: 2px solid #c7cdf0;
+        border-radius: 12px;
+        padding: 14px;
+        margin: 12px 0 6px;
+    }
+    .rules-card table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+        font-size: 16px;
+    }
+    .rules-card td { padding: 6px 8px; text-align: center; border-bottom: 1px solid #eef0fb; }
+    .rules-card tr:last-child td { border-bottom: none; }
+    .rules-card tr.highlight td {
+        background: linear-gradient(90deg, rgba(16,185,129,0.15), rgba(124,58,237,0.15));
+        font-weight: 800;
+        color: #059669;
+    }
+    .rules-card .pos { color: #059669; }
+    .rules-card .neg { color: #1e2a5e; }
+    .numline-wrap {
+        background: #ffffff;
+        border: 2px solid #c7cdf0;
+        border-radius: 12px;
+        padding: 12px 8px 8px;
+        margin: 12px 0 6px;
+        overflow-x: auto;
+    }
+    .numline-svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+    /* ----- Bottom settings bar ----- */
+    .settings-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-top: 18px;
+        padding-top: 14px;
+        border-top: 2px solid #e6e9f6;
+    }
+    .stats-btn { background: #ecfdf5; color: #047857; font-size: 13px; padding: 10px 18px; }
+    .stats-btn:hover { background: #d1fae5; }
+    .toggle-wrap {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        background: none;
+        border: none;
+        padding: 6px;
+    }
+    .toggle-wrap:active { transform: none; }
+    .toggle-label { font-size: 13px; font-weight: 800; color: #4a5480; }
+    .toggle-track {
+        width: 44px; height: 24px;
+        border-radius: 999px;
+        background: #d5d9e8;
+        position: relative;
+        transition: background 0.18s;
+        flex: none;
+    }
+    .toggle-track.on { background: #10b981; }
+    .toggle-knob {
+        position: absolute; top: 3px; left: 3px;
+        width: 18px; height: 18px;
+        border-radius: 50%;
+        background: #ffffff;
+        transition: left 0.18s;
+        box-shadow: 0 1px 3px rgba(8,12,40,0.3);
+    }
+    .toggle-track.on .toggle-knob { left: 23px; }
+    /* ----- Stats view ----- */
+    .stats-view {
+        background: #eef0fb;
+        border: 2px solid #c7cdf0;
+        border-radius: 14px;
+        padding: 20px 18px;
+    }
+    .stats-view h2 { text-align: center; color: #1e2a5e; margin: 0 0 10px; font-size: 22px; }
+    .stats-overall { text-align: center; margin-bottom: 18px; }
+    .stats-overall .big { font-size: 42px; font-weight: 800; color: #059669; }
+    .stats-overall .lbl { font-size: 13px; color: #4a5480; font-weight: 700; }
+    .stat-row {
+        background: #ffffff;
+        border-radius: 10px;
+        padding: 12px 14px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .stat-name { font-weight: 800; color: #2e3d8f; font-size: 15px; min-width: 88px; }
+    .stat-bar-wrap {
+        flex: 1; height: 14px;
+        background: #eef0fb;
+        border-radius: 7px;
+        overflow: hidden;
+    }
+    .stat-bar { height: 100%; border-radius: 7px; transition: width 0.4s ease; }
+    .stat-bar.good { background: linear-gradient(90deg, #10b981, #34d399); }
+    .stat-bar.mid  { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+    .stat-bar.low  { background: linear-gradient(90deg, #2e3d8f, #6a74a8); }
+    .stat-num {
+        font-size: 13px; color: #4a5480; font-weight: 700;
+        min-width: 100px; text-align: right;
+        font-family: 'Consolas', monospace;
+    }
+    .stat-untried {
+        font-size: 13px; color: #6a74a8; font-weight: 700;
+        min-width: 100px; text-align: right;
+        font-style: italic;
+    }
+    .stat-sub {
+        display: flex; justify-content: space-between;
+        font-size: 11px; color: #6a74a8;
+        margin: 2px 100px 8px 0; padding: 0 14px;
+    }
+    .recommend {
+        background: #f3eefe;
+        border-left: 4px solid #7c3aed;
+        border-radius: 0 10px 10px 0;
+        padding: 12px 14px;
+        margin-top: 10px;
+        font-size: 14px;
+        color: #5b21b6;
+    }
+    .stats-actions { text-align: center; margin-top: 16px; }
+    .reset-btn { background: #4a5480; color: #ffffff; font-size: 13px; padding: 10px 18px; }
+    .reset-btn:hover { background: #3c4569; }
+    .reset-btn.armed { background: #1e2a5e; }
+    /* ----- Insignia ----- */
+    .insignia { text-align: center; margin-top: 16px; opacity: 0.9; }
+    .insignia svg { width: 86px; height: auto; display: block; margin: 0 auto; }
+    .insignia-caption {
+        margin-top: 3px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1.9px;
+        color: #6a74a8;
+        text-align: center;
+        white-space: nowrap;
+        font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+    }
+    /* ----- Confetti ----- */
+    .confetti { position: fixed; opacity: 0; pointer-events: none; z-index: 9999; }
+    @keyframes confetti-fall {
+        0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(110vh) rotate(720deg); opacity: 1; }
+    }
+    @keyframes confetti-fall-slow {
+        0%   { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 1; }
+        100% { transform: translateY(115vh) rotate(1080deg) scale(0.85); opacity: 1; }
+    }
+    @media (max-width: 480px) {
+        .card { padding: 24px 14px 16px; }
+        h1 { font-size: 21px; }
+        .problem { font-size: 24px; padding: 16px 8px; }
+        .mode-btn { padding: 8px 12px; font-size: 12px; }
+        input[type="text"] { width: 92px; font-size: 22px; }
+        .stat-name { min-width: 74px; font-size: 13px; }
+        .stat-num, .stat-untried { min-width: 88px; font-size: 11px; }
+        .stat-sub { margin-right: 88px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .confetti { display: none !important; }
+        * { transition: none !important; }
+    }
+</style>
+</head>
+<body>
+<div class="card" id="game-card">
+    <h1>Signed Numbers Practice</h1>
+
+    <div class="mode-btns" role="group" aria-label="Choose operation">
+        <button class="mode-btn active" id="mode-add" aria-pressed="true"  onclick="setMode('add')">Add</button>
+        <button class="mode-btn"        id="mode-sub" aria-pressed="false" onclick="setMode('sub')">Subtract</button>
+        <button class="mode-btn"        id="mode-mul" aria-pressed="false" onclick="setMode('mul')">Multiply</button>
+        <button class="mode-btn"        id="mode-div" aria-pressed="false" onclick="setMode('div')">Divide</button>
+        <button class="mode-btn mixed"  id="mode-mix" aria-pressed="false" onclick="setMode('mix')">Mixed</button>
+    </div>
+
+    <div id="main-content"></div>
+    <div class="feedback" id="feedback" role="status" aria-live="polite" aria-atomic="true"></div>
+    <div id="input-content"></div>
+
+    <div class="helper-row" id="helper-buttons">
+        <button class="hint-btn"    onclick="toggleHint()">Show Hint</button>
+        <button class="explain-btn" onclick="toggleExplanation()">Show Explanation</button>
+        <button class="answer-btn"  onclick="toggleAnswer()">Show Answer</button>
+        <button class="skip-btn"    onclick="skipProblem()">Skip</button>
+    </div>
+
+    <div id="hint"       style="display:none;"></div>
+    <div id="explain"    style="display:none;"></div>
+    <div id="answer-box" style="display:none;"></div>
+
+    <div class="settings-row">
+        <button class="stats-btn" id="stats-toggle-btn" onclick="toggleStatsView()">My Stats</button>
+        <button class="toggle-wrap" id="confetti-toggle" role="switch" aria-checked="true"
+                aria-label="Confetti celebrations" onclick="toggleConfetti()">
+            <span class="toggle-label">Confetti</span>
+            <span class="toggle-track on" id="confetti-track"><span class="toggle-knob"></span></span>
+        </button>
+    </div>
+
+    <div class="insignia" id="insignia"></div>
+</div>
+
+<script>
+/* =====================================================================
+   State
+   ===================================================================== */
+var mode = 'add';                 // add | sub | mul | div | mix
+var currentProblem = null;
+var streak = 0;
+var bestStreak = 0;
+var problemNum = 0;               // problems completed (answered or skipped)
+var missRecorded = false;
+var lastWasBothPositive = false;  // prevents back-to-back easy pairs in Mix mode
+var recentOps = [];               // anti-starvation history for Mix mode
+var confettiEnabled = true;
+
+var inputLocked = false;          // true between a correct answer and the next problem
+var advanceTimer = null;          // handle for the auto-advance timer
+var statsOpen = false;
+
+var stats = {
+    add: { c:0, t:0, sameC:0, sameT:0, diffC:0, diffT:0 },
+    sub: { c:0, t:0, sameC:0, sameT:0, diffC:0, diffT:0 },
+    mul: { c:0, t:0, sameC:0, sameT:0, diffC:0, diffT:0 },
+    div: { c:0, t:0, sameC:0, sameT:0, diffC:0, diffT:0 }
+};
+
+var SAVE_KEY = 'signed-numbers-stats-v1';
+var opNames      = { add: 'Addition', sub: 'Subtraction', mul: 'Multiplication', div: 'Division' };
+var opShortNames = { add: 'Add', sub: 'Subtract', mul: 'Multiply', div: 'Divide' };
+
+function blankStats() {
+    return {
+        add: { c:0, t:0, sameC:0, sameT:0, diffC:0, diffT:0 },
+        sub: { c:0, t:0, sameC:0, sameT:0, diffC:0, diffT:0 },
+        mul: { c:0, t:0, sameC:0, sameT:0, diffC:0, diffT:0 },
+        div: { c:0, t:0, sameC:0, sameT:0, diffC:0, diffT:0 }
+    };
+}
+
+/* =====================================================================
+   Tap guard - 350ms debounce so a double-tap cannot fire an action twice
+   ===================================================================== */
+var lastActionAt = 0;
+function tapGuard() {
+    var now = Date.now();
+    if (now - lastActionAt < 350) return false;
+    lastActionAt = now;
+    return true;
+}
+
+/* =====================================================================
+   Utilities
+   ===================================================================== */
+function ri(lo, hi) { return Math.floor(Math.random() * (hi - lo + 1)) + lo; }
+function nonZero(lo, hi) {
+    var n = ri(lo, hi);
+    while (n === 0) n = ri(lo, hi);
+    return n;
+}
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function fmtTerm(n, isFirst) {
+    if (n < 0 && !isFirst) return '(<span class="neg">' + n + '</span>)';
+    if (n < 0) return '<span class="neg">' + n + '</span>';
+    return String(n);
+}
+function opSymbol(op) {
+    if (op === 'add') return '+';
+    if (op === 'sub') return '&ndash;';
+    if (op === 'mul') return '&times;';
+    return '&divide;';
+}
+function opWord(op) {
+    if (op === 'add') return 'plus';
+    if (op === 'sub') return 'minus';
+    if (op === 'mul') return 'times';
+    return 'divided by';
+}
+function speak(n) { return n < 0 ? 'negative ' + Math.abs(n) : String(n); }
+
+/* =====================================================================
+   Adaptive picker for Mixed mode
+   ===================================================================== */
+function pickAdaptiveOp() {
+    var ops = ['add', 'sub', 'mul', 'div'];
+
+    // Anti-starvation: if any op is missing from the last 4 problems, force it.
+    if (recentOps.length >= 4) {
+        var last4 = recentOps.slice(-4);
+        var missing = ops.filter(function (o) { return last4.indexOf(o) === -1; });
+        if (missing.length > 0) return missing[Math.floor(Math.random() * missing.length)];
+    }
+
+    var weights = ops.map(function (o) {
+        var s = stats[o];
+        if (s.t < 3) return 1.0;
+        return Math.max(0.4, 1 - (s.c / s.t));
+    });
+    var total = weights.reduce(function (a, b) { return a + b; }, 0);
+    var r = Math.random() * total;
+    for (var i = 0; i < ops.length; i++) {
+        r -= weights[i];
+        if (r <= 0) return ops[i];
+    }
+    return ops[0];
+}
+
+/* =====================================================================
+   Problem generation
+   ===================================================================== */
+function generateProblem() {
+    clearAdvance();
+    disarmReset();
+    inputLocked = false;
+    statsOpen = false;
+
+    var op = mode === 'mix' ? pickAdaptiveOp() : mode;
+    var a, b, answer;
+
+    var MAX_TRIES = 40;
+    for (var attempt = 0; attempt < MAX_TRIES; attempt++) {
+        if (op === 'add')      { a = nonZero(-10, 10); b = nonZero(-10, 10); answer = a + b; }
+        else if (op === 'sub') { a = nonZero(-10, 10); b = nonZero(-10, 10); answer = a - b; }
+        else if (op === 'mul') { a = nonZero(-10, 10); b = nonZero(-10, 10); answer = a * b; }
+        else { var q = nonZero(-10, 10); b = nonZero(-10, 10); a = q * b; answer = q; }
+
+        if (mode === 'mix' && a > 0 && b > 0) {
+            if (lastWasBothPositive) continue;       // never two easy ones in a row
+            if (Math.random() >= 0.32) continue;     // cap at roughly 10%
+        }
+        break;
+    }
+
+    // Sign classification.
+    // For add/sub we classify by the EFFECTIVE addition form, because that is
+    // the skill being practiced: a - b is taught as a + (-b). Classifying by
+    // the printed operands would label 10 - (-4) as "different signs" while the
+    // explanation correctly calls it a same-signs addition.
+    var sameSign;
+    if (op === 'add' || op === 'sub') {
+        var effB = (op === 'sub') ? -b : b;
+        sameSign = (a > 0) === (effB > 0);
+    } else {
+        sameSign = (a > 0) === (b > 0);
+    }
+
+    lastWasBothPositive = (a > 0 && b > 0);
+    if (mode === 'mix') {
+        recentOps.push(op);
+        if (recentOps.length > 10) recentOps.shift();
+    }
+
+    currentProblem = { op: op, a: a, b: b, answer: answer, sameSign: sameSign };
+    missRecorded = false;
+    renderProblem();
+    setFeedback('', '');
+    hideAllPanels();
+}
+
+function renderProblem() {
+    var p = currentProblem;
+    var label = speak(p.a) + ' ' + opWord(p.op) + ' ' + speak(p.b) + ' equals what?';
+
+    var problemHtml = '<div class="problem" role="math" aria-label="' + label + '">'
+        + fmtTerm(p.a, true)
+        + ' <span class="op-sym" aria-hidden="true">' + opSymbol(p.op) + '</span> '
+        + fmtTerm(p.b, false)
+        + ' = ?</div>';
+
+    var inputHtml = ''
+        + '<div class="instructions" id="entry-help">Enter your answer as a whole number. Use the plus-minus key for negatives.</div>'
+        + '<div class="input-area">'
+        + '<span class="eq-label" aria-hidden="true">= </span>'
+        + '<input type="text" inputmode="decimal" autocomplete="off" autocorrect="off" '
+        + 'autocapitalize="off" spellcheck="false" id="answer" placeholder="?" '
+        + 'aria-label="Your answer" aria-describedby="entry-help" '
+        + 'onkeypress="if(event.key===\'Enter\'){event.preventDefault();checkAnswer();}">'
+        + '<button class="key-btn" id="signBtn" aria-label="Toggle negative sign" onclick="toggleSign()">+/-</button>'
+        + '<button class="submit-btn" id="submitBtn" onclick="checkAnswer()">Submit</button>'
+        + '</div>';
+
+    document.getElementById('main-content').innerHTML = problemHtml;
+    document.getElementById('input-content').innerHTML = inputHtml;
+    document.getElementById('helper-buttons').style.display = 'block';
+    document.getElementById('stats-toggle-btn').textContent = 'My Stats';
+    setTimeout(function () {
+        var el = document.getElementById('answer');
+        if (el) el.focus();
+    }, 100);
+}
+
+function toggleSign() {
+    // Deliberately NOT tap-guarded: this is a text edit, and students often
+    // tap it twice on purpose to flip back.
+    if (inputLocked) return;
+    var el = document.getElementById('answer');
+    if (!el) return;
+    el.value = el.value.charAt(0) === '-' ? el.value.slice(1) : '-' + el.value;
+    el.focus();
+}
+
+function setFeedback(text, cls) {
+    var fb = document.getElementById('feedback');
+    fb.textContent = text;
+    fb.className = cls ? 'feedback ' + cls : 'feedback';
+}
+
+function hideAllPanels() {
+    document.getElementById('hint').style.display = 'none';
+    document.getElementById('explain').style.display = 'none';
+    document.getElementById('answer-box').style.display = 'none';
+}
+
+function clearAdvance() {
+    if (advanceTimer !== null) { clearTimeout(advanceTimer); advanceTimer = null; }
+}
+
+/* =====================================================================
+   Answer checking
+   ===================================================================== */
+function checkAnswer() {
+    if (inputLocked) return;          // already answered correctly; ignore extra taps
+    if (statsOpen) return;
+    if (!tapGuard()) return;
+
+    var el = document.getElementById('answer');
+    if (!el) return;
+    var raw = el.value.trim();
+    if (raw === '') return;
+
+    // Strict whole-number validation. parseInt alone would accept "-5.9",
+    // "-5abc" and "-5 7" as -5 and mark a wrong answer correct.
+    if (!/^[+-]?\d+$/.test(raw)) {
+        setFeedback('Enter a whole number only, like -7 or 12.', 'incorrect');
+        el.select();
+        return;
+    }
+    var userNum = parseInt(raw, 10);
+
+    if (userNum === currentProblem.answer) {
+        if (!missRecorded) {
+            var s = stats[currentProblem.op];
+            s.c++; s.t++;
+            if (currentProblem.sameSign) { s.sameC++; s.sameT++; }
+            else { s.diffC++; s.diffT++; }
+        }
+        streak++;
+        if (streak > bestStreak) bestStreak = streak;
+        celebrateStreak(streak);
+        setFeedback(pick(['Correct!', 'Nice!', 'Got it!', 'Perfect!', 'Nailed it!', 'Yes!']), 'correct');
+
+        inputLocked = true;
+        var sb = document.getElementById('submitBtn');
+        var kb = document.getElementById('signBtn');
+        if (sb) sb.disabled = true;
+        if (kb) kb.disabled = true;
+        if (el) el.readOnly = true;
+
+        saveState();
+        clearAdvance();
+        advanceTimer = setTimeout(function () {
+            advanceTimer = null;
+            problemNum++;
+            generateProblem();
+        }, 1100);
+    } else {
+        if (!missRecorded) {
+            missRecorded = true;
+            var s2 = stats[currentProblem.op];
+            s2.t++;
+            if (currentProblem.sameSign) s2.sameT++;
+            else s2.diffT++;
+        }
+        streak = 0;
+        setFeedback('Not quite -- try again.', 'incorrect');
+        saveState();
+        el.select();
+    }
+}
+
+/* =====================================================================
+   Hint / Explanation / Answer
+   ===================================================================== */
+function toggleHint() {
+    if (!tapGuard() || statsOpen) return;
+    var box = document.getElementById('hint');
+    if (box.style.display === 'none') {
+        box.className = 'hint-box';
+        box.innerHTML = '<b>Hint:</b> ' + buildHint(currentProblem);
+        box.style.display = 'block';
+    } else { box.style.display = 'none'; }
+}
+
+function buildHint(p) {
+    if (p.op === 'add') {
+        return p.sameSign
+            ? 'Both numbers have the SAME sign. Add their sizes (ignore signs), then keep that sign.'
+            : 'The signs are DIFFERENT. Subtract the smaller size from the larger size, then take the sign of the number with the larger size.';
+    }
+    if (p.op === 'sub') {
+        return 'Rewrite subtraction as addition: keep the first number, change the minus to a plus, change the sign of the second number. Then use the addition rules.';
+    }
+    return 'Same signs give a POSITIVE answer. Different signs give a NEGATIVE answer. Then work out the size ('
+         + Math.abs(p.a) + ' ' + (p.op === 'mul' ? 'x' : '/') + ' ' + Math.abs(p.b) + ').';
+}
+
+function toggleAnswer() {
+    if (!tapGuard() || statsOpen) return;
+    var box = document.getElementById('answer-box');
+    if (box.style.display === 'none') {
+        box.className = 'answer-box';
+        box.innerHTML = '<b>Answer:</b> ' + currentProblem.answer;
+        box.style.display = 'block';
+    } else { box.style.display = 'none'; }
+}
+
+function toggleExplanation() {
+    if (!tapGuard() || statsOpen) return;
+    var box = document.getElementById('explain');
+    if (box.style.display === 'none') {
+        box.className = 'explain-box';
+        box.innerHTML = buildExplanation(currentProblem);
+        box.style.display = 'block';
+    } else { box.style.display = 'none'; }
+}
+
+function buildExplanation(p) {
+    var html = '';
+    if (p.op === 'mul' || p.op === 'div') {
+        html += '<b>' + opNames[p.op] + ' sign rules:</b>';
+        html += rulesTable(p);
+        var sym = p.op === 'mul' ? 'x' : '/';
+        html += '<div style="margin-top:10px;">Size: ' + Math.abs(p.a) + ' ' + sym + ' ' + Math.abs(p.b)
+             + ' = ' + Math.abs(p.answer) + '.'
+             + ' Sign: <b>' + (p.answer < 0 ? 'negative' : 'positive') + '</b>'
+             + (p.sameSign ? ' (same signs)' : ' (different signs)') + '.'
+             + ' So the answer is <b>' + p.answer + '</b>.</div>';
+        return html;
+    }
+
+    if (p.op === 'sub') {
+        html += '<b>Step 1 &ndash; Rewrite subtraction as addition.</b>';
+        html += '<div style="font-size:14px;margin:6px 0;">Keep the first number. Change the minus to plus. Change the sign of the second number.</div>';
+        html += '<div class="rewrite">'
+             +  '<span class="old">' + p.a + ' &ndash; ' + (p.b < 0 ? '(' + p.b + ')' : p.b) + '</span>'
+             +  '<span class="arrow">&rarr;</span>'
+             +  '<span class="new">' + p.a + ' + ' + (-p.b < 0 ? '(' + (-p.b) + ')' : (-p.b)) + '</span>'
+             +  '</div>';
+        html += '<b>Step 2 &ndash; Add on the number line.</b>';
+    } else {
+        html += '<b>Add on the number line.</b>';
+    }
+
+    var jumpFrom = p.a;
+    var jumpBy = (p.op === 'sub') ? -p.b : p.b;
+    html += numberLineSVG(jumpFrom, jumpBy, jumpFrom + jumpBy);
+
+    var absA = Math.abs(jumpFrom), absB = Math.abs(jumpBy);
+    var arule;
+    if (p.sameSign) {
+        arule = 'Same signs: add the sizes (' + absA + ' + ' + absB + ' = ' + (absA + absB) + '), then keep the sign. ';
+    } else {
+        var larger  = absA >= absB ? absA : absB;
+        var smaller = absA >= absB ? absB : absA;
+        var sign    = absA >= absB ? (jumpFrom >= 0 ? '+' : '-') : (jumpBy >= 0 ? '+' : '-');
+        arule = 'Different signs: subtract the sizes (' + larger + ' &ndash; ' + smaller + ' = ' + (larger - smaller)
+              + '), then use the sign of the bigger size (' + sign + '). ';
+    }
+    html += '<div style="margin-top:10px;">' + arule + 'So the answer is <b>' + p.answer + '</b>.</div>';
+    return html;
+}
+
+function rulesTable(p) {
+    var aSign = p.a >= 0 ? '+' : '-';
+    var bSign = p.b >= 0 ? '+' : '-';
+    var rows = [
+        { a: '+', b: '+', r: '+' },
+        { a: '+', b: '-', r: '-' },
+        { a: '-', b: '+', r: '-' },
+        { a: '-', b: '-', r: '+' }
+    ];
+    var sym = p.op === 'mul' ? '&times;' : '&divide;';
+    var html = '<div class="rules-card"><table>';
+    for (var i = 0; i < rows.length; i++) {
+        var row = rows[i];
+        var hi = (row.a === aSign && row.b === bSign) ? ' class="highlight"' : '';
+        html += '<tr' + hi + '>'
+             +  '<td class="' + (row.a === '+' ? 'pos' : 'neg') + '">(' + row.a + ')</td>'
+             +  '<td>' + sym + '</td>'
+             +  '<td class="' + (row.b === '+' ? 'pos' : 'neg') + '">(' + row.b + ')</td>'
+             +  '<td>=</td>'
+             +  '<td class="' + (row.r === '+' ? 'pos' : 'neg') + '">(' + row.r + ')</td>'
+             +  '</tr>';
+    }
+    return html + '</table></div>';
+}
+
+/* =====================================================================
+   Number line SVG
+   ===================================================================== */
+function numberLineSVG(from, jump, to) {
+    var lo = Math.min(from, to) - 2;
+    var hi = Math.max(from, to) + 2;
+    if (hi - lo < 10) {
+        var mid = (lo + hi) / 2;
+        lo = Math.floor(mid - 5);
+        hi = Math.ceil(mid + 5);
+    }
+    var W = 620, H = 130, pad = 25;
+    var scale = (W - 2 * pad) / (hi - lo);
+    function xOf(v) { return pad + (v - lo) * scale; }
+    var yLine = 80;
+
+    var desc = 'Number line. Start at ' + speak(from) + ', jump '
+             + (jump >= 0 ? 'right ' + jump : 'left ' + Math.abs(jump))
+             + ', land on ' + speak(to) + '.';
+
+    var s = '<div class="numline-wrap"><svg class="numline-svg" viewBox="0 0 ' + W + ' ' + H
+          + '" role="img" aria-label="' + desc + '" xmlns="http://www.w3.org/2000/svg">';
+    s += '<title>' + desc + '</title>';
+    s += '<line x1="' + pad + '" y1="' + yLine + '" x2="' + (W - pad) + '" y2="' + yLine + '" stroke="#2e3d8f" stroke-width="2"/>';
+
+    var step = 1;
+    if (hi - lo > 20) step = 2;
+    if (hi - lo > 40) step = 5;
+    for (var v = Math.ceil(lo); v <= Math.floor(hi); v++) {
+        if (v % step !== 0 && v !== 0) continue;
+        var x = xOf(v), isZero = v === 0;
+        s += '<line x1="' + x + '" y1="' + (yLine - 5) + '" x2="' + x + '" y2="' + (yLine + 5)
+           + '" stroke="' + (isZero ? '#7c3aed' : '#8b96d8') + '" stroke-width="' + (isZero ? 2 : 1) + '"/>';
+        s += '<text x="' + x + '" y="' + (yLine + 22) + '" text-anchor="middle" font-size="12" fill="#4a5480" font-family="Consolas, monospace">' + v + '</text>';
+    }
+
+    var x0 = xOf(from), x1 = xOf(to), midX = (x0 + x1) / 2, ctrlY = yLine - 42;
+    s += '<defs><marker id="arrhd" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">'
+       + '<path d="M0,0 L10,5 L0,10 z" fill="#059669"/></marker></defs>';
+    s += '<path d="M ' + x0 + ' ' + yLine + ' Q ' + midX + ' ' + ctrlY + ' ' + x1 + ' ' + yLine
+       + '" stroke="#059669" stroke-width="2.5" fill="none" marker-end="url(#arrhd)"/>';
+    s += '<text x="' + midX + '" y="' + (ctrlY - 6) + '" text-anchor="middle" font-size="14" font-weight="800" fill="#059669" font-family="Nunito, sans-serif">'
+       + (jump >= 0 ? '+' + jump : String(jump)) + '</text>';
+    s += '<circle cx="' + x0 + '" cy="' + yLine + '" r="5" fill="#2e3d8f"/>';
+    s += '<text x="' + x0 + '" y="' + (yLine - 12) + '" text-anchor="middle" font-size="12" font-weight="800" fill="#2e3d8f" font-family="Consolas, monospace">start ' + from + '</text>';
+    s += '<circle cx="' + x1 + '" cy="' + yLine + '" r="6" fill="#059669"/>';
+    s += '<text x="' + x1 + '" y="' + (yLine + 45) + '" text-anchor="middle" font-size="13" font-weight="800" fill="#059669" font-family="Consolas, monospace">end ' + to + '</text>';
+    return s + '</svg></div>';
+}
+
+/* =====================================================================
+   Stats view
+   ===================================================================== */
+function toggleStatsView() {
+    if (!tapGuard()) return;
+    if (statsOpen) hideStats();
+    else showStats();
+}
+
+function showStats() {
+    clearAdvance();
+    statsOpen = true;
+
+    var ops = ['add', 'sub', 'mul', 'div'];
+    var totalC = 0, totalT = 0;
+    ops.forEach(function (o) { totalC += stats[o].c; totalT += stats[o].t; });
+    var overallPct = totalT > 0 ? Math.round((totalC / totalT) * 100) : 0;
+
+    var html = '<div class="stats-view"><h2>My Stats</h2><div class="stats-overall">';
+    if (totalT > 0) {
+        html += '<div class="big">' + overallPct + '%</div>'
+             +  '<div class="lbl">' + totalC + ' right on the first try out of ' + totalT + ' attempted</div>';
+    } else {
+        html += '<div class="big" style="color:#4a5480;">--</div>'
+             +  '<div class="lbl">No problems attempted yet.</div>';
+    }
+    html += '<div class="lbl" style="margin-top:6px;">Problems completed: ' + problemNum
+         +  ' &nbsp;|&nbsp; Current streak: ' + streak
+         +  ' &nbsp;|&nbsp; Best streak: ' + bestStreak + '</div></div>';
+
+    ops.forEach(function (o) {
+        var s = stats[o];
+        var tried = s.t > 0;
+        var pct = tried ? Math.round((s.c / s.t) * 100) : 0;
+        var barCls = 'none';
+        if (tried) barCls = pct >= 80 ? 'good' : (pct >= 60 ? 'mid' : 'low');
+
+        html += '<div class="stat-row">'
+             +  '<div class="stat-name">' + opNames[o] + '</div>'
+             +  '<div class="stat-bar-wrap"><div class="stat-bar ' + barCls + '" style="width:' + (tried ? pct : 0) + '%;"></div></div>';
+        html += tried
+            ? '<div class="stat-num">' + s.c + '/' + s.t + ' (' + pct + '%)</div>'
+            : '<div class="stat-untried">not tried yet</div>';
+        html += '</div>';
+
+        if (tried) {
+            var samePct = s.sameT > 0 ? Math.round((s.sameC / s.sameT) * 100) : null;
+            var diffPct = s.diffT > 0 ? Math.round((s.diffC / s.diffT) * 100) : null;
+            html += '<div class="stat-sub">'
+                 +  '<span>Same signs: ' + (samePct === null ? 'not tried yet' : s.sameC + '/' + s.sameT + ' (' + samePct + '%)') + '</span>'
+                 +  '<span>Different signs: ' + (diffPct === null ? 'not tried yet' : s.diffC + '/' + s.diffT + ' (' + diffPct + '%)') + '</span>'
+                 +  '</div>';
+        }
+    });
+
+    var rec = buildRecommendation();
+    if (rec) html += '<div class="recommend">' + rec + '</div>';
+
+    html += '<div class="stats-actions">'
+         +  '<button class="submit-btn" onclick="hideStats()">Back to Practice</button>'
+         +  '<button class="reset-btn" id="resetBtn" onclick="confirmReset()" style="margin-left:8px;">Reset Stats</button>'
+         +  '</div></div>';
+
+    document.getElementById('main-content').innerHTML = html;
+    document.getElementById('input-content').innerHTML = '';
+    document.getElementById('helper-buttons').style.display = 'none';
+    document.getElementById('stats-toggle-btn').textContent = 'Back to Practice';
+    setFeedback('', '');
+    hideAllPanels();
+}
+
+function buildRecommendation() {
+    var ops = ['add', 'sub', 'mul', 'div'];
+    var weakest = null, weakestPct = 101;
+    ops.forEach(function (o) {
+        var s = stats[o];
+        if (s.t < 1) return;
+        var p = s.c / s.t * 100;
+        if (p < weakestPct) { weakestPct = p; weakest = o; }
+    });
+    if (!weakest) return null;
+
+    var untried = ops.filter(function (o) { return stats[o].t === 0; });
+    if (weakestPct >= 85) {
+        if (untried.length > 0) {
+            return '<b>Strong so far!</b> You have not tried '
+                 + untried.map(function (o) { return opNames[o]; }).join(', ')
+                 + ' yet. Give those a go next.';
+        }
+        return '<b>Great work overall!</b> You are strong across all four operations. Try Mixed mode to keep sharp.';
+    }
+
+    var s = stats[weakest];
+    var sub = '';
+    if (s.sameT >= 2 && s.diffT >= 2) {
+        var sameP = s.sameC / s.sameT * 100;
+        var diffP = s.diffC / s.diffT * 100;
+        if (sameP < diffP - 15) sub = ' Especially the ones that work out to a same-signs addition.';
+        else if (diffP < sameP - 15) sub = ' Especially the ones that work out to a different-signs addition.';
+    }
+    return '<b>Focus area:</b> ' + opNames[weakest] + ' is your weakest (' + Math.round(weakestPct) + '%).'
+         + sub + ' Try the ' + opShortNames[weakest] + ' mode for focused practice.';
+}
+
+function hideStats() {
+    disarmReset();
+    statsOpen = false;
+    // Restore the problem the student was working on rather than discarding it.
+    if (currentProblem) {
+        renderProblem();
+        setFeedback('', '');
+        hideAllPanels();
+    } else {
+        generateProblem();
+    }
+}
+
+/* ----- Two-tap reset ----- */
+var resetArmed = false;
+var resetTimer = null;
+
+function disarmReset() {
+    resetArmed = false;
+    if (resetTimer !== null) { clearTimeout(resetTimer); resetTimer = null; }
+    var b = document.getElementById('resetBtn');
+    if (b) { b.textContent = 'Reset Stats'; b.className = 'reset-btn'; }
+}
+
+function confirmReset() {
+    if (!tapGuard()) return;
+    var btn = document.getElementById('resetBtn');
+    if (!resetArmed) {
+        resetArmed = true;
+        if (btn) { btn.textContent = 'Tap again to confirm'; btn.className = 'reset-btn armed'; }
+        resetTimer = setTimeout(function () { resetTimer = null; disarmReset(); }, 3500);
+        return;
+    }
+    disarmReset();
+    stats = blankStats();
+    streak = 0; bestStreak = 0; problemNum = 0;
+    saveState();
+    showStats();
+}
+
+/* =====================================================================
+   Skip, mode, persistence
+   ===================================================================== */
+function skipProblem() {
+    if (!tapGuard() || statsOpen) return;
+    clearAdvance();
+    problemNum++;
+    generateProblem();
+}
+
+function setMode(m) {
+    if (!tapGuard()) return;
+    clearAdvance();
+    mode = m;
+    ['add', 'sub', 'mul', 'div', 'mix'].forEach(function (k) {
+        var b = document.getElementById('mode-' + k);
+        if (!b) return;
+        var on = (k === m);
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    streak = 0;
+    recentOps = [];
+    if (m === 'mix') lastWasBothPositive = true;   // first Mix problem is never the trivial case
+    generateProblem();
+}
+
+function toggleConfetti() {
+    if (!tapGuard()) return;
+    confettiEnabled = !confettiEnabled;
+    applyConfettiToggle();
+    saveState();
+}
+
+function applyConfettiToggle() {
+    var track = document.getElementById('confetti-track');
+    var wrap = document.getElementById('confetti-toggle');
+    if (track) track.className = confettiEnabled ? 'toggle-track on' : 'toggle-track';
+    if (wrap) wrap.setAttribute('aria-checked', confettiEnabled ? 'true' : 'false');
+}
+
+/* ----- Persistence (validated on load) ----- */
+function toCount(v) {
+    var n = typeof v === 'number' ? v : parseInt(v, 10);
+    if (!isFinite(n) || n < 0) return 0;
+    return Math.min(Math.floor(n), 1000000);
+}
+
+function saveState() {
+    try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify({
+            stats: stats, bestStreak: bestStreak, problemNum: problemNum, confetti: confettiEnabled
+        }));
+    } catch (e) { /* storage unavailable - play without saving */ }
+}
+
+function loadState() {
+    try {
+        var raw = localStorage.getItem(SAVE_KEY);
+        if (!raw) return;
+        var st = JSON.parse(raw);
+        if (st && st.stats) {
+            // Coerce every stored field to a safe non-negative integer. Without
+            // this, a corrupted or hand-edited entry could put a string into the
+            // stats panel markup and break the percentage math.
+            ['add', 'sub', 'mul', 'div'].forEach(function (o) {
+                var src = st.stats[o];
+                if (!src || typeof src !== 'object') return;
+                var d = stats[o];
+                ['c', 't', 'sameC', 'sameT', 'diffC', 'diffT'].forEach(function (k) {
+                    d[k] = toCount(src[k]);
+                });
+                // Correct counts can never exceed attempted counts.
+                d.c = Math.min(d.c, d.t);
+                d.sameC = Math.min(d.sameC, d.sameT);
+                d.diffC = Math.min(d.diffC, d.diffT);
+            });
+        }
+        bestStreak = toCount(st && st.bestStreak);
+        problemNum = toCount(st && st.problemNum);
+        if (st && typeof st.confetti === 'boolean') confettiEnabled = st.confetti;
+    } catch (e) { stats = blankStats(); }
+}
+
+/* =====================================================================
+   Confetti
+   ===================================================================== */
+function celebrateStreak(s) {
+    if (s === 0 || s % 5 !== 0) return;
+    if (s % 10 === 0) createConfetti(200, 3);
+    else createConfetti(100, 2);
+}
+
+// Midnight Scholar 8-color confetti palette (the one place orange is allowed)
+var CONFETTI_COLORS = [
+    '#7c3aed',  // violet
+    '#22c55e',  // vivid green
+    '#2e3d8f',  // navy
+    '#ef4444',  // red
+    '#f59e0b',  // orange
+    '#ffeb3b',  // canary yellow
+    '#0d9488',  // teal
+    '#a78bfa'   // light violet
+];
+
+function makePiece(base, color, shape) {
+    var piece = document.createElement('div');
+    piece.className = 'confetti';
+    if (shape === 0) {
+        piece.style.width = base + 'px';
+        piece.style.height = base + 'px';
+        piece.style.background = color;
+        piece.style.borderRadius = '50%';
+    } else if (shape === 1) {
+        piece.style.width = base + 'px';
+        piece.style.height = base + 'px';
+        piece.style.background = color;
+        piece.style.borderRadius = '2px';
+    } else if (shape === 2) {
+        piece.style.width = Math.max(4, base * 0.35) + 'px';
+        piece.style.height = (base * 1.7) + 'px';
+        piece.style.background = color;
+        piece.style.borderRadius = '2px';
+    } else {
+        piece.style.width = '0';
+        piece.style.height = '0';
+        piece.style.background = 'transparent';
+        piece.style.borderLeft = (base * 0.6) + 'px solid transparent';
+        piece.style.borderRight = (base * 0.6) + 'px solid transparent';
+        piece.style.borderBottom = base + 'px solid ' + color;
+    }
+    return piece;
+}
+
+function launch(piece, tier, isMassive) {
+    piece.style.left = Math.random() * 100 + '%';
+    piece.style.top = '-20px';
+    var dur;
+    if (tier === 1) dur = 1.6 + Math.random() * 1.0;
+    else if (tier === 2) dur = 2.0 + Math.random() * 1.5;
+    else dur = 2.5 + Math.random() * 2.0;
+    piece.style.animation = (isMassive ? 'confetti-fall-slow' : 'confetti-fall') + ' ' + dur + 's ease-out forwards';
+    piece.style.animationDelay = (Math.random() * (isMassive ? 0.8 : 0.4)) + 's';
+    document.body.appendChild(piece);
+    setTimeout(function () {
+        if (piece.parentNode) piece.parentNode.removeChild(piece);
+    }, isMassive ? 6000 : 4500);
+}
+
+function createConfetti(count, tier) {
+    if (!confettiEnabled) return;
+    var isMassive = tier === 3;
+    for (var i = 0; i < count; i++) {
+        var base;
+        if (tier === 1) base = 7 + Math.random() * 5;
+        else if (tier === 2) base = 10 + Math.random() * 7;
+        else base = 11 + Math.random() * 9;
+        var color = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
+        launch(makePiece(base, color, Math.floor(Math.random() * 4)), tier, isMassive);
+    }
+    // Tier 3 gets 15 extra gold sparkles on top of the main burst.
+    if (isMassive) {
+        for (var g = 0; g < 15; g++) {
+            var sp = makePiece(5 + Math.random() * 4, '#ffd54f', 0);
+            sp.style.boxShadow = '0 0 6px rgba(255, 213, 79, 0.9)';
+            launch(sp, 3, true);
+        }
+    }
+}
+
+/* =====================================================================
+   Polar Rose Studio insignia
+   ===================================================================== */
+function renderInsignia() {
+    var d = '';
+    var steps = 240;
+    for (var i = 0; i <= steps; i++) {
+        var t = (i / steps) * 4 * Math.PI;
+        var r = 2 * Math.cos(1.5 * t);
+        var x = (r * Math.cos(t) * 12).toFixed(2);
+        var y = (r * Math.sin(t) * 12).toFixed(2);
+        d += (i === 0 ? 'M' : 'L') + x + ' ' + y + ' ';
+    }
+    var svg = '<svg viewBox="-28 -26 56 52" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Polar Rose Studio">'
+        + '<title>Polar Rose Studio</title>'
+        + '<defs><linearGradient id="pr-grad" x1="0" y1="0" x2="1" y2="1">'
+        + '<stop offset="0%" stop-color="#1e3a5f"/><stop offset="100%" stop-color="#0d9488"/>'
+        + '</linearGradient></defs>'
+        + '<path d="' + d.trim() + '" fill="none" stroke="url(#pr-grad)" stroke-width="1.7" '
+        + 'stroke-linecap="round" stroke-linejoin="round"/>'
+        + '</svg>'
+        + '<div class="insignia-caption" aria-hidden="true">POLAR ROSE STUDIO</div>';
+    document.getElementById('insignia').innerHTML = svg;
+}
+
+/* =====================================================================
+   Boot
+   ===================================================================== */
+loadState();
+applyConfettiToggle();
+renderInsignia();
+generateProblem();
+</script>
+</body>
+</html>
