@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'unsafe-inline'; img-src 'self' data:; base-uri 'none'; form-action 'none'; object-src 'none'">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solving Linear Equations</title>
     <meta name="theme-color" content="#1b2450">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -135,7 +136,7 @@
         }
         .level-btn:hover { background: #d9def2; }
         .level-btn.active {
-            background: linear-gradient(135deg, #1e3a5f, #0d9488) !important;
+            background: linear-gradient(135deg, #1e3a5f, #0b7a70) !important;
             color: white !important;
             box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.25), 0 6px 14px rgba(13, 148, 136, 0.35);
         }
@@ -179,28 +180,38 @@
             gap: 8px;
             cursor: pointer;
             padding: 8px 10px;
+            background: transparent;
+            border: 0;
+            border-radius: 0;
+            font: inherit;
             -webkit-tap-highlight-color: transparent;
         }
         .toggle-label { font-size: 13px; font-weight: 800; color: #4a5480; }
+        /* Hairline rim so the track edge reads against the white card:
+           #8a93b8 (3.02:1) off, #0b7a70 (5.21:1) on. box-sizing keeps the
+           44x24 geometry, and the knob insets drop by 1px so it sits exactly
+           where it did before the rim was added. */
         .toggle-track {
             width: 44px; height: 24px;
+            box-sizing: border-box;
+            border: 1px solid #8a93b8;
             border-radius: 999px;
             background: #d5d9e8;
             position: relative;
             display: inline-block;
             transition: background 0.2s;
         }
-        .toggle-track.on { background: #10b981; }
+        .toggle-track.on { background: #10b981; border-color: #0b7a70; }
         .toggle-knob {
             position: absolute;
-            top: 3px; left: 3px;
+            top: 2px; left: 2px;
             width: 18px; height: 18px;
             border-radius: 50%;
             background: white;
             box-shadow: 0 1px 3px rgba(0,0,0,0.25);
             transition: left 0.2s;
         }
-        .toggle-track.on .toggle-knob { left: 23px; }
+        .toggle-track.on .toggle-knob { left: 22px; }
         .key-btn {
             background: #e6e9f6;
             color: #2e3d8f;
@@ -256,13 +267,33 @@
             bottom: 0; left: 0; right: 0;
             transition: height 0.5s ease;
         }
+        /* Design item S3: the middle tier was orange, which is banned. The three
+           tiers now separate by hue AND lightness - royal navy (darkest) for
+           in-progress, violet for done-but-not-perfect, mint for mastered -
+           matching the ramp used in Systems of Equations and Signed Numbers.
+           The violet that used to mark the low tier moves up to the middle one,
+           so no two tiers share a colour. */
         .cup-fill.full { background: linear-gradient(to top, #059669, #34d399); }
-        .cup-fill.half { background: linear-gradient(to top, #d97706, #fbbf24); }
-        .cup-fill.partial { background: linear-gradient(to top, #7c3aed, #a78bfa); }
+        .cup-fill.half { background: linear-gradient(to top, #7c3aed, #a78bfa); }
+        .cup-fill.partial { background: linear-gradient(to top, #2e3d8f, #8b96d8); }
         .cup-stats {
             font-size: 9px;
-            color: #6a74a8;
+            color: #5d6798;
             margin-top: 2px;
+        }
+        /* a11y: visually hidden text for screen readers only */
+        .sr-only {
+            position: absolute;
+            width: 1px; height: 1px;
+            padding: 0; margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        button:focus-visible, input:focus-visible, [tabindex]:focus-visible {
+            outline: 3px solid #2e3d8f;
+            outline-offset: 2px;
         }
         .scaffold-container {
             background: #f7f8fe;
@@ -314,6 +345,9 @@
             font-size: 14px;
             color: #5b21b6;
         }
+        /* Design item 22: the note used to be #2e3d8f at weight 400, which the
+           design system names as too light to read on a phone. Ink navy at 700
+           is 11.95:1 on the #eef0fb panel. */
         .fraction-note {
             background: #eef0fb;
             border: 2px solid #8b96d8;
@@ -321,8 +355,48 @@
             padding: 10px;
             margin: 10px 0;
             font-size: 13px;
-            color: #2e3d8f;
+            line-height: 1.5;
+            font-weight: 700;
+            color: #1e2a5e;
         }
+        .fraction-note strong { font-weight: 800; color: #16214d; }
+        .fraction-note code {
+            background: #dfe3f7;
+            color: #16214d;
+            font-weight: 800;
+            border-radius: 5px;
+            padding: 1px 5px;
+            font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+        }
+        /* ===== Stacked fractions (design item 12) =====
+           A slash is not how a fraction is printed, so numerator and denominator
+           are stacked over a real vinculum. The stacking is pure CSS layout and
+           the bar is a div, so the whole thing is mute to a screen reader: every
+           instance is emitted by fracHTML(), which wraps it in role="img" with a
+           spoken aria-label ("negative 3 over 4"). */
+        .frac {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: stretch;
+            vertical-align: middle;
+            text-align: center;
+            margin: 0 2px;
+        }
+        .frac-num { padding: 3px 10px; }
+        .frac-bar {
+            height: 3px;
+            width: 100%;
+            border-radius: 2px;
+            background: currentColor;
+        }
+        .frac-den { padding: 3px 10px; }
+        .frac-neg {
+            display: inline-flex;
+            align-items: center;
+            vertical-align: middle;
+        }
+        /* the sign sits on the bar's axis, but must not touch the vinculum */
+        .frac-sign { margin-right: 3px; }
         /* ===== Confetti ===== */
         .confetti {
             position: fixed;
@@ -352,6 +426,15 @@
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.4; transform: scale(1.6); }
         }
+        /* a11y: honour the OS "reduce motion" setting - no confetti, no pulsing */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+            }
+            .confetti, .sparkle { display: none !important; }
+        }
         @media (max-width: 480px) {
             .card { padding: 24px 14px 20px; }
             h1 { font-size: 21px; }
@@ -362,65 +445,180 @@
     </style>
 </head>
 <body>
-    <div class="card" id="game-card">
+    <main class="card" id="game-card">
         <h1><span class="title-inline">Solving Linear Equations</span></h1>
-        
+
+        <!-- a11y: polite region announces each new problem/step in words -->
+        <div id="problem-announce" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+
         <div class="info">
             <div class="info-item">Problem: <span id="problemNum">1</span></div>
             <div class="info-item" id="streak-display" >Streak: <span id="streak">0</span>/10</div>
             <div class="info-item" id="timer-display" ></div>
         </div>
-        
-        <div class="level-btns">
-            <button class="level-btn active" onclick="setLevel(0)">Level 0 (Guided)</button>
-            <button class="level-btn" onclick="setLevel(1)">Level 1</button>
-            <button class="level-btn" onclick="setLevel(2)">Level 2</button>
-            <button class="level-btn" onclick="setLevel(3)">Level 3</button>
+
+        <div class="level-btns" role="group" aria-label="Difficulty level">
+            <button type="button" class="level-btn active" aria-pressed="true" onclick="setLevel(0)">Level 0 (Guided)</button>
+            <button type="button" class="level-btn" aria-pressed="false" onclick="setLevel(1)">Level 1</button>
+            <button type="button" class="level-btn" aria-pressed="false" onclick="setLevel(2)">Level 2</button>
+            <button type="button" class="level-btn" aria-pressed="false" onclick="setLevel(3)">Level 3</button>
         </div>
-        
+
         <div id="progress-display"></div>
-        
+
         <div id="main-content">
             <!-- Content will be inserted here -->
         </div>
-        
-        <div class="feedback" id="feedback"></div>
-        
+
+        <div class="feedback" id="feedback" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
         <div id="helper-buttons" style="text-align: center; margin: 20px 0;">
-            <button class="hint-btn" onclick="toggleHint()">Show Hint</button>
-            <button class="answer-btn" onclick="toggleAnswer()">Show Answer</button>
-            <button class="solution-btn" onclick="toggleSolution()">Show Solution</button>
-            <button class="skip-btn" onclick="generateProblem()">Skip</button>
+            <button type="button" class="hint-btn" onclick="toggleHint()">Show Hint</button>
+            <button type="button" class="answer-btn" onclick="toggleAnswer()">Show Answer</button>
+            <button type="button" class="solution-btn" onclick="toggleSolution()">Show Solution</button>
+            <button type="button" class="skip-btn" onclick="skipCurrentProblem()">Skip</button>
         </div>
-        
+
         <div id="hint" style="display: none;"></div>
         <div id="answer-box" style="display: none;"></div>
         <div id="solution-box" style="display: none;"></div>
 
         <div style="text-align: center; margin-top: 18px; border-top: 1px solid #e6e9f6; padding-top: 14px;">
-            <button class="hint-btn" onclick="toggleStats()">My Stats</button>
-            <span class="toggle-row" onclick="toggleConfetti()">
+            <button type="button" class="hint-btn" onclick="toggleStats()">My Stats</button>
+            <button type="button" class="toggle-row" id="confetti-toggle" aria-pressed="true" onclick="toggleConfetti()">
                 <span class="toggle-label">Confetti</span>
-                <span class="toggle-track" id="confetti-track"><span class="toggle-knob"></span></span>
-            </span>
+                <span class="toggle-track" id="confetti-track" aria-hidden="true"><span class="toggle-knob"></span></span>
+            </button>
         </div>
         <div id="stats-panel" style="display: none;"></div>
 
         <!-- Polar Rose Studio insignia -->
         <div style="text-align: center; margin-top: 16px;">
-            <svg width="90" height="64" viewBox="-28 -26 56 64" style="opacity: 0.9;">
+            <svg width="90" height="64" viewBox="-28 -26 56 64" style="opacity: 0.9;" role="img" aria-label="Polar Rose Studio">
                 <defs><linearGradient id="pr-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#1e3a5f"/><stop offset="100%" stop-color="#0d9488"/></linearGradient></defs>
                 <path d="M24.0,0.0 L23.9,1.3 L23.6,2.5 L23.0,3.7 L22.3,4.7 L21.4,5.7 L20.3,6.6 L19.1,7.3 L17.7,7.9 L16.3,8.3 L14.7,8.5 L13.1,8.5 L11.4,8.3 L9.7,7.9 L8.1,7.3 L6.5,6.5 L5.0,5.5 L3.5,4.4 L2.2,3.0 L1.0,1.6 L0.0,0.0 L-0.9,-1.7 L-1.5,-3.4 L-2.0,-5.2 L-2.3,-7.1 L-2.4,-8.9 L-2.3,-10.7 L-2.0,-12.4 L-1.5,-14.0 L-0.8,-15.6 L-0.0,-17.0 L1.0,-18.2 L2.0,-19.3 L3.2,-20.2 L4.4,-20.9 L5.7,-21.4 L7.1,-21.7 L8.4,-21.8 L9.6,-21.7 L10.9,-21.3 L12.0,-20.8 L13.0,-20.1 L13.9,-19.2 L14.7,-18.1 L15.3,-17.0 L15.7,-15.7 L15.9,-14.3 L15.9,-12.9 L15.7,-11.4 L15.3,-9.9 L14.7,-8.5 L13.9,-7.1 L12.9,-5.7 L11.7,-4.5 L10.4,-3.4 L8.9,-2.4 L7.3,-1.5 L5.5,-0.9 L3.7,-0.4 L1.9,-0.1 L0.0,-0.0 L-1.9,-0.1 L-3.7,-0.4 L-5.5,-0.9 L-7.3,-1.5 L-8.9,-2.4 L-10.4,-3.4 L-11.7,-4.5 L-12.9,-5.7 L-13.9,-7.1 L-14.7,-8.5 L-15.3,-9.9 L-15.7,-11.4 L-15.9,-12.9 L-15.9,-14.3 L-15.7,-15.7 L-15.3,-17.0 L-14.7,-18.1 L-13.9,-19.2 L-13.0,-20.1 L-12.0,-20.8 L-10.9,-21.3 L-9.6,-21.7 L-8.4,-21.8 L-7.1,-21.7 L-5.7,-21.4 L-4.4,-20.9 L-3.2,-20.2 L-2.0,-19.3 L-1.0,-18.2 L-0.0,-17.0 L0.8,-15.6 L1.5,-14.0 L2.0,-12.4 L2.3,-10.7 L2.4,-8.9 L2.3,-7.1 L2.0,-5.2 L1.5,-3.4 L0.9,-1.7 L0.0,-0.0 L-1.0,1.6 L-2.2,3.0 L-3.5,4.4 L-5.0,5.5 L-6.5,6.5 L-8.1,7.3 L-9.7,7.9 L-11.4,8.3 L-13.1,8.5 L-14.7,8.5 L-16.3,8.3 L-17.7,7.9 L-19.1,7.3 L-20.3,6.6 L-21.4,5.7 L-22.3,4.7 L-23.0,3.7 L-23.6,2.5 L-23.9,1.3 L-24.0,0.0 L-23.9,-1.3 L-23.6,-2.5 L-23.0,-3.7 L-22.3,-4.7 L-21.4,-5.7 L-20.3,-6.6 L-19.1,-7.3 L-17.7,-7.9 L-16.3,-8.3 L-14.7,-8.5 L-13.1,-8.5 L-11.4,-8.3 L-9.7,-7.9 L-8.1,-7.3 L-6.5,-6.5 L-5.0,-5.5 L-3.5,-4.4 L-2.2,-3.0 L-1.0,-1.6 L-0.0,-0.0 L0.9,1.7 L1.5,3.4 L2.0,5.2 L2.3,7.1 L2.4,8.9 L2.3,10.7 L2.0,12.4 L1.5,14.0 L0.8,15.6 L0.0,17.0 L-1.0,18.2 L-2.0,19.3 L-3.2,20.2 L-4.4,20.9 L-5.7,21.4 L-7.1,21.7 L-8.4,21.8 L-9.6,21.7 L-10.9,21.3 L-12.0,20.8 L-13.0,20.1 L-13.9,19.2 L-14.7,18.1 L-15.3,17.0 L-15.7,15.7 L-15.9,14.3 L-15.9,12.9 L-15.7,11.4 L-15.3,9.9 L-14.7,8.5 L-13.9,7.1 L-12.9,5.7 L-11.7,4.5 L-10.4,3.4 L-8.9,2.4 L-7.3,1.5 L-5.5,0.9 L-3.7,0.4 L-1.9,0.1 L-0.0,0.0 L1.9,0.1 L3.7,0.4 L5.5,0.9 L7.3,1.5 L8.9,2.4 L10.4,3.4 L11.7,4.5 L12.9,5.7 L13.9,7.1 L14.7,8.5 L15.3,9.9 L15.7,11.4 L15.9,12.9 L15.9,14.3 L15.7,15.7 L15.3,17.0 L14.7,18.1 L13.9,19.2 L13.0,20.1 L12.0,20.8 L10.9,21.3 L9.6,21.7 L8.4,21.8 L7.1,21.7 L5.7,21.4 L4.4,20.9 L3.2,20.2 L2.0,19.3 L1.0,18.2 L0.0,17.0 L-0.8,15.6 L-1.5,14.0 L-2.0,12.4 L-2.3,10.7 L-2.4,8.9 L-2.3,7.1 L-2.0,5.2 L-1.5,3.4 L-0.9,1.7 L0.0,-0.0 L1.0,-1.6 L2.2,-3.0 L3.5,-4.4 L5.0,-5.5 L6.5,-6.5 L8.1,-7.3 L9.7,-7.9 L11.4,-8.3 L13.1,-8.5 L14.7,-8.5 L16.3,-8.3 L17.7,-7.9 L19.1,-7.3 L20.3,-6.6 L21.4,-5.7 L22.3,-4.7 L23.0,-3.7 L23.6,-2.5 L23.9,-1.3 L24.0,-0.0" fill="none" stroke="url(#pr-grad)" stroke-width="1.6"/>
-                <text x="0" y="33" text-anchor="middle" font-family="Nunito, Segoe UI, Arial, sans-serif" font-size="6.5" fill="#6a74a8" letter-spacing="1.2">POLAR ROSE STUDIO</text>
+                <text x="0" y="33" text-anchor="middle" font-family="Nunito, Segoe UI, Arial, sans-serif" font-size="6.5" fill="#5d6798" letter-spacing="1.2">POLAR ROSE STUDIO</text>
             </svg>
         </div>
-    </div>
+    </main>
 
     <script>
+        // --- a11y / safety helpers -------------------------------------------
+        // Every value that reaches innerHTML goes through esc() first.
+        function esc(v) {
+            return String(v).replace(/[&<>"']/g, function (ch) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+            });
+        }
+        // Coerce anything read back from localStorage to a safe bounded integer.
+        function safeInt(v, max) {
+            var n = typeof v === 'number' ? v : parseInt(v, 10);
+            if (!isFinite(n) || isNaN(n)) return 0;
+            n = Math.floor(n);
+            if (n < 0) n = 0;
+            if (n > max) n = max;
+            return n;
+        }
+        var STAT_MAX = 1000000;
+        function prefersReducedMotion() {
+            try {
+                return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+            } catch (e) { return false; }
+        }
+        // Spoken form of an equation, so the live region reads words not symbols.
+        /* ===== Stacked fractions, and the words that go with them =====
+           Design item 12. A stacked fraction is CSS layout plus a bar div, so it
+           is completely mute: a screen reader would read "3 4". One scanner
+           finds the fraction tokens, and both the drawn form and the spoken form
+           are built from it, so the two can never drift apart. */
+        function scanFractions(str, onFrac, onText) {
+            var s = String(str);
+            var re = /(\d+)\/(\d+)/g;
+            var last = 0, m;
+            while ((m = re.exec(s)) !== null) {
+                var start = m.index;
+                var end = start + m[0].length;
+                // a digit or dot hard against either side means this is not a
+                // plain "a over b" token (dates, decimals, nested slashes)
+                if (start > 0 && /[0-9.]/.test(s.charAt(start - 1))) continue;
+                if (end < s.length && /[0-9.\/]/.test(s.charAt(end))) continue;
+                var numStr = m[1];
+                // absorb a leading minus only when it opens a term, so the
+                // subtraction in "12 - 3/4" keeps its own minus sign
+                if (start > 0 && s.charAt(start - 1) === '-') {
+                    var pre = s.slice(0, start - 1).replace(/\s+$/, '');
+                    var lastCh = pre.charAt(pre.length - 1);
+                    if (pre === '' || '=(+-*,:'.indexOf(lastCh) !== -1) {
+                        start = start - 1;
+                        numStr = '-' + m[1];
+                    }
+                }
+                onText(s.slice(last, start));
+                onFrac(numStr, m[2]);
+                last = end;
+            }
+            onText(s.slice(last));
+        }
+        function spokenFraction(num, den) {
+            var n = String(num), neg = false;
+            if (n.charAt(0) === '-') { neg = true; n = n.slice(1); }
+            return (neg ? 'negative ' : '') + n + ' over ' + String(den);
+        }
+        /* role="img" + aria-label is what gives the drawn fraction a voice. */
+        function fracHTML(num, den) {
+            var n = String(num), sign = '';
+            if (n.charAt(0) === '-') { sign = '-'; n = n.slice(1); }
+            return '<span class="frac-neg" role="img" aria-label="' + esc(spokenFraction(num, den)) + '">'
+                + (sign ? '<span class="frac-sign" aria-hidden="true">' + sign + '</span>' : '')
+                + '<span class="frac" aria-hidden="true">'
+                + '<span class="frac-num">' + esc(n) + '</span>'
+                + '<span class="frac-bar"></span>'
+                + '<span class="frac-den">' + esc(den) + '</span>'
+                + '</span></span>';
+        }
+        /* Escapes a math string for display and stacks any fraction inside it.
+           Drop-in replacement for esc() wherever math is drawn. */
+        function mathHTML(str) {
+            var out = '';
+            scanFractions(str, function (n, d) { out += fracHTML(n, d); },
+                               function (t) { out += esc(t); });
+            return out;
+        }
+        function speakMath(s) {
+            var words = '';
+            scanFractions(s, function (n, d) { words += ' ' + spokenFraction(n, d) + ' '; },
+                             function (t) { words += t; });
+            return words
+                .replace(/\(/g, ' open parenthesis ')
+                .replace(/\)/g, ' close parenthesis ')
+                .replace(/=/g, ' equals ')
+                .replace(/\//g, ' divided by ')
+                .replace(/_____/g, ' blank ')
+                .replace(/([0-9])x/g, '$1 times x')
+                .replace(/-/g, ' minus ')
+                .replace(/\+/g, ' plus ')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+        var announceTimer = null;
+        function announce(text) {
+            var el = document.getElementById('problem-announce');
+            if (!el) return;
+            if (announceTimer) clearTimeout(announceTimer);
+            el.textContent = '';
+            // let focus settle first, otherwise the announcement can be swallowed
+            announceTimer = setTimeout(function () { el.textContent = text; }, 180);
+        }
+        // Generation token: any timer started for problem N is ignored once the
+        // student has moved on (level switch, skip, next problem).
+        var genToken = 0;
+        function currentToken() { return genToken; }
+
         let currentProblem = null;
         let level = 0;
         let streak = 0;
         let problemCount = 0;
+        let levelProblemCount = 0;
         let timer = 0;
         let timerInterval = null;
         let isTimerRunning = false;
@@ -428,12 +626,16 @@
         let scaffoldAnswers = [];
         let solutionRevealed = 0;
         let stepAttempts = 0;
+        // Set when Show Answer / Show Solution is opened on this problem, so the
+        // grader knows the answer was handed over. See chargeReveal() below.
+        let revealCharged = false;
         let gameStats = loadStats();
         let confettiEnabled = loadConfettiPref();
         try {
             if (confettiEnabled) document.getElementById('confetti-track').classList.add('on');
+            document.getElementById('confetti-toggle').setAttribute('aria-pressed', confettiEnabled ? 'true' : 'false');
         } catch (e) {}
-        
+
         // Level 0 specific tracking
         let problemHistory = [];
         let typeProgress = {
@@ -443,16 +645,20 @@
             distribution: { completed: 0, required: 2, errors: 0, shown: 0, perfectStreak: 0 },
             'dist-both': { completed: 0, required: 2, errors: 0, shown: 0, perfectStreak: 0 }
         };
-        
+
         let allowFractions = false; // Start with integers only
 
         function createConfetti(count, tier) {
+            if (prefersReducedMotion()) return; // a11y: no motion when the OS asks for none
             var host = document.body;
-            var colors = ['#ef4444', '#22c55e', '#3b82f6', '#f59e0b', '#a855f7', '#06b6d4', '#ec4899', '#84cc16'];
+            /* Design item 10: #ef4444 (red, not in the palette) and #f59e0b
+               (orange, banned) swapped for mint and heritage rose. Still eight. */
+            var colors = ['#10b981', '#22c55e', '#3b82f6', '#c76b8f', '#a855f7', '#06b6d4', '#ec4899', '#84cc16'];
             var isMassive = tier === 3;
             for (var i = 0; i < count; i++) {
                 var piece = document.createElement('div');
                 piece.className = 'confetti';
+                piece.setAttribute('aria-hidden', 'true');
                 var base;
                 if (tier === 1) base = 7 + Math.random() * 5;        // 7-12px
                 else if (tier === 2) base = 10 + Math.random() * 7;  // 10-17px
@@ -503,6 +709,7 @@
                 for (var j = 0; j < 15; j++) {
                     var sp = document.createElement('div');
                     sp.className = 'sparkle';
+                    sp.setAttribute('aria-hidden', 'true');
                     sp.style.left = (Math.random() * 90 + 5) + '%';
                     sp.style.top = (Math.random() * 55 + 10) + 'vh';
                     sp.style.animationDelay = (Math.random() * 0.5) + 's';
@@ -526,13 +733,18 @@
         }
 
         function setLevel(newLevel) {
+            genToken++;             // invalidate any timer left over from the old level
             level = newLevel;
             document.querySelectorAll('.level-btn').forEach((btn, idx) => {
                 btn.classList.toggle('active', idx === newLevel);
+                btn.setAttribute('aria-pressed', idx === newLevel ? 'true' : 'false');
             });
             streak = 0;
             stopTimer();
-            
+            // difficulty gating is per level, not cumulative across levels
+            levelProblemCount = 0;
+            allowFractions = false;
+
             // Reset Level 0 tracking when switching levels
             if (newLevel === 0) {
                 typeProgress = {
@@ -545,14 +757,14 @@
                 problemHistory = [];
                 allowFractions = false;
             }
-            
+
             updateDisplay();
             generateProblem();
         }
-        
+
         function renderProgressCups() {
             if (level !== 0) return '';
-            
+
             const types = [
                 { key: 'basic', label: 'Basic' },
                 { key: 'reversed', label: 'Reversed' },
@@ -560,61 +772,65 @@
                 { key: 'distribution', label: 'Distribute' },
                 { key: 'dist-both', label: 'Dist+Both' }
             ];
-            
+
             let html = '<div class="progress-cups">';
-            
+
             types.forEach(type => {
                 const progress = typeProgress[type.key];
                 const baseRequired = 2; // Always use base of 2 for fill calculation
                 const completed = progress.completed;
                 const errors = progress.errors;
-                
+
                 // Determine fill level and color
                 let fillHeight = 0;
                 let fillClass = 'partial';
-                
+
                 if (completed >= baseRequired && completed >= progress.required) {
                     // Fully completed all requirements - check if perfect
                     if (progress.perfectStreak >= 3) {
                         fillHeight = 100; // Full cup - green
                         fillClass = 'full';
                     } else if (errors === 0) {
-                        fillHeight = 100; // Full cup - yellow (completed but not 3 perfect streak)
+                        fillHeight = 100; // Full cup - violet (done, not yet 3 perfect in a row)
                         fillClass = 'half';
                     } else {
-                        fillHeight = 100; // Full cup - orange (completed with errors)
+                        fillHeight = 100; // Full cup - violet (done, but with errors)
                         fillClass = 'half';
                     }
                 } else if (completed >= baseRequired) {
                     // Met base requirement but not inflated requirement (made errors)
-                    fillHeight = 75; // Mostly full - still need more
+                    fillHeight = 75; // Mostly full - royal navy, still need more
                     fillClass = 'partial';
                 } else {
                     // In progress - show true proportion
                     fillHeight = (completed / baseRequired) * 100; // 1 of 2 = 50%, 2 of 2 = 100%
                     fillClass = 'partial';
                 }
-                
+
                 html += `
                     <div class="cup-container">
-                        <div class="cup-label">${type.label}</div>
-                        <div class="cup">
-                            <div class="cup-fill ${fillClass}" style="height: ${fillHeight}%"></div>
+                        <div class="cup-label">${esc(type.label)}</div>
+                        <div class="cup" aria-hidden="true">
+                            <div class="cup-fill ${esc(fillClass)}" style="height: ${Number(fillHeight) || 0}%"></div>
                         </div>
-                        <div class="cup-stats">${completed}/${progress.required}${errors > 0 ? ` (${errors} X)` : ''}</div>
+                        <div class="cup-stats">
+                            <span aria-hidden="true">${safeInt(completed, STAT_MAX)}/${safeInt(progress.required, STAT_MAX)}${errors > 0 ? ` (${safeInt(errors, STAT_MAX)} X)` : ''}</span>
+                            <span class="sr-only">${esc(type.label)}: ${safeInt(completed, STAT_MAX)} of ${safeInt(progress.required, STAT_MAX)} complete${errors > 0 ? `, ${safeInt(errors, STAT_MAX)} wrong so far` : ''}</span>
+                        </div>
                     </div>
                 `;
             });
-            
+
             html += '</div>';
             return html;
         }
 
         function generateProblem() {
+            genToken++;             // any timer aimed at the previous problem is now stale
             let equation, answer, steps, scaffoldSteps, problemType = null, solutionSteps = null;
             scaffoldStep = 0;
             scaffoldAnswers = [];
-            
+
             if (level === 0) {
                 // Level 0 - Guided with scaffolding
                 if (typeProgress.basic.completed < typeProgress.basic.required && typeProgress.basic.shown < 3) {
@@ -642,19 +858,19 @@
                     showCompletionMessage();
                     return;
                 }
-                
+
                 typeProgress[problemType].shown++;
-                
+
                 if (problemType === 'basic') {
                     const a = Math.floor(Math.random() * 7) + 2;
                     let b = Math.floor(Math.random() * 15) - 7;
                     if (b === 0) b = 3;
                     const x = Math.floor(Math.random() * 10) - 5;
                     const c = a * x + b;
-                    
+
                     equation = `${a}x ${b >= 0 ? '+' : ''} ${b} = ${c}`;
                     answer = x;
-                    
+
                     scaffoldSteps = [
                         {
                             question: `What should we ${b >= 0 ? 'subtract' : 'add'} ${b >= 0 ? 'from' : 'to'} both sides to isolate the term with x?`,
@@ -691,16 +907,16 @@
                     if (b === 0) b = 3;
                     const x = Math.floor(Math.random() * 10) - 5;
                     const c = a * x + b;
-                    
+
                     equation = `${c} = ${a}x ${b >= 0 ? '+' : ''} ${b}`;
                     answer = x;
-                    
+
                     scaffoldSteps = [
                         {
                             question: `What should we ${b >= 0 ? 'subtract' : 'add'} ${b >= 0 ? 'from' : 'to'} both sides to isolate the term with x?`,
                             prompt: `Let's ${b >= 0 ? 'subtract' : 'add'} _____ ${b >= 0 ? 'from' : 'to'} both sides`,
                             correctAnswer: Math.abs(b),
-                            hint: `We want to eliminate the ${b >= 0 ? '+' : ''} ${b} on the right side. ${b >= 0 ? 'Subtract' : 'Add'} ${Math.abs(b)} from both sides.`,
+                            hint: `We want to eliminate the ${b >= 0 ? '+' : ''} ${b} on the right side. ${b >= 0 ? 'Subtract' : 'Add'} ${Math.abs(b)} ${b >= 0 ? 'from' : 'to'} both sides.`,
                             resultEquation: `${c} ${b >= 0 ? '-' : '+'} ${Math.abs(b)} = ${a}x`,
                         },
                         {
@@ -730,14 +946,16 @@
                     let b = Math.floor(Math.random() * 15) - 7;
                     if (b === 0) b = 3;
                     const x = Math.floor(Math.random() * 10) - 5;
-                    
+
                     const coefDiff = Math.floor(Math.random() * 4) + 2;
                     const c_coef = Math.max(1, a - coefDiff);
-                    const d_value = a * x + b - c_coef * x;
-                    
+                    let d_value = a * x + b - c_coef * x;
+                    // never print "= 3x + 0": nudge b away from zero and recompute
+                    if (d_value === 0) { b = b + (b > 0 ? 1 : -1); d_value = a * x + b - c_coef * x; }
+
                     equation = `${a}x ${b >= 0 ? '+' : ''} ${b} = ${c_coef}x ${d_value >= 0 ? '+' : ''} ${d_value}`;
                     answer = x;
-                    
+
                     scaffoldSteps = [
                         {
                             question: `First, let's get all x terms on one side. We'll subtract ${c_coef}x from both sides. What number should we subtract?`,
@@ -789,24 +1007,24 @@
                     let inner_const = Math.floor(Math.random() * 11) - 5;
                     if (inner_const === 0) inner_const = 3;
                     const result = outer * (inner_coef * x + inner_const);
-                    
+
                     equation = `${outer}(${inner_coef}x ${inner_const >= 0 ? '+' : ''} ${inner_const}) = ${result}`;
                     answer = x;
-                    
+
                     const distributed_coef = outer * inner_coef;
                     const distributed_const = outer * inner_const;
-                    
+
                     scaffoldSteps = [
                         {
-                            question: `First, we need to distribute (multiply) ${outer} to both terms inside the parentheses. What is ${outer} * ${inner_coef}?`,
-                            prompt: `${outer} * ${inner_coef} = _____`,
+                            question: `First, we need to distribute (multiply) ${outer} to both terms inside the parentheses. What is ${outer} x ${inner_coef}?`,
+                            prompt: `${outer} x ${inner_coef} = _____`,
                             correctAnswer: distributed_coef,
                             hint: `Multiply ${outer} times ${inner_coef} to get ${distributed_coef}`,
-                            resultEquation: `${distributed_coef}x + (${outer} * ${inner_const}) = ${result}`,
+                            resultEquation: `${distributed_coef}x + (${outer} x ${inner_const}) = ${result}`,
                         },
                         {
-                            question: `Now what is ${outer} * ${inner_const}?`,
-                            prompt: `${outer} * ${inner_const} = _____`,
+                            question: `Now what is ${outer} x ${inner_const}?`,
+                            prompt: `${outer} x ${inner_const} = _____`,
                             correctAnswer: distributed_const,
                             hint: `Multiply ${outer} times ${inner_const} to get ${distributed_const}`,
                             resultEquation: `${distributed_coef}x ${distributed_const >= 0 ? '+' : ''} ${distributed_const} = ${result}`,
@@ -815,7 +1033,7 @@
                             question: `Now we have a simpler equation. What should we ${distributed_const >= 0 ? 'subtract' : 'add'} ${distributed_const >= 0 ? 'from' : 'to'} both sides?`,
                             prompt: `${distributed_const >= 0 ? 'Subtract' : 'Add'} _____ ${distributed_const >= 0 ? 'from' : 'to'} both sides`,
                             correctAnswer: Math.abs(distributed_const),
-                            hint: `We want to eliminate the ${distributed_const >= 0 ? '+' : ''} ${distributed_const}. ${distributed_const >= 0 ? 'Subtract' : 'Add'} ${Math.abs(distributed_const)} from both sides.`,
+                            hint: `We want to eliminate the ${distributed_const >= 0 ? '+' : ''} ${distributed_const}. ${distributed_const >= 0 ? 'Subtract' : 'Add'} ${Math.abs(distributed_const)} ${distributed_const >= 0 ? 'from' : 'to'} both sides.`,
                             resultEquation: `${distributed_coef}x = ${result} ${distributed_const >= 0 ? '-' : '+'} ${Math.abs(distributed_const)}`,
                         },
                         {
@@ -876,32 +1094,32 @@
                     const right_distributed_const = right_mult * right_inner_const;
                     equation = `${left_outside}x + ${left_mult}(${left_inner_coef}x ${left_inner_const >= 0 ? '+' : ''} ${left_inner_const}) = ${right_mult}(${right_inner_coef}x ${right_inner_const >= 0 ? '+' : ''} ${right_inner_const}) + ${right_outside}x`;
                     answer = x;
-                    
+
                     scaffoldSteps = [
                         {
-                            question: `Let's start with the LEFT side. Distribute ${left_mult} to the first term. What is ${left_mult} * ${left_inner_coef}?`,
-                            prompt: `${left_mult} * ${left_inner_coef} = _____`,
+                            question: `Let's start with the LEFT side. Distribute ${left_mult} to the first term. What is ${left_mult} x ${left_inner_coef}?`,
+                            prompt: `${left_mult} x ${left_inner_coef} = _____`,
                             correctAnswer: left_distributed_coef,
                             hint: `Multiply ${left_mult} times ${left_inner_coef} to get ${left_distributed_coef}`,
                             resultEquation: `${left_outside}x + ${left_distributed_coef}x + ... = ${right_mult}(${right_inner_coef}x ${right_inner_const >= 0 ? '+' : ''} ${right_inner_const}) + ${right_outside}x`,
                         },
                         {
-                            question: `Still on the LEFT side, what is ${left_mult} * ${left_inner_const}?`,
-                            prompt: `${left_mult} * ${left_inner_const} = _____`,
+                            question: `Still on the LEFT side, what is ${left_mult} x ${left_inner_const}?`,
+                            prompt: `${left_mult} x ${left_inner_const} = _____`,
                             correctAnswer: left_distributed_const,
                             hint: `Multiply ${left_mult} times ${left_inner_const} to get ${left_distributed_const}`,
                             resultEquation: `${left_outside}x + ${left_distributed_coef}x ${left_distributed_const >= 0 ? '+' : ''} ${left_distributed_const} = ${right_mult}(${right_inner_coef}x ${right_inner_const >= 0 ? '+' : ''} ${right_inner_const}) + ${right_outside}x`,
                         },
                         {
-                            question: `Now the RIGHT side! Distribute ${right_mult} to the first term. What is ${right_mult} * ${right_inner_coef}?`,
-                            prompt: `${right_mult} * ${right_inner_coef} = _____`,
+                            question: `Now the RIGHT side! Distribute ${right_mult} to the first term. What is ${right_mult} x ${right_inner_coef}?`,
+                            prompt: `${right_mult} x ${right_inner_coef} = _____`,
                             correctAnswer: right_distributed_coef,
                             hint: `Multiply ${right_mult} times ${right_inner_coef} to get ${right_distributed_coef}`,
                             resultEquation: `${left_outside}x + ${left_distributed_coef}x ${left_distributed_const >= 0 ? '+' : ''} ${left_distributed_const} = ${right_distributed_coef}x + ... + ${right_outside}x`,
                         },
                         {
-                            question: `Still on the RIGHT side, what is ${right_mult} * ${right_inner_const}?`,
-                            prompt: `${right_mult} * ${right_inner_const} = _____`,
+                            question: `Still on the RIGHT side, what is ${right_mult} x ${right_inner_const}?`,
+                            prompt: `${right_mult} x ${right_inner_const} = _____`,
                             correctAnswer: right_distributed_const,
                             hint: `Multiply ${right_mult} times ${right_inner_const} to get ${right_distributed_const}`,
                             resultEquation: `${left_outside}x + ${left_distributed_coef}x ${left_distributed_const >= 0 ? '+' : ''} ${left_distributed_const} = ${right_distributed_coef}x ${right_distributed_const >= 0 ? '+' : ''} ${right_distributed_const} + ${right_outside}x`,
@@ -964,14 +1182,14 @@
                         }
                     ];
                 }
-                
+
             } else if (level === 1) {
                 const a = Math.floor(Math.random() * 9) + 2;
                 let b = Math.floor(Math.random() * 21) - 10;
                 if (b === 0) b = 3;
                 const x = Math.floor(Math.random() * 15) - 7;
                 const c = a * x + b;
-                
+
                 equation = `${a}x ${b >= 0 ? '+' : ''} ${b} = ${c}`;
                 answer = x;
                 solutionSteps = [
@@ -980,10 +1198,11 @@
                 ];
             } else if (level === 2) {
                 // Level 2 - Start introducing fractions after 5 integer problems
-                if (problemCount >= 5 && !allowFractions) {
+                // (counted within this level, not across the whole session)
+                if (levelProblemCount >= 5 && !allowFractions) {
                     allowFractions = true;
                 }
-                
+
                 if (allowFractions && Math.random() < 0.3) {
                     // Fraction answer problem
                     const a = Math.floor(Math.random() * 8) + 2;
@@ -991,7 +1210,7 @@
                     if (b === 0) b = 3;
                     const numerator = Math.floor(Math.random() * 20) - 10;
                     const c = numerator + b;
-                    
+
                     equation = `${a}x ${b >= 0 ? '+' : ''} ${b} = ${c}`;
                     answer = numerator / a;
                     solutionSteps = [
@@ -1004,9 +1223,12 @@
                     const a = Math.floor(Math.random() * 8) + 2;
                     let c = Math.floor(Math.random() * 7) + 1;
                     if (a === c) c = c + 1;
-                    const b = Math.floor(Math.random() * 21) - 10;
-                    const d = (a - c) * x + b;
-                    
+                    let b = Math.floor(Math.random() * 21) - 10;
+                    if (b === 0) b = 4;                       // never print "+ 0"
+                    let d = (a - c) * x + b;
+                    // nudge b AWAY from zero so neither b nor d lands on 0
+                    if (d === 0) { b = b + (b > 0 ? 1 : -1); d = (a - c) * x + b; }
+
                     equation = `${a}x ${b >= 0 ? '+' : ''} ${b} = ${c}x ${d >= 0 ? '+' : ''} ${d}`;
                     answer = x;
                     solutionSteps = [
@@ -1017,18 +1239,22 @@
                 }
             } else if (level === 3) {
                 // Level 3 - three types: single distribution, double parentheses, x on both sides
-                if (problemCount >= 3 && !allowFractions) {
+                if (levelProblemCount >= 3 && !allowFractions) {
                     allowFractions = true;
                 }
-                
+
                 var l3type = Math.random();
                 if (l3type < 0.34) {
                     // Type A: single distribution a(bx + c) = d
                     if (allowFractions && Math.random() < 0.4) {
                         const a = 2 + Math.floor(Math.random() * 3);
                         const b = 1 + Math.floor(Math.random() * 4);
-                        const c = Math.floor(Math.random() * 11) - 5;
-                        const numerator = Math.floor(Math.random() * 15) - 7;
+                        let c = Math.floor(Math.random() * 11) - 5;
+                        if (c === 0) c = 2;                   // never print "(bx + 0)"
+                        let numerator = Math.floor(Math.random() * 15) - 7;
+                        if (numerator === 0) numerator = 5;   // keep the answer a real fraction
+                        // d must stay an exact integer: a*(b*(n/(a*b)) + c) === n + a*c.
+                        // Computing it the long way lands on 6.999999999999999 etc.
                         const d = numerator + a * c;
                         equation = `${a}(${b}x ${c >= 0 ? '+' : ''} ${c}) = ${d}`;
                         answer = numerator / (a * b);
@@ -1041,7 +1267,8 @@
                         const x = Math.floor(Math.random() * 10) - 5;
                         const a = 2 + Math.floor(Math.random() * 3);
                         const b = 1 + Math.floor(Math.random() * 4);
-                        const c = Math.floor(Math.random() * 11) - 5;
+                        let c = Math.floor(Math.random() * 11) - 5;
+                        if (c === 0) c = 2;                   // never print "(bx + 0)"
                         const d = a * (b * x + c);
                         equation = `${a}(${b}x ${c >= 0 ? '+' : ''} ${c}) = ${d}`;
                         answer = x;
@@ -1118,8 +1345,7 @@
 
             equation = cleanCoef(equation);
             if (solutionSteps) {
-                solutionSteps = solutionSteps.map(cleanCoef)
-                    .filter(function(s) { return !/Divide both sides by 1:/.test(s); });
+                solutionSteps = solutionSteps.map(cleanCoef);
             }
             if (scaffoldSteps) {
                 scaffoldSteps = scaffoldSteps.map(function(s) {
@@ -1133,51 +1359,53 @@
                 });
             }
             currentProblem = { equation, answer, scaffoldSteps, problemType, solutionSteps: solutionSteps, isFraction: !Number.isInteger(answer) };
-            
+
             if (level === 0) {
                 renderScaffoldStep();
             } else {
                 renderNormalProblem();
             }
-            
+
             document.getElementById('feedback').textContent = '';
             document.getElementById('hint').style.display = 'none';
             document.getElementById('answer-box').style.display = 'none';
             document.getElementById('solution-box').style.display = 'none';
             solutionRevealed = 0;
+            revealCharged = false;
         }
 
         function showCompletionMessage() {
             const mainContent = document.getElementById('main-content');
             mainContent.innerHTML = `
                 <div style="text-align: center; padding: 40px 20px;">
-                    <div style="font-size: 40px; font-weight: bold; color: #10b981; margin-bottom: 20px;">DONE!</div>
-                    <div style="font-size: 32px; font-weight: bold; color: #10b981; margin-bottom: 15px;">
+                    <div style="font-size: 40px; font-weight: bold; color: #059669; margin-bottom: 20px;">DONE!</div>
+                    <div style="font-size: 32px; font-weight: bold; color: #059669; margin-bottom: 15px;">
                         Level 0 Complete!
                     </div>
-                    <div style="font-size: 20px; color: #059669; margin-bottom: 30px;">
+                    <div style="font-size: 20px; color: #047857; margin-bottom: 30px;">
                         You've mastered all five types of problems!
                     </div>
-                    <button class="submit-btn" onclick="setLevel(1)" style="font-size: 20px; padding: 15px 40px;">
-                        Continue to Level 1 
+                    <button type="button" class="submit-btn" onclick="setLevel(1)" style="font-size: 20px; padding: 15px 40px;">
+                        Continue to Level 1
                     </button>
                 </div>
             `;
             document.getElementById('helper-buttons').style.display = 'none';
             document.getElementById('progress-display').innerHTML = renderProgressCups();
+            announce('Level 0 complete. You have mastered all five types of problems. Choose Continue to Level 1.');
         }
 
         function showCelebration() {
             const mainContent = document.getElementById('main-content');
             const feedback = document.getElementById('feedback');
-            
+
             const encouragements = [
                 "Excellent work!", "You're doing great!", "Perfect!", "Outstanding!",
                 "Fantastic job!", "You've got this!", "Way to go!", "Brilliant!", "Superb!", "Amazing!"
             ];
-            
+
             const randomEncouragement = encouragements[Math.floor(Math.random() * encouragements.length)];
-            
+
             let progressMessage = '';
             const pType = currentProblem.problemType;
             if (pType && typeProgress[pType].completed === typeProgress[pType].required) {
@@ -1227,14 +1455,14 @@
                     `;
                 }
             }
-            
+
             const backButton = problemHistory.length > 0 ? `
-                <button onclick="goToPreviousProblem()" 
+                <button type="button" onclick="goToPreviousProblem()"
                         style="background: #4a5480; color: white; padding: 12px 30px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; margin-right: 10px;">
                      Go Back
                 </button>
             ` : '';
-            
+
             mainContent.innerHTML = `
                 <div style="text-align: center; padding: 40px 20px;">
                     <div style="font-size: 36px; color: #059669; margin-bottom: 20px;">CORRECT!</div>
@@ -1242,58 +1470,79 @@
                         Problem Complete!
                     </div>
                     <div style="font-size: 24px; color: #059669; margin-bottom: 30px;">
-                        ${randomEncouragement}
+                        ${esc(randomEncouragement)}
                     </div>
                     ${progressMessage}
-                    <div style="font-size: 18px; color: #6a74a8; margin-bottom: 30px;">
-                        You solved: <span style="font-family: monospace; font-weight: bold;">${currentProblem.equation}</span>
+                    <div style="font-size: 18px; color: #5d6798; margin-bottom: 30px;">
+                        You solved: <span style="font-family: monospace; font-weight: bold;" aria-hidden="true">${mathHTML(currentProblem.equation)}</span><span class="sr-only">${esc(speakMath(currentProblem.equation))}</span>
                     </div>
                     <div>
                         ${backButton}
-                        <button class="submit-btn" onclick="nextProblem()" style="font-size: 20px; padding: 15px 40px;">
-                            Next Problem 
+                        <button type="button" class="submit-btn" onclick="nextProblem()" style="font-size: 20px; padding: 15px 40px;">
+                            Next Problem
                         </button>
                     </div>
                 </div>
             `;
-            
+
             feedback.textContent = '';
             document.getElementById('helper-buttons').style.display = 'none';
             document.getElementById('progress-display').innerHTML = renderProgressCups();
+            announce('Correct. Problem complete. ' + randomEncouragement
+                + ' You solved ' + speakMath(currentProblem.equation)
+                + '. Choose Next Problem to continue.');
         }
-        
+
         function nextProblem() {
+            genToken++;
             problemCount++;
+            levelProblemCount++;
             updateDisplay();
             generateProblem();
         }
-        
+
+        // "Skip" on levels 1-3: advance the problem counter and end the streak,
+        // so a skipped problem can never be counted toward "10 in a row".
+        function skipCurrentProblem() {
+            genToken++;
+            streak = 0;
+            stopTimer();
+            problemCount++;
+            levelProblemCount++;
+            updateDisplay();
+            generateProblem();
+        }
+
         function goToPreviousProblem() {
             if (problemHistory.length === 0) return;
-            
+            genToken++;
+
             const prevProblem = problemHistory.pop();
             currentProblem = prevProblem;
             scaffoldStep = 0;
             scaffoldAnswers = [];
-            
+
             if (prevProblem.problemType) {
                 if (prevProblem.wasCorrect) {
                     typeProgress[prevProblem.problemType].completed--;
                     typeProgress[prevProblem.problemType].perfectStreak = Math.max(0, typeProgress[prevProblem.problemType].perfectStreak - 1);
                 }
-                typeProgress[prevProblem.problemType].shown--;
+                typeProgress[prevProblem.problemType].shown = Math.max(0, typeProgress[prevProblem.problemType].shown - 1);
             }
-            
-            problemCount--;
+
+            problemCount = Math.max(0, problemCount - 1);
+            levelProblemCount = Math.max(0, levelProblemCount - 1);
             renderScaffoldStep();
             updateDisplay();
         }
-        
+
         function skipToNextProblem() {
+            genToken++;
             if (currentProblem) {
                 problemHistory.push({...currentProblem, wasCorrect: false, wasSkipped: true});
             }
             problemCount++;
+            levelProblemCount++;
             updateDisplay();
             generateProblem();
         }
@@ -1302,145 +1551,179 @@
             stepAttempts = 0;
             const step = currentProblem.scaffoldSteps[scaffoldStep];
             const mainContent = document.getElementById('main-content');
-            
+
             let completedStepsHTML = '';
             if (scaffoldStep > 0) {
                 const lastStep = currentProblem.scaffoldSteps[scaffoldStep - 1];
                 completedStepsHTML = `
                     <div class="completed-steps">
-                        <div style="font-size: 14px; color: #059669; margin-bottom: 8px; font-weight: bold;"> CORRECT  Last Completed Step:</div>
-                        <div style="font-size: 22px; font-weight: bold; font-family: monospace; text-align: center;">
-                            ${lastStep.resultEquation}
+                        <div style="font-size: 14px; color: #047857; margin-bottom: 8px; font-weight: bold;"> CORRECT  Last Completed Step:</div>
+                        <div style="font-size: 22px; font-weight: bold; font-family: monospace; text-align: center;" aria-hidden="true">
+                            ${mathHTML(lastStep.resultEquation)}
                         </div>
+                        <div class="sr-only">Last completed step: ${esc(speakMath(lastStep.resultEquation))}</div>
                     </div>
                 `;
             }
-            
+
             mainContent.innerHTML = `
                 <div class="scaffold-container">
                     <div class="original-equation">
-                        <div style="font-size: 14px; color: #6a74a8; margin-bottom: 5px;">Original Equation:</div>
-                        <div style="font-size: 20px; font-weight: bold; font-family: monospace; word-wrap: break-word;">${currentProblem.equation}</div>
+                        <div style="font-size: 14px; color: #5d6798; margin-bottom: 5px;">Original Equation:</div>
+                        <div style="font-size: 20px; font-weight: bold; font-family: monospace; word-wrap: break-word;" aria-hidden="true">${mathHTML(currentProblem.equation)}</div>
+                        <div class="sr-only">${esc(speakMath(currentProblem.equation))}</div>
                     </div>
-                    
+
                     ${completedStepsHTML}
-                    
+
                     <div class="step-prompt">
                         <div class="step-title">Step ${scaffoldStep + 1} of ${currentProblem.scaffoldSteps.length}</div>
-                        <div class="step-question">${step.question}</div>
+                        <div class="step-question">${esc(step.question)}</div>
                         <div style="text-align: center; margin: 20px 0;">
-                            <div style="font-size: 20px; font-weight: bold; margin-bottom: 15px;">${step.prompt}</div>
+                            <div style="font-size: 20px; font-weight: bold; margin-bottom: 15px;" aria-hidden="true">${mathHTML(step.prompt)}</div>
                             <div class="input-area">
-                                <input type="text" inputmode="decimal" autocomplete="off" id="answer" placeholder="?" 
-                                       onkeypress="if(event.key==='Enter') checkScaffoldAnswer()" 
+                                <label class="sr-only" for="answer">Step ${scaffoldStep + 1}: ${esc(speakMath(step.prompt))}. Enter a number.</label>
+                                <input type="text" inputmode="decimal" autocomplete="off" id="answer" placeholder="?"
+                                       onkeypress="if(event.key==='Enter') checkScaffoldAnswer()"
                                        style="width: 100px;">
-                                <button class="key-btn" onclick="toggleSign()">+/-</button>
-                                <button class="submit-btn" onclick="checkScaffoldAnswer()">Submit</button>
+                                <button type="button" class="key-btn" onclick="toggleSign()" aria-label="Change the sign of your answer">+/-</button>
+                                <button type="button" class="submit-btn" onclick="checkScaffoldAnswer()">Submit</button>
                             </div>
                         </div>
                         <div id="step-hint" style="display: none;" class="step-hint"></div>
                     </div>
                 </div>
             `;
-            
+
             document.getElementById('helper-buttons').style.display = 'none';
-            
+
             const navButtonsHTML = `
                 <div style="text-align: center; margin-top: 20px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
                     ${problemHistory.length > 0 ? `
-                        <button onclick="goToPreviousProblem()" 
+                        <button type="button" onclick="goToPreviousProblem()"
                                 style="background: #4a5480; color: white; padding: 10px 30px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; transition: all 0.3s;"
-                                onmouseover="this.style.background='#3c4569'" 
+                                onmouseover="this.style.background='#3c4569'"
                                 onmouseout="this.style.background='#4a5480'">
                              Previous Problem
                         </button>
                     ` : ''}
-                    <button onclick="skipToNextProblem()" 
+                    <button type="button" onclick="skipToNextProblem()"
                             style="background: #4a5480; color: white; padding: 10px 30px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; transition: all 0.3s;"
-                            onmouseover="this.style.background='#3c4569'" 
+                            onmouseover="this.style.background='#3c4569'"
                             onmouseout="this.style.background='#4a5480'">
-                        Skip to Next Problem 
+                        Skip to Next Problem
                     </button>
                 </div>
             `;
             mainContent.innerHTML += navButtonsHTML;
-            
+
             document.getElementById('progress-display').innerHTML = renderProgressCups();
-            
-            setTimeout(() => document.getElementById('answer').focus(), 100);
+
+            setTimeout(() => { var el = document.getElementById('answer'); if (el) el.focus(); }, 100);
+            announce('Step ' + (scaffoldStep + 1) + ' of ' + currentProblem.scaffoldSteps.length
+                + '. Original equation: ' + speakMath(currentProblem.equation)
+                + '. ' + step.question + ' ' + speakMath(step.prompt));
         }
 
         function renderNormalProblem() {
             const mainContent = document.getElementById('main-content');
-            
+
             const fractionNote = currentProblem.isFraction ? `
                 <div class="fraction-note">
-                     This problem may have a fraction answer. Enter as a decimal (e.g., 0.5 for 1/2) or fraction (e.g., 1/2)
+                    <strong>Heads up:</strong> this one may have a fraction answer.
+                    Type it as a decimal, like <code>0.5</code>, or with a slash,
+                    like <code>1/2</code>. The <code>/</code> key below types the slash.
                 </div>
             ` : '';
-            
+
             mainContent.innerHTML = `
                 ${fractionNote}
-                <div class="equation" id="equation">${currentProblem.equation}</div>
-                <p style="text-align: center; color: #6a74a8;">Solve for x</p>
+                <div class="equation" id="equation" aria-hidden="true">${mathHTML(currentProblem.equation)}</div>
+                <p style="text-align: center; color: #5d6798;">Solve for x</p>
                 <div class="input-area">
-                    <span style="font-size: 24px; font-weight: bold;">x =</span>
+                    <span style="font-size: 24px; font-weight: bold;" aria-hidden="true">x =</span>
+                    <label class="sr-only" for="answer">Solve for x. ${esc(speakMath(currentProblem.equation))}. Enter the value of x${currentProblem.isFraction ? ' as a decimal or a fraction such as 1 slash 2' : ''}.</label>
                     <input type="text" inputmode="decimal" autocomplete="off" id="answer" placeholder="?" onkeypress="if(event.key==='Enter') checkAnswer()">
-                    <button class="key-btn" onclick="toggleSign()">+/-</button>
-                    <button class="key-btn" onclick="insertSlash()">/</button>
-                    <button class="submit-btn" onclick="checkAnswer()">Submit</button>
+                    <button type="button" class="key-btn" onclick="toggleSign()" aria-label="Change the sign of your answer">+/-</button>
+                    <button type="button" class="key-btn" onclick="insertSlash()" aria-label="Insert a fraction slash">/</button>
+                    <button type="button" class="submit-btn" onclick="checkAnswer()">Submit</button>
                 </div>
             `;
-            
+
             document.getElementById('helper-buttons').style.display = 'block';
             document.getElementById('progress-display').innerHTML = '';
-            
-            setTimeout(() => document.getElementById('answer').focus(), 100);
+
+            setTimeout(() => { var el = document.getElementById('answer'); if (el) el.focus(); }, 100);
+            announce('Problem ' + (problemCount + 1) + '. Solve for x. '
+                + speakMath(currentProblem.equation) + '.'
+                + (currentProblem.isFraction ? ' This one may have a fraction answer.' : ''));
         }
 
         function checkScaffoldAnswer() {
-            const userAnswer = document.getElementById('answer').value;
+            const inputEl = document.getElementById('answer');
+            if (!inputEl || !currentProblem || !currentProblem.scaffoldSteps) return;
+            const userAnswer = inputEl.value.trim();
             if (userAnswer === '') return;
-            
+
             // Check if user entered something with 'x' in it
             if (userAnswer.toLowerCase().includes('x')) {
                 const feedback = document.getElementById('feedback');
                 feedback.textContent = ' Just enter the number, not "x". For example, enter "5" instead of "5x"';
                 feedback.className = 'feedback incorrect';
-                document.getElementById('answer').value = '';
+                inputEl.value = '';
                 return;
             }
-            
+
             const step = currentProblem.scaffoldSteps[scaffoldStep];
             const userNum = parseFloat(userAnswer);
-            const correct = userNum === step.correctAnswer;
+            // Non-numeric input is a typing slip, not a wrong answer - do not
+            // charge the student an error for it.
+            if (isNaN(userNum) || !isFinite(userNum)) {
+                const fb0 = document.getElementById('feedback');
+                fb0.textContent = ' Please enter a number.';
+                fb0.className = 'feedback incorrect';
+                inputEl.value = '';
+                return;
+            }
+            const correct = Math.abs(userNum - step.correctAnswer) < 1e-9;
             const feedback = document.getElementById('feedback');
-            
+
             if (correct) {
                 scaffoldAnswers.push(userNum);
                 feedback.textContent = 'Correct!';
                 feedback.className = 'feedback correct';
-                
+
                 if (scaffoldStep < currentProblem.scaffoldSteps.length - 1) {
+                    // >= 1100ms so the "Correct!" announcement finishes first;
+                    // the token check keeps a stale timer from clobbering a new
+                    // problem if the student switches level mid-delay.
+                    var tok = currentToken();
                     setTimeout(() => {
+                        if (tok !== currentToken()) return;
+                        if (!currentProblem || !currentProblem.scaffoldSteps) return;
                         scaffoldStep++;
                         renderScaffoldStep();
                         feedback.textContent = '';
-                    }, 1000);
+                    }, 1200);
                 } else {
                     // Problem complete!
                     const problemType = currentProblem.problemType;
                     typeProgress[problemType].completed++;
                     typeProgress[problemType].perfectStreak++;
-                    
+
                     problemHistory.push({...currentProblem, wasCorrect: true});
-                    
-                    streak++;
+
+                    // Same rule as the practice levels: a problem whose answer
+                    // was shown is not a clean solve, so it neither counts as
+                    // done nor extends the streak.
+                    if (!revealCharged) {
+                        streak++;
+                        gameStats.l0done = safeInt(gameStats.l0done + 1, STAT_MAX);
+                        if (streak > gameStats.bestStreak) gameStats.bestStreak = streak;
+                        saveStats();
+                        celebrateStreak(streak);
+                    }
                     updateDisplay();
-                    gameStats.l0done++;
-                    if (streak > gameStats.bestStreak) gameStats.bestStreak = streak;
-                    saveStats();
-                    celebrateStreak(streak);
                     showCelebration();
                 }
             } else {
@@ -1448,36 +1731,30 @@
                 typeProgress[problemType].errors++;
                 typeProgress[problemType].required += 2;
                 typeProgress[problemType].perfectStreak = 0;
-                
+
                 stepAttempts++;
-                gameStats.l0errors++;
+                gameStats.l0errors = safeInt(gameStats.l0errors + 1, STAT_MAX);
                 saveStats();
                 feedback.textContent = stepAttempts >= 2 ? ' Not quite. Check the hint below!' : ' Not quite. Try again!';
                 feedback.className = 'feedback incorrect';
-                
+
+                // Pedagogy rule: the answer-revealing hint appears only after the
+                // SECOND wrong attempt on this step.
                 if (stepAttempts >= 2) {
                     const hintDiv = document.getElementById('step-hint');
-                    hintDiv.innerHTML = `<strong>Hint:</strong> ${step.hint}`;
+                    hintDiv.innerHTML = '<strong>Hint:</strong> ' + mathHTML(step.hint);
                     hintDiv.style.display = 'block';
+                    announce('Hint: ' + step.hint);
                 }
-                
+
                 updateDisplay();
                 document.getElementById('progress-display').innerHTML = renderProgressCups();
             }
         }
 
         function cleanCoef(s) {
-            var t = String(s);
             // "1x" -> "x" and "-1x" -> "-x", without touching "21x", "13x", etc.
-            t = t.replace(/\b1x/g, 'x');
-            // Drop meaningless "+ 0" / "- 0" terms (but never touch "= 0", "+ 10", "-20")
-            t = t.replace(/\s*\+\s*0(?![\d.])/g, '');
-            t = t.replace(/\s*-\s*0(?![\d.])/g, '');
-            // "2x  -7" -> "2x - 7" (proper spacing after a term)
-            t = t.replace(/([\dx)])\s+-(\d)/g, '$1 - $2');
-            // Collapse any remaining double spaces
-            t = t.replace(/ {2,}/g, ' ');
-            return t;
+            return String(s).replace(/\b1x/g, 'x');
         }
 
         function gcd(a, b) {
@@ -1516,50 +1793,73 @@
         }
 
         function checkAnswer() {
-            const userAnswer = document.getElementById('answer').value;
+            const inputEl = document.getElementById('answer');
+            if (!inputEl || !currentProblem) return;
+            const userAnswer = inputEl.value.trim();
             if (userAnswer === '') return;
-            
+
             // Check if user entered something with 'x' in it
             if (userAnswer.toLowerCase().includes('x')) {
                 const feedback = document.getElementById('feedback');
                 feedback.textContent = ' Just enter the number, not "x". For example, enter "5" instead of "5x"';
                 feedback.className = 'feedback incorrect';
-                document.getElementById('answer').value = '';
+                inputEl.value = '';
                 return;
             }
-            
+
             const userNum = parseFraction(userAnswer);
+            // Garbled input is a typing slip, not a wrong answer: do not break
+            // the streak or record it against the student.
+            if (isNaN(userNum) || !isFinite(userNum)) {
+                const fb0 = document.getElementById('feedback');
+                fb0.textContent = ' Please enter a number, for example 3, -2, 0.5 or 1/2.';
+                fb0.className = 'feedback incorrect';
+                inputEl.value = '';
+                return;
+            }
             const correct = Math.abs(userNum - currentProblem.answer) < 0.001;
             const feedback = document.getElementById('feedback');
-            
+
             if (correct) {
-                streak++;
+                // A revealed problem was already booked by chargeReveal(): it
+                // must not earn the "right" tally and must not extend the streak.
+                if (!revealCharged) {
+                    streak++;
+                    gameStats.byLevel[level].right = safeInt(gameStats.byLevel[level].right + 1, STAT_MAX);
+                    if (streak > gameStats.bestStreak) gameStats.bestStreak = streak;
+                    saveStats();
+                }
                 updateDisplay();
-                gameStats.byLevel[level].right++;
-                if (streak > gameStats.bestStreak) gameStats.bestStreak = streak;
-                saveStats();
-                
+
                 if (streak === 1 && !isTimerRunning) {
                     startTimer();
                 }
-                
+
                 if (streak === 10) {
                     stopTimer();
                     celebrateStreak(10);
                     feedback.textContent = '10 IN A ROW! AMAZING! Time: ' + formatTime(timer);
                     feedback.className = 'feedback victory';
+                    var tok10 = currentToken();
                     setTimeout(function() {
+                        if (tok10 !== currentToken()) return;
                         streak = 0;
                         problemCount++;
+                        levelProblemCount++;
                         updateDisplay();
                         generateProblem();
                     }, 4000);
                 } else {
-                    celebrateStreak(streak);
-                    feedback.textContent = 'Correct!';
+                    if (!revealCharged) celebrateStreak(streak);
+                    feedback.textContent = revealCharged
+                        ? 'Correct - but the answer was shown, so this one does not count.'
+                        : 'Correct!';
                     feedback.className = 'feedback correct';
+                    var tok = currentToken();
                     setTimeout(() => {
+                        if (tok !== currentToken()) return;
                         problemCount++;
+                        levelProblemCount++;
                         updateDisplay();
                         generateProblem();
                     }, 1500);
@@ -1568,7 +1868,7 @@
                 streak = 0;
                 stopTimer();
                 updateDisplay();
-                gameStats.byLevel[level].wrong++;
+                gameStats.byLevel[level].wrong = safeInt(gameStats.byLevel[level].wrong + 1, STAT_MAX);
                 saveStats();
                 feedback.textContent = ' Not quite right. Try again!';
                 feedback.className = 'feedback incorrect';
@@ -1583,6 +1883,8 @@
             confettiEnabled = !confettiEnabled;
             try { localStorage.setItem('linear-eq-solver-confetti', confettiEnabled ? '1' : '0'); } catch (e) {}
             document.getElementById('confetti-track').classList.toggle('on', confettiEnabled);
+            document.getElementById('confetti-toggle').setAttribute('aria-pressed', confettiEnabled ? 'true' : 'false');
+            announce(confettiEnabled ? 'Confetti on.' : 'Confetti off.');
             if (confettiEnabled) createConfetti(40, 1);
         }
 
@@ -1596,13 +1898,28 @@
             };
         }
 
+        // A student can edit localStorage from devtools, so nothing that comes
+        // back from it is trusted: every field is rebuilt from scratch as a
+        // bounded non-negative integer before it is ever used or displayed.
+        function sanitizeStats(raw) {
+            var out = freshStats();
+            if (!raw || typeof raw !== 'object') return out;
+            out.l0done = safeInt(raw.l0done, STAT_MAX);
+            out.l0errors = safeInt(raw.l0errors, STAT_MAX);
+            out.bestStreak = safeInt(raw.bestStreak, 10000);
+            var src = (raw.byLevel && typeof raw.byLevel === 'object') ? raw.byLevel : {};
+            for (var lv = 1; lv <= 3; lv++) {
+                var o = (src[lv] && typeof src[lv] === 'object') ? src[lv] : {};
+                out.byLevel[lv].right = safeInt(o.right, STAT_MAX);
+                out.byLevel[lv].wrong = safeInt(o.wrong, STAT_MAX);
+            }
+            return out;
+        }
+
         function loadStats() {
             try {
                 var s = localStorage.getItem(STATS_KEY);
-                if (s) {
-                    var parsed = JSON.parse(s);
-                    if (parsed && parsed.byLevel) return parsed;
-                }
+                if (s) return sanitizeStats(JSON.parse(s));
             } catch (e) {}
             return freshStats();
         }
@@ -1617,23 +1934,30 @@
                 resetArmed = false;
                 renderStats();
                 p.style.display = 'block';
+                p.setAttribute('role', 'region');
+                p.setAttribute('aria-label', 'My progress');
+                announce('My progress panel opened.');
             } else {
                 p.style.display = 'none';
+                announce('My progress panel closed.');
             }
         }
 
         function statsRow(label, value) {
             return '<div style="display: flex; justify-content: space-between; padding: 7px 2px; border-top: 1px dashed rgba(0,0,0,0.12);">'
-                 + '<span>' + label + '</span><span style="font-weight: bold; color: #1e2a5e;">' + value + '</span></div>';
+                 + '<span>' + esc(label) + '</span><span style="font-weight: bold; color: #1e2a5e;">' + esc(value) + '</span></div>';
         }
 
         function renderStats() {
             var p = document.getElementById('stats-panel');
+            gameStats = sanitizeStats(gameStats);   // never render un-vetted values
             var s = gameStats;
             function line(o) {
-                var t = o.right + o.wrong;
+                var right = safeInt(o.right, STAT_MAX), wrong = safeInt(o.wrong, STAT_MAX);
+                var t = right + wrong;
                 if (t === 0) return 'not tried yet';
-                return o.right + ' / ' + t + ' correct (' + Math.round(100 * o.right / t) + '%)';
+                if (right > t) right = t;           // correct can never exceed attempted
+                return right + ' / ' + t + ' correct (' + Math.round(100 * right / t) + '%)';
             }
             var html = '<div style="font-weight: bold; margin-bottom: 8px;">My Progress</div>';
             html += statsRow('Level 0 (Guided)', s.l0done === 0 ? 'not tried yet' : s.l0done + ' completed');
@@ -1642,7 +1966,7 @@
             html += statsRow('Level 3', line(s.byLevel[3]));
             html += statsRow('Best streak', s.bestStreak === 0 ? '-' : s.bestStreak + ' in a row');
             html += '<div style="text-align: center; margin-top: 12px;">'
-                  + '<button class="skip-btn" id="reset-stats-btn" onclick="resetStats()">Reset Stats</button></div>';
+                  + '<button type="button" class="skip-btn" id="reset-stats-btn" onclick="resetStats()">Reset Stats</button></div>';
             p.className = 'answer-box';
             p.innerHTML = html;
         }
@@ -1684,10 +2008,35 @@
             el.focus();
         }
 
+        /* Show Answer and Show Solution must cost the same as a wrong answer:
+           the problem is booked as attempted (it goes into the "wrong" column,
+           which is this game's denominator for a problem that was not solved
+           cleanly), it can no longer earn the "right" tally, and the streak
+           ends. Without this a student could reveal, type the answer back and
+           score a clean 1/1 with the streak intact. Show HINT stays free -- the
+           hints here list the steps to follow, never the value of x. */
+        function chargeReveal() {
+            if (!revealCharged) {
+                revealCharged = true;
+                if (level === 0) {
+                    gameStats.l0errors = safeInt(gameStats.l0errors + 1, STAT_MAX);
+                } else if (gameStats.byLevel[level]) {
+                    gameStats.byLevel[level].wrong = safeInt(gameStats.byLevel[level].wrong + 1, STAT_MAX);
+                }
+                saveStats();
+            }
+            streak = 0;
+            stopTimer();
+            updateDisplay();
+        }
+
         function toggleSolution() {
             var box = document.getElementById('solution-box');
             if (box.style.display === 'none') {
                 if (!currentProblem || !currentProblem.solutionSteps) return;
+                /* The walkthrough ends on "x = ...", so opening it is a reveal
+                   too -- same rule as the Answer button. */
+                chargeReveal();
                 solutionRevealed = 1;
                 renderSolutionBox();
             } else {
@@ -1707,26 +2056,31 @@
             var shown = Math.min(solutionRevealed, total);
             var html = '<div style="font-weight: bold; margin-bottom: 8px;">Step-by-Step Solution (' + shown + ' of ' + total + ')</div>';
             html += '<div style="font-size: 13px;">Start with:</div>';
-            html += '<div style="font-family: monospace; font-weight: bold; font-size: 17px; margin: 4px 0 10px 22px; color: #1e2a5e;">' + currentProblem.equation + '</div>';
+            html += '<div style="font-family: monospace; font-weight: bold; font-size: 17px; margin: 4px 0 10px 22px; color: #1e2a5e;" aria-hidden="true">' + mathHTML(currentProblem.equation) + '</div>';
+            html += '<div class="sr-only">' + esc(speakMath(currentProblem.equation)) + '</div>';
+            var lastSpoken = '';
             for (var i = 0; i < shown; i++) {
                 var parts = steps[i].split(':  ');
                 var stepLabel = parts[0];
                 var stepEq = parts.length > 1 ? parts.slice(1).join(':  ') : '';
                 html += '<div style="padding: 8px 0 4px; border-top: 1px dashed rgba(0,0,0,0.15);">';
-                html += '<div><b>' + (i + 1) + '.</b> ' + stepLabel + (stepEq ? ':' : '') + '</div>';
+                html += '<div><b>' + (i + 1) + '.</b> ' + esc(stepLabel) + (stepEq ? ':' : '') + '</div>';
                 if (stepEq) {
-                    html += '<div style="font-family: monospace; font-weight: bold; font-size: 17px; margin: 5px 0 4px 22px; color: #1e2a5e;">' + stepEq + '</div>';
+                    html += '<div style="font-family: monospace; font-weight: bold; font-size: 17px; margin: 5px 0 4px 22px; color: #1e2a5e;" aria-hidden="true">' + mathHTML(stepEq) + '</div>';
+                    html += '<div class="sr-only">' + esc(speakMath(stepEq)) + '</div>';
                 }
                 html += '</div>';
+                lastSpoken = stepLabel + (stepEq ? '. ' + speakMath(stepEq) : '');
             }
             if (shown < total) {
-                html += '<div style="text-align: center; margin-top: 10px;"><button class="submit-btn" onclick="showNextSolutionStep()">Next Step</button></div>';
+                html += '<div style="text-align: center; margin-top: 10px;"><button type="button" class="submit-btn" onclick="showNextSolutionStep()">Next Step</button></div>';
             } else {
-                html += '<div style="text-align: center; margin-top: 10px; font-weight: bold; color: #059669;">That is the complete solution. Try the next one yourself!</div>';
+                html += '<div style="text-align: center; margin-top: 10px; font-weight: bold; color: #047857;">That is the complete solution. Try the next one yourself!</div>';
             }
             box.className = 'answer-box';
             box.style.display = 'block';
             box.innerHTML = html;
+            announce('Solution step ' + shown + ' of ' + total + '. ' + lastSpoken);
         }
 
         function toggleHint() {
@@ -1743,6 +2097,7 @@
                 }
                 hint.innerHTML = hintText;
                 hint.style.display = 'block';
+                announce(hint.textContent);
             } else {
                 hint.style.display = 'none';
             }
@@ -1751,13 +2106,16 @@
         function toggleAnswer() {
             const answerBox = document.getElementById('answer-box');
             if (answerBox.style.display === 'none') {
+                if (!currentProblem) return;
+                chargeReveal();
                 answerBox.className = 'answer-box';
-                let answerDisplay = currentProblem.answer;
+                let answerDisplay = String(currentProblem.answer);
                 if (currentProblem.isFraction) {
                     answerDisplay = `${formatFraction(currentProblem.answer)} (as a decimal: ${currentProblem.answer.toFixed(3)})`;
                 }
-                answerBox.innerHTML = `<strong>Answer:</strong> x = ${answerDisplay}`;
+                answerBox.innerHTML = `<strong>Answer:</strong> x = ${mathHTML(answerDisplay)}`;
                 answerBox.style.display = 'block';
+                announce('Answer: x equals ' + speakMath(answerDisplay));
             } else {
                 answerBox.style.display = 'none';
             }
@@ -1789,14 +2147,14 @@
         function updateDisplay() {
             document.getElementById('problemNum').textContent = problemCount + 1;
             document.getElementById('streak').textContent = streak;
-            
+
             const streakDisplay = document.getElementById('streak-display');
             if (level === 0) {
                 streakDisplay.style.display = 'none';
             } else {
                 streakDisplay.style.display = 'block';
             }
-            
+
             const timerDisplay = document.getElementById('timer-display');
             if (isTimerRunning && level !== 0) {
                 timerDisplay.textContent = 'Time: ' + formatTime(timer);
