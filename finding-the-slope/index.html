@@ -1,0 +1,1814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'unsafe-inline'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finding the Slope</title>
+<meta name="theme-color" content="#1b2450">
+<!-- Midnight Scholar / Polar Rose Studio - Finding the Slope - build v5 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+/* ===== MIDNIGHT SCHOLAR - navy stage, white card, violet + mint accents ===== */
+* { box-sizing: border-box; }
+body {
+    font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+    background:
+        radial-gradient(900px 500px at 85% -10%, rgba(124, 58, 237, 0.28), transparent 60%),
+        radial-gradient(800px 500px at -10% 110%, rgba(16, 185, 129, 0.18), transparent 55%),
+        linear-gradient(160deg, #141b3d 0%, #1b2450 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px 12px;
+    margin: 0;
+}
+.card {
+    background: #ffffff;
+    border-radius: 22px;
+    box-shadow: 0 24px 60px rgba(8, 12, 40, 0.55);
+    max-width: 700px;
+    width: 100%;
+    padding: 30px 24px 26px;
+    position: relative;
+    overflow: hidden;
+}
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+}
+h1 {
+    text-align: center;
+    color: #1e2a5e;
+    margin: 4px auto 6px;
+    font-size: 25px;
+    letter-spacing: 0.3px;
+    display: table;
+}
+h1::after {
+    content: '';
+    display: block;
+    /* design system: the rule matches the width of the title text. The h1 is
+       display:table above, so its box is already shrink-to-fit. */
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    margin: 8px auto 14px;
+    background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+}
+/* Screen-reader-only text (visually hidden, still announced) */
+.sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+.tiles-hint {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #5c6699;
+    margin: 0 0 10px;
+}
+.tiles-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: 14px auto 20px;
+    padding: 0;
+    max-width: 500px;
+}
+.tile {
+    background: linear-gradient(135deg, #1e3a5f, #0f766e);
+    color: #ffffff;
+    border: 3px solid transparent;
+    border-radius: 999px;
+    padding: 6px 12px;
+    text-align: center;
+    cursor: pointer;
+    /* a11y: 'all' animated outline-width too, so the focus ring faded in
+       from 0px instead of appearing at once. Animate only what changes. */
+    transition: filter 0.15s, border-color 0.15s;
+    user-select: none;
+    box-sizing: border-box;
+    font-family: inherit;
+    font-weight: 800;
+    font-size: 12px;
+    line-height: 1.25;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 56px;
+}
+.tile:hover { filter: brightness(1.12); }
+.tile-input:focus-visible + .tile {
+    outline: 3px solid #ffffff;
+    outline-offset: 3px;
+}
+.tile-input:checked + .tile {
+    /* design item 19: neon #39ff5e is not in the palette. Mint border plus the
+       standard mint ring. Selection is border-presence + ring + the native
+       radio's checked state, so it is not carried by hue alone. */
+    border-color: #10b981;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.25);
+}
+.equation {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    margin: 14px auto 18px;
+    font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    color: #1e2a5e;
+    background: #eef0fb;
+    border: 2px solid #c7cdf0;
+    border-radius: 14px;
+    padding: 16px 12px;
+    max-width: 100%;
+    overflow-wrap: break-word;
+}
+.points-row {
+    font-size: 22px;
+    font-weight: bold;
+    text-align: center;
+    margin: 14px auto 18px;
+    font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    color: #1e2a5e;
+    background: #eef0fb;
+    border: 2px solid #c7cdf0;
+    border-radius: 14px;
+    padding: 16px 10px;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow-x: auto;
+}
+.question-text {
+    text-align: center;
+    font-weight: 800;
+    color: #3b3568;
+    margin-bottom: 8px;
+    font-size: 15px;
+}
+.frac {
+    display: inline-flex;
+    flex-direction: column;
+    vertical-align: middle;
+    font-size: 0.82em;
+    line-height: 1;
+    text-align: center;
+    margin: 0 2px;
+    position: relative;
+    top: 0.05em;
+}
+.frac .num { border-bottom: 2px solid currentColor; padding: 0 4px 2px; }
+.frac .den { padding: 2px 4px 0; }
+.input-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 8px 0 14px;
+    flex-wrap: wrap;
+}
+.key-row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 18px 0 0;
+    flex-wrap: wrap;
+}
+input[type="text"] {
+    /* design item 1: 140px clipped the placeholder example. */
+    width: 180px;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    padding: 10px;
+    border: 3px solid #7c3aed;
+    border-radius: 12px;
+    color: #1e2a5e;
+    background: #ffffff;
+    font-family: inherit;
+}
+input[type="text"]:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18);
+}
+input[type="text"]:disabled { opacity: 0.5; }
+button {
+    padding: 12px 22px;
+    font-size: 15px;
+    font-weight: 800;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    /* a11y: 'all' animated outline-width, so the focus ring grew from 0px
+       over 200ms and read as absent. Animate only the hover/press props. */
+    transition: background 0.2s, filter 0.2s, transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    font-family: inherit;
+}
+button:active { transform: scale(0.95); }
+button:disabled { opacity: 0.5; cursor: default; }
+button:focus-visible {
+    outline: 3px solid #7c3aed;
+    outline-offset: 2px;
+}
+.submit-btn {
+    background: linear-gradient(135deg, #2e3d8f, #4b3bbd);
+    color: white;
+    box-shadow: 0 6px 16px rgba(46, 61, 143, 0.35);
+    white-space: nowrap;
+}
+.submit-btn:hover { filter: brightness(1.1); }
+.choice-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: #f3eefe;
+    border: 2px solid #8b6fe8;
+    color: #2b2358;
+    padding: 14px 16px;
+    margin: 8px 0;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+.choice-btn:hover:not(:disabled) { background: #e9defc; }
+.choice-btn.wrong-picked {
+    background: #ede9fe;
+    border-color: #6d5bb5;
+    color: #4c3a80;
+    text-decoration: line-through;
+}
+.choice-btn.correct-reveal { background: #d1fae5; border-color: #047857; color: #064e3b; }
+.feedback {
+    text-align: center;
+    font-size: 19px;
+    font-weight: 800;
+    margin: 14px 0 8px;
+    min-height: 30px;
+}
+.correct { color: #047857; }
+/* design item 13: incorrect feedback is ink navy, 18px, weight 700 in every game. */
+.incorrect { color: #1e2a5e; font-size: 18px; font-weight: 700; }
+.victory {
+    color: #7c3aed;
+    animation: pulse 1s infinite;
+}
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+.info {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+.info-item {
+    font-size: 12px;
+    font-weight: 800;
+    background: #eef0fb;
+    color: #2e3d8f !important;
+    padding: 6px 14px;
+    border-radius: 999px;
+}
+.key-btn {
+    background: #e6e9f6;
+    color: #2e3d8f;
+    padding: 12px 14px;
+    font-size: 15px;
+    font-weight: 800;
+    border-radius: 12px;
+}
+.key-btn:hover { background: #d9def2; }
+.hint-btn, .answer-btn, .skip-btn, .solution-btn, .stats-btn {
+    background: #ede7fd;
+    color: #5b21b6;
+    border: 1px solid #8b6fe8;
+    margin: 4px;
+    font-size: 13px;
+}
+.hint-btn:hover, .answer-btn:hover, .skip-btn:hover, .solution-btn:hover, .stats-btn:hover {
+    background: #e0d5fa;
+}
+.hint-box, .answer-box {
+    background: #f3effe;
+    border: 2px solid #8b6fe8;
+    border-radius: 14px;
+    padding: 15px;
+    margin: 14px 0;
+    color: #2b2358;
+    font-size: 14px;
+    line-height: 1.5;
+}
+/* ===== Settings row (design item 9: confetti is always paired with a toggle) ===== */
+.settings-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 18px 0 0;
+}
+.settings-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #4a5480;
+}
+.switch {
+    position: relative;
+    flex: 0 0 44px;
+    width: 44px;
+    height: 24px;
+    padding: 0;
+    border-radius: 999px;
+    background: #d5d9e8;
+    /* 1px navy-grey rim so the track boundary itself clears 3:1 on the white
+       card in both states - the mint fill alone would not. */
+    border: 1px solid #8a93b8;
+    box-shadow: none;
+    transition: background 0.2s;
+}
+.switch-knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(8, 12, 40, 0.4);
+    transition: transform 0.2s;
+}
+.switch[aria-pressed="true"] { background: #10b981; border-color: #0b7a70; }
+.switch[aria-pressed="true"] .switch-knob { transform: translateX(20px); }
+.reset-btn {
+    display: block;
+    margin: 10px auto 0;
+    background: transparent;
+    color: #5c6699;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 10px;
+    text-decoration: underline;
+}
+/* ===== Confetti ===== */
+.confetti { position: fixed; opacity: 0; pointer-events: none; z-index: 9999; }
+@keyframes confetti-fall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 1; }
+}
+@keyframes confetti-fall-slow {
+    0% { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 1; }
+    100% { transform: translateY(115vh) rotate(1080deg) scale(0.85); opacity: 1; }
+}
+.sparkle {
+    position: fixed;
+    width: 20px; height: 20px;
+    background: radial-gradient(circle, #fff 0%, #ffeb3b 50%, transparent 70%);
+    border-radius: 50%;
+    animation: sparkle 0.5s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 100;
+}
+@keyframes sparkle {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(1.6); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .confetti, .sparkle { display: none !important; }
+    .victory { animation: none; }
+    * { transition: none !important; }
+}
+@media (max-width: 480px) {
+    .card { padding: 24px 14px 20px; }
+    h1 { font-size: 21px; }
+    .equation { font-size: 19px; padding: 12px 8px; }
+    .points-row { font-size: 16px; padding: 12px 6px; }
+    input[type="text"] { width: 150px; font-size: 21px; }
+    .tile { font-size: 11.5px; padding: 6px 10px; height: 50px; }
+    .tiles-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; max-width: 100%; }
+}
+</style>
+</head>
+<body>
+<main class="card" id="game-card">
+    <h1>Finding the Slope</h1>
+
+    <!-- a11y: the problem is announced here in words. The visual copy of the
+         problem is aria-hidden so it is not read a second time. -->
+    <p class="sr-only" id="problem-live" role="status" aria-live="polite" aria-atomic="true"></p>
+
+    <p class="tiles-hint" id="tiles-hint">Pick a category to practice &mdash; or choose Mixed to review everything</p>
+    <div id="category-tiles" class="tiles-grid" role="radiogroup" aria-labelledby="tiles-hint"></div>
+
+    <div id="main-content"></div>
+
+    <div id="numeric-input-section">
+        <div class="key-row">
+            <button type="button" class="key-btn" onclick="toggleSign()" aria-label="Toggle negative sign">+/-</button>
+            <button type="button" class="key-btn" onclick="insertSlash()" aria-label="Insert fraction bar">/</button>
+            <button type="button" class="key-btn" style="font-size:12px;" onclick="insertUndefined()">undefined</button>
+        </div>
+        <div class="input-area">
+            <label for="answer" class="sr-only">Your answer for the slope</label>
+            <!-- design item 2: the grader accepts decimal slopes, so the pad must
+                 have a decimal point. pattern="[0-9]*" is dropped because it
+                 forces the plain numeric pad back on iOS and rejects "2/3". -->
+            <input type="text" id="answer" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                   placeholder="3 or 2/3" onkeypress="if(event.key==='Enter'){checkAnswer();}">
+            <button type="button" class="submit-btn" id="submit-btn" onclick="checkAnswer()">Submit</button>
+        </div>
+    </div>
+
+    <div class="feedback" id="feedback" role="alert" aria-live="assertive" aria-atomic="true"></div>
+    <button type="button" class="submit-btn" id="next-btn" onclick="goNextProblem()" style="display:none;">Next Problem &rarr;</button>
+
+    <div id="helper-buttons" style="text-align: center; margin: 16px 0 4px;">
+        <button type="button" class="hint-btn" id="hint-btn" onclick="toggleHint()" aria-expanded="false" aria-controls="hint">Show Hint</button>
+        <button type="button" class="answer-btn" id="answer-btn" onclick="toggleAnswer()" aria-expanded="false" aria-controls="answer-box">Show Answer</button>
+        <button type="button" class="solution-btn" id="solution-btn" onclick="toggleSolution()" aria-expanded="false" aria-controls="solution-box">Show Solution</button>
+        <button type="button" class="skip-btn" onclick="generateProblem()">Skip</button>
+        <button type="button" class="stats-btn" id="stats-btn" onclick="toggleStatsPanel()" aria-expanded="false" aria-controls="stats-box">Stats</button>
+    </div>
+
+    <div id="hint" style="display: none;"></div>
+    <div id="answer-box" style="display: none;"></div>
+    <div id="solution-box" style="display: none;"></div>
+    <div id="stats-box" style="display: none;"></div>
+
+    <div class="info" style="margin-top:18px;">
+        <div class="info-item">Streak: <span id="streak">0</span></div>
+        <div class="info-item" id="timer-display" style="display:none;"></div>
+        <div class="info-item">Best: <span id="best-streak">0</span></div>
+        <div class="info-item">First-try: <span id="overall-pct">&mdash;</span></div>
+    </div>
+
+    <!-- design item 9: confetti is always paired with a settings toggle, stored
+         per device. A real button, so it is keyboard reachable; aria-pressed
+         carries the state and is re-synced from storage on every load. -->
+    <div class="settings-row">
+        <span class="settings-label" id="confetti-label">Confetti celebrations</span>
+        <button type="button" class="switch" id="confetti-switch" aria-pressed="true"
+                aria-label="Confetti celebrations" onclick="toggleConfettiSetting()"><span class="switch-knob" aria-hidden="true"></span></button>
+    </div>
+
+    <button type="button" class="reset-btn" id="reset-btn" onclick="resetProgress()">Reset Progress</button>
+</main>
+
+<script>
+/* =====================================================================
+   Five practice categories plus a Mixed option. Exactly one tile is
+   selected at a time; Mixed draws randomly from all five. Persists.
+   ===================================================================== */
+var STORAGE_KEY = 'midnightScholar_slope_v5';
+var CATEGORIES = ['graph', 'two-points', 'equation', 'horiz-vert', 'meaning'];
+var TILES = CATEGORIES.concat(['mixed']);
+var CATEGORY_LABELS = {
+    'graph': 'Slope from a graph',
+    'two-points': 'Slope from two points',
+    'equation': 'Slope of an equation',
+    'horiz-vert': 'Slope of horizontal and vertical lines',
+    'meaning': 'Meaning of slope',
+    'mixed': 'Mixed review'
+};
+
+function encounterTier(n) {
+    if (n <= 3) return 0;
+    if (n <= 10) return 1;
+    return 2;
+}
+
+/* =====================================================================
+   State
+   ===================================================================== */
+var selectedCategory = 'graph';
+var streak = 0;
+var bestStreak = 0;
+var timer = 0;
+var timerInterval = null;
+var isTimerRunning = false;
+var currentProblem = null;
+var lastProblemSignature = '';
+var resetArmed = false;
+var resetTimeoutId = null;
+var categoryStats = {};
+var categoryEncounters = {};
+var overallStats = { c: 0, t: 0 };
+
+/* =====================================================================
+   Utilities
+   ===================================================================== */
+function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (ch) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+    });
+}
+function gcd(a, b) {
+    a = Math.abs(a); b = Math.abs(b);
+    while (b) { var t = b; b = a % b; a = t; }
+    return a || 1;
+}
+function simplifyFrac(num, den) {
+    if (den < 0) { den = -den; num = -num; }
+    var g = gcd(num, den);
+    return { num: num / g, den: den / g };
+}
+function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+    }
+    return a;
+}
+function pctText(c, t) {
+    if (!isFinite(c) || !isFinite(t) || t <= 0) return '\u2014';
+    return Math.round(c / t * 100) + '%';
+}
+
+function fracText(f) {
+    if (!f) return 'undefined';
+    if (f.den === 1) return String(f.num);
+    return f.num + '/' + f.den;
+}
+function slopeTermHTML(m) {
+    if (m.den === 1) {
+        if (m.num === 1) return 'x';
+        if (m.num === -1) return '-x';
+        return m.num + 'x';
+    }
+    var sign = m.num < 0 ? '-' : '';
+    var an = Math.abs(m.num);
+    return sign + '<span class="frac"><span class="num">' + an + '</span><span class="den">' + m.den + '</span></span>x';
+}
+function slopeTermPlain(m) {
+    if (m.den === 1) {
+        if (m.num === 1) return 'x';
+        if (m.num === -1) return '-x';
+        return m.num + 'x';
+    }
+    return m.num + '/' + m.den + ' x';
+}
+function termStr(coef, v) {
+    if (coef === 1) return v;
+    if (coef === -1) return '-' + v;
+    return coef + v;
+}
+function fmtStandardForm(A, B, C) {
+    var s = (A === 1 ? 'x' : (A === -1 ? '-x' : A + 'x'));
+    if (B !== 0) {
+        if (B > 0) s += ' + ' + (B === 1 ? 'y' : B + 'y');
+        else s += ' - ' + (B === -1 ? 'y' : Math.abs(B) + 'y');
+    }
+    s += ' = ' + C;
+    return s;
+}
+
+/* =====================================================================
+   Graph generators (grid range -7..7)
+   ===================================================================== */
+function genGraphSimple() {
+    var m = pick([-4, -3, -2, -1, 1, 2, 3, 4]);
+    var run = 1;
+    var rise = m * run;
+    var x1 = randInt(-7, 7 - run);
+    var yLo = rise >= 0 ? -7 : -7 - rise;
+    var yHi = rise >= 0 ? 7 - rise : 7;
+    var y1 = randInt(yLo, yHi);
+    var y2 = y1 + rise;
+    var x2 = x1 + run;
+    return { x1: x1, y1: y1, x2: x2, y2: y2, slope: { num: m, den: 1 } };
+}
+function genGraphFraction() {
+    var num, den;
+    do { num = randInt(1, 5); den = pick([2, 3, 4, 5]); } while (gcd(num, den) !== 1);
+    var sign = pick([1, -1]);
+    var rise = sign * num;
+    var run = den;
+    var x1 = randInt(-7, 7 - run);
+    var yLo = rise >= 0 ? -7 : -7 - rise;
+    var yHi = rise >= 0 ? 7 - rise : 7;
+    var y1 = randInt(yLo, yHi);
+    var y2 = y1 + rise;
+    var x2 = x1 + run;
+    return { x1: x1, y1: y1, x2: x2, y2: y2, slope: simplifyFrac(sign * num, den) };
+}
+function genGraphHorizontal() {
+    var y = randInt(-5, 5);
+    var x1 = randInt(-6, 3);
+    var x2 = x1 + 3;
+    return { x1: x1, y1: y, x2: x2, y2: y };
+}
+function genGraphVertical() {
+    var x = randInt(-5, 5);
+    var y1 = randInt(-6, 3);
+    var y2 = y1 + 3;
+    return { x1: x, y1: y1, x2: x, y2: y2 };
+}
+
+/* =====================================================================
+   Two-points generators (text only, no graph)
+   ===================================================================== */
+function genTwoPointsWhole() {
+    var m = pick([-5, -4, -3, -2, -1, 1, 2, 3, 4, 5]);
+    var run = pick([1, 2, 3, 4]);
+    var x1 = randInt(-8, 8);
+    var x2 = x1 + run;
+    var y1 = randInt(-8, 8);
+    var y2 = y1 + m * run;
+    return { x1: x1, y1: y1, x2: x2, y2: y2, slope: { num: m, den: 1 } };
+}
+function genTwoPointsFraction() {
+    var num, den;
+    do { num = randInt(1, 7); den = pick([2, 3, 4, 5, 6]); } while (gcd(num, den) !== 1);
+    var sign = pick([1, -1]);
+    var rise = sign * num, run = den;
+    var x1 = randInt(-8, 8);
+    var x2 = x1 + run;
+    var y1 = randInt(-8, 8);
+    var y2 = y1 + rise;
+    return { x1: x1, y1: y1, x2: x2, y2: y2, slope: simplifyFrac(sign * num, den) };
+}
+
+/* =====================================================================
+   Equation generators
+   ===================================================================== */
+function genEqSlopeIntercept(fractionAllowed) {
+    if (fractionAllowed && Math.random() < 0.5) {
+        var num, den;
+        do { num = randInt(1, 5); den = pick([2, 3, 4, 5]); } while (gcd(num, den) !== 1);
+        var sign = pick([1, -1]);
+        num *= sign;
+        var b = randInt(-10, 10);
+        return { m: { num: num, den: den }, b: b, slope: simplifyFrac(num, den) };
+    } else {
+        var mInt = pick([-5, -4, -3, -2, -1, 1, 2, 3, 4, 5]);
+        var b2 = randInt(-10, 10);
+        return { m: { num: mInt, den: 1 }, b: b2, slope: { num: mInt, den: 1 } };
+    }
+}
+function genEqStandardForm(harder) {
+    var p, q;
+    if (Math.random() < 0.4) {
+        p = pick([-4, -3, -2, -1, 1, 2, 3, 4]);
+        q = 1;
+    } else {
+        do { p = randInt(1, 4); q = pick([2, 3, 4]); } while (gcd(p, q) !== 1);
+        p *= pick([1, -1]);
+    }
+    var t = harder ? pick([2, 3]) : 1;
+    var A = -p * t;
+    var B = q * t;
+    var x0 = randInt(-5, 5);
+    var y0 = randInt(-5, 5);
+    var C = A * x0 + B * y0;
+    return { A: A, B: B, C: C, slope: { num: p, den: q } };
+}
+function genEqStandardVertical() {
+    var C = randInt(-8, 8);
+    return { A: 1, B: 0, C: C };
+}
+function genEqHorizontalLine() {
+    var C = randInt(-8, 8);
+    return { A: 0, B: 1, C: C };
+}
+
+/* =====================================================================
+   Meaning-of-slope: 12 real-world scenario templates (multiple choice)
+   ===================================================================== */
+var MEANING_TEMPLATES = [
+    function () {
+        var fee = randInt(10, 50), rate = randInt(15, 60);
+        return {
+            scenario: 'A gym charges a $' + fee + ' sign-up fee plus $' + rate + ' per month. In the cost equation, what is the slope, and what does it represent?',
+            correct: 'The slope is ' + rate + '. It represents the monthly membership cost, $' + rate + '.',
+            distractors: [
+                'The slope is ' + fee + '. It represents the amount charged every month.',
+                'The slope is ' + rate + '. It represents the total cost after one year of membership.'
+            ]
+        };
+    },
+    function () {
+        var start = randInt(5, 40), rate = randInt(2, 10);
+        return {
+            scenario: 'A water tank starts with ' + start + ' gallons and fills at a constant rate of ' + rate + ' gallons per minute. What is the slope of the volume-time graph, and what does it represent?',
+            correct: 'The slope is ' + rate + '. It represents the rate the tank fills, ' + rate + ' gallons per minute.',
+            distractors: [
+                'The slope is ' + start + '. It represents how many gallons were already in the tank at the start.',
+                'The slope is ' + rate + '. It represents the tank\u2019s total capacity.'
+            ]
+        };
+    },
+    function () {
+        var start = randInt(200, 600), rate = randInt(10, 40);
+        return {
+            scenario: 'A pool contains ' + start + ' gallons and drains at a steady rate of ' + rate + ' gallons per hour. What is the slope of the volume-time graph, and what does it represent?',
+            correct: 'The slope is -' + rate + '. It represents the rate the pool drains, ' + rate + ' gallons per hour.',
+            distractors: [
+                'The slope is ' + start + '. It represents how many gallons were in the pool at the start.',
+                'The slope is -' + rate + '. It represents the total time until the pool is empty.'
+            ]
+        };
+    },
+    function () {
+        var start = randInt(50, 300), rate = randInt(10, 50);
+        return {
+            scenario: 'Maria starts with $' + start + ' in savings and adds $' + rate + ' to her account every week. What is the slope, and what does it represent?',
+            correct: 'The slope is ' + rate + '. It represents the amount Maria saves each week, $' + rate + '.',
+            distractors: [
+                'The slope is ' + start + '. It represents how much she had in savings when she started.',
+                'The slope is ' + rate + '. It represents her total savings after one year.'
+            ]
+        };
+    },
+    function () {
+        var start = randInt(50, 75), rate = randInt(2, 8);
+        return {
+            scenario: 'The temperature was ' + start + ' degrees F at sunrise and has been dropping at a steady rate of ' + rate + ' degrees F per hour. What is the slope of the temperature-time graph, and what does it represent?',
+            correct: 'The slope is -' + rate + '. It represents the rate the temperature drops, ' + rate + ' degrees per hour.',
+            distractors: [
+                'The slope is ' + start + '. It represents the temperature at sunrise.',
+                'The slope is -' + rate + '. It represents the coldest temperature reached that day.'
+            ]
+        };
+    },
+    function () {
+        var start = randInt(2, 10), rate = randInt(1, 5);
+        return {
+            scenario: 'A sunflower was ' + start + ' cm tall when it was planted and grows ' + rate + ' cm every week. What is the slope, and what does it represent?',
+            correct: 'The slope is ' + rate + '. It represents the plant\u2019s growth rate, ' + rate + ' cm per week.',
+            distractors: [
+                'The slope is ' + start + '. It represents the plant\u2019s height when it was planted.',
+                'The slope is ' + rate + '. It represents the plant\u2019s height one year from now.'
+            ]
+        };
+    },
+    function () {
+        var rate = randInt(2, 5), fee = randInt(3, 10);
+        return {
+            scenario: 'A bakery charges $' + rate + ' per cupcake plus a flat $' + fee + ' delivery fee per order. In the total cost equation, what is the slope, and what does it represent?',
+            correct: 'The slope is ' + rate + '. It represents the price per cupcake, $' + rate + '.',
+            distractors: [
+                'The slope is ' + fee + '. It represents the flat fee charged on every order, no matter the size.',
+                'The slope is ' + rate + '. It represents the total cost of a dozen cupcakes.'
+            ]
+        };
+    },
+    function () {
+        var start = randInt(10, 40), rate = randInt(1, 4);
+        return {
+            scenario: 'A phone battery level is measured in percentage points, from 0 to 100. It starts at ' + start + ' and charges at a steady rate of ' + rate + ' percentage points per minute. What is the slope of the charge-time graph, and what does it represent?',
+            correct: 'The slope is ' + rate + '. It represents the charging rate, ' + rate + ' percentage points per minute.',
+            distractors: [
+                'The slope is ' + start + '. It represents the battery level when charging started.',
+                'The slope is ' + rate + '. It represents the total time needed to reach 100.'
+            ]
+        };
+    },
+    function () {
+        var start = randInt(60, 95), rate = randInt(5, 20);
+        return {
+            scenario: 'A phone battery level is measured in percentage points, from 0 to 100. It starts a trip at ' + start + ' and loses ' + rate + ' percentage points every hour of use. What is the slope, and what does it represent?',
+            correct: 'The slope is -' + rate + '. It represents the rate the battery drains, ' + rate + ' percentage points per hour.',
+            distractors: [
+                'The slope is ' + start + '. It represents the battery level at the start of the trip.',
+                'The slope is -' + rate + '. It represents the time left until the phone dies.'
+            ]
+        };
+    },
+    function () {
+        var rise = randInt(4, 12), run = randInt(12, 24);
+        return {
+            scenario: 'A roof rises ' + rise + ' feet for every ' + run + ' feet of horizontal run. What is the slope, and what does it represent?',
+            correct: 'The slope is ' + rise + '/' + run + '. It represents the roof\u2019s steepness: ' + rise + ' feet of rise for every ' + run + ' feet across.',
+            distractors: [
+                'The slope is ' + run + '/' + rise + '. It represents ' + run + ' feet of rise for every ' + rise + ' feet across.',
+                'The slope is ' + rise + '/' + run + '. It represents the total height of the roof at its peak.'
+            ]
+        };
+    },
+    function () {
+        var start = randInt(1500, 6000), rate = randInt(10, 100), sign = pick([1, -1]);
+        var rateSigned = (sign > 0 ? '+' : '-') + rate;
+        var futurePop = start + sign * rate * 10;
+        return {
+            scenario: 'A small town\u2019s population was ' + start + ' people and has been changing by ' + rateSigned + ' people per year. What is the slope, and what does it represent?',
+            correct: 'The slope is ' + rateSigned + '. It represents the rate the population changes, ' + rateSigned + ' people per year.',
+            distractors: [
+                'The slope is ' + start + '. It represents the town\u2019s population at the start.',
+                'The slope is ' + futurePop + '. It represents the town\u2019s population 10 years from now.'
+            ]
+        };
+    },
+    function () {
+        var warmup = randInt(20, 80), rate = randInt(5, 15);
+        var perHour = rate * 60;
+        return {
+            scenario: 'Before a run, you\u2019ve already burned ' + warmup + ' calories walking to the gym. Running then burns calories at a steady rate of ' + rate + ' calories per minute. This can be written as a function of time: C = ' + rate + 't + ' + warmup + ', where C is total calories burned and t is minutes spent running. What is the slope of this function, and what does it represent?',
+            correct: 'The slope is ' + rate + '. It represents the rate calories are burned, ' + rate + ' calories per minute.',
+            distractors: [
+                'The slope is ' + warmup + '. It represents the calories already burned before the run started.',
+                'The slope is ' + perHour + '. It represents the total calories burned in an hour of running.'
+            ]
+        };
+    }
+];
+function genMeaningProblem() {
+    var tmpl = pick(MEANING_TEMPLATES)();
+    var choices = shuffle([
+        { text: tmpl.correct, correct: true },
+        { text: tmpl.distractors[0], correct: false },
+        { text: tmpl.distractors[1], correct: false }
+    ]);
+    return { scenario: tmpl.scenario, choices: choices };
+}
+
+/* =====================================================================
+   Per-category variant selection (drives the gradual easing)
+   ===================================================================== */
+function pickGraphVariant(tier) {
+    if (tier === 0) return 'graph-simple';
+    return Math.random() < 0.5 ? 'graph-simple' : 'graph-fraction';
+}
+function pickTwoPointsVariant(tier) {
+    if (tier === 0) return 'two-points';
+    return Math.random() < 0.5 ? 'two-points' : 'two-points-fraction';
+}
+function pickEquationVariant(n) {
+    if (n <= 4) return 'eq-slope-intercept';
+    if (n === 5) return 'eq-standard-form';
+    var r = Math.random();
+    if (r < 0.15) return 'eq-slope-intercept';
+    if (r < 0.85) return 'eq-standard-form';
+    return 'eq-standard-vertical';
+}
+function pickHorizVertVariant() {
+    return pick(['graph-horizontal', 'graph-vertical', 'eq-horizontal-line', 'eq-standard-vertical']);
+}
+
+/* =====================================================================
+   Building a problem
+   ===================================================================== */
+function buildProblem(cat, n) {
+    var tier = encounterTier(n);
+    var data, correctSlope, undef = false, subtype, kind;
+    if (cat === 'graph') {
+        subtype = pickGraphVariant(tier);
+        kind = 'graph';
+        if (subtype === 'graph-simple') { data = genGraphSimple(); correctSlope = data.slope; }
+        else { data = genGraphFraction(); correctSlope = data.slope; }
+    } else if (cat === 'two-points') {
+        subtype = pickTwoPointsVariant(tier);
+        kind = 'points';
+        if (subtype === 'two-points') { data = genTwoPointsWhole(); correctSlope = data.slope; }
+        else { data = genTwoPointsFraction(); correctSlope = data.slope; }
+    } else if (cat === 'equation') {
+        subtype = pickEquationVariant(n);
+        kind = 'equation';
+        if (subtype === 'eq-slope-intercept') { data = genEqSlopeIntercept(tier >= 1); correctSlope = data.slope; }
+        else if (subtype === 'eq-standard-form') { data = genEqStandardForm(tier >= 2); correctSlope = data.slope; }
+        else { data = genEqStandardVertical(); correctSlope = null; undef = true; }
+    } else if (cat === 'horiz-vert') {
+        subtype = pickHorizVertVariant();
+        if (subtype === 'graph-horizontal') { data = genGraphHorizontal(); kind = 'graph'; correctSlope = { num: 0, den: 1 }; }
+        else if (subtype === 'graph-vertical') { data = genGraphVertical(); kind = 'graph'; correctSlope = null; undef = true; }
+        else if (subtype === 'eq-horizontal-line') { data = genEqHorizontalLine(); kind = 'equation'; correctSlope = { num: 0, den: 1 }; }
+        else { data = genEqStandardVertical(); kind = 'equation'; correctSlope = null; undef = true; }
+    } else {
+        subtype = 'meaning';
+        kind = 'choice';
+        data = genMeaningProblem();
+        correctSlope = null;
+    }
+    return {
+        category: cat, subtype: subtype, kind: kind, data: data,
+        correctSlope: correctSlope, undefinedSlope: undef,
+        locked: false, attempted: false
+    };
+}
+
+/* =====================================================================
+   Rendering: equations
+   ===================================================================== */
+function equationHTML(p) {
+    var d = p.data;
+    if (p.subtype === 'eq-slope-intercept') {
+        var bPart = d.b === 0 ? '' : (d.b > 0 ? ' + ' + d.b : ' - ' + Math.abs(d.b));
+        return 'y = ' + slopeTermHTML(d.m) + bPart;
+    }
+    if (p.subtype === 'eq-horizontal-line') return 'y = ' + d.C;
+    return fmtStandardForm(d.A, d.B, d.C);
+}
+function equationPlain(p) {
+    var d = p.data;
+    if (p.subtype === 'eq-slope-intercept') {
+        var bPart = d.b === 0 ? '' : (d.b > 0 ? ' + ' + d.b : ' - ' + Math.abs(d.b));
+        return 'y = ' + slopeTermPlain(d.m) + bPart;
+    }
+    if (p.subtype === 'eq-horizontal-line') return 'y = ' + d.C;
+    return fmtStandardForm(d.A, d.B, d.C);
+}
+
+/* =====================================================================
+   Rendering: graph SVG (with text alternative for screen readers)
+   ===================================================================== */
+/* Pass 4: the text alternative must state what the picture actually shows -
+   the line's direction, where it crosses each axis, and exactly which points
+   are marked and how - not merely that a graph is present. Numbers are spoken
+   as words ('negative 3') because screen readers skip or mispronounce a bare
+   ASCII hyphen. */
+function spokenNum(v) {
+    var n = Number(v);
+    if (!isFinite(n)) return 'unknown';
+    if (n < 0) return 'negative ' + Math.abs(n);
+    return String(n);
+}
+function spokenPoint(x, y) {
+    return 'x equals ' + spokenNum(x) + ', y equals ' + spokenNum(y);
+}
+function spokenSlope(s) {
+    if (!s) return 'undefined';
+    if (s.den === 1) return spokenNum(s.num);
+    return spokenNum(s.num) + ' over ' + s.den;
+}
+function graphDescription(problem, showHelpers) {
+    var d = problem.data;
+    var x1 = Number(d.x1), y1 = Number(d.y1), x2 = Number(d.x2), y2 = Number(d.y2);
+    var parts = ['Coordinate grid. The x-axis and the y-axis each run from negative 7 to 7, ruled in single units.'];
+
+    if (x1 === x2) {
+        parts.push('A straight vertical line runs from the bottom of the grid to the top at x equals '
+            + spokenNum(x1) + '.');
+        parts.push('It crosses the x-axis at ' + spokenNum(x1) + ' and never crosses the y-axis'
+            + (x1 === 0 ? ', because it lies along the y-axis' : '') + '.');
+    } else {
+        var m = (y2 - y1) / (x2 - x1);
+        var b = y1 - m * x1;
+        if (m === 0) {
+            parts.push('A straight horizontal line runs from the left edge of the grid to the right edge at y equals '
+                + spokenNum(y1) + '. It stays perfectly flat: it never rises or falls.');
+            parts.push('It crosses the y-axis at ' + spokenNum(y1) + ' and never crosses the x-axis'
+                + (y1 === 0 ? ', because it lies along the x-axis' : '') + '.');
+        } else {
+            parts.push('A straight line ' + (m > 0 ? 'rises' : 'falls')
+                + ' from left to right, going ' + (m > 0 ? 'up' : 'down') + ' by '
+                + Math.abs(y2 - y1) + ' unit' + (Math.abs(y2 - y1) === 1 ? '' : 's')
+                + ' for every ' + Math.abs(x2 - x1) + ' unit' + (Math.abs(x2 - x1) === 1 ? '' : 's')
+                + ' it moves to the right.');
+            parts.push('It crosses the y-axis at ' + spokenNum(Math.round(b * 1000) / 1000) + '.');
+            var xInt = -b / m;
+            if (xInt >= -7 && xInt <= 7) {
+                parts.push('It crosses the x-axis at ' + spokenNum(Math.round(xInt * 1000) / 1000) + '.');
+            }
+        }
+    }
+    parts.push('Two solid filled dots mark points on the line: one at ' + spokenPoint(x1, y1)
+        + ', and one at ' + spokenPoint(x2, y2) + '. Both dots are closed, not open circles, and the line continues past them to the edges of the grid.');
+    if (showHelpers && !problem.undefinedSlope) {
+        parts.push('A dashed right-angled triangle is drawn between the two dots: a vertical dashed leg labelled '
+            + spokenNum(y2 - y1) + ' for the rise, and a horizontal dashed leg labelled '
+            + spokenNum(x2 - x1) + ' for the run.');
+    }
+    return parts.join(' ');
+}
+/* The words spoken in the polite live region when a new problem appears. */
+function problemSpeech(p) {
+    if (p.kind === 'graph') {
+        return 'New problem. What is the slope of the line shown? ' + graphDescription(p, false);
+    }
+    if (p.kind === 'points') {
+        return 'New problem. What is the slope of the line through these two points? '
+            + 'First point: ' + spokenPoint(p.data.x1, p.data.y1) + '. '
+            + 'Second point: ' + spokenPoint(p.data.x2, p.data.y2) + '.';
+    }
+    if (p.kind === 'equation') {
+        return 'New problem. What is the slope of this equation? ' + equationSpeech(p);
+    }
+    return 'New problem. ' + p.data.scenario + ' Three answer choices follow.';
+}
+function equationSpeech(p) {
+    var d = p.data;
+    if (p.subtype === 'eq-slope-intercept') {
+        var mPart = d.m.den === 1 ? spokenNum(d.m.num) : (spokenNum(d.m.num) + ' over ' + d.m.den);
+        var s = 'y equals ' + mPart + ' times x';
+        if (d.b > 0) s += ' plus ' + d.b;
+        else if (d.b < 0) s += ' minus ' + Math.abs(d.b);
+        return s + '.';
+    }
+    if (p.subtype === 'eq-horizontal-line') return 'y equals ' + spokenNum(d.C) + '.';
+    var t = spokenNum(d.A) + ' times x';
+    if (d.B !== 0) t += (d.B > 0 ? ' plus ' : ' minus ') + Math.abs(d.B) + ' times y';
+    return t + ' equals ' + spokenNum(d.C) + '.';
+}
+function announceProblem(p) {
+    var el = document.getElementById('problem-live');
+    if (el) el.textContent = problemSpeech(p);
+}
+/* Security: every value written into an SVG attribute goes through num(), so a
+   non-numeric value can never break out of the quoted attribute. */
+function num(v) {
+    var n = Number(v);
+    return isFinite(n) ? n : 0;
+}
+function renderGraphSVG(problem, showHelpers) {
+    var limit = 7, unit = 22, origin = 170;
+    function sx(x) { return origin + num(x) * unit; }
+    function sy(y) { return origin - num(y) * unit; }
+    /* The graph is aria-hidden because #problem-live already speaks the whole
+       description; leaving both readable made screen readers say it twice.
+       The SVG holds no focusable control, so hiding it traps nothing. */
+    var svg = '<svg viewBox="0 0 340 340" width="100%" height="300" style="max-width:340px;display:block;margin:0 auto;"'
+        + ' aria-hidden="true" focusable="false">';
+    for (var i = -limit; i <= limit; i++) {
+        var strokeColor = i === 0 ? '#8b96d8' : '#e5e8f7';
+        var strokeW = i === 0 ? 2 : 1;
+        svg += '<line x1="' + sx(i) + '" y1="' + sy(-limit) + '" x2="' + sx(i) + '" y2="' + sy(limit) + '" stroke="' + strokeColor + '" stroke-width="' + strokeW + '"/>';
+        svg += '<line x1="' + sx(-limit) + '" y1="' + sy(i) + '" x2="' + sx(limit) + '" y2="' + sy(i) + '" stroke="' + strokeColor + '" stroke-width="' + strokeW + '"/>';
+    }
+    for (var j = -6; j <= 6; j += 2) {
+        if (j === 0) continue;
+        svg += '<text x="' + sx(j) + '" y="' + (sy(0) + 13) + '" font-size="9" fill="#5c6699" text-anchor="middle">' + j + '</text>';
+        svg += '<text x="' + (sx(0) - 7) + '" y="' + (sy(j) + 3) + '" font-size="9" fill="#5c6699" text-anchor="end">' + j + '</text>';
+    }
+
+    var x1 = problem.data.x1, y1 = problem.data.y1, x2 = problem.data.x2, y2 = problem.data.y2;
+    var ends;
+    if (x1 === x2) {
+        ends = [{ x: x1, y: -limit }, { x: x1, y: limit }];
+    } else {
+        var m = (y2 - y1) / (x2 - x1);
+        if (m === 0) {
+            ends = [{ x: -limit, y: y1 }, { x: limit, y: y1 }];
+        } else {
+            var b = y1 - m * x1;
+            var cand = [
+                { x: -limit, y: m * (-limit) + b },
+                { x: limit, y: m * limit + b },
+                { x: (-limit - b) / m, y: -limit },
+                { x: (limit - b) / m, y: limit }
+            ];
+            cand = cand.filter(function (pt) { return pt.x >= -limit - 1e-9 && pt.x <= limit + 1e-9 && pt.y >= -limit - 1e-9 && pt.y <= limit + 1e-9; });
+            cand.sort(function (a, c) { return a.x - c.x; });
+            ends = [cand[0], cand[cand.length - 1]];
+        }
+    }
+    svg += '<line x1="' + sx(ends[0].x) + '" y1="' + sy(ends[0].y) + '" x2="' + sx(ends[1].x) + '" y2="' + sy(ends[1].y) + '" stroke="#7c3aed" stroke-width="3" stroke-linecap="round"/>';
+
+    if (showHelpers && !problem.undefinedSlope) {
+        var riseVal = y2 - y1, runVal = x2 - x1;
+        svg += '<line x1="' + sx(x1) + '" y1="' + sy(y1) + '" x2="' + sx(x1) + '" y2="' + sy(y2) + '" stroke="#0d9488" stroke-width="2" stroke-dasharray="5,4"/>';
+        svg += '<line x1="' + sx(x1) + '" y1="' + sy(y2) + '" x2="' + sx(x2) + '" y2="' + sy(y2) + '" stroke="#0d9488" stroke-width="2" stroke-dasharray="5,4"/>';
+        svg += '<text x="' + (sx(x1) - 6) + '" y="' + (sy((y1 + y2) / 2) + 3) + '" font-size="11" font-weight="800" fill="#0f766e" text-anchor="end">' + riseVal + '</text>';
+        svg += '<text x="' + (sx((x1 + x2) / 2)) + '" y="' + (sy(y2) + (riseVal < 0 ? -8 : 16)) + '" font-size="11" font-weight="800" fill="#0f766e" text-anchor="middle">' + runVal + '</text>';
+    }
+
+    /* design item 19: the marked points were mint-green #059669, and green is
+       reserved for success - a green dot on an unanswered question reads as
+       "already right". Ink navy instead: 13.6:1 on the white grid, and much
+       darker than the violet line, so the dots stay easy to tell from the
+       curve. The 2px white halo keeps them readable where they sit on it. */
+    svg += '<circle cx="' + sx(x1) + '" cy="' + sy(y1) + '" r="5.5" fill="#1e2a5e" stroke="white" stroke-width="2"/>';
+    svg += '<circle cx="' + sx(x2) + '" cy="' + sy(y2) + '" r="5.5" fill="#1e2a5e" stroke="white" stroke-width="2"/>';
+    svg += '</svg>';
+    return svg;
+}
+
+/* =====================================================================
+   Rendering the current problem
+   ===================================================================== */
+function renderProblem(problem) {
+    var numericSection = document.getElementById('numeric-input-section');
+    if (problem.kind === 'choice') {
+        numericSection.style.display = 'none';
+        /* Only the duplicated scenario text is hidden. The choice container is
+           NEVER aria-hidden - it holds focusable buttons, and hiding a focusable
+           control is itself a WCAG failure. */
+        var html = '<div class="question-text" aria-hidden="true">' + esc(problem.data.scenario) + '</div>'
+            + '<div id="choices-container" role="group" aria-label="Answer choices">';
+        problem.data.choices.forEach(function (choice, idx) {
+            html += '<button type="button" class="choice-btn" id="choice-' + idx + '" onclick="selectChoice(' + idx + ')">'
+                + esc(choice.text) + '</button>';
+        });
+        html += '</div>';
+        document.getElementById('main-content').innerHTML = html;
+        return;
+    }
+    numericSection.style.display = '';
+    /* The whole visual problem is aria-hidden; #problem-live carries the words.
+       None of these nodes contains a focusable control. */
+    var html2 = '';
+    if (problem.kind === 'graph') {
+        html2 += '<div class="question-text" aria-hidden="true">What is the slope of the line shown below?</div>';
+        html2 += renderGraphSVG(problem, false);
+    } else if (problem.kind === 'points') {
+        html2 += '<div class="question-text" aria-hidden="true">What is the slope of the line through these two points?</div>';
+        html2 += '<div class="points-row" aria-hidden="true">(' + num(problem.data.x1) + ', ' + num(problem.data.y1) + ') and (' + num(problem.data.x2) + ', ' + num(problem.data.y2) + ')</div>';
+    } else {
+        html2 += '<div class="question-text" aria-hidden="true">What is the slope of this equation?</div>';
+        html2 += '<div class="equation" aria-hidden="true">' + equationHTML(problem) + '</div>';
+    }
+    document.getElementById('main-content').innerHTML = html2;
+}
+function rerenderGraphOnly(showHelpers) {
+    var container = document.getElementById('main-content');
+    var q = container.querySelector('.question-text');
+    container.innerHTML = (q ? q.outerHTML : '') + renderGraphSVG(currentProblem, showHelpers);
+}
+
+/* =====================================================================
+   Hint / Answer / Solution
+   ===================================================================== */
+function getHintText(p) {
+    switch (p.subtype) {
+        case 'graph-simple':
+        case 'graph-fraction':
+            return 'Find the two marked points. Count how many units you move up or down (rise) and how many units right (run) to get from one point to the other. Slope = rise / run.';
+        case 'graph-horizontal':
+            return 'This line is perfectly flat. A flat line never rises, so its slope is always 0.';
+        case 'graph-vertical':
+            return 'This line goes straight up and down without ever moving left or right. Lines like this have an undefined slope.';
+        case 'two-points':
+        case 'two-points-fraction':
+            return 'Use the slope formula: slope = (y2 - y1) / (x2 - x1). Subtract the y-values, then subtract the x-values in the same order, and divide.';
+        case 'eq-horizontal-line':
+            return 'There is no x in this equation. Every point on it has the same y-value, so the line is perfectly flat and its slope is 0.';
+        case 'eq-slope-intercept':
+            return 'This equation is written as y = mx + b. The slope is the number in front of x (the coefficient of x).';
+        case 'eq-standard-form':
+            return 'Rearrange the equation to solve for y. Once it looks like y = mx + b, the number in front of x (the coefficient of x) is the slope.';
+        case 'eq-standard-vertical':
+            return 'There is no y in this equation, which means it describes a vertical line. Vertical lines have an undefined slope.';
+        case 'meaning':
+            return 'Slope represents a constant RATE of change - how much the output changes for each one-unit increase in the input. A one-time fee or starting amount is NOT the slope; that is the intercept.';
+    }
+    return '';
+}
+function setExpanded(btnId, isOpen) {
+    var b = document.getElementById(btnId);
+    if (b) b.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+}
+function toggleHint() {
+    var hint = document.getElementById('hint');
+    if (hint.style.display === 'none') {
+        hint.className = 'hint-box';
+        hint.innerHTML = '<strong>Hint:</strong><br>' + esc(getHintText(currentProblem));
+        hint.style.display = 'block';
+        setExpanded('hint-btn', true);
+    } else {
+        hint.style.display = 'none';
+        setExpanded('hint-btn', false);
+    }
+}
+/* Revealing the answer (Show Answer) or walking the worked solution
+   (Show Solution) costs exactly what a wrong first attempt costs: the problem
+   is booked as attempted, it can no longer earn the correct tally, and the
+   streak ends. Without this a student could reveal, type the slope straight
+   back and score a clean 1/1 with the streak intact, which quietly inflated
+   every accuracy figure on the stats panel.
+
+   It works by setting currentProblem.attempted, the same flag a first
+   submission sets, so handleAnswer() below sees firstTry === false and its
+   existing bookkeeping withholds the credit for us -- no grading logic is
+   restructured. Show HINT stays free: every hint here is strategy
+   ("count the rise, then the run"), never the answer. */
+function recordReveal() {
+    if (!currentProblem || currentProblem.attempted || currentProblem.locked) return;
+    currentProblem.attempted = true;
+    var s = ensureStats(currentProblem.category);
+    s.t++; overallStats.t++;
+    streak = 0;
+    stopTimer();
+    updateDisplay();
+    saveState();
+}
+function toggleAnswer() {
+    var box = document.getElementById('answer-box');
+    if (box.style.display === 'none') {
+        recordReveal();
+        box.className = 'answer-box';
+        if (currentProblem.kind === 'choice') {
+            var correctChoice = currentProblem.data.choices.filter(function (c) { return c.correct; })[0];
+            box.innerHTML = '<strong>Answer:</strong> ' + esc(correctChoice.text);
+        } else {
+            box.innerHTML = '<strong>Slope:</strong> ' + esc(fracText(currentProblem.correctSlope));
+        }
+        box.style.display = 'block';
+        setExpanded('answer-btn', true);
+    } else {
+        box.style.display = 'none';
+        setExpanded('answer-btn', false);
+    }
+}
+function buildSolutionHTML(p) {
+    var d = p.data;
+    var html = '<div style="font-weight:800;margin-bottom:8px;">Solution</div>';
+    if (p.subtype === 'graph-simple' || p.subtype === 'graph-fraction') {
+        var rise = d.y2 - d.y1, run = d.x2 - d.x1;
+        html += '<div>Moving from one marked point to the other:</div>';
+        html += '<div style="margin:6px 0;">Rise = ' + rise + ' &nbsp;&nbsp; Run = ' + run + '</div>';
+        html += '<div>Slope = rise / run = ' + rise + '/' + run + ' = <b>' + fracText(p.correctSlope) + '</b></div>';
+    } else if (p.subtype === 'graph-horizontal') {
+        html += '<div>This line never rises (rise = 0), so slope = 0 / run = <b>0</b>.</div>';
+    } else if (p.subtype === 'graph-vertical') {
+        html += '<div>This line never runs left or right (run = 0). Since we cannot divide by 0, the slope is <b>undefined</b>.</div>';
+    } else if (p.subtype === 'two-points' || p.subtype === 'two-points-fraction') {
+        var rise2 = d.y2 - d.y1, run2 = d.x2 - d.x1;
+        html += '<div>slope = (y2 - y1) / (x2 - x1)</div>';
+        html += '<div style="margin:6px 0;">= (' + d.y2 + ' - (' + d.y1 + ')) / (' + d.x2 + ' - (' + d.x1 + ')) = ' + rise2 + '/' + run2 + '</div>';
+        html += '<div>Slope = <b>' + fracText(p.correctSlope) + '</b></div>';
+    } else if (p.subtype === 'eq-horizontal-line') {
+        html += '<div>The equation <b>y = ' + d.C + '</b> has no x-term, so y is always ' + d.C + ' no matter what x is.</div>';
+        html += '<div style="margin:6px 0;">That describes a horizontal line, which never rises.</div>';
+        html += '<div>Rise = 0, so slope = <b>0</b>.</div>';
+    } else if (p.subtype === 'eq-slope-intercept') {
+        html += '<div>This equation is already in y = mx + b form:</div>';
+        html += '<div style="margin:6px 0;">' + equationHTML(p) + '</div>';
+        html += '<div>The coefficient of x is the slope: m = <b>' + fracText(p.correctSlope) + '</b></div>';
+    } else if (p.subtype === 'eq-standard-form') {
+        var A = d.A, B = d.B, C = d.C;
+        html += '<div>Start with: <b>' + fmtStandardForm(A, B, C) + '</b></div>';
+        html += '<div style="margin:6px 0;">Subtract the x-term from both sides: <b>' + termStr(B, 'y') + ' = ' + termStr(-A, 'x') + (C !== 0 ? (C > 0 ? ' + ' + C : ' - ' + Math.abs(C)) : '') + '</b></div>';
+        html += '<div>Divide every term by ' + B + ': slope = -A/B = -(' + A + ')/(' + B + ') = <b>' + fracText(p.correctSlope) + '</b></div>';
+    } else if (p.subtype === 'eq-standard-vertical') {
+        html += '<div>There is no y-term, so this equation describes a vertical line: <b>x = ' + d.C + '</b>.</div>';
+        html += '<div>Vertical lines have no run, so the slope is <b>undefined</b>.</div>';
+    } else if (p.subtype === 'meaning') {
+        var correctChoice = d.choices.filter(function (c) { return c.correct; })[0];
+        html += '<div>The slope is the constant rate of change in this situation:</div>';
+        html += '<div style="margin:6px 0;"><b>' + esc(correctChoice.text) + '</b></div>';
+        html += '<div>The other choices describe a fixed starting amount, a total, or a swapped rate - not the rate of change itself.</div>';
+    }
+    return html;
+}
+function toggleSolution() {
+    var box = document.getElementById('solution-box');
+    if (box.style.display === 'none') {
+        /* The walkthrough ends on the slope itself, so opening it is a reveal
+           too -- same rule as the Answer button. */
+        recordReveal();
+        box.className = 'answer-box';
+        box.innerHTML = buildSolutionHTML(currentProblem);
+        box.style.display = 'block';
+        if (currentProblem.kind === 'graph') {
+            rerenderGraphOnly(true);
+            /* The graph itself is aria-hidden, so describe the rise/run triangle
+               that the solution has just drawn onto it. */
+            box.innerHTML += '<div class="sr-only">' + esc(graphDescription(currentProblem, true)) + '</div>';
+        }
+        setExpanded('solution-btn', true);
+    } else {
+        box.style.display = 'none';
+        if (currentProblem.kind === 'graph') rerenderGraphOnly(false);
+        setExpanded('solution-btn', false);
+    }
+}
+function toggleStatsPanel() {
+    var box = document.getElementById('stats-box');
+    if (box.style.display === 'none') {
+        box.className = 'answer-box';
+        box.innerHTML = buildStatsHTML();
+        box.style.display = 'block';
+        setExpanded('stats-btn', true);
+    } else {
+        box.style.display = 'none';
+        setExpanded('stats-btn', false);
+    }
+}
+/* design item 11: a mode that was never attempted must read "not tried yet".
+   "0 of 0 (--)" reads as a failed topic the student has not even seen. */
+function statLine(s) {
+    if (!s || !s.t) return 'not tried yet';
+    return s.c + ' of ' + s.t + ' (' + pctText(s.c, s.t) + ')';
+}
+function buildStatsHTML() {
+    var html = '<div style="font-weight:800;margin-bottom:8px;">First-try accuracy: '
+        + statLine(overallStats) + '</div>';
+    html += '<div style="margin-bottom:8px;">Best streak: ' + bestStreak + '</div>';
+    CATEGORIES.forEach(function (cat) {
+        html += '<div>' + esc(CATEGORY_LABELS[cat]) + ': ' + statLine(categoryStats[cat]) + '</div>';
+    });
+    html += '<div style="margin-top:10px;font-size:12px;color:#565f8c;">Counted once per problem, on your first try. Retries and hints never count against you.</div>';
+    return html;
+}
+
+/* =====================================================================
+   Answer parsing & checking (numeric problems)
+   ===================================================================== */
+function parseSlopeInput(str) {
+    if (str == null) return null;
+    var s = str.trim().toLowerCase();
+    if (s === '') return null;
+    if (s === 'undefined' || s === 'no slope' || s === 'none' || s === 'und' || s === 'n/a') return { undefinedSlope: true };
+    s = s.replace(/\s+/g, '');
+    var neg = false;
+    if (s.charAt(0) === '+') { s = s.slice(1); }
+    if (s.charAt(0) === '-') { neg = true; s = s.slice(1); }
+    /* A sign is now allowed on the denominator too: a student who writes 3/-4
+       or -3/-4 has given a correct equivalent form and was previously told the
+       answer was unreadable. */
+    if (!/^\d*\.?\d+(\/[+-]?\d*\.?\d+)?$/.test(s)) return null;
+    var numV, denV;
+    if (s.indexOf('/') !== -1) {
+        var parts = s.split('/');
+        if (parts.length !== 2) return null;
+        numV = parseFloat(parts[0]); denV = parseFloat(parts[1]);
+    } else {
+        numV = parseFloat(s); denV = 1;
+    }
+    if (!isFinite(numV) || !isFinite(denV)) return null;
+    if (denV === 0) return { dividedByZero: true };
+    if (neg) numV = -numV;
+    return { num: numV, den: denV };
+}
+function isAnswerCorrect(problem, userParsed) {
+    if (!userParsed) return false;
+    if (userParsed.dividedByZero) return false;
+    if (problem.undefinedSlope) return !!userParsed.undefinedSlope;
+    if (userParsed.undefinedSlope) return false;
+    var correctVal = problem.correctSlope.num / problem.correctSlope.den;
+    var userVal = userParsed.num / userParsed.den;
+    return Math.abs(correctVal - userVal) < 1e-6;
+}
+/* Pass 4: a wrong answer should say WHERE the mistake is, not merely that one
+   exists. These are the four errors this topic actually produces. */
+function diagnoseSlope(problem, userParsed) {
+    if (!userParsed) return '';
+    if (problem.undefinedSlope) {
+        if (!userParsed.undefinedSlope) {
+            return ' This line has no run at all - the two points share the same x-value, so the fraction would divide by zero.';
+        }
+        return '';
+    }
+    if (userParsed.undefinedSlope) {
+        return ' This line does have a run, so its slope is a number. Only a vertical line has an undefined slope.';
+    }
+    var c = problem.correctSlope.num / problem.correctSlope.den;
+    var u = userParsed.num / userParsed.den;
+    if (c !== 0 && Math.abs(u + c) < 1e-6) {
+        return ' The size is right but the sign is wrong: this line ' + (c > 0 ? 'rises' : 'falls')
+            + ' from left to right, so the slope must be ' + (c > 0 ? 'positive' : 'negative') + '.';
+    }
+    if (u !== 0 && c !== 0 && Math.abs(u - 1 / c) < 1e-6) {
+        return ' That is run over rise. Slope is rise over run - divide the change in y by the change in x, not the other way round.';
+    }
+    if (Math.abs(u) < 1e-6 && c !== 0) {
+        return ' A slope of 0 means a perfectly flat line. This line does change height as it moves right.';
+    }
+    if ((u > 0) === (c > 0) && Math.abs(u) > 1e-6) {
+        return ' The sign is right, so check the numbers: count the rise between the two points, then the run.';
+    }
+    return ' Check the rise and the run between the two points, and watch the sign.';
+}
+function ensureStats(cat) {
+    if (!categoryStats[cat]) categoryStats[cat] = { c: 0, t: 0 };
+    return categoryStats[cat];
+}
+
+/* =====================================================================
+   Shared answer handling.
+   Scoring rule: each problem counts ONCE, scored on the first attempt.
+   Retries are unlimited and never add to the denominator.
+   ===================================================================== */
+var PRAISE_FIRST = ['Correct!', 'Nice work!', 'Exactly right!', 'Well done!', 'You got it!', 'Perfect!'];
+var PRAISE_RETRY = ['That\u2019s it!', 'Got it!', 'Yes \u2014 nice recovery!', 'There you go!'];
+
+function handleAnswer(isCorrect, detailText, whyWrong) {
+    var feedback = document.getElementById('feedback');
+    var stats = ensureStats(currentProblem.category);
+    var firstTry = !currentProblem.attempted;
+    currentProblem.attempted = true;
+
+    if (firstTry) {
+        stats.t++; overallStats.t++;
+        if (isCorrect) { stats.c++; overallStats.c++; }
+    }
+
+    if (isCorrect) {
+        currentProblem.locked = true;
+        var tail = detailText ? ' ' + detailText : '';
+        if (firstTry) {
+            streak++;
+            if (streak > bestStreak) bestStreak = streak;
+            if (!isTimerRunning) startTimer();
+            if (streak % 10 === 0) {
+                feedback.className = 'feedback correct victory';
+                feedback.textContent = streak + ' IN A ROW!' + tail;
+                createConfetti(200, 3);
+            } else if (streak % 5 === 0) {
+                feedback.className = 'feedback correct victory';
+                feedback.textContent = streak + ' in a row!' + tail;
+                createConfetti(120, 2);
+            } else {
+                feedback.className = 'feedback correct';
+                feedback.textContent = pick(PRAISE_FIRST) + tail;
+            }
+        } else {
+            feedback.className = 'feedback correct';
+            feedback.textContent = pick(PRAISE_RETRY) + tail;
+        }
+        document.getElementById('next-btn').style.display = 'inline-block';
+    } else {
+        if (firstTry) { streak = 0; stopTimer(); }
+        feedback.className = 'feedback incorrect';
+        feedback.textContent = 'Not quite.' + (whyWrong ? whyWrong : ' Try again!');
+    }
+    updateDisplay();
+    saveState();
+}
+
+function checkAnswer() {
+    if (currentProblem.locked) return;
+    var ansEl = document.getElementById('answer');
+    var val = ansEl.value;
+    if (val === '') return;
+    var parsed = parseSlopeInput(val);
+    var feedback = document.getElementById('feedback');
+    if (!parsed) {
+        feedback.className = 'feedback incorrect';
+        feedback.textContent = 'Enter a number, a fraction like 2/3, or the word undefined.';
+        return;
+    }
+    if (parsed.dividedByZero) {
+        feedback.className = 'feedback incorrect';
+        feedback.textContent = 'A fraction cannot have 0 on the bottom. If the run is 0, the slope is undefined - type the word undefined.';
+        return;
+    }
+    var correct = isAnswerCorrect(currentProblem, parsed);
+    if (correct) {
+        ansEl.disabled = true;
+        document.getElementById('submit-btn').disabled = true;
+    } else {
+        ansEl.value = '';
+        ansEl.focus();
+    }
+    handleAnswer(correct, 'Slope = ' + fracText(currentProblem.correctSlope),
+                 diagnoseSlope(currentProblem, parsed));
+}
+
+function selectChoice(idx) {
+    if (currentProblem.locked) return;
+    var choice = currentProblem.data.choices[idx];
+    var btn = document.getElementById('choice-' + idx);
+    if (choice.correct) {
+        btn.className = 'choice-btn correct-reveal';
+        currentProblem.data.choices.forEach(function (c, i) {
+            document.getElementById('choice-' + i).disabled = true;
+        });
+        handleAnswer(true, '');
+    } else {
+        btn.className = 'choice-btn wrong-picked';
+        btn.disabled = true;
+        handleAnswer(false, '',
+            ' That choice names a starting amount, a total, or a swapped rate. The slope is the amount that is added or removed for each single unit of the input.');
+    }
+}
+
+/* =====================================================================
+   Category tiles: native radios (single-select, arrow-key navigable)
+   ===================================================================== */
+function renderCategoryTiles() {
+    var html = '';
+    TILES.forEach(function (cat) {
+        var sel = (selectedCategory === cat);
+        var id = 'cat-' + cat;
+        html += '<input type="radio" name="slope-category" class="tile-input sr-only" id="' + id + '"'
+            + (sel ? ' checked' : '')
+            + ' onchange="selectCategory(\'' + cat + '\')">'
+            + '<label class="tile' + (cat === 'mixed' ? ' tile-mixed' : '') + '" for="' + id + '">'
+            + esc(CATEGORY_LABELS[cat])
+            + '</label>';
+    });
+    document.getElementById('category-tiles').innerHTML = html;
+}
+function selectCategory(cat) {
+    if (TILES.indexOf(cat) === -1) return;
+    if (selectedCategory === cat) return;
+    selectedCategory = cat;
+    renderCategoryTiles();
+    saveState();
+    generateProblem();
+}
+function activePool() {
+    return selectedCategory === 'mixed' ? CATEGORIES : [selectedCategory];
+}
+
+/* =====================================================================
+   Problem selection
+   ===================================================================== */
+function pickWeightedCategory(pool) {
+    var weights = pool.map(function (cat) {
+        var s = categoryStats[cat];
+        if (!s || s.t < 3) return 1.0;
+        return Math.max(0.2, 1 - (s.c / s.t));
+    });
+    var total = weights.reduce(function (a, b) { return a + b; }, 0);
+    var r = Math.random() * total;
+    for (var i = 0; i < pool.length; i++) {
+        r -= weights[i];
+        if (r <= 0) return pool[i];
+    }
+    return pool[pool.length - 1];
+}
+function generateProblem() {
+    document.getElementById('hint').style.display = 'none';
+    document.getElementById('answer-box').style.display = 'none';
+    document.getElementById('solution-box').style.display = 'none';
+    setExpanded('hint-btn', false);
+    setExpanded('answer-btn', false);
+    setExpanded('solution-btn', false);
+    var ansEl = document.getElementById('answer');
+    if (ansEl) { ansEl.value = ''; ansEl.disabled = false; }
+    document.getElementById('submit-btn').disabled = false;
+    document.getElementById('next-btn').style.display = 'none';
+    document.getElementById('feedback').textContent = '';
+
+    var cat = pickWeightedCategory(activePool());
+    categoryEncounters[cat] = (categoryEncounters[cat] || 0) + 1;
+    /* Anti-repeat: never serve the identical problem twice running. Bounded to
+       12 attempts so a narrow generator can never spin forever. */
+    var candidate = null, tries = 0;
+    do {
+        candidate = buildProblem(cat, categoryEncounters[cat]);
+        tries++;
+    } while (tries < 12 && lastProblemSignature && problemSignature(candidate) === lastProblemSignature);
+    lastProblemSignature = problemSignature(candidate);
+    currentProblem = candidate;
+    renderProblem(currentProblem);
+    announceProblem(currentProblem);
+    updateDisplay();
+}
+function problemSignature(p) {
+    if (!p) return '';
+    if (p.kind === 'choice') return 'choice|' + p.data.scenario;
+    if (p.kind === 'equation') return p.subtype + '|' + equationPlain(p);
+    return p.subtype + '|' + p.data.x1 + ',' + p.data.y1 + ',' + p.data.x2 + ',' + p.data.y2;
+}
+function goNextProblem() {
+    generateProblem();
+}
+
+/* =====================================================================
+   Display
+   ===================================================================== */
+function updateDisplay() {
+    document.getElementById('streak').textContent = streak;
+    document.getElementById('best-streak').textContent = bestStreak;
+    document.getElementById('overall-pct').textContent = pctText(overallStats.c, overallStats.t);
+    renderCategoryTiles();
+    updateTimerDisplay();
+}
+function updateTimerDisplay() {
+    var timerDisplay = document.getElementById('timer-display');
+    if (isTimerRunning) {
+        timerDisplay.textContent = 'Time: ' + formatTime(timer);
+        timerDisplay.style.display = 'inline-block';
+    } else {
+        timerDisplay.style.display = 'none';
+    }
+}
+
+/* =====================================================================
+   Timer
+   ===================================================================== */
+function startTimer() {
+    isTimerRunning = true;
+    timer = 0;
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(function () {
+        timer++;
+        updateTimerDisplay();
+    }, 1000);
+}
+function stopTimer() {
+    isTimerRunning = false;
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+function formatTime(seconds) {
+    var mins = Math.floor(seconds / 60);
+    var secs = seconds % 60;
+    return mins + ':' + (secs < 10 ? '0' : '') + secs;
+}
+
+/* =====================================================================
+   Confetti (8-colour Midnight Scholar palette)
+   ===================================================================== */
+function createConfetti(count, tier) {
+    if (!confettiEnabled) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var host = document.body;
+    /* design item 10: #ef4444 (red, not in the palette) and #f59e0b (orange,
+       banned outright) swapped for mint and heritage rose. Still 8 colours. */
+    var colors = ['#7c3aed', '#22c55e', '#2e3d8f', '#10b981', '#c76b8f', '#ffeb3b', '#0d9488', '#a78bfa'];
+    var isMassive = tier === 3;
+    for (var i = 0; i < count; i++) {
+        var piece = document.createElement('div');
+        piece.className = 'confetti';
+        piece.setAttribute('aria-hidden', 'true');
+        var base;
+        if (tier === 1) base = 7 + Math.random() * 5;
+        else if (tier === 2) base = 10 + Math.random() * 7;
+        else base = 11 + Math.random() * 9;
+        var color = colors[Math.floor(Math.random() * colors.length)];
+        var shape = Math.floor(Math.random() * 4);
+        if (shape === 0) {
+            piece.style.width = base + 'px'; piece.style.height = base + 'px';
+            piece.style.background = color; piece.style.borderRadius = '50%';
+        } else if (shape === 1) {
+            piece.style.width = base + 'px'; piece.style.height = base + 'px';
+            piece.style.background = color; piece.style.borderRadius = '2px';
+        } else if (shape === 2) {
+            piece.style.width = Math.max(4, base * 0.35) + 'px'; piece.style.height = (base * 1.7) + 'px';
+            piece.style.background = color; piece.style.borderRadius = '2px';
+        } else {
+            piece.style.width = '0'; piece.style.height = '0'; piece.style.background = 'transparent';
+            piece.style.borderLeft = (base * 0.6) + 'px solid transparent';
+            piece.style.borderRight = (base * 0.6) + 'px solid transparent';
+            piece.style.borderBottom = base + 'px solid ' + color;
+        }
+        piece.style.left = Math.random() * 100 + '%';
+        piece.style.top = '-20px';
+        var dur;
+        if (tier === 1) dur = 1.3 + Math.random() * 0.8;
+        else if (tier === 2) dur = 1.6 + Math.random() * 1.2;
+        else dur = 2.0 + Math.random() * 1.6;
+        piece.style.animation = (isMassive ? 'confetti-fall-slow' : 'confetti-fall') + ' ' + dur + 's ease-out forwards';
+        piece.style.animationDelay = (Math.random() * (isMassive ? 0.8 : 0.4)) + 's';
+        host.appendChild(piece);
+        setTimeout((function (el) { return function () { if (el.parentNode) el.parentNode.removeChild(el); }; })(piece), isMassive ? 6000 : 4500);
+    }
+    if (isMassive) {
+        for (var j = 0; j < 15; j++) {
+            var sp = document.createElement('div');
+            sp.className = 'sparkle';
+            sp.setAttribute('aria-hidden', 'true');
+            sp.style.left = (Math.random() * 90 + 5) + '%';
+            sp.style.top = (Math.random() * 55 + 10) + 'vh';
+            sp.style.animationDelay = (Math.random() * 0.5) + 's';
+            host.appendChild(sp);
+            setTimeout((function (el) { return function () { if (el.parentNode) el.parentNode.removeChild(el); }; })(sp), 3500);
+        }
+    }
+}
+
+/* =====================================================================
+   Confetti setting (design item 9) - its own key so clearing progress
+   does not silently turn the animation back on.
+   ===================================================================== */
+var CONFETTI_KEY = 'midnightScholar_slope_confetti_v1';
+var confettiEnabled = true;
+function loadConfettiSetting() {
+    try {
+        var v = localStorage.getItem(CONFETTI_KEY);
+        if (v === '0') confettiEnabled = false;
+        else if (v === '1') confettiEnabled = true;
+    } catch (e) {}
+}
+function syncConfettiSwitch() {
+    var btn = document.getElementById('confetti-switch');
+    if (btn) btn.setAttribute('aria-pressed', confettiEnabled ? 'true' : 'false');
+}
+function toggleConfettiSetting() {
+    confettiEnabled = !confettiEnabled;
+    try { localStorage.setItem(CONFETTI_KEY, confettiEnabled ? '1' : '0'); } catch (e) {}
+    syncConfettiSwitch();
+}
+
+/* =====================================================================
+   Persistence (values sanitised on load - never trusted raw)
+   ===================================================================== */
+function safeCount(v) {
+    var n = Number(v);
+    if (!isFinite(n) || n < 0) return 0;
+    return Math.floor(n);
+}
+function sanitizeStatBucket(obj) {
+    var out = {};
+    if (!obj || typeof obj !== 'object') return out;
+    CATEGORIES.forEach(function (cat) {
+        var s = obj[cat];
+        if (s && typeof s === 'object') {
+            var c = safeCount(s.c), t = safeCount(s.t);
+            if (c > t) c = t;
+            out[cat] = { c: c, t: t };
+        }
+    });
+    return out;
+}
+function sanitizeEncounters(obj) {
+    var out = {};
+    if (!obj || typeof obj !== 'object') return out;
+    CATEGORIES.forEach(function (cat) {
+        if (Object.prototype.hasOwnProperty.call(obj, cat)) out[cat] = safeCount(obj[cat]);
+    });
+    return out;
+}
+function saveState() {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            selectedCategory: selectedCategory,
+            categoryStats: categoryStats,
+            categoryEncounters: categoryEncounters,
+            bestStreak: bestStreak,
+            overallStats: overallStats
+        }));
+    } catch (e) {}
+}
+function loadState() {
+    try {
+        var raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        var s = JSON.parse(raw);
+        if (typeof s.selectedCategory === 'string' && TILES.indexOf(s.selectedCategory) !== -1) {
+            selectedCategory = s.selectedCategory;
+        } else if (Object.prototype.toString.call(s.selectedCategories) === '[object Array]') {
+            // migrate from the earlier multi-select format
+            var filtered = s.selectedCategories.filter(function (c) { return CATEGORIES.indexOf(c) !== -1; });
+            if (filtered.length > 1) selectedCategory = 'mixed';
+            else if (filtered.length === 1) selectedCategory = filtered[0];
+        }
+        categoryStats = sanitizeStatBucket(s.categoryStats);
+        categoryEncounters = sanitizeEncounters(s.categoryEncounters);
+        bestStreak = safeCount(s.bestStreak);
+        var oc = s.overallStats && typeof s.overallStats === 'object' ? s.overallStats : {};
+        var c = safeCount(oc.c), t = safeCount(oc.t);
+        if (c > t) c = t;
+        overallStats = { c: c, t: t };
+    } catch (e) {}
+}
+function resetProgress() {
+    var btn = document.getElementById('reset-btn');
+    if (!resetArmed) {
+        resetArmed = true;
+        btn.textContent = 'Tap again to confirm reset';
+        if (resetTimeoutId) clearTimeout(resetTimeoutId);
+        resetTimeoutId = setTimeout(function () {
+            resetArmed = false;
+            btn.textContent = 'Reset Progress';
+        }, 3000);
+        return;
+    }
+    if (resetTimeoutId) { clearTimeout(resetTimeoutId); resetTimeoutId = null; }
+    resetArmed = false;
+    categoryStats = {};
+    categoryEncounters = {};
+    bestStreak = 0;
+    overallStats = { c: 0, t: 0 };
+    selectedCategory = 'graph';
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    btn.textContent = 'Reset Progress';
+    streak = 0; stopTimer(); timer = 0;
+    generateProblem();
+    updateDisplay();
+}
+
+/* =====================================================================
+   Input helpers
+   ===================================================================== */
+function toggleSign() {
+    var el = document.getElementById('answer');
+    if (!el || el.disabled) return;
+    el.value = el.value.charAt(0) === '-' ? el.value.slice(1) : '-' + el.value;
+    el.focus();
+}
+function insertSlash() {
+    var el = document.getElementById('answer');
+    if (!el || el.disabled) return;
+    if (el.value.indexOf('/') === -1) el.value = el.value + '/';
+    el.focus();
+}
+function insertUndefined() {
+    var el = document.getElementById('answer');
+    if (!el || el.disabled) return;
+    el.value = 'undefined';
+    el.focus();
+}
+
+/* =====================================================================
+   Boot
+   ===================================================================== */
+loadState();
+loadConfettiSetting();
+syncConfettiSwitch();
+renderCategoryTiles();
+generateProblem();
+updateDisplay();
+setInterval(saveState, 5000);
+</script>
+</body>
+</html>
