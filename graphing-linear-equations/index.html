@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'unsafe-inline'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Graphing Linear Equations</title>
+<meta name="theme-color" content="#1b2450">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+/* ===== MIDNIGHT SCHOLAR - navy stage, white card, violet + mint accents ===== */
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+    font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+    background:
+        radial-gradient(900px 500px at 85% -10%, rgba(124, 58, 237, 0.28), transparent 60%),
+        radial-gradient(800px 500px at -10% 110%, rgba(16, 185, 129, 0.18), transparent 55%),
+        linear-gradient(160deg, #141b3d 0%, #1b2450 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 16px 12px;
+    margin: 0;
+}
+.card {
+    background: #ffffff;
+    border-radius: 22px;
+    box-shadow: 0 24px 60px rgba(8, 12, 40, 0.55);
+    max-width: 620px;
+    width: 100%;
+    padding: 26px 22px 24px;
+    position: relative;
+    overflow: hidden;
+    margin-top: 6px;
+}
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+}
+/* The heading box shrinks to its text so the rule below can match it. */
+h1 {
+    text-align: center;
+    color: #1e2a5e;
+    margin: 4px auto 4px;
+    font-size: 23px;
+    letter-spacing: 0.3px;
+    font-weight: 800;
+    width: fit-content;
+    max-width: 100%;
+}
+.subtitle {
+    text-align: center;
+    color: #6b7280;
+    font-size: 12.5px;
+    margin-bottom: 6px;
+}
+h1::after {
+    content: '';
+    display: block;
+    /* design system: the rule matches the width of the title text */
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    margin: 8px auto 14px;
+    background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+}
+
+/* top info bar */
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.info-item { font-size: 12.5px; font-weight: 700; color: #374151; }
+.score-wrap { display: flex; align-items: center; gap: 6px; }
+.score-cup {
+    width: 22px; height: 22px;
+    border: 2px solid #1e3a8a;
+    border-radius: 0 0 6px 6px;
+    position: relative;
+    overflow: hidden;
+    background: white;
+}
+.score-fill { position: absolute; bottom: 0; left: 0; right: 0; transition: height 0.5s ease; }
+.score-fill.good { background: linear-gradient(to top, #16a34a, #4ade80); }
+.score-fill.mid { background: linear-gradient(to top, #1d4ed8, #60a5fa); }
+.score-fill.low { background: linear-gradient(to top, #7c3aed, #a78bfa); }
+.reset-btn {
+    background: none; border: 1.5px solid #d1d5db; color: #6b7280;
+    font-size: 11px; font-weight: 700; border-radius: 8px;
+    padding: 4px 8px; cursor: pointer;
+}
+.reset-btn:hover { border-color: #9ca3af; }
+
+/* category tabs */
+.cat-row { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+.cat-btn {
+    flex: 1 1 0;
+    min-width: 90px;
+    background: #eef0fb;
+    border: 2px solid #c7cdf0;
+    color: #2e3d8f;
+    font-family: inherit;
+    font-weight: 800;
+    font-size: 12px;
+    border-radius: 12px;
+    padding: 8px 6px 6px;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+.cat-btn:hover { transform: translateY(-1px); }
+.cat-btn.active {
+    /* a11y: the gradient is declared as background-image over an explicit
+       background-color. Identical on screen, but the white .cat-stat text now
+       has a solid colour behind it that a contrast checker can actually read
+       (white on #2e3d8f = 9.6:1; white on the #7c3aed end = 5.7:1). */
+    background-color: #2e3d8f;
+    background-image: linear-gradient(135deg, #2e3d8f, #7c3aed);
+    border-color: #2e3d8f;
+    color: #fff;
+}
+.cat-stat { display: block; font-size: 10px; font-weight: 700; margin-top: 3px; opacity: 0.85; }
+
+/* equation / given panel */
+.equation {
+    font-size: 21px;
+    font-weight: 800;
+    text-align: center;
+    margin: 4px auto 10px;
+    font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    color: #1e2a5e;
+    background: #eef0fb;
+    border: 2px solid #c7cdf0;
+    border-radius: 14px;
+    padding: 12px 10px;
+    max-width: 100%;
+}
+.given-chips { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.chip {
+    background: #eef0fb;
+    border: 2px solid #c7cdf0;
+    color: #1e2a5e;
+    font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    font-weight: 800;
+    font-size: 15px;
+    border-radius: 999px;
+    padding: 6px 14px;
+}
+.given-x-list { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.chip-x {
+    background: #fff;
+    border: 2px solid #a5b4fc;
+    color: #2e3d8f;
+    font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    font-weight: 700;
+    font-size: 13px;
+    border-radius: 999px;
+    padding: 4px 10px;
+}
+.chip-x.done { border-color: #10b981; color: #059669; background: #ecfdf5; }
+.chip-x.current { border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124,58,237,0.18); }
+
+.instruction {
+    text-align: center;
+    color: #374151;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    min-height: 20px;
+}
+.instruction .sub {
+    display: block;
+    font-weight: 500;
+    color: #6b7280;
+    font-size: 12.5px;
+    margin-top: 2px;
+}
+
+/* graph */
+.graph-wrap {
+    display: flex;
+    justify-content: center;
+    margin: 6px auto 8px;
+    touch-action: manipulation;
+}
+svg#graph { width: 100%; max-width: 380px; height: auto; display: block; cursor: crosshair; touch-action: manipulation; }
+#click-catcher { touch-action: manipulation; }
+/* a11y: the plot area is now operable from the keyboard, so it must show focus.
+   The ring and the crosshair appear only while the graph holds keyboard focus,
+   so nothing changes for a mouse user. */
+#plot-surface { border-radius: 12px; }
+#plot-surface:focus { outline: none; }
+#plot-surface:focus-visible { outline: 3px solid #2e3d8f; outline-offset: 3px; }
+.kbd-cursor line { stroke: #2e3d8f; stroke-width: 2; }
+.kbd-cursor circle { fill: none; stroke: #2e3d8f; stroke-width: 2.5; }
+.kbd-help {
+    text-align: center;
+    font-size: 11px;
+    color: #4b5563;
+    margin: 0 0 6px;
+}
+.grid-line { stroke: #e5e7eb; stroke-width: 1; }
+.grid-line.major { stroke: #d1d5db; }
+.axis-line { stroke: #1e2a5e; stroke-width: 2; }
+.axis-label { font-family: 'Nunito', sans-serif; font-size: 9px; fill: #6b7280; }
+.plot-point { transition: r 0.15s; }
+.plot-point.correct { fill: #10b981; stroke: #065f46; stroke-width: 1.5; }
+.plot-point.revealed { fill: #7c3aed; stroke: #4c1d95; stroke-width: 1.5; }
+/* design item S2: the system says incorrect feedback is ink navy, never red.
+   The X shape already carries "wrong", so nothing is lost by dropping #dc2626. */
+.plot-point.wrong-flash line { stroke: #1e2a5e; stroke-width: 3; stroke-linecap: round; }
+.plot-line { stroke: #7c3aed; stroke-width: 2.5; opacity: 0; transition: opacity 0.6s ease; }
+.plot-line.shown { opacity: 0.85; }
+
+/* feedback */
+.feedback {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    min-height: 20px;
+    margin: 6px 0 4px;
+}
+.feedback.good { color: #047857; }
+.feedback.bad { color: #7c3aed; }
+
+.hint-box, .done-parts {
+    background: #dbeafe;
+    border: 2px solid #1e3a8a;
+    border-radius: 10px;
+    padding: 9px 12px;
+    margin: 8px 0;
+    font-size: 12.5px;
+    color: #1e3a8a;
+    line-height: 1.5;
+}
+.done-parts {
+    background: #d1fae5;
+    border-color: #10b981;
+    color: #065f46;
+}
+.done-parts .eq { font-family: "Consolas", monospace; font-weight: bold; }
+
+.controls { display: flex; justify-content: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.btn {
+    font-family: inherit;
+    font-weight: 800;
+    font-size: 13px;
+    border: none;
+    border-radius: 10px;
+    padding: 9px 16px;
+    cursor: pointer;
+    color: #fff;
+}
+.btn-hint { background: #7c3aed; }
+.btn-hint:hover { background: #6d28d9; }
+.btn-show { background: #047857; }
+.btn-show:hover { background: #065f46; }
+.btn-skip { background: #6b7280; }
+.btn-skip:hover { background: #4b5563; }
+/* CONTRAST FIX: white on #10b981 is 2.54:1 and white on #0d9488 is 3.74:1;
+   both fail AA for this 13px/800 label. Darkened to the two teals the
+   accessibility checklist sanctions: #0f766e = 5.49:1, #0b7a70 = 5.21:1. */
+.btn-next { background: linear-gradient(135deg, #0f766e, #0b7a70); }
+.btn-next:hover { filter: brightness(1.05); }
+.btn:disabled { opacity: 0.5; cursor: default; }
+
+.btn:focus-visible,
+.cat-btn:focus-visible,
+.reset-btn:focus-visible,
+.switch:focus-visible,
+.sign-btn:focus-visible {
+    outline: 3px solid #1e2a5e;
+    outline-offset: 2px;
+}
+
+.xy-table-wrap { display: flex; justify-content: center; margin: 0 0 10px; }
+.xy-table { border-collapse: collapse; }
+.xy-table th, .xy-table td {
+    border: 2px solid #c7cdf0;
+    padding: 6px 18px;
+    text-align: center;
+    font-weight: 800;
+    color: #1e2a5e;
+    font-size: 14px;
+    font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+}
+.xy-table th {
+    background: #2e3d8f;
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+}
+.xy-table td { background: #eef0fb; }
+.xy-table tr.current-row td { background: #ede9fe; border-color: #7c3aed; }
+.xy-table tr.done-row td { background: #ecfdf5; border-color: #10b981; color: #059669; }
+.table-input {
+    width: 46px;
+    font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    font-weight: 800;
+    font-size: 14px;
+    text-align: center;
+    border: 2px solid #7c3aed;
+    border-radius: 6px;
+    padding: 4px 2px;
+    color: #1e2a5e;
+    background: #fff;
+}
+.table-input:focus { outline: none; border-color: #6d28d9; box-shadow: 0 0 0 3px rgba(124,58,237,0.18); }
+.sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+.sign-btn {
+    border: none;
+    background: #eef0fb;
+    color: #2e3d8f;
+    font-weight: 800;
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin-right: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+    min-height: 34px;
+}
+.sign-btn:hover { background: #dfe3fb; }
+.solve-wrap { margin: 0 0 10px; }
+.solve-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    border: 2px solid #c7cdf0;
+    background: #eef0fb;
+    border-radius: 12px;
+    padding: 9px 12px;
+    margin-bottom: 6px;
+}
+.solve-row.current { border-color: #7c3aed; background: #f5f3ff; }
+.solve-row.done { border-color: #10b981; background: #ecfdf5; }
+.solve-ask { font-size: 12.5px; font-weight: 700; color: #1e2a5e; }
+.solve-val {
+    display: flex;
+    align-items: center;
+    font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    font-weight: 800;
+    font-size: 15px;
+    color: #1e2a5e;
+    white-space: nowrap;
+}
+.solve-row.done .solve-val { color: #047857; }
+.solve-val .table-input { width: 52px; margin: 0 2px; }
+.solve-check {
+    color: #047857;
+    font-weight: 800;
+    font-size: 17px;
+    margin-left: 8px;
+    line-height: 1;
+}
+.table-check-wrap { display: flex; justify-content: center; align-items: center; gap: 8px; margin: -2px 0 10px; }
+.table-check-wrap .sign-btn { margin-right: 0; padding: 8px 14px; }
+/* A physical keyboard already has a minus key, so the sign toggle is only
+   needed on touch devices, where the numeric keypad has no minus. */
+@media (hover: hover) and (pointer: fine) {
+    .sign-btn { display: none; }
+}
+.btn-check { background: #2e3d8f; font-size: 12.5px; padding: 7px 14px; }
+.btn-check:hover { background: #1e2a5e; }
+
+.streak-note { text-align: center; font-size: 11px; color: #6b7280; margin-top: 4px; }
+
+/* ===== Structural fraction (design item 12) =====
+   Stacked, never a slash. The bar is a real element at full width so the
+   vinculum extends past the digits the way a printed one does. */
+.frac {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: stretch;
+    vertical-align: middle;
+    font-size: 0.78em;
+    line-height: 1.05;
+    text-align: center;
+    margin: 0 1px;
+}
+.frac-num { padding: 3px 10px; }
+.frac-bar {
+    height: 3px;
+    border-radius: 2px;
+    background: currentColor;
+    width: 100%;
+}
+.frac-den { padding: 3px 10px; }
+
+/* ===== Settings row (design item 9: confetti is always paired with a toggle) ===== */
+.settings-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 14px 0 0;
+}
+.settings-label { font-size: 13px; font-weight: 700; color: #4a5480; }
+.switch {
+    position: relative;
+    flex: 0 0 44px;
+    width: 44px;
+    height: 24px;
+    padding: 0;
+    border-radius: 999px;
+    background: #d5d9e8;
+    /* 1px navy-grey rim so the track boundary clears 3:1 on the white card in
+       both states - the mint fill on its own would not. */
+    border: 1px solid #8a93b8;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.switch-knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(8, 12, 40, 0.4);
+    transition: transform 0.2s;
+}
+.switch[aria-pressed="true"] { background: #10b981; border-color: #0b7a70; }
+.switch[aria-pressed="true"] .switch-knob { transform: translateX(20px); }
+
+/* confetti */
+.confetti { position: fixed; width: 10px; height: 10px; opacity: 0; pointer-events: none; z-index: 9999; }
+.confetti.small { width: 7px; height: 7px; }
+.confetti.large { width: 14px; height: 14px; }
+/* design item 8: the shared engine falls the whole screen and never fades.
+   520px/640px died mid-screen on a phone, and the fade to opacity 0 made the
+   pieces vanish before they landed. */
+@keyframes confetti-fall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 1; }
+}
+@keyframes confetti-fall-slow {
+    0% { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 1; }
+    100% { transform: translateY(115vh) rotate(1080deg) scale(0.85); opacity: 1; }
+}
+.sparkle {
+    position: fixed; width: 18px; height: 18px;
+    background: radial-gradient(circle, #fff 0%, #a78bfa 50%, transparent 70%);
+    border-radius: 50%;
+    animation: sparkle 0.5s ease-in-out infinite;
+    pointer-events: none; z-index: 9998;
+}
+@keyframes sparkle { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.5); } }
+
+/* a11y baseline: this block was missing entirely. Suppresses confetti and all
+   motion for anyone who has asked their OS for reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+    .confetti, .sparkle { display: none !important; }
+    * { transition: none !important; animation: none !important; }
+}
+
+@media (max-width: 480px) {
+    .card { padding: 18px 12px 16px; }
+    h1 { font-size: 19px; }
+    .equation { font-size: 18px; }
+    .cat-btn { font-size: 10.5px; padding: 7px 4px 5px; }
+    .chip { font-size: 13px; padding: 5px 10px; }
+}
+</style>
+</head>
+<body>
+<main class="card" id="game-card">
+    <h1>Graphing Linear Equations</h1>
+    <div class="subtitle">Plot the line -- intercepts, points, and slope</div>
+
+    <!-- a11y: each new problem is announced here in words. The visual equation
+         panel is aria-hidden so it is not read a second time. -->
+    <p class="sr-only" id="problem-live" role="status" aria-live="polite" aria-atomic="true"></p>
+
+    <div class="topbar">
+        <div class="info-item">Problem <span id="problemNum">1</span></div>
+        <div class="score-wrap">
+            <div class="info-item" id="accuracyLabel" aria-hidden="true">Accuracy</div>
+            <div class="score-cup" aria-hidden="true"><div class="score-fill good" id="scoreFill" style="height:0%"></div></div>
+            <!-- aria-labelledby used to replace this element's own text, so a
+                 screen reader announced "Accuracy" instead of the percentage.
+                 The spoken sentence now lives in its own polite region. -->
+            <div class="info-item"><span id="scorePct" aria-hidden="true">--</span></div>
+            <span class="sr-only" id="scoreLive" role="status" aria-live="polite" aria-atomic="true">Accuracy not yet measured</span>
+        </div>
+        <button class="reset-btn" id="resetBtn" onclick="handleResetClick()">Reset</button>
+    </div>
+
+    <div class="cat-row" role="tablist" aria-label="Problem type">
+        <button class="cat-btn active" role="tab" aria-selected="true" data-cat="points" onclick="setCategory('points')">
+            Plot the Points<span class="cat-stat" id="stat-points">not tried yet</span>
+        </button>
+        <button class="cat-btn" role="tab" aria-selected="false" data-cat="intercepts" onclick="setCategory('intercepts')">
+            Find Intercepts<span class="cat-stat" id="stat-intercepts">not tried yet</span>
+        </button>
+        <button class="cat-btn" role="tab" aria-selected="false" data-cat="slope" onclick="setCategory('slope')">
+            Slope &amp; Intercept<span class="cat-stat" id="stat-slope">not tried yet</span>
+        </button>
+    </div>
+
+    <!-- aria-hidden: #problem-live speaks this equation in words already. It
+         contains no focusable control, so hiding it traps nothing. -->
+    <div id="equation-area" aria-hidden="true"></div>
+
+    <div id="table-area"></div>
+    <div id="table-check-area"></div>
+
+    <div class="instruction" id="instruction" role="status" aria-live="polite"></div>
+
+    <p class="kbd-help" id="kbdHelp">Click the graph to plot, or press Tab to it and use the arrow keys.</p>
+    <!-- PASS 4 BLOCKER FIX: plotting used to be reachable by mouse only, so the
+         whole game was unplayable from the keyboard. #plot-surface is focusable
+         and drives a crosshair with the arrow keys; Enter or Space plots.
+         role=application so arrow keys reach the handler in a screen reader's
+         browse mode. The static SVG description stays on the svg itself. -->
+    <div class="graph-wrap" id="plot-surface" tabindex="0" role="application"
+         aria-label="Coordinate plane plotter" aria-describedby="kbdInstructions">
+        <svg id="graph" viewBox="0 0 420 420" xmlns="http://www.w3.org/2000/svg" role="img" focusable="false" aria-labelledby="graphTitle graphDesc"></svg>
+    </div>
+    <p class="sr-only" id="kbdInstructions">Use the arrow keys to move the crosshair one unit at a time. Hold Shift with an arrow key to move five units. Press Home to jump to the origin. Press Enter or Space to plot a point where the crosshair is.</p>
+    <p class="sr-only" id="cursor-live" role="status" aria-live="polite" aria-atomic="true"></p>
+
+    <div class="feedback" id="feedback" role="alert" aria-live="assertive"></div>
+    <div id="hint-area" role="region" aria-live="polite" aria-label="Hint"></div>
+    <div id="done-area" role="region" aria-live="polite" aria-label="Solution summary"></div>
+
+    <div class="controls">
+        <button class="btn btn-hint" id="hintBtn" onclick="showHint()">Hint</button>
+        <button class="btn btn-show" id="showAnswerBtn" onclick="showAnswer()">Show Answer</button>
+        <button class="btn btn-skip" id="skipBtn" onclick="skipProblem()">Skip</button>
+        <button class="btn btn-next" id="nextBtn" onclick="newProblem()" style="display:none;">Next Problem</button>
+    </div>
+    <div class="streak-note" id="streakNote"></div>
+
+    <!-- design item 9: confetti is always paired with a settings toggle, stored
+         per device. A real button, so it is keyboard reachable; aria-pressed
+         carries the state and is re-synced from storage on every load. -->
+    <div class="settings-row">
+        <span class="settings-label" id="confetti-label">Confetti celebrations</span>
+        <button type="button" class="switch" id="confetti-switch" aria-pressed="true"
+                aria-label="Confetti celebrations" onclick="toggleConfettiSetting()"><span class="switch-knob" aria-hidden="true"></span></button>
+    </div>
+</main>
+
+<script>
+// ================= constants / helpers =================
+var GRID_MIN = -10, GRID_MAX = 10;
+var MARGIN = 34, PLOT = 352, SCALE = PLOT / (GRID_MAX - GRID_MIN);
+var ORIGIN = MARGIN + PLOT / 2;
+var VB = PLOT + 2 * MARGIN;
+
+/* Security: every number written into an SVG attribute passes through num(),
+   so a non-numeric value can never terminate the quoted attribute early. */
+function num(v) { var n = Number(v); return isFinite(n) ? n : 0; }
+function toSX(gx) { return ORIGIN + num(gx) * SCALE; }
+function toSY(gy) { return ORIGIN - num(gy) * SCALE; }
+/* Spoken forms: a bare ASCII hyphen is skipped or mispronounced by screen
+   readers, and the house style forbids non-ASCII characters in the source. */
+function spokenNum(v) {
+    var n = Number(v);
+    if (!isFinite(n)) return 'unknown';
+    return n < 0 ? ('negative ' + Math.abs(n)) : String(n);
+}
+function spokenPoint(x, y) { return 'x equals ' + spokenNum(x) + ', y equals ' + spokenNum(y); }
+function ri(lo, hi) { return Math.floor(Math.random() * (hi - lo + 1)) + lo; }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { var t = b; b = a % b; a = t; } return a; }
+function samePt(a, b) { return a.x === b.x && a.y === b.y; }
+
+function fmtSlope(m) { return m.d === 1 ? String(m.n) : (m.n + '/' + m.d); }
+function fmtCoef(c) { return c === 1 ? '' : (c === -1 ? '-' : String(c)); }
+
+/* design item 12: fractions are built stacked, never as slash text.
+   A stacked fraction carries its meaning entirely in CSS layout, so a screen
+   reader would read "3 2" for three halves. role="img" plus a generated label
+   gives it a spoken equivalent - the same pattern Radical Expressions uses. */
+function fracHTML(n, d) {
+    var label = 'the fraction ' + spokenNum(n) + ' over ' + spokenNum(d);
+    return '<span class="frac" role="img" aria-label="' + label + '">'
+        + '<span class="frac-num">' + num(n) + '</span>'
+        + '<span class="frac-bar"></span>'
+        + '<span class="frac-den">' + num(d) + '</span></span>';
+}
+/* Slope as display markup: a whole number stays plain text, anything else
+   becomes the structural fraction. */
+function slopeHTML(m) {
+    return m.d === 1 ? String(num(m.n)) : fracHTML(m.n, m.d);
+}
+
+function fmtDivStep(C, D, result) {
+    if (D === 1) return String(result);
+    if (D === -1) return '-(' + C + ') = ' + result;
+    if (D < 0) return '(' + C + ')/(' + D + ') = ' + result;
+    return C + '/' + D + ' = ' + result;
+}
+
+function fmtStdEq(A, B, C) {
+    var s = (A === -1 ? '-' : (Math.abs(A) === 1 ? '' : A)) + 'x';
+    s += (B >= 0 ? ' + ' : ' - ') + (Math.abs(B) === 1 ? '' : Math.abs(B)) + 'y';
+    s += ' = ' + C;
+    return s;
+}
+/* Returns display markup (design item 12), not plain text. Every caller feeds
+   it to innerHTML; the spoken form of each problem comes from speakSIEq(). */
+function fmtSlopeInterceptEq(m, b) {
+    if (m.n === 0) return 'y = ' + b;
+    var mPart = m.d === 1 ? fmtCoef(m.n) : fracHTML(m.n, m.d);
+    var s = 'y = ' + mPart + 'x';
+    if (b > 0) s += ' + ' + b; else if (b < 0) s += ' - ' + Math.abs(b);
+    return s;
+}
+/* Spoken equivalents of the two printed equation forms. */
+function speakSlope(m) {
+    if (m.n === 0) return '0';
+    return m.d === 1 ? spokenNum(m.n) : (spokenNum(m.n) + ' over ' + m.d);
+}
+function speakSIEq(m, b) {
+    if (m.n === 0) return 'y equals ' + spokenNum(b);
+    var s = 'y equals ' + speakSlope(m) + ' times x';
+    if (b > 0) s += ' plus ' + b; else if (b < 0) s += ' minus ' + Math.abs(b);
+    return s;
+}
+function speakStdEq(A, B, C) {
+    var s = spokenNum(A) + ' times x';
+    s += (B > 0 ? ' plus ' : ' minus ') + Math.abs(B) + ' times y';
+    return s + ' equals ' + spokenNum(C);
+}
+
+// ================= generators =================
+var SLOPES = [
+    {n:1,d:1},{n:2,d:1},{n:3,d:1},{n:-1,d:1},{n:-2,d:1},{n:-3,d:1},
+    {n:1,d:2},{n:-1,d:2},{n:3,d:2},{n:-3,d:2},
+    {n:1,d:3},{n:-1,d:3},{n:2,d:3},{n:-2,d:3}
+];
+var SLOPES_INT = SLOPES.filter(function(s){ return s.d === 1; });
+var SLOPES_HALF = SLOPES.filter(function(s){ return s.d === 1 || s.d === 2; });
+
+function genIntercepts() {
+    var pool = [-8,-7,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,7,8];
+    var a = pick(pool), b = pick(pool);
+    var A = b, B = a, C = a * b;
+    var g = gcd(gcd(A,B), C) || 1;
+    A = A/g; B = B/g; C = C/g;
+    return { type:'std', A:A, B:B, C:C, xInt:C/A, yInt:C/B };
+}
+
+function genFindPoints() {
+    var attempted = stats.points.d;
+    var tier = attempted < 4 ? 0 : (attempted < 8 ? 1 : 2);
+    var pool = tier === 0 ? SLOPES_INT : (tier === 1 ? SLOPES_HALF : SLOPES);
+    var allowVert = tier === 2;
+    var allowZero = tier >= 1;
+    var special = (allowVert && Math.random() < 0.10) ? 'vert' : ((allowZero && Math.random() < 0.11) ? 'zero' : null);
+    var numPts = Math.random() < 0.3 ? 3 : 2;
+    if (special === 'vert') {
+        var k = ri(-6, 6);
+        var ys = [];
+        while (ys.length < numPts) {
+            var y = ri(-8, 8);
+            if (ys.indexOf(y) === -1) ys.push(y);
+        }
+        return { type:'vert', k:k, given:ys };
+    }
+    var m = special === 'zero' ? {n:0,d:1} : pick(pool);
+    var b = ri(-8, 8);
+    var xs = [], tries = 0;
+    while (xs.length < numPts && tries < 200) {
+        tries++;
+        var x = ri(-4,4) * m.d;
+        if (x < -8 || x > 8) continue;
+        var y = (m.n * x) / m.d + b;
+        if (y < -8 || y > 8) continue;
+        if (xs.indexOf(x) !== -1) continue;
+        xs.push(x);
+    }
+    if (xs.length < numPts) return null;
+    return { type:'std', m:m, b:b, given:xs };
+}
+
+function genSlopeIntercept() {
+    var attempted = stats.slope.d;
+    var m;
+    if (attempted === 0) {
+        m = pick(SLOPES.filter(function(s){ return s.n > 0 && s.d > 1; }));
+    } else if (attempted === 1) {
+        m = pick(SLOPES.filter(function(s){ return s.n > 0 && s.d === 1; }));
+    } else if (attempted === 2) {
+        m = pick(SLOPES.filter(function(s){ return s.n < 0 && s.d > 1; }));
+    } else if (attempted === 3) {
+        m = pick(SLOPES.filter(function(s){ return s.n < 0 && s.d === 1; }));
+    } else {
+        var special = Math.random() < 0.12;
+        m = special ? {n:0,d:1} : pick(SLOPES);
+    }
+    var b, secondPoint, tries = 0;
+    do {
+        b = ri(-8, 8);
+        var run = m.d === 1 ? pick([1,2,3]) : m.d;
+        var rise = m.n * (run / m.d);
+        secondPoint = { x: run, y: b + rise };
+        tries++;
+    } while ((secondPoint.y < -8 || secondPoint.y > 8) && tries < 100);
+    if (secondPoint.y < -8 || secondPoint.y > 8) return null;
+    return { m:m, b:b, second:secondPoint };
+}
+
+// ================= problem builders (raw generator output -> playable problem) =================
+function buildProblem(cat) {
+    if (cat === 'intercepts') {
+        var raw;
+        do { raw = genIntercepts(); } while (!raw);
+        return buildIntercepts(raw);
+    } else if (cat === 'points') {
+        var raw2;
+        do { raw2 = genFindPoints(); } while (!raw2);
+        return buildFindPoints(raw2);
+    } else {
+        var raw3;
+        do { raw3 = genSlopeIntercept(); } while (!raw3);
+        return buildSlopeIntercept(raw3);
+    }
+}
+
+function buildIntercepts(raw) {
+    var A = raw.A, B = raw.B, C = raw.C, xInt = raw.xInt, yInt = raw.yInt;
+    return {
+        cat:'intercepts',
+        equationHTML: '<div class="equation">' + fmtStdEq(A,B,C) + '</div>',
+        solve: [
+            { ask:'Find the x-intercept.', slot:'x', answer:xInt },
+            { ask:'Find the y-intercept.', slot:'y', answer:yInt }
+        ],
+        points: [
+            { x:xInt, y:0, label:'x-intercept', prompt:'Find the x-intercept.', hint:'Set y = 0, then solve for x.' },
+            { x:0, y:yInt, label:'y-intercept', prompt:'Find the y-intercept.', hint:'Set x = 0, then solve for y.' }
+        ],
+        summary: 'x-intercept: (' + xInt + ', 0)  &nbsp;&nbsp; y-intercept: (0, ' + yInt + ')',
+        speech: 'Find the intercepts. The equation is ' + speakStdEq(A, B, C)
+            + '. Work out each intercept, type it in, then plot it on the grid.'
+    };
+}
+
+function buildFindPoints(raw) {
+    if (raw.type === 'vert') {
+        var k = raw.k;
+        var pts = raw.given.map(function(y, i) {
+            return { x:k, y:y, label:'(' + k + ', ' + y + ')', prompt:'Every point on this line has the same x-value. Find x when y = ' + y + ', then type it in the table.', hint:'On a vertical line every point has the same x-value -- read it from the equation.' };
+        });
+        var tableV = pts.map(function(p){ return { xKnown:null, yKnown:p.y }; });
+        return {
+            cat:'points',
+            equationHTML: '<div class="equation">x = ' + k + '</div>',
+            points: pts,
+            table: tableV,
+            summary: 'x = ' + k + ' is a vertical line -- every point has x = ' + k + '.',
+            speech: 'Plot the points. The equation is x equals ' + spokenNum(k)
+                + ', which is a vertical line. For each y value in the table, give the x value, then plot the point.'
+        };
+    }
+    var m = raw.m, b = raw.b;
+    var pts2 = raw.given.map(function(x) {
+        var y = (m.n * x) / m.d + b;
+        var mstr = fmtSlope(m);
+        var work = m.n === 0
+            ? 'The slope is 0, so y is the same no matter what x is.'
+            : ('Substitute x = ' + x + ' into y = ' + fmtSlopeInterceptEq(m, b).slice(4) + ' and simplify.');
+        return { x:x, y:y, label:'x = ' + x, prompt:'Find y when x = ' + x + ', then type it in the table.', hint:work };
+    });
+    var tableS = pts2.map(function(p){ return { xKnown:p.x, yKnown:null }; });
+    return {
+        cat:'points',
+        equationHTML: '<div class="equation">' + fmtSlopeInterceptEq(m, b) + '</div>',
+        points: pts2,
+        table: tableS,
+        summary: 'Points: ' + pts2.map(function(p){ return '(' + p.x + ', ' + p.y + ')'; }).join('  '),
+        speech: 'Plot the points. The equation is ' + speakSIEq(m, b)
+            + '. For each x value in the table, work out y, type it in, then plot the point.'
+    };
+}
+
+function buildSlopeIntercept(raw) {
+    var m = raw.m, b = raw.b, second = raw.second;
+    var mLabel = m.n === 0 ? '0' : slopeHTML(m);
+    var run = second.x, rise = second.y - b;
+    var slopeHint = m.n === 0
+        ? 'A slope of 0 means the line is flat -- moving right, the height never changes.'
+        : ('Slope is rise over run. Starting at the y-intercept, move right by the run, then ' + (m.n > 0 ? 'up' : 'down') + ' by the rise.');
+    return {
+        cat:'slope',
+        equationHTML: '<div class="given-chips"><span class="chip">m = ' + mLabel + '</span><span class="chip">b = ' + b + '</span></div>',
+        points: [
+            { x:0, y:b, label:'y-intercept', prompt:'Plot the y-intercept: (0, ' + b + ')', hint:'The y-intercept is the point (0, b) -- use the value of b shown above.' },
+            { x:run, y:second.y, label:'second point', prompt:'Use the slope to find and plot a second point', hint:slopeHint,
+              validate: function(gx, gy) {
+                  if (gx === 0) return false;
+                  var num = m.n * gx;
+                  if (num % m.d !== 0) return false;
+                  return gy === (num / m.d) + b;
+              }
+            }
+        ],
+        summary: 'Equation: ' + fmtSlopeInterceptEq(m, b),
+        speech: 'Slope and intercept. The slope m is ' + speakSlope(m)
+            + ' and the y-intercept b is ' + spokenNum(b)
+            + '. Plot the y-intercept first, then use the slope to plot a second point.'
+    };
+}
+
+// ================= state =================
+var category = 'points';
+var lastClickTime = 0;
+var problem = null;
+var pointIdx = 0;
+var awaitingValue = false;
+
+var plotted = []; // {x,y,state}
+var problemHadMiss = false;
+var streak = 0;
+var stats = { intercepts:{c:0,d:0}, points:{c:0,d:0}, slope:{c:0,d:0} };
+var overallC = 0, overallD = 0;
+var problemNum = 1;
+var resetArmed = false;
+
+function blankStats() {
+    return { intercepts:{c:0,d:0}, points:{c:0,d:0}, slope:{c:0,d:0} };
+}
+function safeInt(v) {
+    return (typeof v === 'number' && isFinite(v) && v >= 0) ? Math.floor(v) : 0;
+}
+function loadStats() {
+    try {
+        var raw = localStorage.getItem('graphLinesStats');
+        if (raw) {
+            var s = JSON.parse(raw) || {};
+            var merged = blankStats();
+            var saved = s.stats || {};
+            Object.keys(merged).forEach(function(k) {
+                var row = saved[k];
+                if (row && typeof row === 'object') {
+                    merged[k].c = safeInt(row.c);
+                    merged[k].d = safeInt(row.d);
+                }
+                if (merged[k].c > merged[k].d) merged[k].c = merged[k].d;
+            });
+            stats = merged;
+            overallC = safeInt(s.overallC);
+            overallD = safeInt(s.overallD);
+            if (overallC > overallD) overallC = overallD;
+            problemNum = Math.max(1, safeInt(s.problemNum) || 1);
+        }
+    } catch (e) {
+        stats = blankStats();
+        overallC = 0; overallD = 0; problemNum = 1;
+    }
+}
+function saveStats() {
+    try {
+        localStorage.setItem('graphLinesStats', JSON.stringify({ stats:stats, overallC:overallC, overallD:overallD, problemNum:problemNum }));
+    } catch (e) {}
+}
+
+// ================= rendering: graph =================
+function renderGrid() {
+    var svg = document.getElementById('graph');
+    svg.setAttribute('viewBox', '0 0 ' + VB + ' ' + VB);
+    var s = '<title id="graphTitle">Coordinate plane</title>';
+    s += '<desc id="graphDesc">A grid from negative 10 to 10 on both axes. Plotted points are announced as you place them.</desc>';
+    s += '<g aria-hidden="true">';
+    for (var i = GRID_MIN; i <= GRID_MAX; i++) {
+        var isMajor = (i % 2 === 0);
+        var x = toSX(i);
+        s += '<line class="grid-line' + (isMajor?' major':'') + '" x1="' + num(x) + '" y1="' + num(toSY(GRID_MIN)) + '" x2="' + num(x) + '" y2="' + num(toSY(GRID_MAX)) + '"></line>';
+        var y = toSY(i);
+        s += '<line class="grid-line' + (isMajor?' major':'') + '" x1="' + num(toSX(GRID_MIN)) + '" y1="' + num(y) + '" x2="' + num(toSX(GRID_MAX)) + '" y2="' + num(y) + '"></line>';
+    }
+    // axes
+    s += '<line class="axis-line" x1="' + toSX(GRID_MIN) + '" y1="' + toSY(0) + '" x2="' + toSX(GRID_MAX) + '" y2="' + toSY(0) + '"></line>';
+    s += '<line class="axis-line" x1="' + toSX(0) + '" y1="' + toSY(GRID_MIN) + '" x2="' + toSX(0) + '" y2="' + toSY(GRID_MAX) + '"></line>';
+    // labels every 2
+    for (var i2 = GRID_MIN; i2 <= GRID_MAX; i2 += 2) {
+        if (i2 !== 0) {
+            s += '<text class="axis-label" x="' + toSX(i2) + '" y="' + (toSY(0) + 12) + '" text-anchor="middle">' + i2 + '</text>';
+            s += '<text class="axis-label" x="' + (toSX(0) - 8) + '" y="' + (toSY(i2) + 3) + '" text-anchor="end">' + i2 + '</text>';
+        }
+    }
+    s += '</g>';
+    s += '<g id="plot-layer"></g>';
+    s += '<g id="cursor-layer" aria-hidden="true"></g>';
+    s += '<rect id="click-catcher" x="' + num(MARGIN) + '" y="' + num(MARGIN) + '" width="' + num(PLOT) + '" height="' + num(PLOT) + '" fill="transparent"></rect>';
+    svg.innerHTML = s;
+    document.getElementById('click-catcher').addEventListener('pointerdown', handleGraphClick);
+    renderCursorLayer();
+    updateGraphDescription();
+}
+
+/* =====================================================================
+   PASS 4: text alternative that states what the graph ACTUALLY shows.
+   Rebuilt after every plot, so the description always matches the picture.
+   ===================================================================== */
+function describePlotted() {
+    if (!plotted.length) return 'Nothing has been plotted yet.';
+    var bits = plotted.map(function (p) {
+        return (p.state === 'revealed'
+            ? 'a violet diamond marking the revealed answer at '
+            : 'a solid green dot at ') + spokenPoint(p.x, p.y);
+    });
+    return 'Plotted so far: ' + bits.join('; ') + '.';
+}
+function describeLine() {
+    var done = plotted.filter(function (p) { return p.state === 'correct' || p.state === 'revealed'; });
+    if (!(done.length >= 2 && problem && pointIdx >= problem.points.length)) return '';
+    var a = done[0], b = done[done.length - 1];
+    if (a.x === b.x) {
+        return ' A straight violet line is drawn through them: it runs vertically at x equals '
+            + spokenNum(a.x) + ', from the bottom edge of the grid to the top edge. It crosses the x-axis at '
+            + spokenNum(a.x) + ' and never crosses the y-axis.';
+    }
+    var m = (b.y - a.y) / (b.x - a.x);
+    var c = a.y - m * a.x;
+    var out = ' A straight violet line is drawn through them. It ';
+    if (m === 0) {
+        out += 'runs horizontally at y equals ' + spokenNum(a.y)
+            + ', perfectly flat from the left edge of the grid to the right edge. It crosses the y-axis at '
+            + spokenNum(a.y) + '.';
+        return out;
+    }
+    out += (m > 0 ? 'rises' : 'falls') + ' from left to right with a slope of '
+        + spokenNum(Math.round(m * 1000) / 1000) + '. It crosses the y-axis at '
+        + spokenNum(Math.round(c * 1000) / 1000) + '.';
+    var xi = -c / m;
+    if (xi >= GRID_MIN && xi <= GRID_MAX) {
+        out += ' It crosses the x-axis at ' + spokenNum(Math.round(xi * 1000) / 1000) + '.';
+    }
+    var ends = clipLineToGrid(a.x, a.y, b.x, b.y);
+    if (ends.length === 2) {
+        out += ' The drawn segment runs from ' + spokenPoint(Math.round(ends[0].x * 100) / 100, Math.round(ends[0].y * 100) / 100)
+            + ' to ' + spokenPoint(Math.round(ends[1].x * 100) / 100, Math.round(ends[1].y * 100) / 100)
+            + ', with plain ends at the edge of the grid rather than arrows or open circles.';
+    }
+    return out;
+}
+function updateGraphDescription() {
+    var d = document.getElementById('graphDesc');
+    if (!d) return;
+    var txt = 'A coordinate grid. The x-axis and the y-axis each run from negative 10 to 10, ruled in single units and numbered every 2 units. '
+        + describePlotted() + describeLine()
+        + ' Correct points are green circles and revealed answers are violet diamonds, so the two are told apart by shape as well as by colour.';
+    d.textContent = txt;
+}
+
+/* =====================================================================
+   PASS 4 blocker fix: a keyboard/assistive-tech path to plotting.
+   Previously the only way to answer was to position a mouse pointer.
+   ===================================================================== */
+var cursor = { x: 0, y: 0 };
+var cursorVisible = false;
+
+function renderCursorLayer() {
+    var layer = document.getElementById('cursor-layer');
+    if (!layer) return;
+    if (!cursorVisible) { layer.innerHTML = ''; return; }
+    var cx = toSX(cursor.x), cy = toSY(cursor.y), arm = 11;
+    layer.innerHTML = '<g class="kbd-cursor">'
+        + '<line x1="' + num(cx - arm) + '" y1="' + num(cy) + '" x2="' + num(cx + arm) + '" y2="' + num(cy) + '"></line>'
+        + '<line x1="' + num(cx) + '" y1="' + num(cy - arm) + '" x2="' + num(cx) + '" y2="' + num(cy + arm) + '"></line>'
+        + '<circle cx="' + num(cx) + '" cy="' + num(cy) + '" r="9"></circle>'
+        + '</g>';
+}
+function announceCursor(extra) {
+    var el = document.getElementById('cursor-live');
+    if (el) el.textContent = 'Crosshair at ' + spokenPoint(cursor.x, cursor.y) + '.' + (extra || '');
+}
+function moveCursor(dx, dy, step) {
+    var s = step || 1;
+    cursor.x = Math.max(GRID_MIN, Math.min(GRID_MAX, cursor.x + dx * s));
+    cursor.y = Math.max(GRID_MIN, Math.min(GRID_MAX, cursor.y + dy * s));
+    cursorVisible = true;
+    renderCursorLayer();
+    announceCursor('');
+}
+function handleGraphKey(evt) {
+    var k = evt.key;
+    var step = evt.shiftKey ? 5 : 1;
+    if (k === 'ArrowLeft') { moveCursor(-1, 0, step); }
+    else if (k === 'ArrowRight') { moveCursor(1, 0, step); }
+    else if (k === 'ArrowUp') { moveCursor(0, 1, step); }
+    else if (k === 'ArrowDown') { moveCursor(0, -1, step); }
+    else if (k === 'Home') { cursor.x = 0; cursor.y = 0; cursorVisible = true; renderCursorLayer(); announceCursor(''); }
+    else if (k === 'Enter' || k === ' ' || k === 'Spacebar') { plotAtCursor(); }
+    else { return; }
+    evt.preventDefault();
+}
+function plotAtCursor() {
+    if (!problem || pointIdx >= problem.points.length) {
+        announceCursor(' This problem is finished. Choose Next Problem.');
+        return;
+    }
+    if ((problem.table || problem.solve) && awaitingValue) {
+        var fb = document.getElementById('feedback');
+        fb.textContent = problem.solve
+            ? 'Solve for the value and enter it first.'
+            : 'Fill in the table value first.';
+        fb.className = 'feedback bad';
+        return;
+    }
+    cursorVisible = true;
+    checkPoint(cursor.x, cursor.y);
+}
+function initGraphKeyboard() {
+    var surface = document.getElementById('plot-surface');
+    if (!surface) return;
+    surface.addEventListener('keydown', handleGraphKey);
+    surface.addEventListener('focus', function () {
+        cursorVisible = true;
+        renderCursorLayer();
+        announceCursor(' Use the arrow keys to move, then press Enter to plot.');
+    });
+    surface.addEventListener('blur', function () {
+        cursorVisible = false;
+        renderCursorLayer();
+    });
+}
+
+function renderPlotLayer() {
+    var layer = document.getElementById('plot-layer');
+    var s = '';
+    // line through completed points (all points revealed/correct)
+    var donePts = plotted.filter(function(p){ return p.state === 'correct' || p.state === 'revealed'; });
+    if (donePts.length >= 2 && pointIdx >= problem.points.length) {
+        var p1 = donePts[0], p2 = donePts[donePts.length - 1];
+        var clipped = clipLineToGrid(p1.x, p1.y, p2.x, p2.y);
+        if (clipped.length === 2) {
+            s += '<line class="plot-line shown" x1="' + num(toSX(clipped[0].x)) + '" y1="' + num(toSY(clipped[0].y)) + '" x2="' + num(toSX(clipped[1].x)) + '" y2="' + num(toSY(clipped[1].y)) + '"></line>';
+        }
+    }
+    plotted.forEach(function(p) {
+        var cx = toSX(p.x), cy = toSY(p.y);
+        if (p.state === 'revealed') {
+            var r = 7;
+            s += '<polygon class="plot-point revealed" points="'
+               + num(cx) + ',' + num(cy-r) + ' ' + num(cx+r) + ',' + num(cy) + ' '
+               + num(cx) + ',' + num(cy+r) + ' ' + num(cx-r) + ',' + num(cy) + '"></polygon>';
+        } else {
+            s += '<circle class="plot-point correct" cx="' + num(cx) + '" cy="' + num(cy) + '" r="6"></circle>';
+        }
+    });
+    layer.innerHTML = s;
+    updateGraphDescription();
+}
+
+function clipLineToGrid(x1,y1,x2,y2) {
+    if (x1 === x2) return [{x:x1,y:GRID_MIN},{x:x1,y:GRID_MAX}];
+    var m = (y2-y1)/(x2-x1), b = y1 - m*x1;
+    var cands = [];
+    var yAtMin = m*GRID_MIN+b; if (yAtMin>=GRID_MIN && yAtMin<=GRID_MAX) cands.push({x:GRID_MIN,y:yAtMin});
+    var yAtMax = m*GRID_MAX+b; if (yAtMax>=GRID_MIN && yAtMax<=GRID_MAX) cands.push({x:GRID_MAX,y:yAtMax});
+    if (m !== 0) {
+        var xAtMin = (GRID_MIN-b)/m; if (xAtMin>=GRID_MIN && xAtMin<=GRID_MAX) cands.push({x:xAtMin,y:GRID_MIN});
+        var xAtMax = (GRID_MAX-b)/m; if (xAtMax>=GRID_MIN && xAtMax<=GRID_MAX) cands.push({x:xAtMax,y:GRID_MAX});
+    }
+    var uniq = [];
+    cands.forEach(function(p){
+        if (!uniq.some(function(q){ return Math.abs(q.x-p.x)<1e-6 && Math.abs(q.y-p.y)<1e-6; })) uniq.push(p);
+    });
+    return uniq.slice(0,2);
+}
+
+function handleGraphClick(evt) {
+    if (evt.preventDefault) evt.preventDefault();
+    var now = Date.now();
+    if (now - lastClickTime < 350) return;
+    lastClickTime = now;
+    if (!problem || pointIdx >= problem.points.length) return;
+    if ((problem.table || problem.solve) && awaitingValue) {
+        var fbBlock = document.getElementById('feedback');
+        fbBlock.textContent = problem.solve
+            ? 'Solve for the value and enter it first.'
+            : 'Fill in the table value first.';
+        fbBlock.className = 'feedback bad';
+        return;
+    }
+    var svg = document.getElementById('graph');
+    var rect = svg.getBoundingClientRect();
+    var svgX = (evt.clientX - rect.left) / rect.width * VB;
+    var svgY = (evt.clientY - rect.top) / rect.height * VB;
+    var gx = Math.round((svgX - ORIGIN) / SCALE);
+    var gy = Math.round((ORIGIN - svgY) / SCALE);
+    if (gx < GRID_MIN || gx > GRID_MAX || gy < GRID_MIN || gy > GRID_MAX) return;
+    checkPoint(gx, gy);
+}
+
+// ================= game flow =================
+function setCategory(cat) {
+    category = cat;
+    document.querySelectorAll('.cat-btn').forEach(function(b){
+        var on = b.dataset.cat === cat;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    newProblem();
+}
+
+function newProblem() {
+    problem = buildProblem(category);
+    pointIdx = 0;
+    awaitingValue = !!(problem.table || problem.solve);
+    plotted = [];
+    problemHadMiss = false;
+    lastClickTime = 0;
+    cursor = { x: 0, y: 0 };
+    document.getElementById('problemNum').textContent = problemNum;
+    document.getElementById('equation-area').innerHTML = problem.equationHTML;
+    document.getElementById('feedback').textContent = '';
+    document.getElementById('feedback').className = 'feedback';
+    document.getElementById('hint-area').innerHTML = '';
+    document.getElementById('done-area').innerHTML = '';
+    document.getElementById('nextBtn').style.display = 'none';
+    document.getElementById('hintBtn').style.display = '';
+    document.getElementById('hintBtn').disabled = false;
+    document.getElementById('showAnswerBtn').style.display = '';
+    document.getElementById('skipBtn').style.display = '';
+    renderGrid();
+    renderTable();
+    updateInstruction();
+    updateStatsDisplay();
+    announceProblem();
+}
+/* Speaks the new problem in words in the polite live region. The visual
+   equation panel is aria-hidden so this is the only reading of it. */
+function announceProblem() {
+    var el = document.getElementById('problem-live');
+    if (!el || !problem) return;
+    var first = problem.points[0];
+    el.textContent = 'New problem. ' + (problem.speech || '')
+        + ' Step 1 of ' + problem.points.length + ': ' + (first ? first.prompt : '')
+        + ' The graph can be reached with the Tab key and plotted with the arrow keys and Enter.';
+}
+
+function valueStepCount() {
+    if (problem.table) return problem.table.length;
+    if (problem.solve) return problem.solve.length;
+    return 0;
+}
+
+function inputMarkup(ariaLabel) {
+    return '<input type="text" inputmode="numeric" id="tableInput" class="table-input" placeholder="?"'
+        + ' aria-label="' + ariaLabel + '"'
+        + ' onkeydown="if(event.key===\'Enter\'){checkTableValue();}">';
+}
+
+function renderTable(focusInput) {
+    var area = document.getElementById('table-area');
+    var checkArea = document.getElementById('table-check-area');
+    if (!problem.table && !problem.solve) {
+        area.innerHTML = '';
+        if (checkArea) checkArea.innerHTML = '';
+        return;
+    }
+    if (problem.solve) {
+        renderSolveBox(area);
+    } else {
+        renderXYTable(area);
+    }
+    if (checkArea) {
+        checkArea.innerHTML = (awaitingValue && pointIdx < valueStepCount())
+            ? '<div class="table-check-wrap">'
+              + '<button type="button" class="sign-btn" onclick="toggleInputSign()" aria-label="Toggle positive or negative">+/-</button>'
+              + '<button class="btn btn-check" onclick="checkTableValue()">Check</button>'
+              + '</div>'
+            : '';
+    }
+    if (focusInput) {
+        var inputEl = document.getElementById('tableInput');
+        if (inputEl) { try { inputEl.focus(); } catch (e) {} }
+    }
+}
+
+function renderSolveBox(area) {
+    var html = '<div class="solve-wrap">';
+    problem.solve.forEach(function(step, idx) {
+        var solved = idx < pointIdx;
+        var isCurrent = idx === pointIdx;
+        if (!solved && !isCurrent) return;
+        var valueDone = solved || (isCurrent && !awaitingValue);
+        var cls = valueDone ? 'solve-row done' : 'solve-row current';
+        var editing = isCurrent && awaitingValue;
+        var blank = editing
+            ? inputMarkup('Enter the ' + step.slot + ' value of the ' + step.slot + '-intercept')
+            : '<strong>' + step.answer + '</strong>';
+        var pair = step.slot === 'x'
+            ? '(' + blank + ', 0)'
+            : '(0, ' + blank + ')';
+        var mark = '';
+        if (valueDone && !step.revealed) {
+            mark = '<span class="solve-check" aria-hidden="true">&#10003;</span><span class="sr-only">correct</span>';
+        }
+        html += '<div class="' + cls + '">';
+        html += '<span class="solve-ask">Step ' + (idx + 1) + ': ' + step.ask + '</span>';
+        html += '<span class="solve-val">' + pair + mark + '</span>';
+        html += '</div>';
+    });
+    html += '</div>';
+    area.innerHTML = html;
+}
+
+function renderXYTable(area) {
+    var html = '<div class="xy-table-wrap"><table class="xy-table"><caption class="sr-only">Table of x and y values for this line</caption><thead><tr><th scope="col">x</th><th scope="col">y</th></tr></thead><tbody>';
+    problem.table.forEach(function(row, idx) {
+        var solved = idx < pointIdx;
+        var isCurrent = idx === pointIdx;
+        var valueDone = solved || (isCurrent && !awaitingValue);
+        var rowCls = valueDone ? ' class="done-row"' : (isCurrent ? ' class="current-row"' : '');
+        var xVal, yVal;
+        var inputCell = inputMarkup(row.xKnown === null ? 'Enter the x value' : 'Enter the y value');
+        if (row.xKnown !== null) {
+            xVal = row.xKnown;
+        } else if (solved || (isCurrent && !awaitingValue)) {
+            xVal = problem.points[idx].x;
+        } else if (isCurrent && awaitingValue) {
+            xVal = inputCell;
+        } else {
+            xVal = '?';
+        }
+        if (row.yKnown !== null) {
+            yVal = row.yKnown;
+        } else if (solved || (isCurrent && !awaitingValue)) {
+            yVal = problem.points[idx].y;
+        } else if (isCurrent && awaitingValue) {
+            yVal = inputCell;
+        } else {
+            yVal = '?';
+        }
+        html += '<tr' + rowCls + '><td>' + xVal + '</td><td>' + yVal + '</td></tr>';
+    });
+    html += '</tbody></table></div>';
+    area.innerHTML = html;
+}
+
+function toggleInputSign() {
+    var input = document.getElementById('tableInput');
+    if (!input) return;
+    if (input.value.charAt(0) === '-') input.value = input.value.slice(1);
+    else input.value = '-' + input.value;
+    input.focus();
+}
+
+function checkTableValue() {
+    if ((!problem.table && !problem.solve) || !awaitingValue || pointIdx >= valueStepCount()) return;
+    var input = document.getElementById('tableInput');
+    var fb = document.getElementById('feedback');
+    if (!input) return;
+    var raw = (input.value || '').trim();
+    /* MATH FIX: parseInt() accepted "3.7", "3abc" and "1e2" and silently
+       truncated them, so 3.7 was marked correct when the answer was 3.
+       Every answer here is a whole number, so require exactly that. */
+    if (!/^[+-]?\d+$/.test(raw)) {
+        fb.textContent = raw === ''
+            ? 'Type a number first.'
+            : 'Enter a whole number, like 3 or -4. No decimals or extra characters.';
+        fb.className = 'feedback bad';
+        return;
+    }
+    var val = parseInt(raw, 10);
+    if (!isFinite(val)) {
+        fb.textContent = 'Type a number first.';
+        fb.className = 'feedback bad';
+        return;
+    }
+    var target = problem.points[pointIdx];
+    var expected;
+    if (problem.solve) {
+        expected = problem.solve[pointIdx].answer;
+    } else {
+        var row = problem.table[pointIdx];
+        expected = row.xKnown === null ? target.x : target.y;
+    }
+    if (val === expected) {
+        awaitingValue = false;
+        fb.textContent = 'Correct! Now plot that point on the graph.';
+        fb.className = 'feedback good';
+        document.getElementById('hint-area').innerHTML = '';
+        renderTable();
+        updateInstruction();
+    } else {
+        /* MATH FIX: a wrong value used to leave problemHadMiss false, so the
+           problem still scored as a first-time success. */
+        problemHadMiss = true;
+        /* PASS 4: say WHERE the answer is wrong, not just that it is. */
+        var why = ' Try again.';
+        if (val === -expected) why = ' That is the right size but the wrong sign.';
+        else if (problem.solve && problem.solve.length === 2 && val === problem.solve[1 - pointIdx].answer) {
+            why = ' That is the other intercept. This step wants the '
+                + problem.solve[pointIdx].slot + '-intercept.';
+        } else if (!problem.solve && problem.table && problem.table[pointIdx].xKnown !== null
+                   && val === problem.table[pointIdx].xKnown) {
+            why = ' That is the x-value you were given. This step wants the matching y-value.';
+        } else if (Math.abs(val - expected) === 1) {
+            why = ' Very close - you are off by 1. Check the arithmetic once more.';
+        }
+        fb.textContent = 'Not quite.' + why;
+        fb.className = 'feedback bad';
+    }
+}
+
+function skipProblem() {
+    problemNum++;
+    saveStats();
+    newProblem();
+}
+
+function updateInstruction() {
+    var el = document.getElementById('instruction');
+    if (pointIdx >= problem.points.length) { el.innerHTML = ''; return; }
+    var p = problem.points[pointIdx];
+    var stepNote = problem.points.length > 1 ? ('Step ' + (pointIdx+1) + ' of ' + problem.points.length) : '';
+    var mainText = ((problem.table || problem.solve) && !awaitingValue)
+        ? ('Now plot the point (' + p.x + ', ' + p.y + ') on the graph.')
+        : p.prompt;
+    el.innerHTML = mainText + (stepNote ? '<span class="sub">' + stepNote + '</span>' : '');
+}
+
+function checkPoint(gx, gy) {
+    var target = problem.points[pointIdx];
+    var fb = document.getElementById('feedback');
+    var isMatch = target.validate ? target.validate(gx, gy) : (gx === target.x && gy === target.y);
+    if (isMatch) {
+        plotted.push({ x:gx, y:gy, state:'correct' });
+        fb.textContent = 'Correct! ' + target.label + ': (' + gx + ', ' + gy + ')';
+        fb.className = 'feedback good';
+        pointIdx++;
+        renderPlotLayer();
+        if (problem.table || problem.solve) { awaitingValue = true; }
+        renderTable(true);
+        document.getElementById('hint-area').innerHTML = '';
+        if (pointIdx >= problem.points.length) {
+            finishProblem();
+        } else {
+            updateInstruction();
+        }
+    } else {
+        /* MATH FIX: a wrong plot used to leave problemHadMiss false, so a
+           problem missed any number of times still counted as fully correct
+           and still extended the streak. */
+        problemHadMiss = true;
+        /* PASS 4: name the position that was clicked and say which way the
+           real point lies, so the mistake is locatable without seeing it. */
+        fb.textContent = 'Not quite. You plotted ' + spokenPoint(gx, gy) + '.' + missDirection(gx, gy, target);
+        fb.className = 'feedback bad';
+        flashWrong(gx, gy);
+    }
+}
+/* Describes where the intended point sits relative to the one just plotted. */
+function missDirection(gx, gy, target) {
+    if (target.validate) {
+        if (gx === 0) return ' That is the y-intercept, which is already plotted. The second point must have an x-value other than 0.';
+        return ' That point is not on the line. From the y-intercept, move right by the run, then up or down by the rise.';
+    }
+    var dx = target.x - gx, dy = target.y - gy;
+    var bits = [];
+    if (dx !== 0) bits.push(Math.abs(dx) + ' unit' + (Math.abs(dx) === 1 ? '' : 's') + ' to the ' + (dx > 0 ? 'right' : 'left'));
+    if (dy !== 0) bits.push(Math.abs(dy) + ' unit' + (Math.abs(dy) === 1 ? '' : 's') + ' ' + (dy > 0 ? 'up' : 'down'));
+    if (!bits.length) return '';
+    return ' The point you want is ' + bits.join(' and ') + ' from there.';
+}
+
+function showAnswer() {
+    if (!problem || pointIdx >= problem.points.length) return;
+    var target = problem.points[pointIdx];
+    var fb = document.getElementById('feedback');
+    problemHadMiss = true;
+    if (problem.solve && problem.solve[pointIdx]) { problem.solve[pointIdx].revealed = true; }
+    plotted.push({ x:target.x, y:target.y, state:'revealed' });
+    fb.textContent = 'Here it is: ' + target.label + ' is (' + target.x + ', ' + target.y + ').';
+    fb.className = 'feedback bad';
+    pointIdx++;
+    renderPlotLayer();
+    if (problem.table || problem.solve) { awaitingValue = true; }
+    renderTable(true);
+    document.getElementById('hint-area').innerHTML = '';
+    if (pointIdx >= problem.points.length) {
+        finishProblem();
+    } else {
+        updateInstruction();
+    }
+}
+
+function flashWrong(gx, gy) {
+    var layer = document.getElementById('plot-layer');
+    var cx = toSX(gx), cy = toSY(gy), r = 6;
+    var el = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    el.setAttribute('class', 'plot-point wrong-flash');
+    el.innerHTML =
+        '<line x1="' + num(cx-r) + '" y1="' + num(cy-r) + '" x2="' + num(cx+r) + '" y2="' + num(cy+r) + '"></line>' +
+        '<line x1="' + num(cx-r) + '" y1="' + num(cy+r) + '" x2="' + num(cx+r) + '" y2="' + num(cy-r) + '"></line>';
+    layer.appendChild(el);
+    setTimeout(function(){ el.remove(); }, 500);
+}
+
+function showHint() {
+    if (!problem || pointIdx >= problem.points.length) return;
+    var p = problem.points[pointIdx];
+    document.getElementById('hint-area').innerHTML = '<div class="hint-box">' + p.hint + '</div>';
+}
+
+function finishProblem() {
+    document.getElementById('instruction').innerHTML = '';
+    document.getElementById('hintBtn').style.display = 'none';
+    document.getElementById('showAnswerBtn').style.display = 'none';
+    document.getElementById('skipBtn').style.display = 'none';
+    document.getElementById('nextBtn').style.display = '';
+    document.getElementById('done-area').innerHTML = '<div class="done-parts"><span class="eq">' + problem.summary + '</span></div>';
+
+    var s = stats[category];
+    s.d++;
+    overallD++;
+    if (!problemHadMiss) {
+        s.c++;
+        overallC++;
+        streak++;
+    } else {
+        streak = 0;
+    }
+    problemNum++;
+    saveStats();
+    updateStatsDisplay();
+
+    /* design item 7: milestones only, never every problem. Confetti on every
+       correct answer stops meaning anything. */
+    if (!problemHadMiss) {
+        var burst = confettiForStreak(streak);
+        if (burst) confettiBurst(burst.count, burst.tier);
+    }
+    var note = document.getElementById('streakNote');
+    note.textContent = streak >= 2 ? ('Streak: ' + streak + ' in a row!') : '';
+}
+
+function updateStatsDisplay() {
+    /* design item 11: a mode that has never been attempted says "not tried yet".
+       "0/0" reads as a failed topic the student has not even opened. */
+    ['points','intercepts','slope'].forEach(function(cat) {
+        var s = stats[cat];
+        document.getElementById('stat-' + cat).textContent = s.d ? (s.c + '/' + s.d) : 'not tried yet';
+    });
+    var pct = overallD > 0 ? Math.round(100 * overallC / overallD) : null;
+    document.getElementById('scorePct').textContent = pct === null ? '--' : (pct + '%');
+    var live = document.getElementById('scoreLive');
+    if (live) {
+        live.textContent = pct === null
+            ? 'Accuracy not yet measured'
+            : ('Accuracy ' + pct + ' percent, ' + overallC + ' of ' + overallD + ' problems solved with no misses');
+    }
+    var fill = document.getElementById('scoreFill');
+    fill.style.height = (pct === null ? 0 : pct) + '%';
+    fill.className = 'score-fill ' + (pct === null || pct >= 70 ? 'good' : pct >= 50 ? 'mid' : 'low');
+}
+
+// ================= reset (two-tap confirm) =================
+function handleResetClick() {
+    var btn = document.getElementById('resetBtn');
+    if (!resetArmed) {
+        resetArmed = true;
+        btn.textContent = 'Tap again to confirm';
+        setTimeout(function(){ resetArmed = false; btn.textContent = 'Reset'; }, 3000);
+        return;
+    }
+    stats = blankStats();
+    overallC = 0; overallD = 0; problemNum = 1; streak = 0;
+    resetArmed = false;
+    btn.textContent = 'Reset';
+    saveStats();
+    newProblem();
+}
+
+// ================= confetti =================
+/* design item 9: the setting lives under its own key, so clearing progress
+   does not silently turn the animation back on. */
+var CONFETTI_KEY = 'graphLinesConfetti_v1';
+var confettiEnabled = true;
+function loadConfettiSetting() {
+    try {
+        var v = localStorage.getItem(CONFETTI_KEY);
+        if (v === '0') confettiEnabled = false;
+        else if (v === '1') confettiEnabled = true;
+    } catch (e) {}
+}
+function syncConfettiSwitch() {
+    var btn = document.getElementById('confetti-switch');
+    if (btn) btn.setAttribute('aria-pressed', confettiEnabled ? 'true' : 'false');
+}
+function toggleConfettiSetting() {
+    confettiEnabled = !confettiEnabled;
+    try { localStorage.setItem(CONFETTI_KEY, confettiEnabled ? '1' : '0'); } catch (e) {}
+    syncConfettiSwitch();
+}
+
+/* design item 7: the sanctioned milestone schedule (Linear Equations reference).
+   Streak 2 = tier 1 (40), 4/6/8 = tier 2 (100/140/170), 10 and every 4th
+   streak after that = tier 3 (200). Everything else gets no burst. */
+function confettiForStreak(n) {
+    if (n === 2) return { count: 40, tier: 1 };
+    if (n === 4) return { count: 100, tier: 2 };
+    if (n === 6) return { count: 140, tier: 2 };
+    if (n === 8) return { count: 170, tier: 2 };
+    if (n >= 10 && (n - 10) % 4 === 0) return { count: 200, tier: 3 };
+    return null;
+}
+
+function confettiBurst(count, tier) {
+    if (!confettiEnabled) return;
+    /* a11y: honour the OS reduced-motion setting at runtime as well as in CSS. */
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    /* design item 10: #ef4444 is red, which is not in the palette. The array is
+       now the shared eight-colour Midnight Scholar set, with no orange or red. */
+    var colors = ['#7c3aed', '#22c55e', '#2e3d8f', '#10b981', '#c76b8f', '#ffeb3b', '#0d9488', '#a78bfa'];
+    var sizes = tier === 1 ? ['small', 'small', ''] : (tier === 2 ? ['small', '', 'large'] : ['', 'large', 'large']);
+    var isMassive = tier === 3;
+    for (var i = 0; i < count; i++) {
+        var el = document.createElement('div');
+        el.className = 'confetti ' + pick(sizes);
+        el.setAttribute('aria-hidden', 'true');
+        /* design item 8: the pieces start above the top edge and fall the whole
+           screen. They used to start at 20% down in a narrow column, so with
+           these piece counts they read as a clump rather than a fall. */
+        el.style.left = (Math.random() * 100) + '%';
+        el.style.top = '-20px';
+        el.style.background = pick(colors);
+        el.style.borderRadius = Math.random() < 0.5 ? '50%' : '2px';
+        var dur;
+        if (tier === 1) dur = 1.6 + Math.random() * 1.0;
+        else if (tier === 2) dur = 2.0 + Math.random() * 1.5;
+        else dur = 2.5 + Math.random() * 2.0;
+        el.style.animation = (isMassive ? 'confetti-fall-slow' : 'confetti-fall') + ' ' + dur + 's ease-out forwards';
+        el.style.animationDelay = (Math.random() * (isMassive ? 0.8 : 0.4)) + 's';
+        document.body.appendChild(el);
+        (function(e){ setTimeout(function(){ if (e.parentNode) e.parentNode.removeChild(e); }, isMassive ? 6000 : 4500); })(el);
+    }
+    if (isMassive) {
+        for (var j = 0; j < 15; j++) {
+            var sp = document.createElement('div');
+            sp.className = 'sparkle';
+            sp.setAttribute('aria-hidden', 'true');
+            sp.style.left = (Math.random() * 90 + 5) + '%';
+            sp.style.top = (Math.random() * 55 + 10) + 'vh';
+            sp.style.animationDelay = (Math.random() * 0.5) + 's';
+            document.body.appendChild(sp);
+            (function(e){ setTimeout(function(){ if (e.parentNode) e.parentNode.removeChild(e); }, 3500); })(sp);
+        }
+    }
+}
+
+// ================= init =================
+loadStats();
+loadConfettiSetting();
+syncConfettiSwitch();
+initGraphKeyboard();
+updateStatsDisplay();
+newProblem();
+</script>
+</body>
+</html>
