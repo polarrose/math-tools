@@ -1,0 +1,2453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>Solving Linear and Quadratic Equations</title>
+<meta name="theme-color" content="#1b2450">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+    /* ===== MIDNIGHT SCHOLAR - navy stage, white card, violet + mint accents ===== */
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+        background:
+            radial-gradient(900px 500px at 85% -10%, rgba(124, 58, 237, 0.28), transparent 60%),
+            radial-gradient(800px 500px at -10% 110%, rgba(16, 185, 129, 0.18), transparent 55%),
+            linear-gradient(160deg, #141b3d 0%, #1b2450 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 16px 12px;
+        margin: 0;
+    }
+    .card {
+        background: #ffffff;
+        border-radius: 22px;
+        box-shadow: 0 24px 60px rgba(8, 12, 40, 0.55);
+        max-width: 700px;
+        width: 100%;
+        padding: 30px 24px 26px;
+        position: relative;
+        overflow: hidden;
+    }
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+    }
+    /* The heading box shrinks to its text so the rule below can match it. */
+    h1 {
+        text-align: center;
+        color: #1e2a5e;
+        margin: 4px auto 6px;
+        font-size: 25px;
+        letter-spacing: 0.3px;
+        width: fit-content;
+        max-width: 100%;
+    }
+    /* The gradient rule is exactly as wide as the title text. */
+    h1::after {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 4px;
+        border-radius: 2px;
+        margin: 8px auto 14px;
+        background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+    }
+    .info {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+    }
+    .info-item {
+        font-size: 12px;
+        font-weight: 800;
+        background: #eef0fb;
+        color: #2e3d8f !important;
+        padding: 6px 14px;
+        border-radius: 999px;
+    }
+    .mode-btns {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+    }
+    .mode-btn {
+        background: #e6e9f6;
+        color: #4a5480;
+        border: none;
+        border-radius: 999px;
+        padding: 9px 15px;
+        font-size: 12.5px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.15s;
+        -webkit-tap-highlight-color: transparent;
+        font-family: inherit;
+        touch-action: manipulation;
+    }
+    .mode-btn:hover { background: #d9def2; }
+    .mode-btn.active {
+        /* a11y: white on #10b981 is 2.54:1; #047857 is 5.48:1 (mint ring kept) */
+        background: #047857 !important;
+        color: white !important;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.25), 0 6px 14px rgba(16, 185, 129, 0.35);
+    }
+    .quad-connector-wrap {
+        position: relative;
+    }
+    .quad-connector-svg {
+        position: absolute;
+        top: -14px;
+        left: 0;
+        width: 100%;
+        height: 14px;
+        overflow: visible;
+        pointer-events: none;
+    }
+    .sub-tabs {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 7px;
+        margin: -2px 0 12px;
+        flex-wrap: wrap;
+        background: #f4f6fd;
+        border-radius: 14px;
+        padding: 9px 10px;
+    }
+    .sub-tabs-label {
+        font-size: 11px;
+        font-weight: 800;
+        color: #5d6798;
+        margin-right: 2px;
+    }
+    .sub-btn {
+        background: #e6e9f6;
+        color: #4a5480;
+        border: none;
+        border-radius: 999px;
+        padding: 7px 13px;
+        font-size: 11.5px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.15s;
+        -webkit-tap-highlight-color: transparent;
+        font-family: inherit;
+        touch-action: manipulation;
+    }
+    .sub-btn:hover { background: #d9def2; }
+    .sub-btn.active {
+        /* a11y: white on the #0d9488 stop is 3.74:1; the documented accessible
+           Favorite gradient ends at #0b7a70 (5.21:1) */
+        background: linear-gradient(135deg, #1e3a5f, #0b7a70) !important;
+        color: white !important;
+        box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.25);
+    }
+    .stats-row {
+        text-align: center;
+        margin-top: 14px;
+    }
+    .stats-btn {
+        background: #e6e9f6;
+        color: #2e3d8f;
+        border: none;
+        border-radius: 999px;
+        padding: 7px 16px;
+        font-size: 12px;
+        font-weight: 800;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .stats-btn:hover { background: #d9def2; }
+    .equation {
+        font-size: 23px;
+        font-weight: bold;
+        text-align: center;
+        margin: 16px auto 18px;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+        color: #1e2a5e;
+        background: #eef0fb;
+        border: 2px solid #c7cdf0;
+        border-radius: 14px;
+        padding: 14px 12px;
+        max-width: 100%;
+        overflow-wrap: break-word;
+    }
+    .input-area {
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        gap: 14px;
+        margin: 20px 0 10px;
+        flex-wrap: wrap;
+    }
+    .double-input-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+    }
+    .input-label {
+        font-size: 13px;
+        font-weight: 800;
+        color: #4a5480;
+    }
+    input[type="text"] {
+        width: 118px;
+        font-size: 22px;
+        font-weight: bold;
+        text-align: center;
+        padding: 10px 6px;
+        border: 3px solid #7c3aed;
+        border-radius: 12px;
+        color: #1e2a5e;
+        background: #ffffff;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    }
+    input[type="text"]:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18);
+    }
+    /* Design item 15: the error ring was orange, which is banned. Recolouring it
+       to violet alone would have made it near-identical to the resting violet
+       border, so the distinction is now carried by three non-hue signals that a
+       resting or focused box never has: a tinted (not white) field, a heavy 4px
+       halo, and a bold dashed underline drawn with a background gradient.
+       aria-invalid carries the same information non-visually. */
+    input[type="text"].field-error {
+        border-color: #6d28d9 !important;
+        background: #f3eefe
+            repeating-linear-gradient(90deg, #6d28d9 0, #6d28d9 5px, rgba(0,0,0,0) 5px, rgba(0,0,0,0) 10px)
+            bottom left / 100% 3px no-repeat;
+        box-shadow: 0 0 0 4px rgba(109, 40, 217, 0.35);
+    }
+    .formula-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 4px;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+        font-size: 21px;
+        font-weight: bold;
+        color: #1e2a5e;
+        margin: 20px 0 6px;
+    }
+    input[type="text"].formula-input {
+        width: 62px;
+        font-size: 19px;
+        padding: 8px 4px;
+    }
+    input[type="text"].coeff-input {
+        width: 44px;
+    }
+    /* ---- Real stacked fraction ---- */
+    .frac {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: stretch;
+        vertical-align: middle;
+        margin: 0 4px;
+    }
+    .frac-num, .frac-den {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        padding: 3px 10px;
+    }
+    .frac-bar {
+        width: 100%;
+        height: 3px;
+        background: #1e2a5e;
+        border-radius: 2px;
+        margin: 4px 0;
+    }
+    /* ---- Radical with a real overbar ---- */
+    .radical {
+        display: inline-flex;
+        align-items: stretch;
+        margin-left: 2px;
+    }
+    .radical-sign {
+        width: 18px;
+        flex: 0 0 18px;
+        color: #1e2a5e;
+        display: flex;
+        margin-right: -1px;
+    }
+    .radical-sign svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+        overflow: visible;
+    }
+    .radical-body {
+        border-top: 2px solid #1e2a5e;
+        padding-top: 4px;
+        padding-right: 5px;
+        display: flex;
+        align-items: center;
+    }
+    /* ---- Instruction + formula reminder ---- */
+    .solve-instruction {
+        text-align: center;
+        font-size: 13.5px;
+        font-weight: 800;
+        color: #2e3d8f;
+        margin: 0 0 8px;
+    }
+    .formula-reminder {
+        background: #f7f5ff;
+        border: 2px solid #d8ccf7;
+        border-radius: 12px;
+        padding: 9px 12px;
+        margin: 0 auto 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        color: #4b3bbd;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+        font-weight: bold;
+        font-size: 15px;
+    }
+    .formula-reminder .reminder-label {
+        font-family: 'Nunito', sans-serif;
+        font-size: 11px;
+        font-weight: 800;
+        color: #6a5fae; /* a11y: #8b7fd0 on #f7f5ff is 3.22:1 */
+        letter-spacing: 0.3px;
+    }
+    .formula-reminder .frac-bar { background: #4b3bbd; }
+    .formula-reminder .radical-sign { color: #4b3bbd; width: 12px; flex: 0 0 12px; }
+    .formula-reminder .radical-body { border-top-color: #4b3bbd; border-top-width: 2px; padding-top: 3px; }
+    .recap-math {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        margin-top: 6px;
+        font-size: 15px;
+    }
+    /* a11y: #059669 on #ecfdf5 is 3.58:1; #047857 is 5.21:1 */
+    .recap-math .frac-bar { background: #047857; height: 2px; }
+    .recap-math .radical-sign { color: #047857; width: 12px; flex: 0 0 12px; }
+    .recap-math .radical-body { border-top-color: #047857; border-top-width: 2px; padding-top: 3px; }
+    .part1-recap {
+        text-align: center;
+        font-size: 13px;
+        font-weight: 800;
+        color: #047857;
+        background: #ecfdf5;
+        border: 2px solid #a7f3d0;
+        border-radius: 12px;
+        padding: 10px 10px;
+        margin: 4px auto 0;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+        line-height: 1.6;
+    }
+    button {
+        padding: 12px 22px;
+        font-size: 15px;
+        font-weight: 800;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+    }
+    button:active { transform: scale(0.95); }
+    .submit-row { text-align: center; margin: 16px 0 6px; }
+    .submit-btn {
+        background: linear-gradient(135deg, #2e3d8f, #4b3bbd);
+        color: white;
+        box-shadow: 0 6px 16px rgba(46, 61, 143, 0.35);
+    }
+    .submit-btn:hover { filter: brightness(1.1); }
+    .next-btn {
+        /* a11y: white on #10b981 is 2.54:1 and on #059669 is 3.77:1 */
+        background: linear-gradient(135deg, #047857, #065f46) !important;
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35) !important;
+    }
+    #next-btn-row { text-align: center; margin: 14px 0 6px; }
+    input:disabled {
+        background: #f3f4f8;
+        /* a11y: #9aa2c4 on #f3f4f8 is 2.29:1 -- the student's own answer stays
+           in the box after it locks, so it has to remain readable */
+        color: #5d6798;
+        border-color: #c7cdf0;
+    }
+    .key-row {
+        text-align: center;
+        margin: 4px 0 2px;
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .key-btn {
+        background: #e6e9f6;
+        color: #2e3d8f;
+        padding: 10px 14px;
+        font-size: 15px;
+        font-weight: 800;
+        border-radius: 12px;
+    }
+    .key-btn:hover { background: #d9def2; }
+    .fraction-note {
+        background: #eef0fb;
+        border: 2px solid #8b96d8;
+        border-radius: 12px;
+        padding: 10px;
+        margin: 12px 0 4px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #1e2a5e;
+        text-align: center;
+        line-height: 1.5;
+    }
+    .fraction-note strong { font-weight: 800; color: #16214d; }
+    .fraction-note code {
+        background: #dfe3f7;
+        color: #1e2a5e;
+        font-weight: 800;
+        padding: 1px 5px;
+        border-radius: 5px;
+    }
+    .feedback {
+        text-align: center;
+        font-size: 20px;
+        font-weight: 800;
+        margin: 14px 0 6px;
+        min-height: 30px;
+    }
+    .correct { color: #059669; }
+    /* Design item 13: incorrect feedback is ink navy #1e2a5e at 18px/700 in every
+       game, so it reads the same everywhere (13.57:1 on white). The earlier
+       violet was a local deviation and the instructor has overruled it. */
+    .incorrect { color: #1e2a5e; font-size: 18px; font-weight: 700; }
+    .victory {
+        text-align: center;
+        font-size: 24px;
+        color: #7c3aed;
+        animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    #helper-buttons { text-align: center; margin: 18px 0; }
+    .hint-btn, .answer-btn, .skip-btn, .solution-btn {
+        background: #f3eefe;
+        color: #6d28d9;
+        margin: 4px;
+        font-size: 12.5px;
+    }
+    .hint-btn:hover, .answer-btn:hover, .skip-btn:hover, .solution-btn:hover {
+        background: #e9defc;
+    }
+    .hint-box, .answer-box {
+        background: #f7f5ff;
+        border: 2px solid #d8ccf7;
+        border-radius: 14px;
+        padding: 15px;
+        margin: 14px 0;
+        color: #3b3568;
+        font-size: 14px;
+    }
+    .solution-step {
+        padding: 8px 0 4px;
+        border-top: 1px dashed rgba(0,0,0,0.15);
+    }
+    .solution-eq {
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+        font-weight: bold;
+        font-size: 16px;
+        margin: 5px 0 4px 18px;
+        color: #1e2a5e;
+    }
+    /* ===== Stats overlay ===== */
+    .stats-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(20, 27, 61, 0.82);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        padding: 16px;
+    }
+    .stats-panel {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 24px 22px;
+        max-width: 460px;
+        width: 100%;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: 0 24px 60px rgba(8, 12, 40, 0.55);
+    }
+    .stats-panel h2 {
+        color: #1e2a5e;
+        font-size: 19px;
+        text-align: center;
+        margin-top: 0;
+    }
+    .stat-row { margin: 14px 0; }
+    .stat-name { font-size: 13px; font-weight: 800; color: #1e2a5e; margin-bottom: 4px; }
+    .stat-bar-wrap {
+        background: #e6e9f6;
+        border-radius: 999px;
+        height: 14px;
+        overflow: hidden;
+    }
+    .stat-bar {
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #2e3d8f, #7c3aed);
+        transition: width 0.4s ease;
+    }
+    .stat-num { font-size: 11px; color: #5d6798; margin-top: 3px; text-align: right; }
+    /* Design item 15: was orange #9a3412 on #fff7ed. Violet bg family instead --
+       #6d28d9 on #f3eefe is 6.25:1. */
+    .recommend {
+        background: #f3eefe;
+        border: 2px solid #c4b5fd;
+        border-radius: 12px;
+        padding: 10px;
+        margin-top: 14px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #6d28d9;
+    }
+    .stats-actions { text-align: center; margin-top: 18px; }
+    .close-btn { background: #e6e9f6; color: #2e3d8f; }
+    .close-btn:hover { background: #d9def2; }
+    /* Design item 17: red is not in the palette; navy slate secondary button. */
+    .reset-btn { background: #4a5480; color: #ffffff; margin-left: 8px; }
+    .reset-btn:hover { background: #3c4569; }
+    /* Armed (second tap) state: ink navy, per the two-tap pattern. */
+    .reset-btn.armed { background: #1e2a5e; color: #ffffff; }
+    .reset-btn.armed:hover { background: #16214d; }
+    .settings-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 22px;
+        padding-top: 16px;
+        border-top: 1px solid #eef0fb;
+    }
+    .challenge-toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin: 4px 0 12px;
+    }
+    .mixed-toggle-row {
+        justify-content: flex-start;
+    }
+    .challenge-label-stack {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.35;
+    }
+    .challenge-label-main {
+        font-size: 12px;
+        font-weight: 800;
+        color: #5d6798;
+    }
+    .challenge-label-sub {
+        font-size: 10px;
+        font-weight: 700;
+        color: #5d6798; /* a11y: #b3bad8 on white is 1.92:1 */
+    }
+    .settings-label {
+        font-size: 12px;
+        font-weight: 800;
+        color: #5d6798;
+    }
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 42px;
+        height: 24px;
+        flex-shrink: 0;
+    }
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    /* Hairline rim so the track edge is visible against the white card:
+       #8a93b8 (3.02:1) off, #0b7a70 (5.21:1) on. box-sizing keeps the 42x24
+       geometry, and the knob insets drop by 1px so it sits where it always did. */
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0; left: 0; right: 0; bottom: 0;
+        box-sizing: border-box;
+        border: 1px solid #8a93b8;
+        background: #d5d9e8;
+        transition: 0.2s;
+        border-radius: 999px;
+    }
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 2px;
+        bottom: 2px;
+        background: white;
+        transition: 0.2s;
+        border-radius: 50%;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .toggle-switch input:checked + .toggle-slider {
+        background: #10b981;
+        border-color: #0b7a70;
+    }
+    .toggle-switch input:checked + .toggle-slider:before {
+        transform: translateX(18px);
+    }
+    /* ===== Confetti ===== */
+    .confetti {
+        position: fixed;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 9999;
+    }
+    @keyframes confetti-fall {
+        0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(110vh) rotate(720deg); opacity: 1; }
+    }
+    @keyframes confetti-fall-slow {
+        0% { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 1; }
+        100% { transform: translateY(115vh) rotate(1080deg) scale(0.85); opacity: 1; }
+    }
+    .sparkle {
+        position: fixed;
+        width: 20px;
+        height: 20px;
+        background: radial-gradient(circle, #fff 0%, #ffd700 50%, transparent 70%);
+        border-radius: 50%;
+        animation: sparkle 0.5s ease-in-out infinite;
+        pointer-events: none;
+        z-index: 100;
+    }
+    @keyframes sparkle {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.4; transform: scale(1.6); }
+    }
+    .insignia {
+        text-align: center;
+        margin-top: 38px;
+    }
+    .insignia svg { display: block; margin: 0 auto; }
+    .insignia-caption {
+        /* a11y: #6a74a8 at opacity .9 composites to 3.72:1 on white.
+           #5d6798 at full opacity is 5.44:1. */
+        color: #5d6798;
+        font-size: 6.5px;
+        letter-spacing: 1.2px;
+        opacity: 1;
+        font-weight: 800;
+        margin-top: 2px;
+    }
+    .sr-only {
+        position: absolute;
+        width: 1px; height: 1px;
+        padding: 0; margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .confetti, .sparkle { display: none !important; }
+        * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        .victory { animation: none !important; }
+    }
+    @media (max-width: 480px) {
+        .card { padding: 24px 14px 20px; }
+        h1 { font-size: 21px; }
+        .equation { font-size: 19px; padding: 12px 8px; }
+        .mode-btn { padding: 8px 11px; font-size: 11.5px; }
+        input[type="text"] { width: 100px; font-size: 20px; }
+        input[type="text"].formula-input { width: 52px; font-size: 16px; }
+    }
+</style>
+</head>
+<body>
+<main class="card" id="game-card">
+    <h1>Solving Linear and Quadratic Equations</h1>
+
+    <div class="info">
+        <div class="info-item">Problem: <span id="problemNum">1</span></div>
+        <div class="info-item" id="streak-display">Streak: <span id="streak">0</span>/10</div>
+        <div class="info-item" id="timer-display"></div>
+    </div>
+
+    <div class="mode-btns" id="main-tabs" role="group" aria-label="Equation type">
+        <button class="mode-btn active" aria-pressed="true" onclick="setMainCategory('linear')">Linear</button>
+        <button class="mode-btn" aria-pressed="false" onclick="setMainCategory('quadratic')">Quadratic</button>
+        <button class="mode-btn" aria-pressed="false" onclick="setMainCategory('mixed')">Mixed</button>
+    </div>
+    <div class="quad-connector-wrap" id="quad-connector-wrap">
+        <svg id="quad-connector-svg" class="quad-connector-svg" aria-hidden="true" focusable="false"></svg>
+        <div class="sub-tabs" id="quadratic-subtabs" role="group" aria-label="Quadratic method" style="display: none;">
+            <button class="sub-btn active" aria-pressed="true" onclick="setQuadraticSubMode('factoring')">Factoring</button>
+            <button class="sub-btn" aria-pressed="false" onclick="setQuadraticSubMode('formula')">Quadratic Formula</button>
+        </div>
+    </div>
+    <div class="challenge-toggle-row" id="challenge-toggle-row" style="display: none;">
+        <label class="toggle-switch">
+            <input type="checkbox" id="challengeToggle" onchange="toggleChallengeMode()">
+            <span class="toggle-slider"></span>
+        </label>
+        <span class="settings-label" id="challengeToggleLabel">Challenge mode (a &ne; 1)</span>
+    </div>
+    <div class="challenge-toggle-row mixed-toggle-row" id="mixed-challenge-toggle-row" style="display: none;">
+        <label class="toggle-switch">
+            <input type="checkbox" id="mixedChallengeToggle" onchange="toggleMixedChallengeMode()">
+            <span class="toggle-slider"></span>
+        </label>
+        <span class="challenge-label-stack">
+            <span class="challenge-label-main">Challenge mode</span>
+            <span class="challenge-label-sub">AC method and harder formula</span>
+        </span>
+    </div>
+    <div id="main-content"></div>
+
+    <!-- Polite region: announces each new problem in words for screen readers. -->
+    <div id="problem-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+    <div class="feedback" id="feedback" role="alert" aria-live="assertive" aria-atomic="true"></div>
+    <div id="next-btn-row"></div>
+
+    <div id="helper-buttons">
+        <button class="hint-btn" onclick="toggleHint()">Show Hint</button>
+        <button class="answer-btn" onclick="toggleAnswer()">Show Answer</button>
+        <button class="solution-btn" onclick="toggleSolution()">Show Solution</button>
+        <button class="skip-btn" onclick="skipProblem()">Skip</button>
+    </div>
+
+    <div class="hint-box" id="hint" style="display: none;"></div>
+    <div class="answer-box" id="answer-box" style="display: none;"></div>
+    <div class="answer-box" id="solution-box" style="display: none;"></div>
+
+    <div class="settings-row">
+        <label class="toggle-switch">
+            <input type="checkbox" id="confettiToggle" checked onchange="toggleConfettiSetting()">
+            <span class="toggle-slider"></span>
+        </label>
+        <span class="settings-label">Confetti celebrations</span>
+    </div>
+    <div class="stats-row"><button class="stats-btn" id="stats-btn" onclick="showStats()">My Stats</button></div>
+    <div class="insignia">
+        <svg viewBox="-28 -26 56 64" width="68" aria-hidden="true" focusable="false">
+            <defs>
+                <linearGradient id="pr-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#1e3a5f"/>
+                    <stop offset="100%" stop-color="#0d9488"/>
+                </linearGradient>
+            </defs>
+            <path id="pr-rose" fill="none" stroke="url(#pr-grad)" stroke-width="1.7" stroke-linejoin="round"></path>
+        </svg>
+        <div class="insignia-caption">POLAR ROSE STUDIO</div>
+    </div>
+</main>
+
+<div class="stats-overlay" id="stats-overlay" style="display: none;">
+    <div class="stats-panel" id="stats-panel" role="dialog" aria-modal="true" aria-labelledby="stats-heading" tabindex="-1"></div>
+</div>
+
+<script>
+/* =====================================================================
+   Utility helpers
+   ===================================================================== */
+function ri(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { var t = b; b = a % b; a = t; } return a || 1; }
+function gcd3(a, b, c) { return gcd(gcd(a, b), c); }
+function isPerfectSquare(n) { if (n < 0) return false; var r = Math.round(Math.sqrt(n)); return r * r === n; }
+
+function reduceFrac(num, den) {
+    if (den < 0) { num = -num; den = -den; }
+    var g = gcd(num, den);
+    if (g === 0) g = 1;
+    return { num: num / g, den: den / g };
+}
+function fmtFrac(num, den) {
+    var r = reduceFrac(num, den);
+    if (r.den === 1) return String(r.num);
+    return r.num + '/' + r.den;
+}
+function fracValue(num, den) { return num / den; }
+
+function xTermStr(coef) {
+    var absC = Math.abs(coef);
+    var numPart = (absC === 1) ? '' : String(absC);
+    return (coef >= 0 ? ' + ' : ' - ') + numPart + 'x';
+}
+function constTermStr(c) {
+    return (c >= 0 ? ' + ' : ' - ') + Math.abs(c);
+}
+function leadCoef(n) { return (n === 1) ? '' : String(n); }
+
+function buildQuadString(a, b, c) {
+    return buildTrinomialExpr(a, b, c) + ' = 0';
+}
+
+function buildTrinomialExpr(a, b, c) {
+    var out = (a === 1 ? '' : a) + 'x\u00B2';
+    if (b !== 0) out += xTermStr(b);
+    if (c !== 0) out += constTermStr(c);
+    return out;
+}
+
+function buildQuadStringShifted(a, b, c) {
+    var left = (a === 1 ? '' : a) + 'x\u00B2';
+    if (b !== 0) left += xTermStr(b);
+    return left + ' = ' + (-c);
+}
+
+function applyShiftToHint(hint, isShifted, standardEq) {
+    if (!isShifted) return hint;
+    return 'First, get everything on one side so the equation equals 0:  ' + standardEq + '.  Then: ' + hint;
+}
+
+function applyShiftToSteps(steps, isShifted, shiftedEq, standardEq) {
+    if (!isShifted) return steps;
+    var rest = steps.slice(1);
+    return ['Start with the equation:  ' + shiftedEq, 'Move everything to one side so it equals 0:  ' + standardEq].concat(rest);
+}
+
+function simplifySqrt(n) {
+    var coeff = 1, radicand = n;
+    for (var i = Math.floor(Math.sqrt(n)); i >= 2; i--) {
+        if (n % (i * i) === 0) { coeff = i; radicand = n / (i * i); break; }
+    }
+    return { coeff: coeff, radicand: radicand };
+}
+
+function simplifyQuadRoots(a, b, D) {
+    var s = simplifySqrt(D);
+    var negB = -b;
+    var denom = 2 * a;
+
+    function fmtGeneric(num, coeff, radicand, den, sign) {
+        var radicalPart = (coeff === 1 ? '\u221a' + radicand : coeff + '\u221a' + radicand);
+        var radStr = (sign > 0 ? ' + ' : ' - ') + radicalPart;
+        var numStr = (num === 0 ? '' : num) + radStr;
+        numStr = numStr.trim();
+        if (numStr.charAt(0) === '+') numStr = numStr.slice(1).trim();
+        if (den === 1) return numStr;
+        return '(' + numStr + ')/' + den;
+    }
+
+    // Step A: simplify just the radical (e.g. sqrt48 -> 4 sqrt3), fraction not yet reduced
+    var radicalStepStr = (s.coeff === 1) ? ('\u221a' + s.radicand) : (s.coeff + '\u221a' + s.radicand);
+    var afterRadicalStr1 = fmtGeneric(negB, s.coeff, s.radicand, denom, 1);
+    var afterRadicalStr2 = fmtGeneric(negB, s.coeff, s.radicand, denom, -1);
+
+    // Step B: reduce the whole fraction by gcd(numerator, radical coeff, denominator)
+    var g = gcd3(negB, s.coeff, denom);
+    if (g === 0) g = 1;
+    var redNegB = negB / g, redCoeff = s.coeff / g, redDenom = denom / g;
+    var root1Str = fmtGeneric(redNegB, redCoeff, s.radicand, redDenom, 1);
+    var root2Str = fmtGeneric(redNegB, redCoeff, s.radicand, redDenom, -1);
+
+    return {
+        root1Str: root1Str, root2Str: root2Str,
+        radicalStepStr: radicalStepStr,
+        afterRadicalStr1: afterRadicalStr1, afterRadicalStr2: afterRadicalStr2,
+        furtherReductionNeeded: g > 1,
+        numerator: redNegB, coeff: redCoeff, radicand: s.radicand, denominator: redDenom,
+        needsSimplification: s.coeff > 1
+    };
+}
+
+/* Strict numeric parsing. parseFloat() alone accepted "3abc", "5x", "1e3",
+   "0x10", "1,000" and "4." as 3, 5, 1000, 0, 1 and 4, so a wrong entry could be
+   graded correct. A plain decimal or a simple a/b fraction only. */
+var NUM_RE = /^[+-]?(?:\d+(?:\.\d+)?|\.\d+)$/;
+function parseFraction(str) {
+    if (typeof str !== 'string') return NaN;
+    str = str.trim();
+    if (str === '') return NaN;
+    if (str.indexOf('/') !== -1) {
+        var parts = str.split('/');
+        if (parts.length !== 2) return NaN;
+        var ns = parts[0].trim(), ds = parts[1].trim();
+        if (!NUM_RE.test(ns) || !NUM_RE.test(ds)) return NaN;
+        var den = parseFloat(ds);
+        if (den === 0) return NaN;
+        return parseFloat(ns) / den;
+    }
+    if (!NUM_RE.test(str)) return NaN;
+    return parseFloat(str);
+}
+
+
+function closeEnough(a, b, tol) {
+    tol = tol || 0.01;
+    return Math.abs(a - b) < tol;
+}
+function checkPair(correct, u1, u2, tol) {
+    return (closeEnough(u1, correct[0], tol) && closeEnough(u2, correct[1], tol)) ||
+           (closeEnough(u1, correct[1], tol) && closeEnough(u2, correct[0], tol));
+}
+
+/* =====================================================================
+   State
+   ===================================================================== */
+var currentTab = 'linear';
+var currentProblem = null;
+var streak = 0;
+var problemCount = 0;
+var timer = 0;
+var timerInterval = null;
+var isTimerRunning = false;
+var solutionRevealed = 0;
+var quadFormulaPart = 1;
+var shiftHintGiven = false;
+var lastFocusedId = 'answer';
+var resetConfirming = false;
+
+var stats = {
+    linear: { c: 0, t: 0 },
+    factoring: { c: 0, t: 0 },
+    quadFormula: { c: 0, t: 0 },
+    challenge: { c: 0, t: 0 }
+};
+var confettiEnabled = true;
+
+var SAVE_KEY = 'solvingEquationsGame_v1';
+function saveState() {
+    try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify({ stats: stats, confettiEnabled: confettiEnabled }));
+    } catch (e) { /* storage unavailable */ }
+}
+function escHtml(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+/* Rebuilds the stats object from untrusted localStorage, keeping only known
+   keys and coercing every value to a finite non-negative integer with
+   correct <= attempted. The old loader copied whatever was in storage
+   straight onto `stats`, and showStats() concatenates those values into
+   innerHTML -- so a tampered entry could persist markup into the page. */
+var STAT_KEYS = ['linear', 'factoring', 'quadFormula', 'challenge'];
+function sanitizeStats(raw) {
+    function num(n) {
+        n = Number(n);
+        if (!isFinite(n) || n < 0) return 0;
+        return Math.min(Math.floor(n), 1e9);
+    }
+    function cell(v) {
+        var src = (v && typeof v === 'object') ? v : {};
+        var t = num(src.t), c = num(src.c);
+        if (c > t) c = t;
+        return { c: c, t: t };
+    }
+    var src = (raw && typeof raw === 'object') ? raw : {};
+    var out = {};
+    for (var i = 0; i < STAT_KEYS.length; i++) out[STAT_KEYS[i]] = cell(src[STAT_KEYS[i]]);
+    return out;
+}
+function loadState() {
+    try {
+        var raw = localStorage.getItem(SAVE_KEY);
+        if (raw) {
+            var data = JSON.parse(raw);
+            stats = sanitizeStats(data && data.stats);
+            if (typeof data.confettiEnabled === 'boolean') confettiEnabled = data.confettiEnabled;
+        }
+    } catch (e) {
+        stats = sanitizeStats(null); // corrupt or hostile state -> clean slate
+    }
+    var toggle = document.getElementById('confettiToggle');
+    if (toggle) toggle.checked = confettiEnabled;
+}
+
+function toggleConfettiSetting() {
+    var toggle = document.getElementById('confettiToggle');
+    confettiEnabled = toggle.checked;
+    saveState();
+}
+
+/* =====================================================================
+   Adaptive picker for Mixed mode (weights toward weaker categories,
+   never repeats the same category twice in a row, and eases Linear in
+   slowly since it's usually the easiest of the three)
+   ===================================================================== */
+var lastMixedCategory = null;
+var mixedCount = 0;
+
+function pickAdaptiveCategory() {
+    mixedCount++;
+    var cats = mixedChallengeOn ? ['linear', 'factoring', 'quadFormula', 'challenge'] : ['linear', 'factoring', 'quadFormula'];
+
+    if (mixedCount === 1) {
+        lastMixedCategory = 'linear';
+        return 'linear';
+    }
+    if (mixedCount >= 2 && mixedCount <= 7) {
+        var nonLinearAll = cats.filter(function (k) { return k !== 'linear'; });
+        var nonLinear = nonLinearAll.filter(function (k) { return k !== lastMixedCategory; });
+        var chosen1 = nonLinear.length > 0 ? pick(nonLinear) : pick(nonLinearAll);
+        lastMixedCategory = chosen1;
+        return chosen1;
+    }
+
+    var weights = cats.map(function (k) {
+        if (k === lastMixedCategory) return 0;
+        var s = stats[k];
+        var base = (s.t < 3) ? 1.0 : Math.max(0.2, 1 - s.c / s.t);
+        if (k === 'linear') base *= 0.3;
+        return base;
+    });
+    var total = weights.reduce(function (a, b) { return a + b; }, 0);
+    var chosen = cats[0];
+    if (total <= 0) {
+        chosen = pick(cats);
+    } else {
+        var r = Math.random() * total;
+        for (var i = 0; i < cats.length; i++) {
+            r -= weights[i];
+            if (r <= 0) { chosen = cats[i]; break; }
+        }
+    }
+    lastMixedCategory = chosen;
+    return chosen;
+}
+
+/* =====================================================================
+   Problem generators
+   ===================================================================== */
+function xCoefStr(n) {
+    if (n === 1) return 'x';
+    if (n === -1) return '-x';
+    return n + 'x';
+}
+
+var linearCount = 0;
+
+// Zero is a legitimate answer but shouldn't dominate; allow it only ~3% of the time.
+function pickX() {
+    if (Math.random() < 0.03) return 0;
+    var v = 0;
+    while (v === 0) v = ri(-9, 9);
+    return v;
+}
+
+// Omit a constant term entirely when it is zero (never render "4x + 0").
+function constTerm(c) {
+    return (c === 0) ? '' : constTermStr(c);
+}
+
+function pickLinearSubtype() {
+    var fracChance = 0.30;
+    if (currentTab === 'linear') {
+        linearCount++;
+        if (linearCount <= 2) fracChance = 0;           // first two: plain whole-number answers
+        else if (linearCount === 3) return 'fractionAnswer'; // guarantee an early fraction
+        else if (linearCount <= 16) fracChance = 0.55;  // early stretch: heavy fraction practice
+    }
+    var r = Math.random();
+    if (r < 0.15) return 'distbothsides';
+    if (r < 0.15 + fracChance) return 'fractionAnswer';
+    return pick(['basic', 'reversed', 'both', 'distribution', 'distboth']);
+}
+
+function genLinear() {
+    var subtype = pickLinearSubtype();
+    var x = pickX();
+    var a = ri(2, 9);
+    var b = ri(-9, 9); if (b === 0) b = pick([3, -4, 5]);
+    var equation, hint, solutionSteps, d, e, c, ab, diff, afterDist;
+
+    if (subtype === 'basic') {
+        c = a * x + b;
+        equation = a + 'x' + constTermStr(b) + ' = ' + c;
+        hint = 'Isolate the x-term first: ' + (b >= 0 ? 'subtract' : 'add') + ' ' + Math.abs(b) + ' ' + (b >= 0 ? 'from' : 'to') + ' both sides. Then divide by ' + a + '.';
+        solutionSteps = [
+            'Start with the equation:  ' + equation,
+            (b >= 0 ? 'Subtract ' : 'Add ') + Math.abs(b) + ' ' + (b >= 0 ? 'from' : 'to') + ' both sides:  ' + a + 'x = ' + (c - b),
+            'Divide both sides by ' + a + ':  x = ' + x
+        ];
+    } else if (subtype === 'reversed') {
+        c = a * x + b;
+        equation = c + ' = ' + a + 'x' + constTermStr(b);
+        hint = 'The x-term is on the right side. ' + (b >= 0 ? 'Subtract' : 'Add') + ' ' + Math.abs(b) + ' from both sides, then divide by ' + a + '.';
+        solutionSteps = [
+            'Start with the equation:  ' + equation,
+            (b >= 0 ? 'Subtract ' : 'Add ') + Math.abs(b) + ' ' + (b >= 0 ? 'from' : 'to') + ' both sides:  ' + (c - b) + ' = ' + a + 'x',
+            'Divide both sides by ' + a + ':  x = ' + x
+        ];
+    } else if (subtype === 'both') {
+        d = ri(2, 9); var guard = 0; while (d === a && guard < 20) { d = ri(2, 9); guard++; }
+        diff = a - d;
+        e = diff * x + b;
+        equation = a + 'x' + constTermStr(b) + ' = ' + d + 'x' + constTerm(e);
+        hint = 'Get all the x-terms on one side by subtracting ' + d + 'x from both sides, then solve like a basic equation.';
+        solutionSteps = [
+            'Start with the equation:  ' + equation,
+            'Subtract ' + d + 'x from both sides:  ' + xCoefStr(diff) + constTermStr(b) + ' = ' + e,
+            (b >= 0 ? 'Subtract ' : 'Add ') + Math.abs(b) + ' ' + (b >= 0 ? 'from' : 'to') + ' both sides:  ' + xCoefStr(diff) + ' = ' + (e - b),
+            'Divide both sides by ' + diff + ':  x = ' + x
+        ];
+    } else if (subtype === 'distribution') {
+        c = a * (x + b);
+        equation = a + '(x' + constTermStr(b) + ') = ' + c;
+        hint = 'Distribute the ' + a + ' first, then solve like a basic equation.';
+        ab = a * b;
+        solutionSteps = [
+            'Start with the equation:  ' + equation,
+            'Distribute ' + a + ':  ' + a + 'x' + constTermStr(ab) + ' = ' + c,
+            (ab >= 0 ? 'Subtract ' : 'Add ') + Math.abs(ab) + ' ' + (ab >= 0 ? 'from' : 'to') + ' both sides:  ' + a + 'x = ' + (c - ab),
+            'Divide both sides by ' + a + ':  x = ' + x
+        ];
+    } else if (subtype === 'distbothsides') {
+        var f, tries = 0, ok = false;
+        while (tries < 500 && !ok) {
+            a = ri(2, 9);
+            d = ri(2, 9);
+            b = ri(-9, 9);
+            f = ri(-9, 9);
+            tries++;
+            if (a === d || b === 0 || f === 0) continue;
+            var numer = d * f - a * b;
+            var denom = a - d;
+            if (numer % denom !== 0) continue;
+            var cand = numer / denom;
+            if (cand === 0 || Math.abs(cand) > 12) continue;
+            x = cand;
+            ok = true;
+        }
+        if (!ok) { a = 3; d = 2; b = 1; f = 2; x = 1; }
+
+        ab = a * b;
+        var df = d * f;
+        diff = a - d;
+        equation = a + '(x' + constTermStr(b) + ') = ' + d + '(x' + constTermStr(f) + ')';
+        afterDist = a + 'x' + constTermStr(ab) + ' = ' + d + 'x' + constTermStr(df);
+        hint = 'There is something to distribute on BOTH sides. Distribute the ' + a + ' on the left and the ' + d + ' on the right first, then collect the x-terms on one side.';
+        solutionSteps = [
+            'Start with the equation:  ' + equation,
+            'Distribute on both sides:  ' + afterDist,
+            'Subtract ' + d + 'x from both sides:  ' + xCoefStr(diff) + constTermStr(ab) + ' = ' + df,
+            (ab >= 0 ? 'Subtract ' : 'Add ') + Math.abs(ab) + ' ' + (ab >= 0 ? 'from' : 'to') + ' both sides:  ' + xCoefStr(diff) + ' = ' + (df - ab),
+            'Divide both sides by ' + diff + ':  x = ' + x
+        ];
+    } else if (subtype === 'fractionAnswer') {
+        var fracNum, fracDen, ftries = 0, fok = false;
+        var useBothSides = Math.random() < 0.5;
+        while (ftries < 500 && !fok) {
+            ftries++;
+            if (useBothSides) {
+                a = ri(2, 9);
+                d = ri(2, 9);
+                if (a === d) continue;
+                b = ri(-9, 9);
+                e = ri(-9, 9);
+                if (b === 0 || e === 0) continue;
+                diff = a - d;
+                if ((e - b) % diff === 0) continue;
+                fracNum = e - b; fracDen = diff;
+            } else {
+                a = ri(2, 9);
+                b = ri(-9, 9);
+                c = ri(-20, 20);
+                if (b === 0) continue;
+                if ((c - b) % a === 0) continue;
+                fracNum = c - b; fracDen = a;
+            }
+            fok = true;
+        }
+        if (!fok) { useBothSides = false; a = 2; b = 1; c = 4; fracNum = 3; fracDen = 2; }
+
+        var red = reduceFrac(fracNum, fracDen);
+        var fracStr = fmtFrac(fracNum, fracDen);
+        /* Normalise the sign before printing the unreduced quotient. Dividing by
+           a negative coefficient used to render as "x = 5/-3" (and "x = -2/-5",
+           which is positive) in the solution steps. Measured on the original:
+           1,572 of 20,000 linear problems. The reduce step is still shown
+           whenever the normalised form is not already in lowest terms. */
+        var rawNum = fracNum, rawDen = fracDen;
+        if (rawDen < 0) { rawNum = -rawNum; rawDen = -rawDen; }
+        var rawStr = rawNum + '/' + rawDen;
+        var needsReduceStep = (rawStr !== fracStr);
+        x = fracNum / fracDen;
+
+        if (useBothSides) {
+            equation = a + 'x' + constTermStr(b) + ' = ' + d + 'x' + constTerm(e);
+            hint = 'Collect the x-terms on one side, then divide. This one does not come out even &mdash; leave your answer as a fraction in lowest terms.';
+            solutionSteps = [
+                'Start with the equation:  ' + equation,
+                'Subtract ' + d + 'x from both sides:  ' + xCoefStr(diff) + constTermStr(b) + ' = ' + e,
+                (b >= 0 ? 'Subtract ' : 'Add ') + Math.abs(b) + ' ' + (b >= 0 ? 'from' : 'to') + ' both sides:  ' + xCoefStr(diff) + ' = ' + (e - b),
+                'Divide both sides by ' + diff + ':  x = ' + rawStr
+            ];
+            if (needsReduceStep) solutionSteps.push('Simplify:  x = ' + fracStr);
+        } else {
+            equation = a + 'x' + constTermStr(b) + ' = ' + c;
+            hint = 'Isolate the x-term, then divide by ' + a + '. This one does not come out even &mdash; leave your answer as a fraction in lowest terms.';
+            solutionSteps = [
+                'Start with the equation:  ' + equation,
+                (b >= 0 ? 'Subtract ' : 'Add ') + Math.abs(b) + ' ' + (b >= 0 ? 'from' : 'to') + ' both sides:  ' + a + 'x = ' + (c - b),
+                'Divide both sides by ' + a + ':  x = ' + rawStr
+            ];
+            if (needsReduceStep) solutionSteps.push('Simplify:  x = ' + fracStr);
+        }
+
+        return {
+            category: 'linear',
+            subtypeLabel: 'Linear Equation',
+            equation: equation,
+            answerType: 'single',
+            inputMode: 'fraction',
+            requiresFraction: true,
+            fractionNum: red.num,
+            fractionDen: red.den,
+            answer: x,
+            hint: hint,
+            solutionSteps: solutionSteps,
+            answerDisplay: 'x = ' + fracStr
+        };
+    } else { // distboth
+        d = ri(2, 9); guard = 0; while (d === a && guard < 20) { d = ri(2, 9); guard++; }
+        diff = a - d;
+        ab = a * b;
+        e = diff * x + ab;
+        equation = a + '(x' + constTermStr(b) + ') = ' + d + 'x' + constTerm(e);
+        afterDist = a + 'x' + constTerm(ab) + ' = ' + d + 'x' + constTerm(e);
+        hint = 'Distribute first, then get the x-terms together and solve.';
+        solutionSteps = [
+            'Start with the equation:  ' + equation,
+            'Distribute ' + a + ':  ' + afterDist,
+            'Subtract ' + d + 'x from both sides:  ' + xCoefStr(diff) + constTermStr(ab) + ' = ' + e,
+            (ab >= 0 ? 'Subtract ' : 'Add ') + Math.abs(ab) + ' ' + (ab >= 0 ? 'from' : 'to') + ' both sides:  ' + xCoefStr(diff) + ' = ' + (e - ab),
+            'Divide both sides by ' + diff + ':  x = ' + x
+        ];
+    }
+
+    return {
+        category: 'linear',
+        subtypeLabel: 'Linear Equation',
+        equation: equation,
+        answerType: 'single',
+        inputMode: 'fraction',
+        answer: x,
+        hint: hint,
+        solutionSteps: solutionSteps,
+        answerDisplay: 'x = ' + x
+    };
+}
+
+var standardFactoringCount = 0;
+
+function pickFactoringSubtype() {
+    if (currentTab === 'factoring') {
+        standardFactoringCount++;
+        if (standardFactoringCount === 1 || standardFactoringCount === 2) return 'gcf';
+        if (standardFactoringCount === 3 || standardFactoringCount === 4) return 'diffsquares';
+        if (standardFactoringCount >= 5 && standardFactoringCount <= 10) return 'trinomial';
+    }
+    if (Math.random() < 0.70) return 'trinomial';
+    return pick(['gcf', 'diffsquares', 'gcfCoef', 'diffsquaresCoef']);
+}
+
+function genFactoring() {
+    var subtype = pickFactoringSubtype();
+    var a = 1, b, c, roots, rootsDisplay, label, hint, solutionSteps, K, p, q, tries, g, k, r, s;
+    var allowShift = (subtype === 'diffsquares' || subtype === 'diffsquaresCoef' || subtype === 'trinomial');
+
+    if (subtype === 'gcf') {
+        b = pick([-9, -8, -7, -6, -5, -4, -3, -2, 2, 3, 4, 5, 6, 7, 8, 9]);
+        c = 0;
+        roots = [0, -b];
+        rootsDisplay = ['0', String(-b)];
+        label = 'Factoring: GCF';
+        hint = 'Factor out the greatest common factor, x, from both terms: x(x' + constTermStr(b) + ') = 0. Then set each factor equal to 0.';
+        solutionSteps = [
+            'Start with the equation:  ' + buildQuadString(1, b, 0),
+            'Factor out the GCF, x:  x(x' + constTermStr(b) + ') = 0',
+            'Set each factor to 0:  x = 0   or   x' + constTermStr(b) + ' = 0',
+            'Solve each:  x = 0   or   x = ' + (-b)
+        ];
+    } else if (subtype === 'diffsquares') {
+        K = ri(2, 12);
+        b = 0; c = -(K * K);
+        roots = [K, -K];
+        rootsDisplay = [String(K), String(-K)];
+        label = 'Factoring: Difference of Squares';
+        hint = 'This is a difference of squares: x\u00B2 - ' + (K * K) + ' = (x - ' + K + ')(x + ' + K + ').';
+        solutionSteps = [
+            'Start with the equation:  ' + buildQuadString(1, 0, c),
+            'Recognize the difference of squares:  (x - ' + K + ')(x + ' + K + ') = 0',
+            'Set each factor to 0:  x - ' + K + ' = 0   or   x + ' + K + ' = 0',
+            'Solve each:  x = ' + K + '   or   x = ' + (-K)
+        ];
+    } else if (subtype === 'gcfCoef') {
+        /* gcd(k, r) must be 1, otherwise gcd(a, b) = g * gcd(k, r) exceeds g and
+           the hint's "factor out the greatest common factor, gx" is false:
+           4x^2 + 8x was being presented as 2x(2x + 4), which is not factored
+           completely. Measured on the original: 367 of 20,000 problems. */
+        g = pick([2, 3, 4, 5, 6]);
+        tries = 0;
+        do {
+            k = pick([1, 2, 3, 4, 5]);
+            r = pick([-9, -8, -7, -6, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+            tries++;
+        } while (gcd(k, Math.abs(r)) !== 1 && tries < 200);
+        if (gcd(k, Math.abs(r)) !== 1) { k = 1; r = pick([-5, -3, 3, 5]); }
+        a = g * k; b = g * r; c = 0;
+        roots = [0, fracValue(-r, k)];
+        rootsDisplay = ['0', fmtFrac(-r, k)];
+        label = 'Factoring: GCF';
+        hint = 'The GCF includes a number this time: factor out ' + leadCoef(g) + 'x (not just x) to get ' + leadCoef(g) + 'x(' + leadCoef(k) + 'x' + constTermStr(r) + ') = 0. Then set each factor to 0.';
+        solutionSteps = [
+            'Start with the equation:  ' + buildQuadString(a, b, 0),
+            'Factor out the GCF, ' + leadCoef(g) + 'x:  ' + leadCoef(g) + 'x(' + leadCoef(k) + 'x' + constTermStr(r) + ') = 0',
+            'Set each factor to 0:  ' + leadCoef(g) + 'x = 0   or   ' + leadCoef(k) + 'x' + constTermStr(r) + ' = 0',
+            'Solve each:  x = 0   or   x = ' + fmtFrac(-r, k)
+        ];
+    } else if (subtype === 'diffsquaresCoef') {
+        /* gcd(s, K) must be 1, otherwise (sx - K)(sx + K) still has a common
+           numeric factor: 4x^2 - 16 was being "factored" as (2x - 4)(2x + 4).
+           Measured on the original: 681 of 20,000 problems. */
+        tries = 0;
+        do {
+            s = pick([2, 3, 4, 5, 6]);
+            K = ri(2, 12);
+            tries++;
+        } while (gcd(s, K) !== 1 && tries < 200);
+        if (gcd(s, K) !== 1) { s = 2; K = 3; }
+        a = s * s; b = 0; c = -(K * K);
+        roots = [fracValue(K, s), fracValue(-K, s)];
+        rootsDisplay = [fmtFrac(K, s), fmtFrac(-K, s)];
+        label = 'Factoring: Difference of Squares';
+        hint = 'This is a difference of squares with a coefficient: ' + a + 'x\u00B2 = (' + s + 'x)\u00B2 and ' + (K * K) + ' = ' + K + '\u00B2, so it factors as (' + s + 'x - ' + K + ')(' + s + 'x + ' + K + ').';
+        solutionSteps = [
+            'Start with the equation:  ' + buildQuadString(a, 0, c),
+            'Recognize the difference of squares:  ' + a + 'x\u00B2 = (' + s + 'x)\u00B2   and   ' + (K * K) + ' = ' + K + '\u00B2',
+            'Factor:  (' + s + 'x - ' + K + ')(' + s + 'x + ' + K + ') = 0',
+            'Set each factor to 0:  ' + s + 'x - ' + K + ' = 0   or   ' + s + 'x + ' + K + ' = 0',
+            'Solve each:  x = ' + fmtFrac(K, s) + '   or   x = ' + fmtFrac(-K, s)
+        ];
+    } else {
+        tries = 0;
+        do { p = ri(-9, 9); q = ri(-9, 9); tries++; } while ((p === 0 || q === 0 || p === q) && tries < 50);
+        b = -(p + q); c = p * q;
+        roots = [p, q];
+        rootsDisplay = [String(p), String(q)];
+        label = 'Factoring: Trinomial';
+        hint = 'Find two numbers that multiply to ' + c + ' and add to ' + b + '. Those numbers become the constants in the two binomial factors.';
+        solutionSteps = [
+            'Start with the equation:  ' + buildQuadString(1, b, c),
+            'Find two numbers that multiply to ' + c + ' and add to ' + b + ':  ' + (-p) + ' and ' + (-q),
+            'Write the factored form:  (x' + constTermStr(-p) + ')(x' + constTermStr(-q) + ') = 0',
+            'Set each factor to 0 and solve:  x = ' + p + '   or   x = ' + q
+        ];
+    }
+
+    var standardEquation = buildQuadString(a, b, c);
+    var shiftGatePassed = (currentTab === 'factoring' && standardFactoringCount > 10) || currentTab === 'mixed';
+    var isShifted = allowShift && shiftGatePassed && Math.random() < 0.40;
+    var shiftedEquation = isShifted ? buildQuadStringShifted(a, b, c) : null;
+    var equation = isShifted ? shiftedEquation : standardEquation;
+    hint = applyShiftToHint(hint, isShifted, standardEquation);
+    solutionSteps = applyShiftToSteps(solutionSteps, isShifted, shiftedEquation, standardEquation);
+
+    return {
+        category: 'factoring',
+        subtypeLabel: label,
+        equation: equation,
+        answerType: 'double',
+        inputMode: 'integer',
+        isShifted: isShifted,
+        roots: roots,
+        hint: hint,
+        solutionSteps: solutionSteps,
+        answerDisplay: 'x = ' + rootsDisplay[0] + '   or   x = ' + rootsDisplay[1]
+    };
+}
+
+var quadFormulaCount = 0;
+
+function genQuadFormula() {
+    if (currentTab === 'quadFormula') quadFormulaCount++;
+
+    var wantSimplify;
+    if (currentTab === 'quadFormula') wantSimplify = challengeModeOn;
+    else if (currentTab === 'mixed') wantSimplify = mixedChallengeOn && Math.random() < 0.5;
+    else wantSimplify = false;
+
+    var a, b, c, D, tries = 0, coeff;
+    do {
+        a = pick([1, 1, 1, 2, 2, 3]);
+        b = ri(-9, 9);
+        c = ri(-9, 9);
+        D = b * b - 4 * a * c;
+        tries++;
+        coeff = (D > 0 && !isPerfectSquare(D)) ? simplifySqrt(D).coeff : null;
+    } while (
+        (D <= 0 || isPerfectSquare(D) || b === 0 || c === 0 ||
+            (wantSimplify && coeff === 1) || (!wantSimplify && coeff > 1))
+        && tries < 600
+    );
+
+    var root1 = (-b + Math.sqrt(D)) / (2 * a);
+    var root2 = (-b - Math.sqrt(D)) / (2 * a);
+    var simp = simplifyQuadRoots(a, b, D);
+    var needsSimplification = simp.needsSimplification;
+    var standardEquation = buildQuadString(a, b, c);
+
+    var hint = 'This trinomial cannot be factored (the discriminant, b\u00B2 - 4ac = ' + D + ', is not a perfect square). Use the quadratic formula: x = (-b \u00B1 \u221a(b\u00B2-4ac)) / (2a).';
+    if (needsSimplification) {
+        hint += ' This one will also need simplifying once you\'ve plugged in the numbers.';
+    }
+
+    var solutionSteps = [
+        'Start with the equation:  ' + standardEquation + '   (a = ' + a + ', b = ' + b + ', c = ' + c + ')',
+        'Compute the discriminant:  b\u00B2 - 4ac = (' + b + ')\u00B2 - 4(' + a + ')(' + c + ') = ' + D,
+        'Plug into the quadratic formula &mdash; this is Part 1, exactly what goes in the first three boxes:  x = (' + (-b) + ' \u00B1 \u221a' + D + ') / ' + (2 * a)
+    ];
+    if (needsSimplification) {
+        solutionSteps.push('Simplify the radical:  \u221a' + D + ' = ' + simp.radicalStepStr);
+        solutionSteps.push('Rewrite with the simplified radical:  x = ' + simp.afterRadicalStr1 + '   or   x = ' + simp.afterRadicalStr2);
+        if (simp.furtherReductionNeeded) {
+            solutionSteps.push('Reduce the fraction completely &mdash; this is Part 2:  x = ' + simp.root1Str + '   or   x = ' + simp.root2Str);
+        } else {
+            solutionSteps.push('That fraction is already in lowest terms, so this is your Part 2 answer:  x = ' + simp.root1Str + '   or   x = ' + simp.root2Str);
+        }
+    } else {
+        solutionSteps.push('This radical is already in simplest form, so that\'s your final answer:  x = ' + simp.root1Str + '   or   x = ' + simp.root2Str);
+    }
+
+    var shiftGatePassed = (currentTab === 'quadFormula' && quadFormulaCount > 4) || currentTab === 'mixed';
+    var isShifted = shiftGatePassed && Math.random() < 0.40;
+    var shiftedEquation = isShifted ? buildQuadStringShifted(a, b, c) : null;
+    var equation = isShifted ? shiftedEquation : standardEquation;
+    hint = applyShiftToHint(hint, isShifted, standardEquation);
+    solutionSteps = applyShiftToSteps(solutionSteps, isShifted, shiftedEquation, standardEquation);
+
+    var answerDisplayPart1 = 'Numerator = ' + (-b) + ' &nbsp;|&nbsp; Radicand = ' + D + ' &nbsp;|&nbsp; Denominator = ' + (2 * a) +
+        ' &nbsp;&rarr;&nbsp; x = (' + (-b) + ' \u00B1 \u221a' + D + ') / ' + (2 * a);
+    var answerDisplayPart2 = null;
+    if (needsSimplification) {
+        answerDisplayPart2 = 'Numerator = ' + simp.numerator + ' &nbsp;|&nbsp; Coefficient = ' + simp.coeff + ' &nbsp;|&nbsp; Radicand = ' + simp.radicand + ' &nbsp;|&nbsp; Denominator = ' + simp.denominator +
+            ' &nbsp;&rarr;&nbsp; x = ' + simp.root1Str + '   or   x = ' + simp.root2Str;
+    }
+
+    return {
+        category: 'quadFormula',
+        subtypeLabel: needsSimplification ? 'Quadratic Formula (Challenge)' : 'Quadratic Formula',
+        equation: equation,
+        answerType: 'double',
+        inputMode: 'radicalStructured',
+        needsSimplification: needsSimplification,
+        isShifted: isShifted,
+        roots: [root1, root2],
+        structuredAnswer: { numerator: -b, radicand: D, denominator: 2 * a },
+        simplifiedAnswer: { numerator: simp.numerator, coeff: simp.coeff, radicand: simp.radicand, denominator: simp.denominator },
+        hint: hint,
+        solutionSteps: solutionSteps,
+        answerDisplay: answerDisplayPart1,
+        answerDisplayPart1: answerDisplayPart1,
+        answerDisplayPart2: answerDisplayPart2
+    };
+}
+
+var challengeCount = 0;
+
+function genChallenge() {
+    if (currentTab === 'challenge') challengeCount++;
+
+    var d, e, f, g, a, b, c, tries = 0;
+    do {
+        d = pick([1, 2, 3, 4]);
+        f = pick([1, 2, 3, 4]);
+        e = pick([-6, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6]);
+        g = pick([-6, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6]);
+        a = d * f; b = d * g + e * f; c = e * g;
+        tries++;
+    } while ((a < 2 || gcd3(a, b, c) > 1 || b === 0) && tries < 500);
+
+    var root1 = fracValue(-e, d), root2 = fracValue(-g, f);
+    var standardEquation = buildQuadString(a, b, c);
+    var ac = a * c;
+    var m = d * g, n = e * f; // m*n = ac, m+n = b, by construction
+    var hint = 'The leading coefficient is ' + a + ', not 1. Try the AC method: multiply a&middot;c = ' + ac + ', find two numbers that multiply to ' + ac + ' and add to ' + b + ', then split the middle term and factor by grouping. (Or use trial and error: pair up factors of ' + a + ' for the x-coefficients with factors of ' + c + ' for the constants, like (_x + _)(_x + _), until the cross terms add up to ' + b + '.)';
+    var solutionSteps = [
+        'Start with the equation:  ' + standardEquation + '   (a = ' + a + ', c = ' + c + ')',
+        'Multiply a and c:  a&middot;c = (' + a + ')(' + c + ') = ' + ac,
+        'Find two numbers that multiply to ' + ac + ' and add to ' + b + ':  ' + m + ' and ' + n,
+        'Split the middle term:  ' + a + 'x\u00B2' + xTermStr(m) + xTermStr(n) + constTermStr(c) + ' = 0',
+        'Group and factor each pair:  ' + leadCoef(d) + 'x(' + leadCoef(f) + 'x' + constTermStr(g) + ')' + (e >= 0 ? ' + ' : ' - ') + Math.abs(e) + '(' + leadCoef(f) + 'x' + constTermStr(g) + ') = 0',
+        'Factor completely:  (' + leadCoef(d) + 'x' + constTermStr(e) + ')(' + leadCoef(f) + 'x' + constTermStr(g) + ') = 0',
+        'Set each factor to 0 and solve:  x = ' + fmtFrac(-e, d) + '   or   x = ' + fmtFrac(-g, f)
+    ];
+
+    var shiftGatePassed = (currentTab === 'challenge' && challengeCount > 4) || currentTab === 'mixed';
+    var isShifted = shiftGatePassed && Math.random() < 0.40;
+    var shiftedEquation = isShifted ? buildQuadStringShifted(a, b, c) : null;
+    var equation = isShifted ? shiftedEquation : standardEquation;
+    hint = applyShiftToHint(hint, isShifted, standardEquation);
+    if (isShifted) {
+        solutionSteps = ['Start with the equation:  ' + shiftedEquation, 'Move everything to one side so it equals 0:  ' + standardEquation + '   (a = ' + a + ', c = ' + c + ')'].concat(solutionSteps.slice(1));
+    }
+
+    return {
+        category: 'challenge',
+        subtypeLabel: 'Challenge',
+        equation: equation,
+        answerType: 'double',
+        inputMode: 'fraction',
+        isShifted: isShifted,
+        roots: [root1, root2],
+        hint: hint,
+        solutionSteps: solutionSteps,
+        answerDisplay: 'x = ' + fmtFrac(-e, d) + '   or   x = ' + fmtFrac(-g, f)
+    };
+}
+
+/* =====================================================================
+   Game flow
+   ===================================================================== */
+function generateProblem() {
+    var effectiveCat = currentTab;
+    if (currentTab === 'mixed') effectiveCat = pickAdaptiveCategory();
+
+    if (effectiveCat === 'linear') currentProblem = genLinear();
+    else if (effectiveCat === 'factoring') currentProblem = genFactoring();
+    else if (effectiveCat === 'quadFormula') currentProblem = genQuadFormula();
+    else currentProblem = genChallenge();
+
+    quadFormulaPart = 1;
+    shiftHintGiven = false;
+    solutionRevealed = 0;
+    revealCharged = false;
+    document.getElementById('hint').style.display = 'none';
+    document.getElementById('answer-box').style.display = 'none';
+    document.getElementById('solution-box').style.display = 'none';
+    document.getElementById('next-btn-row').innerHTML = '';
+    var fb = document.getElementById('feedback');
+    fb.textContent = '';
+    fb.className = 'feedback';
+
+    render();
+}
+
+/* Speaks a printed equation the way a person would read it aloud. Without this
+   a screen reader announces "-3x" as "dash 3 x" and "x^2" as "x superscript
+   two", and the CSS-drawn radical and fraction (an SVG tick plus a border-top,
+   and a stacked flex column) carry their meaning entirely in layout. */
+function speakEquation(str) {
+    var out = String(str);
+    out = out.replace(/&minus;|\u2212/g, '-').replace(/&plusmn;/g, '\u00B1')
+             .replace(/&sup2;/g, '\u00B2').replace(/&nbsp;/g, ' ').replace(/&rarr;/g, ' gives ');
+    out = out.replace(/<[^>]+>/g, ' ');
+    out = out.replace(/([A-Za-z0-9])\u00B2/g, '$1 squared ');
+    out = out.replace(/\u221a/g, ' square root of ');
+    out = out.replace(/\u00B1/g, ' plus or minus ');
+    out = out.replace(/(\d)\s*\(/g, '$1 times (');
+    out = out.replace(/\(/g, ' open parenthesis ').replace(/\)/g, ' close parenthesis ');
+    out = out.replace(/^\s*-/, 'negative ');
+    out = out.replace(/\s*=\s*/g, ' equals ');
+    out = out.replace(/\s+\+\s*/g, ' plus ');
+    out = out.replace(/\s+-\s*/g, ' minus ');
+    out = out.replace(/equals\s+minus\s+/g, 'equals negative ');
+    out = out.replace(/-/g, 'negative ');
+    out = out.replace(/(\d)([A-Za-z])/g, '$1 $2');
+    out = out.replace(/\//g, ' over ');
+    return out.replace(/\s+/g, ' ').trim();
+}
+function announceProblem(text) {
+    var el = document.getElementById('problem-announcer');
+    if (!el) return;
+    // Clearing first forces assistive tech to re-announce identical text.
+    el.textContent = '';
+    setTimeout(function () { el.textContent = text; }, 60);
+}
+/* Every status message goes through here so it reaches the assertive region. */
+function setFeedback(text, cls) {
+    var fb = document.getElementById('feedback');
+    if (!fb) return;
+    fb.textContent = text;
+    fb.className = 'feedback' + (cls ? ' ' + cls : '');
+}
+/* label: when the radicand is static text, the whole radical is announced as
+   one labelled image. When it wraps an input it must stay a plain container,
+   or the input would be hidden from assistive technology. */
+function radicalHTML(inner, label) {
+    var svg = '<svg viewBox="0 0 14 40" preserveAspectRatio="none" aria-hidden="true" focusable="false">' +
+        '<path d="M0.5,24 L4,24 L7.5,37.5 L12.5,1 L14,1" fill="none" stroke="currentColor" ' +
+        'stroke-width="2" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"/>' +
+        '</svg>';
+    var attrs = label ? ' role="img" aria-label="' + escHtml(label) + '"' : '';
+    var bodyAttrs = label ? ' aria-hidden="true"' : '';
+    return '<span class="radical"' + attrs + '><span class="radical-sign"' + bodyAttrs + '>' + svg + '</span>' +
+        '<span class="radical-body"' + bodyAttrs + '>' + inner + '</span></span>';
+}
+
+var FORMULA_LABELS = {
+    ansNum: 'Numerator, the value of negative b',
+    ansRad: 'Number under the square root, the discriminant',
+    ansDen: 'Denominator, the value of 2a',
+    ansNum2: 'Simplified numerator',
+    ansCoeff2: 'Number in front of the square root, enter 1 if there is none',
+    ansRad2: 'Simplified number under the square root',
+    ansDen2: 'Simplified denominator'
+};
+function formulaInput(id, extraClass, placeholder) {
+    var cls = 'formula-input' + (extraClass ? ' ' + extraClass : '');
+    var ph = placeholder || '?';
+    var lab = FORMULA_LABELS[id] || id;
+    return '<input type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="' + cls + '" id="' + id + '" aria-label="' + escHtml(lab) + '" placeholder="' + ph + '" onfocus="trackFocus(\'' + id + '\')" onkeypress="if(event.key===\'Enter\') checkAnswer()">';
+}
+
+/* One sentence describing the whole problem, for the polite live region. */
+function spokenProblem() {
+    var p = currentProblem;
+    var eq = speakEquation(p.equation);
+    if (p.inputMode === 'radicalStructured' && quadFormulaPart === 2) {
+        var sa = p.structuredAnswer;
+        return 'Part 2 of 2. Part 1 was correct: x equals ' + sa.numerator +
+            ' plus or minus the square root of ' + sa.radicand + ', all over ' + sa.denominator +
+            '. Now simplify completely: enter the numerator, the number in front of the square root, ' +
+            'the number under the square root, and the denominator.';
+    }
+    var lead = 'New problem. ' + p.subtypeLabel + '. Solve ' + eq + ' for x. ';
+    if (p.inputMode === 'radicalStructured') {
+        return lead + 'Use the quadratic formula. ' +
+            (p.needsSimplification ? 'Part 1 of 2: plug in, do not simplify yet. ' : '') +
+            'Enter the numerator, the number under the square root, and the denominator.';
+    }
+    if (p.answerType === 'double') return lead + 'Enter both solutions, in either order.';
+    if (p.requiresFraction) return lead + 'The answer is not a whole number: enter it as a fraction in lowest terms.';
+    return lead;
+}
+function render() {
+    var html = '';
+    // aria-hidden: spokenProblem() reads the equation aloud, so the visual chip
+    // must not be announced a second time in raw glyphs.
+    html += '<div class="equation" aria-hidden="true">' + currentProblem.equation + '</div>';
+
+    if (currentProblem.inputMode === 'radicalStructured' && quadFormulaPart === 1) {
+        html += '<div class="solve-instruction">Solve for x using the quadratic formula</div>';
+        html += '<div class="formula-reminder">';
+        html += '<span class="reminder-label">REMINDER</span>';
+        html += '<span role="img" aria-label="Reminder. The quadratic formula: x equals negative b plus or minus the square root of b squared minus 4 a c, all over 2 a.">';
+        html += '<span aria-hidden="true">x =</span>';
+        html += '<span class="frac" aria-hidden="true">';
+        html += '<span class="frac-num">&minus;b &plusmn; ' + radicalHTML('b&sup2; &minus; 4ac') + '</span>';
+        html += '<span class="frac-bar"></span>';
+        html += '<span class="frac-den">2a</span>';
+        html += '</span>';
+        html += '</span>';
+        html += '</div>';
+
+        html += '<div class="formula-row">';
+        html += '<span>x =</span>';
+        html += '<span class="frac">';
+        html += '<span class="frac-num">' + formulaInput('ansNum') + ' <span aria-hidden="true">&plusmn;</span> ' + radicalHTML(formulaInput('ansRad')) + '</span>';
+        html += '<span class="frac-bar"></span>';
+        html += '<span class="frac-den">' + formulaInput('ansDen') + '</span>';
+        html += '</span>';
+        html += '</div>';
+
+        html += '<div class="submit-row"><button class="submit-btn" onclick="checkAnswer()">Submit</button></div>';
+        html += '<div class="key-row"><button class="key-btn" aria-label="Toggle positive or negative sign" onclick="toggleSign()"><span aria-hidden="true">\u00B1</span></button></div>';
+        if (currentProblem.needsSimplification) {
+            html += '<div class="fraction-note"><strong>Part 1 of 2 &mdash; plug in, don\'t simplify yet.</strong> Identify a, b, and c from the equation above and fill in the three boxes.</div>';
+        } else {
+            html += '<div class="fraction-note">Identify a, b, and c from the equation above and fill in the three boxes. This radical is already in simplest form, so you won\'t need to simplify.</div>';
+        }
+    } else if (currentProblem.inputMode === 'radicalStructured' && quadFormulaPart === 2) {
+        var sa = currentProblem.structuredAnswer;
+        html += '<div class="part1-recap"><span aria-hidden="true">&#10003;</span> Part 1 correct! Now simplify completely.' +
+            '<div class="recap-math" role="img" aria-label="' +
+            escHtml('x equals ' + sa.numerator + ' plus or minus the square root of ' + sa.radicand + ', all over ' + sa.denominator) + '">' +
+            '<span aria-hidden="true">x = <span class="frac"><span class="frac-num">' + sa.numerator + ' &plusmn; ' + radicalHTML(sa.radicand) + '</span><span class="frac-bar"></span><span class="frac-den">' + sa.denominator + '</span></span></span></div></div>';
+
+        html += '<div class="formula-row">';
+        html += '<span>x =</span>';
+        html += '<span class="frac">';
+        html += '<span class="frac-num">' + formulaInput('ansNum2') + ' <span aria-hidden="true">&plusmn;</span> ' + formulaInput('ansCoeff2', 'coeff-input', '1') + radicalHTML(formulaInput('ansRad2')) + '</span>';
+        html += '<span class="frac-bar"></span>';
+        html += '<span class="frac-den">' + formulaInput('ansDen2') + '</span>';
+        html += '</span>';
+        html += '</div>';
+
+        html += '<div class="submit-row"><button class="submit-btn" onclick="checkAnswer()">Submit</button></div>';
+        html += '<div class="key-row"><button class="key-btn" aria-label="Toggle positive or negative sign" onclick="toggleSign()"><span aria-hidden="true">\u00B1</span></button></div>';
+        html += '<div class="fraction-note"><strong>Part 2 of 2 &mdash; simplify completely.</strong> Reduce the radical and the fraction as far as they\'ll go. If there\'s no number in front of the root, enter 1.</div>';
+    } else if (currentProblem.answerType === 'single') {
+        html += '<div class="input-area">';
+        html += '<label class="sr-only" for="answer">Your answer for x</label>';
+        html += '<input type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="answer" placeholder="?" onfocus="trackFocus(\'answer\')" onkeypress="if(event.key===\'Enter\') checkAnswer()">';
+        html += '</div>';
+        html += '<div class="submit-row"><button class="submit-btn" onclick="checkAnswer()">Submit</button></div>';
+        html += '<div class="key-row"><button class="key-btn" aria-label="Toggle positive or negative sign" onclick="toggleSign()"><span aria-hidden="true">\u00B1</span></button><button class="key-btn" aria-label="Insert a fraction slash" onclick="insertSlash()"><span aria-hidden="true">/</span></button></div>';
+        if (currentProblem.requiresFraction) {
+            html += '<div class="fraction-note"><strong>This answer is not a whole number.</strong> Enter the exact answer as a fraction in lowest terms (like <code>3/4</code> or <code>-5/2</code>). Do not enter a decimal.</div>';
+        }
+    } else {
+        html += '<div class="input-area">';
+        html += '<div class="double-input-group"><label class="input-label" for="ans1"><span aria-hidden="true">x\u2081 =</span><span class="sr-only">First solution</span></label>';
+        html += '<input type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="ans1" placeholder="?" onfocus="trackFocus(\'ans1\')" onkeypress="if(event.key===\'Enter\') checkAnswer()"></div>';
+        html += '<div class="double-input-group"><label class="input-label" for="ans2"><span aria-hidden="true">x\u2082 =</span><span class="sr-only">Second solution</span></label>';
+        html += '<input type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="ans2" placeholder="?" onfocus="trackFocus(\'ans2\')" onkeypress="if(event.key===\'Enter\') checkAnswer()"></div>';
+        html += '</div>';
+        html += '<div class="submit-row"><button class="submit-btn" onclick="checkAnswer()">Submit</button></div>';
+        html += '<div class="key-row"><button class="key-btn" aria-label="Toggle positive or negative sign" onclick="toggleSign()"><span aria-hidden="true">\u00B1</span></button><button class="key-btn" aria-label="Insert a fraction slash" onclick="insertSlash()"><span aria-hidden="true">/</span></button></div>';
+        html += '<div class="fraction-note">Enter both solutions &mdash; order does not matter. Fractions like <code>3/2</code> are OK.</div>';
+    }
+
+    document.getElementById('main-content').innerHTML = html;
+    var firstId = currentProblem.inputMode === 'radicalStructured' ? (quadFormulaPart === 1 ? 'ansNum' : 'ansNum2') : (currentProblem.answerType === 'single' ? 'answer' : 'ans1');
+    lastFocusedId = firstId;
+    var firstInput = document.getElementById(firstId);
+    if (firstInput) firstInput.focus();
+    announceProblem(spokenProblem());
+}
+
+function trackFocus(id) { lastFocusedId = id; }
+
+function toggleSign() {
+    var el = document.getElementById(lastFocusedId);
+    if (!el) return;
+    el.value = el.value.charAt(0) === '-' ? el.value.slice(1) : '-' + el.value;
+    el.focus();
+}
+function insertSlash() {
+    var el = document.getElementById(lastFocusedId);
+    if (!el) return;
+    if (el.value.indexOf('/') === -1) el.value += '/';
+    el.focus();
+}
+
+
+function incorrectFeedbackText(checkShift) {
+    if (checkShift && !shiftHintGiven && currentProblem.isShifted) {
+        shiftHintGiven = true;
+        return 'Did you remember to move everything to one side and get zero on the other side?';
+    }
+    return 'Not quite right. Try again!';
+}
+
+/* The violet ring alone is colour-only error signalling; aria-invalid gives a
+   screen reader the same information. */
+function markField(el, ok) {
+    if (!el) return;
+    el.classList.toggle('field-error', !ok);
+    if (ok) el.removeAttribute('aria-invalid'); else el.setAttribute('aria-invalid', 'true');
+}
+function checkAnswer() {
+    var cat = currentProblem.category;
+    var feedback = document.getElementById('feedback');
+
+    if (currentProblem.inputMode === 'radicalStructured') {
+        if (quadFormulaPart === 1) {
+            var elNum = document.getElementById('ansNum');
+            var elRad = document.getElementById('ansRad');
+            var elDen = document.getElementById('ansDen');
+            var rawNum = elNum.value, rawRad = elRad.value, rawDen = elDen.value;
+            if (rawNum.trim() === '' || rawRad.trim() === '' || rawDen.trim() === '') {
+                setFeedback('Fill in all three boxes first.', 'incorrect');
+                return;
+            }
+            var uNum = parseFraction(rawNum), uRad = parseFraction(rawRad), uDen = parseFraction(rawDen);
+            if (isNaN(uNum) || isNaN(uRad) || isNaN(uDen)) {
+                feedback.textContent = "Couldn't read that as a number \u2014 check your entries and try again.";
+                feedback.className = 'feedback incorrect';
+                return;
+            }
+            var sa = currentProblem.structuredAnswer;
+            var numOk = closeEnough(uNum, sa.numerator, 0.001);
+            var radOk = closeEnough(uRad, sa.radicand, 0.001);
+            var denOk = closeEnough(uDen, sa.denominator, 0.001);
+            var part1Correct = numOk && radOk && denOk;
+            markField(elNum, numOk); markField(elRad, radOk); markField(elDen, denOk);
+            /* chargeReveal() already booked this problem as attempted, so do
+               not book it a second time -- and do not credit it below. */
+            if (!revealCharged) stats[cat].t++;
+
+            if (!part1Correct) {
+                streak = 0;
+                stopTimer();
+                updateDisplay();
+                feedback.textContent = incorrectFeedbackText(true) + ' Check the highlighted box(es).';
+                feedback.className = 'feedback incorrect';
+                saveState();
+                return;
+            }
+
+            if (!revealCharged) stats[cat].c++;
+            saveState();
+
+            if (currentProblem.needsSimplification) {
+                quadFormulaPart = 2;
+                document.getElementById('hint').style.display = 'none';
+                document.getElementById('answer-box').style.display = 'none';
+                document.getElementById('solution-box').style.display = 'none';
+                setFeedback('Part 1 correct. Now simplify completely.', 'correct');
+                render();
+                var mc = document.getElementById('main-content');
+                if (mc && mc.scrollIntoView) mc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                recordFullCorrectAnswer(feedback);
+            }
+            return;
+        } else {
+            var elNum2 = document.getElementById('ansNum2');
+            var elCoeff2 = document.getElementById('ansCoeff2');
+            var elRad2 = document.getElementById('ansRad2');
+            var elDen2 = document.getElementById('ansDen2');
+            var rawNum2 = elNum2.value, rawCoeff2 = elCoeff2.value, rawRad2 = elRad2.value, rawDen2 = elDen2.value;
+            if (rawNum2.trim() === '' || rawRad2.trim() === '' || rawDen2.trim() === '') {
+                setFeedback('Fill in the numerator, the number under the root and the denominator first.', 'incorrect');
+                return;
+            }
+            if (rawCoeff2 === '') rawCoeff2 = '1';
+            var uNum2 = parseFraction(rawNum2), uCoeff2 = parseFraction(rawCoeff2), uRad2 = parseFraction(rawRad2), uDen2 = parseFraction(rawDen2);
+            if (isNaN(uNum2) || isNaN(uCoeff2) || isNaN(uRad2) || isNaN(uDen2)) {
+                feedback.textContent = "Couldn't read that as a number \u2014 check your entries and try again.";
+                feedback.className = 'feedback incorrect';
+                return;
+            }
+            var sa2 = currentProblem.simplifiedAnswer;
+            var numOk2 = closeEnough(uNum2, sa2.numerator, 0.001);
+            var coeffOk2 = closeEnough(uCoeff2, sa2.coeff, 0.001);
+            var radOk2 = closeEnough(uRad2, sa2.radicand, 0.001);
+            var denOk2 = closeEnough(uDen2, sa2.denominator, 0.001);
+            var part2Correct = numOk2 && coeffOk2 && radOk2 && denOk2;
+            markField(elNum2, numOk2); markField(elCoeff2, coeffOk2);
+            markField(elRad2, radOk2); markField(elDen2, denOk2);
+            if (!revealCharged) stats[cat].t++;
+
+            if (part2Correct) {
+                if (!revealCharged) stats[cat].c++;
+                saveState();
+                recordFullCorrectAnswer(feedback);
+            } else {
+                feedback.textContent = incorrectFeedbackText(false) + ' Check the highlighted box(es).';
+                feedback.className = 'feedback incorrect';
+                saveState();
+            }
+            return;
+        }
+    }
+
+    var correct = false;
+    if (currentProblem.answerType === 'single') {
+        var elS = document.getElementById('answer');
+        var raw = elS.value;
+        if (raw.trim() === '') {
+            setFeedback('Enter your answer first.', 'incorrect');
+            return;
+        }
+
+        if (currentProblem.requiresFraction) {
+            if (raw.indexOf('.') !== -1) {
+                feedback.textContent = 'Please enter the exact answer as a fraction, not a decimal.';
+                feedback.className = 'feedback incorrect';
+                return;
+            }
+            var fparts = raw.split('/');
+            if (fparts.length !== 2) {
+                feedback.textContent = 'This answer is a fraction \u2014 enter it in the form a/b.';
+                feedback.className = 'feedback incorrect';
+                return;
+            }
+            var nsRaw = fparts[0].trim(), dsRaw = fparts[1].trim();
+            var uN = /^[+-]?\d+$/.test(nsRaw) ? parseInt(nsRaw, 10) : NaN;
+            var uD = /^[+-]?\d+$/.test(dsRaw) ? parseInt(dsRaw, 10) : NaN;
+            if (isNaN(uN) || isNaN(uD) || uD === 0) {
+                feedback.textContent = 'That is not a valid fraction \u2014 try again.';
+                feedback.className = 'feedback incorrect';
+                return;
+            }
+            var valueMatches = closeEnough(uN / uD, currentProblem.answer, 0.0001);
+            var inLowestTerms = (uN === currentProblem.fractionNum && uD === currentProblem.fractionDen);
+            if (valueMatches && !inLowestTerms) {
+                feedback.textContent = 'Right value \u2014 now write it in lowest terms.';
+                feedback.className = 'feedback incorrect';
+                return;
+            }
+            correct = valueMatches && inLowestTerms;
+        } else {
+            var userNum = parseFraction(raw);
+            correct = !isNaN(userNum) && closeEnough(userNum, currentProblem.answer, 0.001);
+        }
+    } else {
+        var el1 = document.getElementById('ans1');
+        var el2 = document.getElementById('ans2');
+        var raw1 = el1.value, raw2 = el2.value;
+        if (raw1.trim() === '' || raw2.trim() === '') {
+            setFeedback('Enter both solutions first.', 'incorrect');
+            return;
+        }
+        var u1 = parseFraction(raw1), u2 = parseFraction(raw2);
+        if (isNaN(u1) || isNaN(u2)) {
+            var fbBad = document.getElementById('feedback');
+            fbBad.textContent = "Couldn't read that as a number \u2014 check your entries and try again.";
+            fbBad.className = 'feedback incorrect';
+            return;
+        }
+        correct = checkPair(currentProblem.roots, u1, u2, 0.01);
+    }
+
+    if (!revealCharged) stats[cat].t++;
+
+    if (correct) {
+        if (!revealCharged) stats[cat].c++;
+        saveState();
+        recordFullCorrectAnswer(feedback);
+    } else {
+        streak = 0;
+        stopTimer();
+        updateDisplay();
+        feedback.textContent = incorrectFeedbackText(true);
+        feedback.className = 'feedback incorrect';
+        saveState();
+    }
+}
+
+function recordFullCorrectAnswer(feedback) {
+    /* A problem whose answer was shown is not a clean solve: chargeReveal() has
+       already ended the streak and booked the attempt, so this one neither
+       earns credit (above) nor restarts the streak here. */
+    if (revealCharged) {
+        updateDisplay();
+        feedback.textContent = 'Correct - but the answer was shown, so this one does not count.';
+        feedback.className = 'feedback correct';
+        lockInputsAndShowNext(false);
+        return;
+    }
+    streak++;
+    updateDisplay();
+
+    if (streak === 1 && !isTimerRunning) startTimer();
+
+    if (streak === 10) {
+        stopTimer();
+        celebrateStreak(10);
+        feedback.textContent = '10 IN A ROW! AMAZING! Time: ' + formatTime(timer);
+        feedback.className = 'feedback victory';
+        lockInputsAndShowNext(true);
+    } else {
+        celebrateStreak(streak);
+        feedback.textContent = 'Correct!';
+        feedback.className = 'feedback correct';
+        lockInputsAndShowNext(false);
+    }
+}
+
+function lockInputsAndShowNext(isStreakTen) {
+    ['answer', 'ans1', 'ans2', 'ansNum', 'ansRad', 'ansDen', 'ansNum2', 'ansCoeff2', 'ansRad2', 'ansDen2'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.disabled = true;
+    });
+    var submitBtn = document.querySelector('.submit-btn');
+    if (submitBtn) submitBtn.style.display = 'none';
+    var keyRow = document.querySelector('.key-row');
+    if (keyRow) keyRow.style.display = 'none';
+
+    var row = document.getElementById('next-btn-row');
+    row.innerHTML = '<button class="submit-btn next-btn" onclick="advanceToNextProblem(' + isStreakTen + ')">Next Question <span aria-hidden="true">&rarr;</span></button>';
+    var nextBtn = row.querySelector('.next-btn');
+    if (nextBtn) nextBtn.focus();
+}
+
+function advanceToNextProblem(isStreakTen) {
+    if (isStreakTen) streak = 0;
+    problemCount++;
+    updateDisplay();
+    generateProblem();
+}
+
+/* =====================================================================
+   Hint / Answer / Solution reveal
+   ===================================================================== */
+/* Show Answer, Show Solution and Skip must cost the same as a wrong answer:
+   one attempt against this problem's category and the end of the streak.
+   Without this a student could reveal the worked answer, type it back and
+   score a clean 1/1 with the streak intact. Show Hint stays free -- it gives
+   strategy, not the answer. */
+var revealCharged = false;
+function chargeReveal() {
+    if (!revealCharged) {
+        revealCharged = true;
+        var cat = currentProblem.category;
+        if (stats[cat]) { stats[cat].t++; saveState(); }
+    }
+    streak = 0;
+    stopTimer();
+    updateDisplay();
+}
+function skipProblem() {
+    chargeReveal();
+    problemCount++;
+    generateProblem();
+    updateDisplay();
+}
+function toggleHint() {
+    var hint = document.getElementById('hint');
+    if (hint.style.display === 'none') {
+        hint.innerHTML = '<strong>Hint:</strong><br>' + currentProblem.hint;
+        hint.style.display = 'block';
+    } else {
+        hint.style.display = 'none';
+    }
+}
+
+function toggleAnswer() {
+    var box = document.getElementById('answer-box');
+    if (box.style.display === 'none') {
+        chargeReveal();
+        var text;
+        if (currentProblem.inputMode === 'radicalStructured') {
+            text = (quadFormulaPart === 1) ? currentProblem.answerDisplayPart1 : currentProblem.answerDisplayPart2;
+        } else {
+            text = currentProblem.answerDisplay;
+        }
+        box.innerHTML = '<strong>Answer:</strong> <span aria-hidden="true">' + text + '</span>' +
+            '<span class="sr-only">' + escHtml(speakEquation(text)) + '</span>';
+        box.style.display = 'block';
+    } else {
+        box.style.display = 'none';
+    }
+}
+
+function toggleSolution() {
+    var box = document.getElementById('solution-box');
+    if (box.style.display === 'none') {
+        chargeReveal();
+        solutionRevealed = 1;
+        renderSolutionBox();
+    } else {
+        box.style.display = 'none';
+    }
+}
+function showNextSolutionStep() {
+    solutionRevealed++;
+    renderSolutionBox();
+}
+function renderSolutionBox() {
+    var box = document.getElementById('solution-box');
+    var steps = currentProblem.solutionSteps;
+    var total = steps.length;
+    var shown = Math.min(solutionRevealed, total);
+    var html = '<div style="font-weight:bold; margin-bottom:8px;">Step-by-Step Solution (' + shown + ' of ' + total + ')</div>';
+    for (var i = 0; i < shown; i++) {
+        var parts = steps[i].split(':  ');
+        var label = parts[0];
+        var eq = parts.length > 1 ? parts.slice(1).join(':  ') : '';
+        html += '<div class="solution-step">';
+        html += '<div><b>' + (i + 1) + '.</b> ' + label + (eq ? ':' : '') + '</div>';
+        if (eq) html += '<div class="solution-eq" role="img" aria-label="' + escHtml(speakEquation(eq)) + '">' + eq + '</div>';
+        html += '</div>';
+    }
+    if (shown < total) {
+        html += '<div style="text-align:center; margin-top:10px;"><button class="submit-btn" onclick="showNextSolutionStep()">Next Step</button></div>';
+    } else {
+        html += '<div style="text-align:center; margin-top:10px; font-weight:bold; color:#047857;">That\'s the complete solution. Try the next one yourself!</div>';
+    }
+    box.style.display = 'block';
+    box.innerHTML = html;
+}
+
+/* =====================================================================
+   Timer
+   ===================================================================== */
+function startTimer() {
+    isTimerRunning = true;
+    timer = 0;
+    timerInterval = setInterval(function () {
+        timer++;
+        updateDisplay();
+    }, 1000);
+}
+function stopTimer() {
+    isTimerRunning = false;
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+function formatTime(seconds) {
+    var mins = Math.floor(seconds / 60);
+    var secs = seconds % 60;
+    return mins + ':' + (secs < 10 ? '0' : '') + secs;
+}
+
+function updateDisplay() {
+    document.getElementById('problemNum').textContent = problemCount + 1;
+    document.getElementById('streak').textContent = streak;
+    var timerDisplay = document.getElementById('timer-display');
+    if (isTimerRunning) {
+        timerDisplay.textContent = 'Time: ' + formatTime(timer);
+        timerDisplay.style.display = 'block';
+    } else {
+        timerDisplay.style.display = 'none';
+    }
+}
+
+/* =====================================================================
+   Confetti
+   ===================================================================== */
+function prefersReducedMotion() {
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+function createConfetti(count, tier) {
+    if (prefersReducedMotion()) return;
+    var host = document.body;
+    /* Design item 10: #ef4444 (red, not in the palette) and #f59e0b (orange,
+       banned) swapped for mint and heritage rose. Still eight colours. */
+    var colors = ['#10b981', '#22c55e', '#3b82f6', '#c76b8f', '#a855f7', '#06b6d4', '#ec4899', '#84cc16'];
+    var isMassive = tier === 3;
+    for (var i = 0; i < count; i++) {
+        var piece = document.createElement('div');
+        piece.className = 'confetti';
+        piece.setAttribute('aria-hidden', 'true');
+        var base;
+        if (tier === 1) base = 7 + Math.random() * 5;
+        else if (tier === 2) base = 10 + Math.random() * 7;
+        else base = 11 + Math.random() * 9;
+        var color = colors[Math.floor(Math.random() * colors.length)];
+        var shape = Math.floor(Math.random() * 4);
+        if (shape === 0) {
+            piece.style.width = base + 'px'; piece.style.height = base + 'px';
+            piece.style.background = color; piece.style.borderRadius = '50%';
+        } else if (shape === 1) {
+            piece.style.width = base + 'px'; piece.style.height = base + 'px';
+            piece.style.background = color; piece.style.borderRadius = '2px';
+        } else if (shape === 2) {
+            piece.style.width = Math.max(4, base * 0.35) + 'px'; piece.style.height = (base * 1.7) + 'px';
+            piece.style.background = color; piece.style.borderRadius = '2px';
+        } else {
+            piece.style.width = '0'; piece.style.height = '0'; piece.style.background = 'transparent';
+            piece.style.borderLeft = (base * 0.6) + 'px solid transparent';
+            piece.style.borderRight = (base * 0.6) + 'px solid transparent';
+            piece.style.borderBottom = base + 'px solid ' + color;
+        }
+        piece.style.left = Math.random() * 100 + '%';
+        piece.style.top = '-20px';
+        var dur;
+        if (tier === 1) dur = 1.6 + Math.random() * 1.0;
+        else if (tier === 2) dur = 2.0 + Math.random() * 1.5;
+        else dur = 2.5 + Math.random() * 2.0;
+        piece.style.animation = (isMassive ? 'confetti-fall-slow' : 'confetti-fall') + ' ' + dur + 's ease-out forwards';
+        piece.style.animationDelay = (Math.random() * (isMassive ? 0.8 : 0.4)) + 's';
+        host.appendChild(piece);
+        setTimeout(function (el) { return function () { if (el.parentNode) el.parentNode.removeChild(el); }; }(piece), isMassive ? 6000 : 4500);
+    }
+    if (isMassive) {
+        for (var j = 0; j < 15; j++) {
+            var sp = document.createElement('div');
+            sp.className = 'sparkle';
+            sp.setAttribute('aria-hidden', 'true');
+            sp.style.left = (Math.random() * 90 + 5) + '%';
+            sp.style.top = (Math.random() * 55 + 10) + 'vh';
+            sp.style.animationDelay = (Math.random() * 0.5) + 's';
+            host.appendChild(sp);
+            setTimeout(function (el) { return function () { if (el.parentNode) el.parentNode.removeChild(el); }; }(sp), 3500);
+        }
+    }
+}
+function celebrateStreak(s) {
+    if (!confettiEnabled) return;
+    if (s === 10) createConfetti(200, 3);
+    else if (s >= 4) createConfetti(100, 2);
+    else if (s >= 2) createConfetti(40, 1);
+}
+
+/* =====================================================================
+   Tabs
+   ===================================================================== */
+var mainCategory = 'linear';       // 'linear' | 'quadratic' | 'mixed'
+var quadraticSubMode = 'factoring'; // 'factoring' | 'formula' (only relevant when mainCategory === 'quadratic')
+var challengeModeOn = false;        // toggle state; applies to whichever of factoring/formula is active
+var mixedChallengeOn = false;       // toggle state for Mixed mode; includes AC-method/harder-Formula problems when on
+
+function setMainCategory(cat) {
+    mainCategory = cat;
+    if (cat === 'quadratic') {
+        quadraticSubMode = 'factoring';
+        challengeModeOn = false;
+        currentTab = 'factoring';
+    } else {
+        currentTab = cat;
+        if (cat === 'mixed') mixedChallengeOn = false;
+    }
+    afterTabChange();
+}
+
+function setQuadraticSubMode(mode) {
+    quadraticSubMode = mode; // 'factoring' | 'formula'
+    challengeModeOn = false;
+    currentTab = (mode === 'factoring') ? 'factoring' : 'quadFormula';
+    afterTabChange();
+}
+
+function toggleChallengeMode() {
+    var toggle = document.getElementById('challengeToggle');
+    challengeModeOn = toggle.checked;
+    if (quadraticSubMode === 'factoring') {
+        currentTab = challengeModeOn ? 'challenge' : 'factoring';
+    } else {
+        currentTab = 'quadFormula';
+    }
+    afterTabChange();
+}
+
+function toggleMixedChallengeMode() {
+    var toggle = document.getElementById('mixedChallengeToggle');
+    mixedChallengeOn = toggle.checked;
+    afterTabChange();
+}
+
+function afterTabChange() {
+    updateTabUI();
+    streak = 0;
+    stopTimer();
+    updateDisplay();
+    generateProblem();
+}
+
+function updateTabUI() {
+    var mainOrder = ['linear', 'quadratic', 'mixed'];
+    var mainBtns = document.querySelectorAll('#main-tabs .mode-btn');
+    mainBtns.forEach(function (btn, idx) {
+        var on = mainOrder[idx] === mainCategory;
+        btn.classList.toggle('active', on);
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+
+    var quadRow = document.getElementById('quadratic-subtabs');
+    var toggleRow = document.getElementById('challenge-toggle-row');
+    var mixedToggleRow = document.getElementById('mixed-challenge-toggle-row');
+    if (mainCategory === 'quadratic') {
+        quadRow.style.display = 'flex';
+        toggleRow.style.display = 'flex';
+        mixedToggleRow.style.display = 'none';
+        var quadOrder = ['factoring', 'formula'];
+        var quadBtns = document.querySelectorAll('#quadratic-subtabs .sub-btn');
+        quadBtns.forEach(function (btn, idx) {
+            var on = quadOrder[idx] === quadraticSubMode;
+            btn.classList.toggle('active', on);
+            btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
+
+        document.getElementById('challengeToggle').checked = challengeModeOn;
+        document.getElementById('challengeToggleLabel').textContent = (quadraticSubMode === 'factoring')
+            ? 'Challenge mode (a \u2260 1)'
+            : 'Challenge mode (needs simplifying)';
+    } else if (mainCategory === 'mixed') {
+        quadRow.style.display = 'none';
+        toggleRow.style.display = 'none';
+        mixedToggleRow.style.display = 'flex';
+        document.getElementById('mixedChallengeToggle').checked = mixedChallengeOn;
+    } else {
+        quadRow.style.display = 'none';
+        toggleRow.style.display = 'none';
+        mixedToggleRow.style.display = 'none';
+    }
+
+    requestAnimationFrame(drawQuadConnector);
+    requestAnimationFrame(alignMixedToggle);
+}
+
+function drawQuadConnector() {
+    var svg = document.getElementById('quad-connector-svg');
+    if (!svg) return;
+    if (mainCategory !== 'quadratic') { svg.innerHTML = ''; return; }
+
+    var mainBtns = document.querySelectorAll('#main-tabs .mode-btn');
+    var quadBtn = mainBtns[1];
+    var subBtns = document.querySelectorAll('#quadratic-subtabs .sub-btn');
+    if (!quadBtn || subBtns.length < 2) { svg.innerHTML = ''; return; }
+
+    var wrap = document.getElementById('quad-connector-wrap');
+    var wrapRect = wrap.getBoundingClientRect();
+    var quadRect = quadBtn.getBoundingClientRect();
+    var sub1Rect = subBtns[0].getBoundingClientRect();
+    var sub2Rect = subBtns[1].getBoundingClientRect();
+
+    if (wrapRect.width === 0) { svg.innerHTML = ''; return; }
+
+    var startX = quadRect.left + quadRect.width / 2 - wrapRect.left;
+    var end1X = sub1Rect.left + sub1Rect.width / 2 - wrapRect.left;
+    var end2X = sub2Rect.left + sub2Rect.width / 2 - wrapRect.left;
+    var midY = 6;
+    var endY = 14;
+
+    svg.setAttribute('viewBox', '0 0 ' + wrapRect.width + ' ' + endY);
+    svg.style.height = endY + 'px';
+
+    var color = '#b7c0ea';
+    svg.innerHTML =
+        '<path d="M ' + startX + ' 0 L ' + startX + ' ' + midY + '" stroke="' + color + '" stroke-width="2" fill="none"/>' +
+        '<path d="M ' + startX + ' ' + midY + ' L ' + end1X + ' ' + midY + ' L ' + end1X + ' ' + endY + '" stroke="' + color + '" stroke-width="2" fill="none"/>' +
+        '<path d="M ' + startX + ' ' + midY + ' L ' + end2X + ' ' + midY + ' L ' + end2X + ' ' + endY + '" stroke="' + color + '" stroke-width="2" fill="none"/>';
+}
+window.addEventListener('resize', function () {
+    if (mainCategory === 'quadratic') drawQuadConnector();
+    if (mainCategory === 'mixed') alignMixedToggle();
+});
+
+function alignMixedToggle() {
+    var row = document.getElementById('mixed-challenge-toggle-row');
+    if (!row || mainCategory !== 'mixed') return;
+    var linearBtn = document.querySelectorAll('#main-tabs .mode-btn')[0];
+    if (!linearBtn) return;
+    var rowRect = row.getBoundingClientRect();
+    var linearRect = linearBtn.getBoundingClientRect();
+    var offset = linearRect.left - rowRect.left;
+    row.style.paddingLeft = Math.max(0, offset) + 'px';
+}
+
+/* =====================================================================
+   Stats panel
+   ===================================================================== */
+function pct(s) { return s.t > 0 ? Math.round((s.c / s.t) * 100) : 0; }
+
+function showStats() {
+    var names = { linear: 'Linear Equations', factoring: 'Quadratic (Factoring, Standard)', quadFormula: 'Quadratic (Formula)', challenge: 'Quadratic (Factoring, Challenge)' };
+    var html = '<h2 id="stats-heading">My Stats</h2>';
+    STAT_KEYS.forEach(function (k) {
+        // Second coercion at the render boundary: these numbers originate from
+        // localStorage and are interpolated into innerHTML.
+        var s = sanitizeStats(stats)[k];
+        var p = pct(s);
+        html += '<div class="stat-row">';
+        html += '<div class="stat-name">' + escHtml(names[k]) + '</div>';
+        html += '<div class="stat-bar-wrap"><div class="stat-bar" style="width:' + p + '%;"></div></div>';
+        /* Design item 11: a mode that was never attempted reads "not tried yet",
+           never "0/0" -- a zero score there looks like failure at something the
+           student has not even seen. */
+        html += '<div class="stat-num">' + (s.t > 0 ? s.c + '/' + s.t + ' (' + p + '%)' : 'not tried yet') + '</div>';
+        html += '</div>';
+    });
+
+    var weakest = null, weakestAcc = 1.0;
+    ['linear', 'factoring', 'quadFormula'].forEach(function (k) {
+        var s = sanitizeStats(stats)[k];
+        if (s.t >= 3) {
+            var acc = s.c / s.t;
+            if (acc < weakestAcc) { weakestAcc = acc; weakest = k; }
+        }
+    });
+    if (weakest && weakestAcc < 0.8) {
+        html += '<div class="recommend">The Mixed category will give you extra practice on ' + escHtml(names[weakest]) + ' since that\'s where you\'re struggling most.</div>';
+    }
+
+    html += '<div class="stats-actions">';
+    html += '<button class="close-btn" onclick="hideStats()">Close</button>';
+    html += '<button class="reset-btn' + (resetConfirming ? ' armed' : '') + '" id="reset-btn" onclick="resetProgress()">' + (resetConfirming ? 'Tap again to confirm' : 'Reset Progress') + '</button>';
+    html += '</div>';
+
+    var panel = document.getElementById('stats-panel');
+    panel.innerHTML = html;
+    document.getElementById('stats-overlay').style.display = 'flex';
+    // The panel is a modal dialog: move focus into it, and give it back on close.
+    panel.focus();
+}
+function hideStats() {
+    document.getElementById('stats-overlay').style.display = 'none';
+    disarmReset();
+    var opener = document.getElementById('stats-btn');
+    if (opener) opener.focus();
+}
+/* Design item 16: the armed confirm state used to stay loaded forever, so a
+   stray tap minutes later wiped the student's record. It now re-arms itself
+   after 3500ms, matching the design system's two-tap pattern. The label is
+   rewritten in place rather than by re-rendering the panel, so the timer never
+   steals focus from whatever the student is on. */
+var RESET_DISARM_MS = 3500;
+var resetDisarmTimer = null;
+function disarmReset() {
+    if (resetDisarmTimer) { clearTimeout(resetDisarmTimer); resetDisarmTimer = null; }
+    if (!resetConfirming) return;
+    resetConfirming = false;
+    var btn = document.getElementById('reset-btn');
+    if (btn) {
+        btn.textContent = 'Reset Progress';
+        btn.className = 'reset-btn';
+    }
+}
+document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    var ov = document.getElementById('stats-overlay');
+    if (ov && ov.style.display !== 'none') hideStats();
+});
+function resetProgress() {
+    if (!resetConfirming) {
+        resetConfirming = true;
+        var btn = document.getElementById('reset-btn');
+        if (btn) {
+            btn.textContent = 'Tap again to confirm';
+            btn.className = 'reset-btn armed';
+        }
+        announceProblem('Tap Reset Progress again within 3.5 seconds to erase your stats.');
+        if (resetDisarmTimer) clearTimeout(resetDisarmTimer);
+        resetDisarmTimer = setTimeout(disarmReset, RESET_DISARM_MS);
+        return;
+    }
+    disarmReset();
+    stats = {
+        linear: { c: 0, t: 0 },
+        factoring: { c: 0, t: 0 },
+        quadFormula: { c: 0, t: 0 },
+        challenge: { c: 0, t: 0 }
+    };
+    resetConfirming = false;
+    saveState();
+    showStats();
+}
+
+/* =====================================================================
+   Init
+   ===================================================================== */
+function drawInsignia() {
+    var el = document.getElementById('pr-rose');
+    if (!el) return;
+    var pts = [];
+    var steps = 240;
+    for (var i = 0; i <= steps; i++) {
+        var t = (i / steps) * 4 * Math.PI;
+        var r = 2 * Math.cos(1.5 * t);
+        var x = r * Math.cos(t) * 12;
+        var y = r * Math.sin(t) * 12;
+        pts.push((i === 0 ? 'M' : 'L') + x.toFixed(2) + ' ' + y.toFixed(2));
+    }
+    el.setAttribute('d', pts.join(' '));
+}
+drawInsignia();
+
+loadState();
+generateProblem();
+updateDisplay();
+</script>
+</body>
+</html>
