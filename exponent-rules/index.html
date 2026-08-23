@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!-- Defence in depth: the page is entirely self-contained apart from the Google
+     Fonts stylesheet, so nothing else is allowed to load or run. Inline scripts
+     and styles stay permitted because this game is built from inline handlers. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data:; base-uri 'none'; form-action 'none'">
+<title>Exponent Rules Practice</title>
+<meta name="theme-color" content="#1b2450">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+    /* ===== MIDNIGHT SCHOLAR - navy stage, white card, violet + mint accents ===== */
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+        background:
+            radial-gradient(900px 500px at 85% -10%, rgba(124, 58, 237, 0.28), transparent 60%),
+            radial-gradient(800px 500px at -10% 110%, rgba(16, 185, 129, 0.18), transparent 55%),
+            linear-gradient(160deg, #141b3d 0%, #1b2450 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 16px 12px;
+        margin: 0;
+    }
+    .card {
+        background: #ffffff;
+        border-radius: 22px;
+        box-shadow: 0 24px 60px rgba(8, 12, 40, 0.55);
+        max-width: 700px;
+        width: 100%;
+        padding: 30px 24px 26px;
+        position: relative;
+        overflow: hidden;
+    }
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+    }
+    /* The heading box shrinks to its text so the rule below can match it. */
+    h1 {
+        text-align: center;
+        color: #1e2a5e;
+        margin: 4px auto 6px;
+        font-size: 24px;
+        letter-spacing: 0.3px;
+        width: fit-content;
+        max-width: 100%;
+    }
+    /* The gradient rule is exactly as wide as the title text. */
+    h1::after {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 4px;
+        border-radius: 2px;
+        margin: 8px auto 14px;
+        background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+    }
+    .info {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+    .info-item {
+        font-size: 12px;
+        font-weight: 800;
+        background: #eef0fb;
+        color: #2e3d8f;
+        padding: 6px 14px;
+        border-radius: 999px;
+    }
+    .info-item.streak-hot {
+        background: linear-gradient(135deg, #0b7a70, #2e3d8f);
+        color: white;
+    }
+    .mode-btns {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+    }
+    .mode-btn {
+        background: #e6e9f6;
+        color: #4a5480;
+        border: none;
+        border-radius: 999px;
+        padding: 9px 14px;
+        font-size: 12.5px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.15s;
+        -webkit-tap-highlight-color: transparent;
+        font-family: inherit;
+    }
+    .mode-btn:hover { background: #d9def2; }
+    .mode-btn.active {
+        background: #0b7a70 !important;
+        color: white !important;
+        box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.25), 0 6px 14px rgba(11, 122, 112, 0.35);
+    }
+    /* "Mixed" used to carry a permanent violet gradient, so it looked selected
+       whatever mode was actually on. It is a mode pill like the others: plain
+       inactive treatment, and the one shared active state when it is chosen. */
+    .problem {
+        font-size: 22px;
+        font-weight: 800;
+        text-align: center;
+        margin: 18px auto;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+        color: #1e2a5e;
+        background: #eef0fb;
+        border: 2px solid #c7cdf0;
+        border-radius: 14px;
+        padding: 26px 14px;
+        max-width: 100%;
+        overflow-wrap: break-word;
+        letter-spacing: 0.5px;
+        line-height: 1.9;
+    }
+    .problem sup { font-size: 0.62em; }
+    .exp-slot { display: inline-block; margin: 0 1px; }
+    /* Structural stacked fraction (design system). One component for every
+       fraction in the game -- the division and negative-exponent problems that
+       already used it, and the fractional exponents that used to be slash
+       text ("49^(1/2)"). align-items: stretch is what makes the bar run the
+       full width of the wider of the two rows, like a printed vinculum. */
+    .frac {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+        vertical-align: middle;
+        margin: 0 8px;
+        line-height: 1.3;
+    }
+    .frac .frac-num, .frac .frac-den {
+        padding: 3px 10px;
+        white-space: nowrap;
+    }
+    .frac .frac-bar {
+        width: 100%;
+        height: 3px;
+        background: #1e2a5e;
+        border-radius: 2px;
+        margin: 1px 0;
+    }
+    /* A stacked fraction is an atomic inline box, so a line can break right
+       after it and leave the following punctuation stranded. */
+    .nobreak { white-space: nowrap; }
+    /* Same component inside a superscript, scaled for the exponent slot. */
+    .frac.frac-exp {
+        margin: 0 1px;
+        line-height: 1.15;
+    }
+    .frac.frac-exp .frac-num, .frac.frac-exp .frac-den { padding: 0 4px; }
+    .frac.frac-exp .frac-bar { height: 2px; margin: 1px 0; }
+    /* Radical component -- the design system's stretching inline SVG. A bare
+       &radic; glyph over a CSS overbar can never join up: the hook is part of
+       the font. Here the SVG tip and the 2px overbar are one stroke. */
+    .radical {
+        display: inline-flex;
+        align-items: stretch;
+        vertical-align: middle;
+    }
+    .radical-sign {
+        width: 16px;
+        flex: 0 0 16px;
+        display: flex;
+        margin-right: -1px;
+        position: relative;
+    }
+    .radical-sign svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+        overflow: visible;
+    }
+    /* .problem sup sets 0.62em, so this needs the extra specificity to win. */
+    .radical-sign .rad-index {
+        position: absolute;
+        left: -0.12em;
+        top: 0;
+        font-size: 0.44em;
+        line-height: 1;
+        font-weight: 800;
+        z-index: 1;
+    }
+    .radical-body {
+        border-top: 2px solid currentColor;
+        padding-top: 4px;
+        padding-right: 5px;
+    }
+    .big-paren {
+        display: inline-block;
+        font-size: 2.3em;
+        font-weight: 300;
+        transform: scaleY(1.6);
+        vertical-align: middle;
+        color: #1e2a5e;
+        line-height: 1;
+        padding: 0 1px;
+    }
+    .blank-input {
+        width: 56px;
+        font-size: 17px;
+        font-weight: 800;
+        text-align: center;
+        padding: 6px 4px;
+        border: 3px solid #7c3aed;
+        border-radius: 10px;
+        color: #1e2a5e;
+        background: #ffffff;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+        margin: 0 2px;
+    }
+    .blank-input:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18);
+    }
+    .exp-input { width: 40px; font-size: 14px; padding: 4px 2px; vertical-align: super; }
+    .frac-input { width: 64px; }
+    .sign-btn {
+        background: #e6e9f6;
+        color: #2e3d8f;
+        padding: 6px 10px;
+        font-size: 13px;
+        border-radius: 8px;
+        margin-left: 2px;
+        border: none;
+        font-weight: 800;
+        cursor: pointer;
+        vertical-align: baseline;
+        font-family: inherit;
+    }
+    .sign-btn:hover { background: #d9def2; }
+    .instructions {
+        text-align: center;
+        color: #5d6798;
+        font-size: 14px;
+        margin: 6px 0 12px;
+    }
+    .input-area {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin: 18px 0;
+        flex-wrap: wrap;
+    }
+    button {
+        padding: 12px 22px;
+        font-size: 15px;
+        font-weight: 800;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.15s;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        font-family: inherit;
+    }
+    button:active { transform: scale(0.95); }
+    .submit-btn {
+        background: linear-gradient(135deg, #2e3d8f, #4b3bbd);
+        color: white;
+        box-shadow: 0 6px 16px rgba(46, 61, 143, 0.35);
+    }
+    .submit-btn:hover { filter: brightness(1.1); }
+    .feedback {
+        text-align: center;
+        font-size: 21px;
+        font-weight: 800;
+        margin: 12px 0 8px;
+        min-height: 32px;
+    }
+    .feedback:not(:empty) {
+        padding: 8px 14px;
+        border-radius: 10px;
+    }
+    .feedback.correct { background: #ecfdf5; border: 2px solid #34d399; }
+    .feedback.incorrect { background: #f3eefe; border: 2px solid #c4b5fd; }
+    .correct { color: #047857; }
+    .incorrect { color: #1e2a5e; font-size: 18px; font-weight: 700; }
+    .helper-row {
+        text-align: center;
+        margin: 14px 0 4px;
+    }
+    .hint-btn, .answer-btn, .skip-btn, .explain-btn, .stats-btn {
+        background: #f3eefe;
+        color: #6d28d9;
+        margin: 4px;
+        font-size: 13px;
+        padding: 10px 16px;
+    }
+    .hint-btn:hover, .answer-btn:hover, .skip-btn:hover, .explain-btn:hover, .stats-btn:hover {
+        background: #e9defc;
+    }
+    .stats-btn {
+        background: #ecfdf5;
+        color: #047857;
+    }
+    .stats-btn:hover { background: #d1fae5; }
+    .hint-box, .answer-box, .explain-box {
+        background: #f7f5ff;
+        border: 2px solid #d8ccf7;
+        border-radius: 14px;
+        padding: 15px;
+        margin: 14px 0;
+        color: #3b3568;
+        font-size: 15px;
+        line-height: 1.55;
+    }
+    .hint-box b, .answer-box b, .explain-box b { color: #6d28d9; }
+    .explain-box .rewrite {
+        text-align: center;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+        font-size: 19px;
+        font-weight: 800;
+        color: #1e2a5e;
+        margin: 10px 0;
+    }
+    /* Stats view */
+    .stats-view {
+        background: #eef0fb;
+        border: 2px solid #c7cdf0;
+        border-radius: 14px;
+        padding: 20px 18px;
+    }
+    .stats-view h2 {
+        text-align: center;
+        color: #1e2a5e;
+        margin: 0 0 10px;
+        font-size: 22px;
+    }
+    .stats-overall {
+        text-align: center;
+        margin-bottom: 18px;
+    }
+    .stats-overall .big {
+        font-size: 42px;
+        font-weight: 800;
+        color: #059669;
+    }
+    .stats-overall .lbl {
+        font-size: 13px;
+        color: #4a5480;
+        font-weight: 700;
+    }
+    .stat-row {
+        background: #ffffff;
+        border-radius: 10px;
+        padding: 12px 14px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .stat-name {
+        font-weight: 800;
+        color: #2e3d8f;
+        font-size: 13.5px;
+        min-width: 100px;
+    }
+    .stat-bar-wrap {
+        flex: 1;
+        height: 14px;
+        background: #eef0fb;
+        border-radius: 7px;
+        overflow: hidden;
+        position: relative;
+    }
+    .stat-bar {
+        height: 100%;
+        border-radius: 7px;
+        transition: width 0.4s ease;
+    }
+    .stat-bar.good { background: linear-gradient(90deg, #0b7a70, #34d399); }
+    .stat-bar.mid  { background: linear-gradient(90deg, #2e3d8f, #6b7cc4); }
+    .stat-bar.low  { background: linear-gradient(90deg, #6d28d9, #a78bfa); }
+    .stat-bar.none { background: #d1d5db; }
+    .stat-num {
+        font-size: 12.5px;
+        color: #4a5480;
+        font-weight: 700;
+        min-width: 92px;
+        text-align: right;
+        font-family: 'Consolas', monospace;
+    }
+    .recommend {
+        background: #f3eefe;
+        border-left: 4px solid #7c3aed;
+        border-radius: 0 10px 10px 0;
+        padding: 12px 14px;
+        margin-top: 10px;
+        font-size: 14px;
+        color: #5b21b6;
+    }
+    .stats-actions {
+        text-align: center;
+        margin-top: 16px;
+    }
+    .reset-btn {
+        background: #4a5480;
+        color: white;
+        font-size: 13px;
+        padding: 10px 18px;
+    }
+    .reset-btn:hover { background: #3c4569; }
+    /* Confetti */
+    .confetti {
+        position: fixed;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 9999;
+    }
+    @keyframes confetti-fall {
+        0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(110vh) rotate(720deg); opacity: 1; }
+    }
+    @keyframes confetti-fall-slow {
+        0% { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 1; }
+        100% { transform: translateY(115vh) rotate(1080deg) scale(0.85); opacity: 1; }
+    }
+    /* Visible keyboard focus on every interactive control */
+    button:focus-visible,
+    input:focus-visible,
+    .mode-btn:focus-visible {
+        outline: 3px solid #1e2a5e;
+        outline-offset: 2px;
+    }
+    /* Visually hidden but available to screen readers */
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+    .insignia {
+        text-align: center;
+        margin-top: 22px;
+        opacity: 0.9;
+    }
+    .insignia-caption {
+        font-size: 6.5px;
+        letter-spacing: 1.2px;
+        color: #5d6798;
+        font-weight: 800;
+        margin-top: 2px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: 0.001ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.001ms !important;
+        }
+        .confetti { display: none !important; }
+    }
+    @media (max-width: 480px) {
+        .card { padding: 24px 14px 20px; }
+        h1 { font-size: 19px; }
+        .problem { font-size: 19px; padding: 20px 8px; }
+        .mode-btn { padding: 7px 10px; font-size: 11px; }
+        .blank-input { width: 46px; font-size: 15px; }
+        .exp-input { width: 34px; font-size: 12px; }
+        .frac { margin: 0 4px; }
+        .frac .frac-num, .frac .frac-den { padding: 3px 6px; }
+        .frac.frac-exp .frac-num, .frac.frac-exp .frac-den { padding: 0 3px; }
+        .radical-sign { width: 13px; flex: 0 0 13px; }
+        .stat-name { min-width: 84px; font-size: 12px; }
+        .stat-num { min-width: 78px; font-size: 11px; }
+    }
+</style>
+</head>
+<body>
+<main class="card" id="game-card">
+    <h1>Exponent Rules Practice</h1>
+    <div class="info">
+        <div class="info-item">Problem: <span id="problemNum">1</span></div>
+        <div class="info-item" id="streak-display">Streak: <span id="streak">0</span></div>
+        <div class="info-item" id="acc-display">Accuracy: --</div>
+    </div>
+    <div class="mode-btns" role="group" aria-label="Choose a practice category">
+        <button type="button" class="mode-btn active" aria-pressed="true" onclick="setMode('mul')">Multiply</button>
+        <button type="button" class="mode-btn" aria-pressed="false" onclick="setMode('div')">Divide</button>
+        <button type="button" class="mode-btn" aria-pressed="false" onclick="setMode('zero')">Zero Power</button>
+        <button type="button" class="mode-btn" aria-pressed="false" onclick="setMode('neg')">Neg Exp</button>
+        <button type="button" class="mode-btn" aria-pressed="false" onclick="setMode('frac')">Frac Exp</button>
+        <button type="button" class="mode-btn" aria-pressed="false" onclick="setMode('powpow')">Pow of Pow</button>
+        <button type="button" class="mode-btn" aria-pressed="false" onclick="setMode('prodquot')">Distribute</button>
+        <button type="button" class="mode-btn" aria-pressed="false" onclick="setMode('mix')">Mixed</button>
+    </div>
+    <div id="main-content"></div>
+    <!-- Spoken form of the current problem; the visual copy above is aria-hidden -->
+    <p class="sr-only" id="problem-spoken" aria-live="polite" aria-atomic="true"></p>
+    <!-- role="alert" (not "status"): role=status carries an implicit polite
+         politeness that some screen readers honour over an explicit
+         aria-live="assertive", which would have delayed or dropped the
+         correct/incorrect verdict. Matches the rest of the suite. -->
+    <div class="feedback" id="feedback" role="alert" aria-live="assertive" aria-atomic="true"></div>
+    <div id="input-content"></div>
+    <div class="helper-row" id="helper-buttons">
+        <button type="button" class="hint-btn" id="hint-toggle" aria-expanded="false" aria-controls="hint" onclick="toggleHint()">Show Hint</button>
+        <button type="button" class="explain-btn" id="explain-toggle" aria-expanded="false" aria-controls="explain" onclick="toggleExplanation()">Show Explanation</button>
+        <button type="button" class="answer-btn" id="answer-toggle" aria-expanded="false" aria-controls="answer-box" onclick="toggleAnswer()">Show Answer</button>
+        <button type="button" class="skip-btn" onclick="skipProblem()">Skip</button>
+        <button type="button" class="stats-btn" onclick="showStats()">My Stats</button>
+        <button type="button" class="stats-btn" id="confetti-toggle" aria-pressed="true" onclick="toggleConfetti()">Confetti: On</button>
+    </div>
+    <div id="hint" style="display:none;"></div>
+    <div id="explain" style="display:none;"></div>
+    <div id="answer-box" style="display:none;"></div>
+    <div class="insignia" aria-hidden="true">
+        <svg width="90" height="103" viewBox="-28 -26 56 64" role="presentation" focusable="false">
+            <defs>
+                <linearGradient id="pr-grad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#1e3a5f"></stop>
+                    <stop offset="100%" stop-color="#0d9488"></stop>
+                </linearGradient>
+            </defs>
+            <path id="pr-path" fill="none" stroke="url(#pr-grad)" stroke-width="1.7"></path>
+        </svg>
+        <div class="insignia-caption">POLAR ROSE STUDIO</div>
+    </div>
+</main>
+
+<script>
+/* =====================================================================
+   State
+   ===================================================================== */
+var mode = 'mul';   // mul | div | zero | neg | frac | powpow | prodquot | mix
+var currentProblem = null;
+var streak = 0;
+var bestStreak = 0;
+var problemNum = 0;
+var missRecorded = false;
+
+var CATS = ['mul', 'div', 'zero', 'neg', 'frac', 'powpow', 'prodquot'];
+var CAT_LABELS = {
+    mul: 'Multiply', div: 'Divide', zero: 'Power of Zero',
+    neg: 'Negative Exponents', frac: 'Fractional Exponents', powpow: 'Power of a Power', prodquot: 'Distribute the Power'
+};
+var CAT_SHORT = {
+    mul: 'Multiply', div: 'Divide', zero: 'Zero Power',
+    neg: 'Neg Exp', frac: 'Frac Exp', powpow: 'Pow of Pow', prodquot: 'Distribute'
+};
+var CAT_SPOKEN = {
+    mul: 'Multiplying powers', div: 'Dividing powers', zero: 'Power of zero',
+    neg: 'Negative exponents', frac: 'Fractional exponents',
+    powpow: 'Power of a power', prodquot: 'Distributing a power'
+};
+
+var stats = {
+    mul: { c: 0, t: 0 }, div: { c: 0, t: 0 }, zero: { c: 0, t: 0 },
+    neg: { c: 0, t: 0 }, frac: { c: 0, t: 0 }, powpow: { c: 0, t: 0 }, prodquot: { c: 0, t: 0 }
+};
+
+var SAVE_KEY = 'exponentRulesGame_v1';
+var confettiOn = true;
+
+/* =====================================================================
+   Utilities
+   ===================================================================== */
+function ri(lo, hi) { return Math.floor(Math.random() * (hi - lo + 1)) + lo; }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function ordinal(n) {
+    var j = n % 10, k = n % 100;
+    if (j === 1 && k !== 11) return n + 'st';
+    if (j === 2 && k !== 12) return n + 'nd';
+    if (j === 3 && k !== 13) return n + 'rd';
+    return n + 'th';
+}
+/* The radical sign: one stretching inline SVG whose tip joins the overbar as a
+   single continuous stroke. preserveAspectRatio="none" lets the V stretch to
+   whatever it wraps; vector-effect="non-scaling-stroke" keeps the stroke an
+   even 2px at any height, matching the 2px border-top of .radical-body -- which
+   is what makes the joint read as one line. ASCII only, like the rest of the
+   file. Replaces the old "&radic; glyph + text-decoration: overline" build,
+   which the design system forbids because the glyph's hook is baked into the
+   font and can never meet the bar. */
+var RADICAL_SVG = '<svg viewBox="0 0 14 40" preserveAspectRatio="none" aria-hidden="true" focusable="false">' +
+    '<path d="M0.5,24 L4,24 L7.5,37.5 L12.5,1 L14,1" fill="none" stroke="currentColor" stroke-width="2" ' +
+    'vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+/* data-root carries the index in the markup so spokenFromHtml() can still say
+   "the square root of" / "the cube root of" -- an SVG is as mute as a border. */
+function radicalHtml(n, v) {
+    var idx = (n === 2) ? '' : '<sup class="rad-index">' + n + '</sup>';
+    return '<span class="radical" data-root="' + n + '">' +
+        '<span class="radical-sign">' + idx + RADICAL_SVG + '</span>' +
+        '<span class="radical-body">' + v + '</span></span>';
+}
+
+/* Inline blank-input builders */
+function blankInline(id) {
+    return '<input type="text" inputmode="numeric" autocomplete="off" autocorrect="off" spellcheck="false" class="blank-input" id="' + id + '" onkeypress="if(event.key===\'Enter\')checkAnswer()">';
+}
+function blankSignedInline(id) {
+    return '<input type="text" inputmode="text" autocomplete="off" autocorrect="off" spellcheck="false" class="blank-input" id="' + id + '" onkeypress="if(event.key===\'Enter\')checkAnswer()">'
+         + '<button type="button" class="sign-btn" aria-label="Toggle negative sign for this answer" onclick="toggleSignFor(\'' + id + '\')">&plusmn;</button>';
+}
+function expSlot(id) {
+    return '<span class="exp-slot"><input type="text" inputmode="numeric" autocomplete="off" autocorrect="off" spellcheck="false" class="blank-input exp-input" id="' + id + '" onkeypress="if(event.key===\'Enter\')checkAnswer()"></span>';
+}
+function expSlotSigned(id) {
+    return '<span class="exp-slot"><input type="text" inputmode="text" autocomplete="off" autocorrect="off" spellcheck="false" class="blank-input exp-input" id="' + id + '" onkeypress="if(event.key===\'Enter\')checkAnswer()"></span>'
+         + '<button type="button" class="sign-btn" aria-label="Toggle negative sign for this answer" onclick="toggleSignFor(\'' + id + '\')">&plusmn;</button>';
+}
+function blankFrac(id) {
+    return '<span class="exp-slot"><input type="text" inputmode="text" autocomplete="off" autocorrect="off" spellcheck="false" class="blank-input exp-input frac-input" id="' + id + '" placeholder="?/?" onkeypress="if(event.key===\'Enter\')checkAnswer()"></span>';
+}
+function fracHtml(numHtml, denHtml, cls) {
+    return '<span class="frac' + (cls ? ' ' + cls : '') + '"><span class="frac-num">' + numHtml +
+        '</span><span class="frac-bar"></span><span class="frac-den">' + denHtml + '</span></span>';
+}
+
+/* A fractional exponent, stacked rather than written with a slash. */
+function fracExpHtml(numHtml, denHtml) {
+    return fracHtml(numHtml, denHtml, 'frac-exp');
+}
+function bigParenWrap(innerHtml) {
+    return '<span class="big-paren">(</span>' + innerHtml + '<span class="big-paren">)</span>';
+}
+
+function toggleSignFor(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.value = el.value.charAt(0) === '-' ? el.value.slice(1) : '-' + el.value;
+    el.focus();
+}
+
+/* =====================================================================
+   Hint text (category-level rules)
+   ===================================================================== */
+var HINT_MUL = 'Same base, so <b>add the exponents</b>: x<sup>a</sup> &middot; x<sup>b</sup> = x<sup>a+b</sup>. If there are coefficients out front, multiply them like ordinary numbers.';
+var HINT_DIV = 'Same base, so <b>subtract the exponents</b> (top minus bottom): x<sup>a</sup> &divide; x<sup>b</sup> = x<sup>a&minus;b</sup>. If there are coefficients, divide them like ordinary numbers.';
+var HINT_POWPOW = 'A power raised to another power: <b>multiply the exponents</b>. (x<sup>a</sup>)<sup>b</sup> = x<sup>a&times;b</sup>. Any coefficient gets raised to the outer power too.';
+var POWPOW_RULE = '<b>Rule:</b> (x<sup>m</sup>)<sup>n</sup> = x<sup>m&times;n</sup> &mdash; when you raise a power to another power, multiply the exponents together.';
+var HINT_PRODQUOT = 'The outer exponent applies to <b>every factor</b> inside the parentheses: (xy)<sup>n</sup> = x<sup>n</sup>y<sup>n</sup>, and the same for a quotient or a coefficient.';
+var HINT_NEG = 'A negative exponent means &ldquo;reciprocal&rdquo;: x<sup>&minus;n</sup> = ' + fracHtml('1', 'x<sup>n</sup>') + ' (and the reverse: ' + fracHtml('1', 'x<sup>n</sup>') + ' = x<sup>&minus;n</sup>).';
+var HINT_FRAC_RADICAL = 'A root can be written as a fractional exponent: the n-th root of x equals <span class="nobreak">x<sup>' + fracExpHtml('1', 'n') + '</sup>.</span>';
+var HINT_FRAC_ROOT = 'x<sup>' + fracExpHtml('1', 'n') + '</sup> means the n-th root of x. Ask yourself: what number, raised to the n, gives the base?';
+var HINT_FRAC_POWROOT = 'For x<sup>' + fracExpHtml('m', 'n') + '</sup>, rewrite it as (x<sup>' + fracExpHtml('1', 'n') + '</sup>)<sup>m</sup> &mdash; take the n-th root first, then raise the result to the m power.';
+
+/* =====================================================================
+   Category builders
+   ===================================================================== */
+function buildMul() {
+    var subtype = pick(['simple', 'coef', 'numbase', 'twovar', 'three']);
+    if (subtype === 'simple') {
+        var A = ri(2, 9), B = ri(2, 9), e = A + B;
+        return {
+            category: 'mul', subtype: subtype,
+            html: 'x<sup>' + A + '</sup> &middot; x<sup>' + B + '</sup> = x' + expSlot('b0'),
+            blanks: [{ id: 'b0', key: 'e', kind: 'int' }],
+            answers: { e: e },
+            hint: HINT_MUL,
+            explanation: '<b>Same base, so add the exponents:</b><div class="rewrite">' + A + ' + ' + B + ' = ' + e + '</div>x<sup>' + A + '</sup> &middot; x<sup>' + B + '</sup> = x<sup>' + e + '</sup>',
+            answerLine: 'x<sup>' + e + '</sup>'
+        };
+    }
+    if (subtype === 'coef') {
+        var c1 = ri(2, 6), c2 = ri(2, 6), A2 = ri(2, 7), B2 = ri(2, 7), cf = c1 * c2, e2 = A2 + B2;
+        return {
+            category: 'mul', subtype: subtype,
+            html: c1 + 'x<sup>' + A2 + '</sup> &middot; ' + c2 + 'x<sup>' + B2 + '</sup> = ' + blankInline('b0') + 'x' + expSlot('b1'),
+            blanks: [{ id: 'b0', key: 'cf', kind: 'int' }, { id: 'b1', key: 'e', kind: 'int' }],
+            answers: { cf: cf, e: e2 },
+            hint: HINT_MUL,
+            explanation: '<b>Multiply coefficients, add exponents:</b><div class="rewrite">' + c1 + ' &times; ' + c2 + ' = ' + cf + '</div><div class="rewrite">' + A2 + ' + ' + B2 + ' = ' + e2 + '</div>Answer: ' + cf + 'x<sup>' + e2 + '</sup>',
+            answerLine: cf + 'x<sup>' + e2 + '</sup>'
+        };
+    }
+    if (subtype === 'numbase') {
+        var N = pick([2, 3, 5, 7, 10]), A3 = ri(2, 6), B3 = ri(2, 6), e3 = A3 + B3;
+        return {
+            category: 'mul', subtype: subtype,
+            html: N + '<sup>' + A3 + '</sup> &middot; ' + N + '<sup>' + B3 + '</sup> = ' + N + expSlot('b0'),
+            blanks: [{ id: 'b0', key: 'e', kind: 'int' }],
+            answers: { e: e3 },
+            hint: HINT_MUL,
+            explanation: '<b>Same base (' + N + '), so add the exponents:</b><div class="rewrite">' + A3 + ' + ' + B3 + ' = ' + e3 + '</div>Answer: ' + N + '<sup>' + e3 + '</sup>',
+            answerLine: N + '<sup>' + e3 + '</sup>'
+        };
+    }
+    if (subtype === 'twovar') {
+        var A4 = ri(2, 6), B4 = ri(2, 6), C4 = ri(2, 6), D4 = ri(2, 6), e1 = A4 + C4, e2b = B4 + D4;
+        return {
+            category: 'mul', subtype: subtype,
+            html: 'x<sup>' + A4 + '</sup>y<sup>' + B4 + '</sup> &middot; x<sup>' + C4 + '</sup>y<sup>' + D4 + '</sup> = x' + expSlot('b0') + 'y' + expSlot('b1'),
+            blanks: [{ id: 'b0', key: 'e1', kind: 'int' }, { id: 'b1', key: 'e2', kind: 'int' }],
+            answers: { e1: e1, e2: e2b },
+            hint: HINT_MUL + ' Add exponents separately for each variable.',
+            explanation: '<b>Add exponents for each base separately:</b><div class="rewrite">x: ' + A4 + ' + ' + C4 + ' = ' + e1 + '</div><div class="rewrite">y: ' + B4 + ' + ' + D4 + ' = ' + e2b + '</div>Answer: x<sup>' + e1 + '</sup>y<sup>' + e2b + '</sup>',
+            answerLine: 'x<sup>' + e1 + '</sup>y<sup>' + e2b + '</sup>'
+        };
+    }
+    var A5 = ri(2, 6), B5 = ri(2, 6), C5 = ri(2, 6), e5 = A5 + B5 + C5;
+    return {
+        category: 'mul', subtype: subtype,
+        html: 'x<sup>' + A5 + '</sup> &middot; x<sup>' + B5 + '</sup> &middot; x<sup>' + C5 + '</sup> = x' + expSlot('b0'),
+        blanks: [{ id: 'b0', key: 'e', kind: 'int' }],
+        answers: { e: e5 },
+        hint: HINT_MUL,
+        explanation: '<b>Same base, add all the exponents:</b><div class="rewrite">' + A5 + ' + ' + B5 + ' + ' + C5 + ' = ' + e5 + '</div>Answer: x<sup>' + e5 + '</sup>',
+        answerLine: 'x<sup>' + e5 + '</sup>'
+    };
+}
+
+function buildDiv() {
+    var subtype = pick(['simple', 'coef', 'numbase', 'twovar']);
+    if (subtype === 'simple') {
+        var A = ri(5, 12), B = ri(2, A - 1), e = A - B;
+        return {
+            category: 'div', subtype: subtype,
+            html: fracHtml('x<sup>' + A + '</sup>', 'x<sup>' + B + '</sup>') + ' = x' + expSlot('b0'),
+            blanks: [{ id: 'b0', key: 'e', kind: 'int' }],
+            answers: { e: e },
+            hint: HINT_DIV,
+            explanation: '<b>Same base, so subtract the exponents:</b><div class="rewrite">' + A + ' &minus; ' + B + ' = ' + e + '</div>Answer: x<sup>' + e + '</sup>',
+            answerLine: 'x<sup>' + e + '</sup>'
+        };
+    }
+    if (subtype === 'coef') {
+        var c2 = ri(2, 5), cf = ri(2, 6), c1 = c2 * cf, A2 = ri(5, 12), B2 = ri(2, A2 - 1), e2 = A2 - B2;
+        return {
+            category: 'div', subtype: subtype,
+            html: fracHtml(c1 + 'x<sup>' + A2 + '</sup>', c2 + 'x<sup>' + B2 + '</sup>') + ' = ' + blankInline('b0') + 'x' + expSlot('b1'),
+            blanks: [{ id: 'b0', key: 'cf', kind: 'int' }, { id: 'b1', key: 'e', kind: 'int' }],
+            answers: { cf: cf, e: e2 },
+            hint: HINT_DIV,
+            explanation: '<b>Divide coefficients, subtract exponents:</b><div class="rewrite">' + c1 + ' &divide; ' + c2 + ' = ' + cf + '</div><div class="rewrite">' + A2 + ' &minus; ' + B2 + ' = ' + e2 + '</div>Answer: ' + cf + 'x<sup>' + e2 + '</sup>',
+            answerLine: cf + 'x<sup>' + e2 + '</sup>'
+        };
+    }
+    if (subtype === 'numbase') {
+        var N = pick([2, 3, 5, 7, 10]), A3 = ri(5, 10), B3 = ri(2, A3 - 1), e3 = A3 - B3;
+        return {
+            category: 'div', subtype: subtype,
+            html: fracHtml(N + '<sup>' + A3 + '</sup>', N + '<sup>' + B3 + '</sup>') + ' = ' + N + expSlot('b0'),
+            blanks: [{ id: 'b0', key: 'e', kind: 'int' }],
+            answers: { e: e3 },
+            hint: HINT_DIV,
+            explanation: '<b>Same base (' + N + '), subtract the exponents:</b><div class="rewrite">' + A3 + ' &minus; ' + B3 + ' = ' + e3 + '</div>Answer: ' + N + '<sup>' + e3 + '</sup>',
+            answerLine: N + '<sup>' + e3 + '</sup>'
+        };
+    }
+    var A4 = ri(5, 10), C4 = ri(2, A4 - 1), B4 = ri(5, 10), D4 = ri(2, B4 - 1), e1 = A4 - C4, e2b = B4 - D4;
+    return {
+        category: 'div', subtype: subtype,
+        html: fracHtml('x<sup>' + A4 + '</sup>y<sup>' + B4 + '</sup>', 'x<sup>' + C4 + '</sup>y<sup>' + D4 + '</sup>') + ' = x' + expSlot('b0') + 'y' + expSlot('b1'),
+        blanks: [{ id: 'b0', key: 'e1', kind: 'int' }, { id: 'b1', key: 'e2', kind: 'int' }],
+        answers: { e1: e1, e2: e2b },
+        hint: HINT_DIV + ' Subtract exponents separately for each variable.',
+        explanation: '<b>Subtract exponents for each base separately:</b><div class="rewrite">x: ' + A4 + ' &minus; ' + C4 + ' = ' + e1 + '</div><div class="rewrite">y: ' + B4 + ' &minus; ' + D4 + ' = ' + e2b + '</div>Answer: x<sup>' + e1 + '</sup>y<sup>' + e2b + '</sup>',
+        answerLine: 'x<sup>' + e1 + '</sup>y<sup>' + e2b + '</sup>'
+    };
+}
+
+function buildZero() {
+    var subtype = pick(['basic_var', 'basic_num', 'coef_no_paren', 'paren_whole', 'neg_no_paren', 'neg_paren', 'pow_of_pow', 'product_zero']);
+    if (subtype === 'basic_var') {
+        return {
+            category: 'zero', subtype: subtype,
+            html: 'x<sup>0</sup> = ' + blankInline('b0'),
+            blanks: [{ id: 'b0', key: 'v', kind: 'int' }], answers: { v: 1 },
+            hint: 'Any nonzero number or variable raised to the power of 0 equals 1.',
+            explanation: 'By the zero-exponent rule, anything (nonzero) to the 0 power is 1. So x<sup>0</sup> = 1.',
+            answerLine: '1'
+        };
+    }
+    if (subtype === 'basic_num') {
+        var N = ri(2, 20);
+        return {
+            category: 'zero', subtype: subtype,
+            html: N + '<sup>0</sup> = ' + blankInline('b0'),
+            blanks: [{ id: 'b0', key: 'v', kind: 'int' }], answers: { v: 1 },
+            hint: 'Any nonzero number raised to the power of 0 equals 1.',
+            explanation: 'By the zero-exponent rule, anything (nonzero) to the 0 power is 1. So ' + N + '<sup>0</sup> = 1 &mdash; it does not matter what ' + N + ' is.',
+            answerLine: '1'
+        };
+    }
+    if (subtype === 'coef_no_paren') {
+        var C = ri(2, 9);
+        return {
+            category: 'zero', subtype: subtype,
+            html: C + 'x<sup>0</sup> = ' + blankInline('b0'),
+            blanks: [{ id: 'b0', key: 'v', kind: 'int' }], answers: { v: C },
+            hint: 'The 0 exponent is attached only to the x, not to the coefficient out front. Simplify x<sup>0</sup> to 1 first, then multiply.',
+            explanation: 'The exponent applies only to what it touches &mdash; here, just the x.<div class="rewrite">' + C + 'x<sup>0</sup> = ' + C + ' &middot; 1 = ' + C + '</div>The coefficient ' + C + ' is untouched by the exponent.',
+            answerLine: String(C)
+        };
+    }
+    if (subtype === 'paren_whole') {
+        var C2 = ri(2, 9);
+        return {
+            category: 'zero', subtype: subtype,
+            html: '(' + C2 + 'x)<sup>0</sup> = ' + blankInline('b0'),
+            blanks: [{ id: 'b0', key: 'v', kind: 'int' }], answers: { v: 1 },
+            hint: 'The parentheses group the coefficient and the variable together, so the 0 exponent applies to the whole quantity inside.',
+            explanation: 'Parentheses group ' + C2 + ' and x together, so the exponent of 0 applies to the entire quantity (' + C2 + 'x). Anything (nonzero) to the 0 power is 1.',
+            answerLine: '1'
+        };
+    }
+    if (subtype === 'neg_no_paren') {
+        var N2 = ri(2, 9);
+        return {
+            category: 'zero', subtype: subtype,
+            html: '&minus;' + N2 + '<sup>0</sup> = ' + blankSignedInline('b0'),
+            blanks: [{ id: 'b0', key: 'v', kind: 'signedint' }], answers: { v: -1 },
+            hint: 'Without parentheses, the exponent applies only to ' + N2 + ', not to the minus sign. Simplify ' + N2 + '<sup>0</sup> first, then apply the negative.',
+            explanation: 'The exponent touches only ' + N2 + '.<div class="rewrite">&minus;' + N2 + '<sup>0</sup> = &minus;(' + N2 + '<sup>0</sup>) = &minus;(1) = &minus;1</div>',
+            answerLine: '&minus;1'
+        };
+    }
+    if (subtype === 'neg_paren') {
+        var N3 = ri(2, 9);
+        return {
+            category: 'zero', subtype: subtype,
+            html: '(&minus;' + N3 + ')<sup>0</sup> = ' + blankInline('b0'),
+            blanks: [{ id: 'b0', key: 'v', kind: 'int' }], answers: { v: 1 },
+            hint: 'The parentheses group the negative sign together with ' + N3 + ', so the 0 exponent applies to the whole signed quantity.',
+            explanation: 'Here the parentheses include the minus sign, so the base being raised to the 0 power is the whole quantity (&minus;' + N3 + '). Anything (nonzero) to the 0 power is 1.',
+            answerLine: '1'
+        };
+    }
+    if (subtype === 'pow_of_pow') {
+        var A = ri(2, 9);
+        return {
+            category: 'zero', subtype: subtype,
+            html: '(x<sup>' + A + '</sup>)<sup>0</sup> = ' + blankInline('b0'),
+            blanks: [{ id: 'b0', key: 'v', kind: 'int' }], answers: { v: 1 },
+            hint: 'It does not matter what is inside the parentheses &mdash; anything (nonzero) raised to the power of 0 is 1.',
+            explanation: 'The whole quantity (x<sup>' + A + '</sup>) is being raised to the 0 power, and anything (nonzero) to the 0 power is 1.',
+            answerLine: '1'
+        };
+    }
+    return {
+        category: 'zero', subtype: 'product_zero',
+        html: '(xy)<sup>0</sup> = ' + blankInline('b0'),
+        blanks: [{ id: 'b0', key: 'v', kind: 'int' }], answers: { v: 1 },
+        hint: 'The 0 exponent applies to the entire product inside the parentheses.',
+        explanation: 'The whole product (xy) is raised to the 0 power. Anything (nonzero) to the 0 power is 1.',
+        answerLine: '1'
+    };
+}
+
+var ROOT_TABLE = [
+    [4, 2, 2], [9, 2, 3], [16, 2, 4], [25, 2, 5], [36, 2, 6], [49, 2, 7], [64, 2, 8], [81, 2, 9], [100, 2, 10],
+    [8, 3, 2], [27, 3, 3], [64, 3, 4], [125, 3, 5],
+    [16, 4, 2], [81, 4, 3]
+];
+var POWROOT_TABLE = [
+    [8, 2, 3, 2], [27, 2, 3, 3], [4, 3, 2, 2], [9, 3, 2, 3], [16, 3, 2, 4], [16, 3, 4, 2],
+    [32, 2, 5, 2], [25, 3, 2, 5], [8, 4, 3, 2], [27, 4, 3, 3], [81, 3, 4, 3]
+];
+
+function buildNeg() {
+    var subtype = pick(['neg_to_frac_var', 'frac_to_neg_var', 'neg_numeric_eval']);
+    if (subtype === 'neg_to_frac_var') {
+        var A = ri(2, 9);
+        return {
+            category: 'neg', subtype: subtype,
+            html: 'x<sup>&minus;' + A + '</sup> = ' + fracHtml('1', 'x' + expSlot('b0')),
+            blanks: [{ id: 'b0', key: 'e', kind: 'int' }], answers: { e: A },
+            hint: HINT_NEG,
+            explanation: 'A negative exponent flips the base to the denominator and drops the minus sign.<div class="rewrite">x<sup>&minus;' + A + '</sup> = ' + fracHtml('1', 'x<sup>' + A + '</sup>') + '</div>',
+            answerLine: fracHtml('1', 'x<sup>' + A + '</sup>')
+        };
+    }
+    if (subtype === 'frac_to_neg_var') {
+        var A2 = ri(2, 9);
+        return {
+            category: 'neg', subtype: subtype,
+            html: fracHtml('1', 'x<sup>' + A2 + '</sup>') + ' = x' + expSlotSigned('b0'),
+            blanks: [{ id: 'b0', key: 'e', kind: 'signedint' }], answers: { e: -A2 },
+            hint: HINT_NEG,
+            explanation: 'A power in the denominator can move to the numerator by making the exponent negative.<div class="rewrite">' + fracHtml('1', 'x<sup>' + A2 + '</sup>') + ' = x<sup>&minus;' + A2 + '</sup></div>',
+            answerLine: 'x<sup>&minus;' + A2 + '</sup>'
+        };
+    }
+    var N = pick([2, 3, 4, 5]), A3 = ri(2, 3), d = Math.pow(N, A3);
+    return {
+        category: 'neg', subtype: 'neg_numeric_eval',
+        html: N + '<sup>&minus;' + A3 + '</sup> = ' + fracHtml('1', blankInline('b0')),
+        blanks: [{ id: 'b0', key: 'd', kind: 'int' }], answers: { d: d },
+        hint: HINT_NEG + ' Then evaluate the power in the denominator.',
+        explanation: 'First flip to a positive exponent, then evaluate.<div class="rewrite">' + N + '<sup>&minus;' + A3 + '</sup> = ' + fracHtml('1', N + '<sup>' + A3 + '</sup>') + ' = ' + fracHtml('1', String(d)) + '</div>',
+        answerLine: fracHtml('1', String(d))
+    };
+}
+
+var fracProgress = 0;               // how many Fractional Exponents problems have been served so far
+var FRAC_INTRO_ROOT_COUNT = 3;       // first N problems: numeric x^(1/n), n in {2,3,4}
+var FRAC_INTRO_RADICAL_COUNT = 2;    // next N problems: reverse -- given the root, name the fractional exponent
+
+function buildFrac() {
+    var subtype;
+    if (fracProgress < FRAC_INTRO_ROOT_COUNT) {
+        subtype = 'frac_numeric_root';
+    } else if (fracProgress < FRAC_INTRO_ROOT_COUNT + FRAC_INTRO_RADICAL_COUNT) {
+        subtype = 'radical_to_frac';
+    } else {
+        subtype = pick(['radical_to_frac', 'frac_numeric_root', 'frac_numeric_powroot']);
+    }
+    fracProgress++;
+
+    if (subtype === 'radical_to_frac') {
+        var n = pick([2, 3, 4]);
+        var radHtml = radicalHtml(n, 'x');
+        return {
+            category: 'frac', subtype: subtype,
+            html: radHtml + ' = x' + blankFrac('b0'),
+            blanks: [{ id: 'b0', key: 'e', kind: 'fracOrInt' }], answers: { e: 1 / n },
+            hint: HINT_FRAC_RADICAL,
+            explanation: 'A root becomes a fractional exponent with the root index on the bottom.<div class="rewrite">' + radHtml + ' = x<sup>' + fracExpHtml('1', n) + '</sup></div>',
+            answerLine: 'x<sup>' + fracExpHtml('1', n) + '</sup>'
+        };
+    }
+    if (subtype === 'frac_numeric_root') {
+        var t = pick(ROOT_TABLE);
+        return {
+            category: 'frac', subtype: subtype,
+            html: t[0] + '<sup>' + fracExpHtml('1', t[1]) + '</sup> = ' + blankInline('b0'),
+            blanks: [{ id: 'b0', key: 'v', kind: 'int' }], answers: { v: t[2] },
+            hint: HINT_FRAC_ROOT,
+            explanation: t[0] + '<sup>' + fracExpHtml('1', t[1]) + '</sup> asks for the ' + ordinal(t[1]) + ' root of ' + t[0] + '.<div class="rewrite">' + t[2] + '<sup>' + t[1] + '</sup> = ' + t[0] + ', so the answer is ' + t[2] + '</div>',
+            answerLine: String(t[2])
+        };
+    }
+    var t2 = pick(POWROOT_TABLE), v2 = Math.pow(t2[3], t2[1]);
+    return {
+        category: 'frac', subtype: 'frac_numeric_powroot',
+        html: t2[0] + '<sup>' + fracExpHtml(t2[1], t2[2]) + '</sup> = ' + blankInline('b0'),
+        blanks: [{ id: 'b0', key: 'v', kind: 'int' }], answers: { v: v2 },
+        hint: HINT_FRAC_POWROOT,
+        explanation: 'A fractional exponent m over n splits into a root and a power: x<sup>' + fracExpHtml('m', 'n') + '</sup> = (x<sup>' + fracExpHtml('1', 'n') + '</sup>)<sup>m</sup>.<div class="rewrite">' + t2[0] + '<sup>' + fracExpHtml(t2[1], t2[2]) + '</sup> = (' + t2[0] + '<sup>' + fracExpHtml('1', t2[2]) + '</sup>)<sup>' + t2[1] + '</sup> = (' + t2[3] + ')<sup>' + t2[1] + '</sup> = ' + v2 + '</div>',
+        answerLine: String(v2)
+    };
+}
+
+function buildPowPow() {
+    var subtype = pick(['simple', 'coef', 'coef', 'numbase']);
+    if (subtype === 'simple') {
+        var A = ri(2, 6), B = ri(2, 6), e = A * B;
+        return {
+            category: 'powpow', subtype: subtype,
+            html: '(x<sup>' + A + '</sup>)<sup>' + B + '</sup> = x' + expSlot('b0'),
+            blanks: [{ id: 'b0', key: 'e', kind: 'int' }], answers: { e: e },
+            hint: HINT_POWPOW,
+            explanation: POWPOW_RULE + '<div class="rewrite">(x<sup>' + A + '</sup>)<sup>' + B + '</sup> = x<sup>' + A + '&times;' + B + '</sup> = x<sup>' + e + '</sup></div>',
+            answerLine: 'x<sup>' + e + '</sup>'
+        };
+    }
+    if (subtype === 'coef') {
+        var C = ri(2, 4), A2 = ri(2, 6), B2 = ri(2, 3), cf = Math.pow(C, B2), e2 = A2 * B2;
+        return {
+            category: 'powpow', subtype: subtype,
+            html: '(' + C + 'x<sup>' + A2 + '</sup>)<sup>' + B2 + '</sup> = ' + blankInline('b0') + 'x' + expSlot('b1'),
+            blanks: [{ id: 'b0', key: 'cf', kind: 'int' }, { id: 'b1', key: 'e', kind: 'int' }], answers: { cf: cf, e: e2 },
+            hint: HINT_POWPOW,
+            explanation: POWPOW_RULE + ' The coefficient gets raised to the outer power as well.<div class="rewrite">(x<sup>' + A2 + '</sup>)<sup>' + B2 + '</sup> = x<sup>' + A2 + '&times;' + B2 + '</sup> = x<sup>' + e2 + '</sup></div><div class="rewrite">' + C + '<sup>' + B2 + '</sup> = ' + cf + '</div>Answer: ' + cf + 'x<sup>' + e2 + '</sup>',
+            answerLine: cf + 'x<sup>' + e2 + '</sup>'
+        };
+    }
+    var N = pick([2, 3, 5]), A3 = ri(2, 5), B3 = ri(2, 4), e3 = A3 * B3;
+    return {
+        category: 'powpow', subtype: 'numbase',
+        html: '(' + N + '<sup>' + A3 + '</sup>)<sup>' + B3 + '</sup> = ' + N + expSlot('b0'),
+        blanks: [{ id: 'b0', key: 'e', kind: 'int' }], answers: { e: e3 },
+        hint: HINT_POWPOW,
+        explanation: POWPOW_RULE + '<div class="rewrite">(' + N + '<sup>' + A3 + '</sup>)<sup>' + B3 + '</sup> = ' + N + '<sup>' + A3 + '&times;' + B3 + '</sup> = ' + N + '<sup>' + e3 + '</sup></div>',
+        answerLine: N + '<sup>' + e3 + '</sup>'
+    };
+}
+
+function buildProdQuot() {
+    var subtype = pick(['product_simple', 'quotient_simple', 'product_coef', 'product_three', 'quotient_coef_num']);
+    if (subtype === 'product_simple') {
+        var A = ri(2, 6);
+        return {
+            category: 'prodquot', subtype: subtype,
+            html: '(xy)<sup>' + A + '</sup> = x' + expSlot('b0') + 'y' + expSlot('b1'),
+            blanks: [{ id: 'b0', key: 'e1', kind: 'int' }, { id: 'b1', key: 'e2', kind: 'int' }], answers: { e1: A, e2: A },
+            hint: HINT_PRODQUOT,
+            explanation: 'The outer exponent distributes to both x and y.<div class="rewrite">(xy)<sup>' + A + '</sup> = x<sup>' + A + '</sup>y<sup>' + A + '</sup></div>',
+            answerLine: 'x<sup>' + A + '</sup>y<sup>' + A + '</sup>'
+        };
+    }
+    if (subtype === 'quotient_simple') {
+        var A2 = ri(2, 6);
+        return {
+            category: 'prodquot', subtype: subtype,
+            html: bigParenWrap(fracHtml('x', 'y')) + '<sup>' + A2 + '</sup> = ' + fracHtml('x' + expSlot('b0'), 'y' + expSlot('b1')),
+            blanks: [{ id: 'b0', key: 'e1', kind: 'int' }, { id: 'b1', key: 'e2', kind: 'int' }], answers: { e1: A2, e2: A2 },
+            hint: HINT_PRODQUOT,
+            explanation: 'The outer exponent distributes to both the top and the bottom.<div class="rewrite">' + bigParenWrap(fracHtml('x', 'y')) + '<sup>' + A2 + '</sup> = ' + fracHtml('x<sup>' + A2 + '</sup>', 'y<sup>' + A2 + '</sup>') + '</div>',
+            answerLine: fracHtml('x<sup>' + A2 + '</sup>', 'y<sup>' + A2 + '</sup>')
+        };
+    }
+    if (subtype === 'product_coef') {
+        var C = ri(2, 4), A3 = ri(2, 4), cf = Math.pow(C, A3);
+        return {
+            category: 'prodquot', subtype: subtype,
+            html: '(' + C + 'x)<sup>' + A3 + '</sup> = ' + blankInline('b0') + 'x' + expSlot('b1'),
+            blanks: [{ id: 'b0', key: 'cf', kind: 'int' }, { id: 'b1', key: 'e', kind: 'int' }], answers: { cf: cf, e: A3 },
+            hint: HINT_PRODQUOT,
+            explanation: 'The exponent applies to both the ' + C + ' and the x.<div class="rewrite">' + C + '<sup>' + A3 + '</sup> = ' + cf + '</div>Answer: ' + cf + 'x<sup>' + A3 + '</sup>',
+            answerLine: cf + 'x<sup>' + A3 + '</sup>'
+        };
+    }
+    if (subtype === 'product_three') {
+        var C2 = ri(2, 4), A4 = ri(2, 4), cf2 = Math.pow(C2, A4);
+        return {
+            category: 'prodquot', subtype: subtype,
+            html: '(' + C2 + 'xy)<sup>' + A4 + '</sup> = ' + blankInline('b0') + 'x' + expSlot('b1') + 'y' + expSlot('b2'),
+            blanks: [{ id: 'b0', key: 'cf', kind: 'int' }, { id: 'b1', key: 'e1', kind: 'int' }, { id: 'b2', key: 'e2', kind: 'int' }], answers: { cf: cf2, e1: A4, e2: A4 },
+            hint: HINT_PRODQUOT,
+            explanation: 'The exponent applies to every factor: ' + C2 + ', x, and y.<div class="rewrite">' + C2 + '<sup>' + A4 + '</sup> = ' + cf2 + '</div>Answer: ' + cf2 + 'x<sup>' + A4 + '</sup>y<sup>' + A4 + '</sup>',
+            answerLine: cf2 + 'x<sup>' + A4 + '</sup>y<sup>' + A4 + '</sup>'
+        };
+    }
+    var C3 = ri(2, 4), A5 = ri(2, 4), cf3 = Math.pow(C3, A5);
+    return {
+        category: 'prodquot', subtype: 'quotient_coef_num',
+        html: bigParenWrap(fracHtml('x', String(C3))) + '<sup>' + A5 + '</sup> = ' + fracHtml('x' + expSlot('b0'), blankInline('b1')),
+        blanks: [{ id: 'b0', key: 'e', kind: 'int' }, { id: 'b1', key: 'cf', kind: 'int' }], answers: { e: A5, cf: cf3 },
+        hint: HINT_PRODQUOT,
+        explanation: 'The exponent applies to both the x on top and the ' + C3 + ' on the bottom.<div class="rewrite">' + C3 + '<sup>' + A5 + '</sup> = ' + cf3 + '</div>Answer: ' + fracHtml('x<sup>' + A5 + '</sup>', String(cf3)),
+        answerLine: fracHtml('x<sup>' + A5 + '</sup>', String(cf3))
+    };
+}
+
+var CATEGORY_BUILDERS = {
+    mul: buildMul, div: buildDiv, zero: buildZero,
+    neg: buildNeg, frac: buildFrac, powpow: buildPowPow, prodquot: buildProdQuot
+};
+
+/* =====================================================================
+   Adaptive picker for Mixed mode
+   ===================================================================== */
+function pickAdaptiveCategory() {
+    var weights = CATS.map(function (c) {
+        var s = stats[c];
+        if (s.t < 3) return 1.0;
+        var acc = s.c / s.t;
+        return Math.max(0.2, 1 - acc);
+    });
+    var total = weights.reduce(function (a, b) { return a + b; }, 0);
+    var r = Math.random() * total;
+    for (var i = 0; i < CATS.length; i++) {
+        r -= weights[i];
+        if (r <= 0) return CATS[i];
+    }
+    return CATS[0];
+}
+
+/* =====================================================================
+   Problem generation / rendering
+   ===================================================================== */
+/* Convert problem HTML into a sentence a screen reader can read aloud.
+   Keeps the visual markup as the single source of truth so every builder --
+   including any added later -- gets an announcement for free. */
+var BLANK_LABELS = {
+    cf: 'the coefficient', e: 'the exponent', e1: 'the first exponent',
+    e2: 'the second exponent', v: 'the value', d: 'the denominator'
+};
+
+function spokenFromHtml(html) {
+    var s = html;
+    /* Drop controls that sit beside a blank but are not part of the expression.
+       The plus/minus sign-toggle button carries a "&plusmn;" glyph, and stripping
+       tags alone left that glyph in the sentence, so every signed blank was
+       announced as "... equals x blank plus or minus" -- which sounds like the
+       answer itself is plus-or-minus something. The button keeps its own
+       aria-label, so it is still announced properly when it takes focus. */
+    s = s.replace(/<button\b[\s\S]*?<\/button>/gi, ' ');
+    // Inputs become the word "blank"
+    s = s.replace(/<input\b[^>]*>/gi, ' blank ');
+    /* Radicals first. The sign is now an inline SVG and the overbar a CSS
+       border -- neither says anything -- and the root index lives in a <sup>
+       that must not be turned into "to the power of". data-root carries the
+       index, and the whole component collapses to the spoken root phrase. */
+    s = s.replace(/<span class="radical" data-root="(\d+)">\s*<span class="radical-sign">[\s\S]*?<\/svg>\s*<\/span>\s*<span class="radical-body">([\s\S]*?)<\/span>\s*<\/span>/gi,
+        function (m, idx, val) {
+            var root = (idx === '2') ? 'the square root of ' : 'the ' + ordinal(parseInt(idx, 10)) + ' root of ';
+            return ' ' + root + spokenFromHtml(val) + ' ';
+        });
+    // Stacked fractions -> "the fraction A over B"
+    s = s.replace(/<span class="frac(?: frac-exp)?">\s*<span class="frac-num">([\s\S]*?)<\/span>\s*<span class="frac-bar"><\/span>\s*<span class="frac-den">([\s\S]*?)<\/span>\s*<\/span>/gi,
+        function (m, num, den) { return ' the fraction ' + spokenFromHtml(num) + ' over ' + spokenFromHtml(den) + ' '; });
+    // Exponents -> "to the power of N" (drop the parentheses used only for visual grouping)
+    s = s.replace(/<sup[^>]*>([\s\S]*?)<\/sup>/gi, function (m, inner) {
+        var t = inner.replace(/^\s*\(([\s\S]*)\)\s*$/, '$1');
+        return ' to the power of ' + t + ' ';
+    });
+    // Strip remaining tags
+    s = s.replace(/<[^>]+>/g, ' ');
+    // Entities and symbols to words
+    s = s.replace(/&middot;/g, ' times ')
+         .replace(/&divide;/g, ' divided by ')
+         .replace(/&times;/g, ' times ')
+         .replace(/&minus;/g, ' negative ')
+         .replace(/&plusmn;/g, ' plus or minus ')
+         .replace(/&nbsp;/g, ' ')
+         .replace(/&rarr;/g, ' gives ')
+         .replace(/&amp;/g, ' and ');
+    s = s.replace(/\(/g, ' open parenthesis ').replace(/\)/g, ' close parenthesis ');
+    s = s.replace(/\//g, ' over ').replace(/=/g, ' equals ');
+    return s.replace(/\s+/g, ' ').trim();
+}
+
+/* The 1100ms "advance to the next problem" delay used to run unconditionally.
+   Switching mode, pressing Skip or opening My Stats inside that window left the
+   old timer armed, so it fired afterwards and replaced whatever the student was
+   now looking at -- a fresh problem in the mode they just left, or a new problem
+   painted over the stats panel. Every path that puts something else on screen
+   cancels the pending advance first. */
+var advanceTimer = null;
+function cancelAdvance() {
+    if (advanceTimer !== null) { clearTimeout(advanceTimer); advanceTimer = null; }
+}
+
+function generateProblem() {
+    cancelAdvance();
+    var cat = mode === 'mix' ? pickAdaptiveCategory() : mode;
+    currentProblem = CATEGORY_BUILDERS[cat]();
+    currentProblem.trackCategory = cat;
+    missRecorded = false;
+    renderProblem();
+}
+
+function renderProblem() {
+    var p = currentProblem;
+    // NOTE: the answer inputs sit inline inside the expression, so the problem
+    // container must NOT be aria-hidden -- that would bury focusable controls.
+    // Instead the purely decorative math wrappers are hidden below.
+    document.getElementById('main-content').innerHTML =
+        '<div class="problem" id="problem-visual">' + p.html + '</div>';
+    hideDecorativeMath(document.getElementById('problem-visual'));
+    var plural = p.blanks.length > 1 ? 's' : '';
+    var inputHtml = '<div class="instructions" id="instructions">Fill in the blank' + plural + ', then press Submit</div>';
+    inputHtml += '<div class="input-area"><button type="button" class="submit-btn" onclick="checkAnswer()">Submit</button></div>';
+    document.getElementById('input-content').innerHTML = inputHtml;
+
+    // Give every blank a real accessible name (placeholder is not a label)
+    var total = p.blanks.length;
+    p.blanks.forEach(function (b, i) {
+        var el = document.getElementById(b.id);
+        if (!el) return;
+        var label = BLANK_LABELS[b.key] || 'the answer';
+        if (total > 1) label += ', blank ' + (i + 1) + ' of ' + total;
+        if (b.kind === 'signedint') label += ' (use the plus or minus button for a negative)';
+        if (b.kind === 'fracOrInt') label += ' (a fraction such as 1/2 is allowed)';
+        el.setAttribute('aria-label', label);
+    });
+
+    // Announce the new problem in words
+    var spoken = spokenFromHtml(p.html);
+    document.getElementById('problem-spoken').textContent =
+        CAT_SPOKEN[p.trackCategory] + '. ' + spoken + '. Fill in the blank' + plural + '.';
+
+    document.getElementById('feedback').textContent = '';
+    document.getElementById('feedback').className = 'feedback';
+    hideHelperBox('hint', 'hint-toggle', 'Show Hint');
+    hideHelperBox('explain', 'explain-toggle', 'Show Explanation');
+    hideHelperBox('answer-box', 'answer-toggle', 'Show Answer');
+    document.getElementById('helper-buttons').style.display = 'block';
+    setTimeout(function () {
+        var el = document.getElementById(p.blanks[0].id);
+        if (el) el.focus();
+    }, 100);
+}
+
+/* Hide superscripts, fraction scaffolding and stretched parentheses from the
+   accessibility tree so the expression is not read as raw markup alongside the
+   spoken sentence. Anything containing a focusable control is left alone --
+   aria-hidden over a focusable element is itself a WCAG failure. */
+var FOCUSABLE_SEL = 'input, button, a[href], [tabindex]';
+function hideDecorativeMath(root) {
+    if (!root) return;
+    var els = root.querySelectorAll('*'), i, el;
+    for (i = 0; i < els.length; i++) {
+        el = els[i];
+        if (el.tagName === 'INPUT' || el.tagName === 'BUTTON') continue;
+        if (el.querySelector(FOCUSABLE_SEL)) continue;
+        el.setAttribute('aria-hidden', 'true');
+    }
+    /* The containers that hold a focusable control cannot be hidden wholesale,
+       but they still carry loose math text ("x", "=", a base digit) that would
+       otherwise be read a second time alongside the spoken sentence. Wrap those
+       bare text runs in aria-hidden spans -- inline and unstyled, so nothing
+       moves visually, and no focusable element is ever hidden. */
+    maskLooseText(root);
+    els = root.querySelectorAll('*');
+    for (i = 0; i < els.length; i++) {
+        el = els[i];
+        if (el.tagName === 'INPUT' || el.tagName === 'BUTTON') continue;
+        if (el.getAttribute('aria-hidden') === 'true') continue;
+        maskLooseText(el);
+    }
+}
+function maskLooseText(el) {
+    var nodes = [], i;
+    for (i = 0; i < el.childNodes.length; i++) nodes.push(el.childNodes[i]);
+    for (i = 0; i < nodes.length; i++) {
+        var n = nodes[i];
+        if (n.nodeType !== 3) continue;
+        if (!n.textContent.replace(/\s+/g, '')) continue;
+        var span = document.createElement('span');
+        span.setAttribute('aria-hidden', 'true');
+        span.textContent = n.textContent;
+        el.replaceChild(span, n);
+    }
+}
+
+function hideHelperBox(boxId, btnId, label) {
+    var box = document.getElementById(boxId);
+    if (box) box.style.display = 'none';
+    var btn = document.getElementById(btnId);
+    if (btn) { btn.setAttribute('aria-expanded', 'false'); btn.textContent = label; }
+}
+
+/* =====================================================================
+   Answer checking
+   ===================================================================== */
+/* parseFloat/parseInt stop at the first character they cannot read, so "3.7",
+   "3abc" and "3 4" all used to pass as 3. Every entry is validated in full
+   before it is converted. */
+function parseStrictInt(raw) {
+    if (!/^[+-]?\d+$/.test(raw)) return null;
+    var n = parseInt(raw, 10);
+    return isNaN(n) ? null : n;
+}
+function parseFracOrFloat(raw) {
+    raw = raw.replace(/\s+/g, '');
+    if (/^-?\d+\/\d+$/.test(raw)) {
+        var parts = raw.split('/');
+        var num = parseFloat(parts[0]), den = parseFloat(parts[1]);
+        if (den === 0) return null;
+        return num / den;
+    }
+    if (!/^[+-]?(\d+\.?\d*|\.\d+)$/.test(raw)) return null;
+    var f = parseFloat(raw);
+    return isNaN(f) ? null : f;
+}
+function blankCorrect(kind, raw, expected) {
+    if (kind === 'int' || kind === 'signedint') {
+        var n = parseStrictInt(raw);
+        if (n === null) return false;
+        return n === expected;
+    }
+    if (kind === 'fracOrInt') {
+        var v = parseFracOrFloat(raw);
+        if (v === null) return false;
+        return Math.abs(v - expected) < 1e-9;
+    }
+    return false;
+}
+
+function checkAnswer() {
+    var p = currentProblem;
+    var feedback = document.getElementById('feedback');
+    for (var i = 0; i < p.blanks.length; i++) {
+        var el = document.getElementById(p.blanks[i].id);
+        if (!el || el.value.trim() === '') {
+            feedback.textContent = 'Fill in every blank, then press Submit.';
+            feedback.className = 'feedback incorrect';
+            return;
+        }
+    }
+    var allCorrect = true;
+    for (var j = 0; j < p.blanks.length; j++) {
+        var b = p.blanks[j];
+        var el2 = document.getElementById(b.id);
+        var expected = p.answers[b.key];
+        if (!blankCorrect(b.kind, el2.value.trim(), expected)) allCorrect = false;
+    }
+
+    if (allCorrect) {
+        /* A problem that was missed or revealed does not restart the streak:
+           the reveal already ended it, and it must stay at 0 the way it does in
+           the rest of the suite. */
+        if (!missRecorded) {
+            var s = stats[p.trackCategory];
+            s.c++; s.t++;
+            streak++;
+            if (streak > bestStreak) bestStreak = streak;
+            celebrateStreak(streak);
+        } else {
+            streak = 0;
+        }
+        feedback.textContent = pick(['Correct!', 'Nice!', 'Got it!', 'Perfect!', 'Nailed it!', 'Yes!']);
+        feedback.className = 'feedback correct';
+        updateDisplay();
+        saveState();
+        cancelAdvance();
+        advanceTimer = setTimeout(function () {
+            advanceTimer = null;
+            problemNum++;
+            generateProblem();
+            updateDisplay();
+        }, 1100);
+    } else {
+        if (!missRecorded) {
+            missRecorded = true;
+            var s2 = stats[p.trackCategory];
+            s2.t++;
+        }
+        streak = 0;
+        feedback.textContent = 'Not quite -- check each blank and try again.';
+        feedback.className = 'feedback incorrect';
+        updateDisplay();
+        saveState();
+    }
+}
+
+/* =====================================================================
+   Hint / Explanation / Answer
+   ===================================================================== */
+function toggleHelperBox(boxId, btnId, showLabel, hideLabel, cls, htmlContent) {
+    var box = document.getElementById(boxId);
+    var btn = document.getElementById(btnId);
+    if (box.style.display === 'none') {
+        box.className = cls;
+        // Visual copy is aria-hidden; a spoken sibling carries the same content in words
+        box.innerHTML = '<div aria-hidden="true">' + htmlContent + '</div>' +
+            '<p class="sr-only">' + escapeHtml(spokenFromHtml(htmlContent)) + '</p>';
+        box.style.display = 'block';
+        if (btn) { btn.setAttribute('aria-expanded', 'true'); btn.textContent = hideLabel; }
+    } else {
+        box.style.display = 'none';
+        if (btn) { btn.setAttribute('aria-expanded', 'false'); btn.textContent = showLabel; }
+    }
+}
+function toggleHint() {
+    toggleHelperBox('hint', 'hint-toggle', 'Show Hint', 'Hide Hint', 'hint-box',
+        '<b>Hint:</b> ' + currentProblem.hint);
+}
+function toggleExplanation() {
+    toggleHelperBox('explain', 'explain-toggle', 'Show Explanation', 'Hide Explanation', 'explain-box',
+        currentProblem.explanation);
+}
+/* Revealing the answer records the problem as attempted, exactly like a wrong
+   try, and ends the streak. Without this a student could reveal, type it back
+   and take clean first-try credit, which quietly inflated every accuracy
+   figure. Hint and Explanation stay free, matching the rest of the suite. */
+function recordReveal() {
+    if (missRecorded || !currentProblem) return;
+    missRecorded = true;
+    stats[currentProblem.trackCategory].t++;
+    streak = 0;
+    updateDisplay();
+    saveState();
+}
+function toggleAnswer() {
+    var box = document.getElementById('answer-box');
+    if (box && box.style.display === 'none') recordReveal();
+    toggleHelperBox('answer-box', 'answer-toggle', 'Show Answer', 'Hide Answer', 'answer-box',
+        '<b>Answer:</b> ' + currentProblem.answerLine);
+}
+
+/* =====================================================================
+   Stats view
+   ===================================================================== */
+function showStats() {
+    cancelAdvance();   // a pending advance would paint a problem over this panel
+    var totalC = 0, totalT = 0;
+    CATS.forEach(function (c) { totalC += stats[c].c; totalT += stats[c].t; });
+    var overallPct = totalT > 0 ? Math.round((totalC / totalT) * 100) : 0;
+
+    var html = '<div class="stats-view">';
+    html += '<h2 id="stats-heading" tabindex="-1">My Stats</h2>';
+    html += '<div class="stats-overall">';
+    if (totalT > 0) {
+        html += '<div class="big">' + escapeHtml(overallPct) + '%</div>';
+        html += '<div class="lbl">' + escapeHtml(totalC) + ' correct on first try out of ' + escapeHtml(totalT) + ' problems</div>';
+    } else {
+        html += '<div class="big" style="color:#4a5480;" aria-hidden="true">--</div>';
+        html += '<div class="lbl">No problems attempted yet.</div>';
+    }
+    html += '<div class="lbl" style="margin-top:6px;">Best streak: ' + escapeHtml(bestStreak) + '</div>';
+    html += '</div>';
+
+    CATS.forEach(function (c) {
+        var s = stats[c];
+        var pct = s.t > 0 ? Math.round((s.c / s.t) * 100) : 0;
+        var barCls = 'none';
+        if (s.t > 0) {
+            if (pct >= 80) barCls = 'good';
+            else if (pct >= 60) barCls = 'mid';
+            else barCls = 'low';
+        }
+        var w = s.t > 0 ? pct : 0;
+        var name = CAT_LABELS[c];
+        var spokenRow = s.t > 0
+            ? name + ': ' + s.c + ' correct out of ' + s.t + ', ' + pct + ' percent'
+            : name + ': not attempted yet';
+        html += '<div class="stat-row">';
+        html += '<div class="stat-name" aria-hidden="true">' + name + '</div>';
+        html += '<div class="stat-bar-wrap" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' +
+                escapeHtml(w) + '" aria-label="' + escapeHtml(spokenRow) + '">' +
+                '<div class="stat-bar ' + barCls + '" style="width:' + escapeHtml(w) + '%;"></div></div>';
+        html += '<div class="stat-num" aria-hidden="true">' + escapeHtml(s.c) + '/' + escapeHtml(s.t) +
+                (s.t > 0 ? ' (' + escapeHtml(pct) + '%)' : '') + '</div>';
+        html += '</div>';
+    });
+
+    var recommend = buildRecommendation();
+    if (recommend) html += '<div class="recommend">' + recommend + '</div>';
+
+    html += '<div class="stats-actions">';
+    html += '<button type="button" class="submit-btn" onclick="hideStats()">Back to Practice</button>';
+    html += '<button type="button" class="reset-btn" onclick="confirmReset()" style="margin-left:8px;">Reset Stats</button>';
+    html += '</div>';
+    html += '</div>';
+
+    document.getElementById('main-content').innerHTML = html;
+    document.getElementById('input-content').innerHTML = '';
+    document.getElementById('feedback').textContent = '';
+    document.getElementById('feedback').className = 'feedback';
+    document.getElementById('problem-spoken').textContent = '';
+    document.getElementById('helper-buttons').style.display = 'none';
+    hideHelperBox('hint', 'hint-toggle', 'Show Hint');
+    hideHelperBox('explain', 'explain-toggle', 'Show Explanation');
+    hideHelperBox('answer-box', 'answer-toggle', 'Show Answer');
+    var h = document.getElementById('stats-heading');
+    if (h) h.focus();
+}
+
+function buildRecommendation() {
+    var totalT = 0;
+    CATS.forEach(function (c) { totalT += stats[c].t; });
+    if (totalT === 0) return null;
+
+    var untried = CATS.filter(function (c) { return stats[c].t === 0; });
+    if (untried.length > 0) {
+        var names = untried.map(function (c) { return CAT_LABELS[c]; });
+        var list = names.length > 1 ? (names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1]) : names[0];
+        return '<b>Try these next:</b> you haven&rsquo;t attempted ' + list + ' yet, so it&rsquo;s too soon to call this a strong overall score. Give them a shot!';
+    }
+
+    var weakest = null, weakestPct = 101;
+    CATS.forEach(function (c) {
+        var s = stats[c];
+        var p = s.c / s.t * 100;
+        if (p < weakestPct) { weakestPct = p; weakest = c; }
+    });
+    if (weakestPct >= 85) {
+        return '<b>Great work overall!</b> You are strong across all seven categories. Try the Mixed mode to keep sharp.';
+    }
+    return '<b>Focus area:</b> ' + CAT_LABELS[weakest] + ' is your weakest (' + Math.round(weakestPct) + '%). Try the ' + CAT_SHORT[weakest] + ' mode for focused practice.';
+}
+
+function hideStats() { generateProblem(); }
+
+var resetArmed = false;
+var resetTimer = null;
+function confirmReset() {
+    if (!resetArmed) {
+        resetArmed = true;
+        var btns = document.querySelectorAll('.reset-btn');
+        for (var i = 0; i < btns.length; i++) btns[i].textContent = 'Tap again to confirm';
+        resetTimer = setTimeout(function () {
+            resetArmed = false;
+            var b2 = document.querySelectorAll('.reset-btn');
+            for (var j = 0; j < b2.length; j++) b2[j].textContent = 'Reset Stats';
+        }, 4000);
+        return;
+    }
+    clearTimeout(resetTimer);
+    resetArmed = false;
+    stats = {
+        mul: { c: 0, t: 0 }, div: { c: 0, t: 0 }, zero: { c: 0, t: 0 },
+        neg: { c: 0, t: 0 }, frac: { c: 0, t: 0 }, powpow: { c: 0, t: 0 }, prodquot: { c: 0, t: 0 }
+    };
+    streak = 0;
+    bestStreak = 0;
+    problemNum = 0;
+    fracProgress = 0;
+    saveState();
+    updateDisplay();
+    showStats();
+}
+
+/* =====================================================================
+   Skip, mode, display, persistence
+   ===================================================================== */
+function skipProblem() {
+    problemNum++;
+    generateProblem();
+    updateDisplay();
+}
+
+function setMode(m) {
+    mode = m;
+    var btns = document.querySelectorAll('.mode-btn');
+    var order = ['mul', 'div', 'zero', 'neg', 'frac', 'powpow', 'prodquot', 'mix'];
+    for (var i = 0; i < btns.length; i++) {
+        var on = order[i] === m;
+        btns[i].classList.toggle('active', on);
+        btns[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    streak = 0;
+    generateProblem();
+    updateDisplay();
+}
+
+function updateDisplay() {
+    document.getElementById('problemNum').textContent = problemNum + 1;
+    document.getElementById('streak').textContent = streak;
+    var sd = document.getElementById('streak-display');
+    sd.className = streak >= 5 ? 'info-item streak-hot' : 'info-item';
+    var totalC = 0, totalT = 0;
+    CATS.forEach(function (c) { totalC += stats[c].c; totalT += stats[c].t; });
+    var accEl = document.getElementById('acc-display');
+    if (totalT > 0) accEl.textContent = 'Accuracy: ' + Math.round(totalC / totalT * 100) + '%';
+    else accEl.textContent = 'Accuracy: --';
+}
+
+/* --- Persistence hardening ---------------------------------------------
+   Anything read back from localStorage is untrusted: another script on the
+   origin, a shared device, or a curious student can edit it. Stats values
+   flow into innerHTML in the stats panel, so they are coerced to plain
+   non-negative integers on load and escaped on the way out. */
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function safeCount(v, max) {
+    var n = Number(v);
+    if (!isFinite(n) || n < 0) return 0;
+    n = Math.floor(n);
+    return n > max ? max : n;
+}
+
+function saveState() {
+    try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify({
+            stats: stats, bestStreak: bestStreak, problemNum: problemNum,
+            fracProgress: fracProgress, confettiOn: confettiOn
+        }));
+    } catch (e) { /* storage unavailable -- play without saving */ }
+}
+function loadState() {
+    try {
+        var raw = localStorage.getItem(SAVE_KEY);
+        if (!raw) return;
+        var st = JSON.parse(raw);
+        if (st && typeof st === 'object' && st.stats && typeof st.stats === 'object') {
+            CATS.forEach(function (c) {
+                var s = st.stats[c];
+                if (!s || typeof s !== 'object') return;
+                var t = safeCount(s.t, 1e6);
+                var correct = safeCount(s.c, t);   // correct can never exceed attempts
+                stats[c] = { c: correct, t: t };
+            });
+        }
+        if (st) {
+            bestStreak = safeCount(st.bestStreak, 1e6);
+            problemNum = safeCount(st.problemNum, 1e6);
+            fracProgress = safeCount(st.fracProgress, 1e6);
+            confettiOn = st.confettiOn !== false;
+        }
+    } catch (e) { /* corrupt or unreadable -- start fresh rather than fail */ }
+}
+
+/* =====================================================================
+   Confetti
+   ===================================================================== */
+function prefersReducedMotion() {
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+function toggleConfetti() {
+    confettiOn = !confettiOn;
+    var btn = document.getElementById('confetti-toggle');
+    if (btn) {
+        btn.setAttribute('aria-pressed', confettiOn ? 'true' : 'false');
+        btn.textContent = 'Confetti: ' + (confettiOn ? 'On' : 'Off');
+    }
+    saveState();
+}
+function celebrateStreak(s) {
+    if (s === 0 || s % 5 !== 0) return;
+    if (!confettiOn || prefersReducedMotion()) return;
+    if (s % 10 === 0) createConfetti(200, 3);
+    else createConfetti(100, 2);
+}
+
+function createConfetti(count, tier) {
+    var host = document.body;
+    // Midnight Scholar 8-colour confetti palette (the only place orange is allowed)
+    /* Palette colours only: the system bans orange outright and red is not in it. */
+    var colors = ['#7c3aed', '#22c55e', '#2e3d8f', '#c76b8f', '#10b981', '#ffeb3b', '#0d9488', '#a78bfa'];
+    var isMassive = tier === 3;
+    for (var i = 0; i < count; i++) {
+        var piece = document.createElement('div');
+        piece.className = 'confetti';
+        piece.setAttribute('aria-hidden', 'true');
+        var base;
+        if (tier === 1) base = 7 + Math.random() * 5;
+        else if (tier === 2) base = 10 + Math.random() * 7;
+        else base = 11 + Math.random() * 9;
+        var color = colors[Math.floor(Math.random() * colors.length)];
+        var shape = Math.floor(Math.random() * 4);
+        if (shape === 0) {
+            piece.style.width = base + 'px';
+            piece.style.height = base + 'px';
+            piece.style.background = color;
+            piece.style.borderRadius = '50%';
+        } else if (shape === 1) {
+            piece.style.width = base + 'px';
+            piece.style.height = base + 'px';
+            piece.style.background = color;
+            piece.style.borderRadius = '2px';
+        } else if (shape === 2) {
+            piece.style.width = Math.max(4, base * 0.35) + 'px';
+            piece.style.height = (base * 1.7) + 'px';
+            piece.style.background = color;
+            piece.style.borderRadius = '2px';
+        } else {
+            piece.style.width = '0';
+            piece.style.height = '0';
+            piece.style.background = 'transparent';
+            piece.style.borderLeft = (base * 0.6) + 'px solid transparent';
+            piece.style.borderRight = (base * 0.6) + 'px solid transparent';
+            piece.style.borderBottom = base + 'px solid ' + color;
+        }
+        piece.style.left = Math.random() * 100 + '%';
+        piece.style.top = '-20px';
+        var dur;
+        if (tier === 1) dur = 1.6 + Math.random() * 1.0;
+        else if (tier === 2) dur = 2.0 + Math.random() * 1.5;
+        else dur = 2.5 + Math.random() * 2.0;
+        piece.style.animation = (isMassive ? 'confetti-fall-slow' : 'confetti-fall') + ' ' + dur + 's ease-out forwards';
+        piece.style.animationDelay = (Math.random() * (isMassive ? 0.8 : 0.4)) + 's';
+        host.appendChild(piece);
+        setTimeout(function (el) {
+            return function () { if (el.parentNode) el.parentNode.removeChild(el); };
+        }(piece), isMassive ? 6000 : 4500);
+    }
+}
+
+/* =====================================================================
+   Boot
+   ===================================================================== */
+/* Polar Rose Studio insignia: r = 2cos(3/2 theta) */
+function drawInsignia() {
+    var el = document.getElementById('pr-path');
+    if (!el) return;
+    var d = '', steps = 240, maxT = 4 * Math.PI;
+    for (var i = 0; i <= steps; i++) {
+        var t = (i / steps) * maxT;
+        var r = 2 * Math.cos(1.5 * t);
+        var x = (r * Math.cos(t) * 12).toFixed(2);
+        var y = (r * Math.sin(t) * 12).toFixed(2);
+        d += (i === 0 ? 'M' : 'L') + x + ' ' + y + ' ';
+    }
+    el.setAttribute('d', d.trim());
+}
+
+function syncConfettiButton() {
+    var btn = document.getElementById('confetti-toggle');
+    if (!btn) return;
+    btn.setAttribute('aria-pressed', confettiOn ? 'true' : 'false');
+    btn.textContent = 'Confetti: ' + (confettiOn ? 'On' : 'Off');
+}
+
+loadState();
+drawInsignia();
+syncConfettiButton();
+generateProblem();
+updateDisplay();
+</script>
+</body>
+</html>
