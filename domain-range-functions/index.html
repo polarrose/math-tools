@@ -1,0 +1,2376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Domain, Range & Function Values</title>
+<meta name="theme-color" content="#1b2450">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="Practice identifying domain and range, reading function values from a graph, evaluating f(x), and applying the vertical line test.">
+<!-- Locks the page to its own inline code plus the Google Fonts stylesheet:
+     no external scripts, frames, or form posts can be introduced. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+    /* ===== MIDNIGHT SCHOLAR - navy stage, white card, violet + mint accents ===== */
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+        background:
+            radial-gradient(900px 500px at 85% -10%, rgba(124, 58, 237, 0.28), transparent 60%),
+            radial-gradient(800px 500px at -10% 110%, rgba(16, 185, 129, 0.18), transparent 55%),
+            linear-gradient(160deg, #141b3d 0%, #1b2450 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 16px 12px;
+        margin: 0;
+    }
+    .card {
+        background: #ffffff;
+        border-radius: 22px;
+        box-shadow: 0 24px 60px rgba(8, 12, 40, 0.55);
+        max-width: 700px;
+        width: 100%;
+        padding: 30px 24px 26px;
+        position: relative;
+        overflow: hidden;
+    }
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+    }
+    /* The heading box shrinks to its text so the rule below can match it. */
+    h1 {
+        text-align: center;
+        color: #1e2a5e;
+        margin: 4px auto 6px;
+        font-size: 24px;
+        letter-spacing: 0.3px;
+        width: fit-content;
+        max-width: 100%;
+    }
+    /* The gradient rule is exactly as wide as the title text. */
+    h1::after {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 4px;
+        border-radius: 2px;
+        margin: 8px auto 14px;
+        background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+    }
+    .info {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+    .info-item {
+        font-size: 12px;
+        font-weight: 800;
+        background: #eef0fb;
+        color: #2e3d8f;
+        padding: 6px 14px;
+        border-radius: 999px;
+    }
+    .info-item.streak-hot {
+        /* CONTRAST: white on #10b981 was 2.56:1 (needs 4.5:1 at 12px/800).
+           #047857 is 5.55:1, #2e3d8f is 9.63:1 -- both stops now pass. */
+        background: linear-gradient(135deg, #047857, #2e3d8f);
+        color: white;
+    }
+    .mode-panel {
+        background: #f3f5fc;
+        border: 1px solid #e2e7f7;
+        border-radius: 18px;
+        padding: 14px 12px 12px;
+        margin-bottom: 16px;
+    }
+    .mode-panel-label {
+        text-align: center;
+        font-size: 10.5px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        color: #5d6798;
+        margin-bottom: 10px;
+    }
+    .mode-btns {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+    }
+    .mode-btn {
+        background: #e6e9f6;
+        color: #4a5480;
+        border: none;
+        border-radius: 999px;
+        padding: 9px 16px;
+        font-size: 13px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: background 0.15s, box-shadow 0.15s, color 0.15s;
+        -webkit-tap-highlight-color: transparent;
+        font-family: inherit;
+    }
+    .mode-btn:hover { background: #d9def2; }
+    .mode-btn.active {
+        /* Accessible navy-to-teal per design system; both gradient stops pass AA
+           with white text (#1e3a5f 11.6:1, #0b7a70 5.21:1). */
+        background: linear-gradient(135deg, #1e3a5f, #0b7a70) !important;
+        color: white !important;
+        box-shadow: 0 0 0 4px rgba(11, 122, 112, 0.22), 0 6px 14px rgba(30, 58, 95, 0.35);
+    }
+    button {
+        padding: 12px 22px;
+        font-size: 15px;
+        font-weight: 800;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        /* Was `transition: all`, which animates outline-width/-color from zero
+           and can swallow the focus ring entirely. Only the properties that
+           were actually meant to animate are listed now -- no visual change. */
+        transition: background 0.2s, box-shadow 0.2s, filter 0.2s, color 0.2s;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        font-family: inherit;
+    }
+    button:active { transform: scale(0.95); }
+    .submit-btn {
+        background: linear-gradient(135deg, #2e3d8f, #4b3bbd);
+        color: white;
+        box-shadow: 0 6px 16px rgba(46, 61, 143, 0.35);
+        display: block;
+        margin: 14px auto 0;
+    }
+    .submit-btn:hover { filter: brightness(1.1); }
+    .equation {
+        font-size: 24px;
+        font-weight: bold;
+        text-align: center;
+        margin: 18px auto;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+        color: #1e2a5e;
+        background: #eef0fb;
+        border: 2px solid #c7cdf0;
+        border-radius: 14px;
+        padding: 14px 12px;
+        max-width: 100%;
+        overflow-wrap: break-word;
+    }
+    .dr-question {
+        font-size: 15px;
+        color: #3b3568;
+        text-align: center;
+        margin: 12px 4px 16px;
+        font-weight: 700;
+        line-height: 1.4;
+    }
+    .yesno-row {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin: 18px 0 6px;
+        flex-wrap: wrap;
+    }
+    .yesno-btn {
+        flex: 1 1 160px;
+        max-width: 220px;
+        padding: 16px 14px;
+        font-size: 16px;
+        font-weight: 800;
+        border-radius: 14px;
+        color: white;
+        line-height: 1.3;
+    }
+    /* CONTRAST: white on #059669 was 3.77:1 and on #10b981 2.56:1, both below
+       the 4.5:1 needed at 16px/800. #065f46 is 7.67:1, #047857 is 5.55:1. */
+    .yes-btn { background: linear-gradient(135deg, #065f46, #047857); box-shadow: 0 6px 16px rgba(5, 150, 105, 0.35); }
+    .yes-btn:hover { filter: brightness(1.08); }
+    /* CONTRAST: white on #3b82f6 was 3.68:1; #2563eb is 5.12:1. */
+    .no-btn { background: linear-gradient(135deg, #1d4ed8, #2563eb); box-shadow: 0 6px 16px rgba(29, 78, 216, 0.35); }
+    .no-btn:hover { filter: brightness(1.08); }
+    .yesno-sub {
+        display: block;
+        font-size: 10.5px;
+        font-weight: 600;
+        opacity: 0.9;
+        margin-top: 3px;
+    }
+    .graph-wrap {
+        text-align: center;
+        margin: 10px 0 6px;
+    }
+    .graph-svg {
+        display: block;
+        margin: 0 auto;
+        max-width: min(100%, 230px);
+        height: auto;
+    }
+    .answer-row {
+        margin: 14px 0;
+        padding-bottom: 14px;
+        border-bottom: 1px solid #eef0fb;
+    }
+    .answer-row:last-of-type {
+        border-bottom: none;
+    }
+    .field-check-btn {
+        display: block;
+        margin: 10px auto 0;
+        padding: 9px 20px;
+        font-size: 13px;
+    }
+    .field-feedback {
+        text-align: center;
+        font-size: 13px;
+        font-weight: 700;
+        min-height: 18px;
+        margin-top: 6px;
+    }
+    /* CONTRAST: #059669 on white is 3.77:1; at 13px/700 the requirement is
+       4.5:1. #047857 is 5.55:1. (.feedback .correct below is 19px/800, where
+       3:1 applies, so it may stay #059669.) */
+    .field-feedback.correct { color: #047857; }
+    .field-feedback.incorrect { color: #3b3568; font-weight: 600; }
+    .field-label {
+        display: block;
+        font-weight: 800;
+        color: #1e2a5e;
+        font-size: 14px;
+        margin-bottom: 5px;
+        text-align: center;
+    }
+    .interval-input {
+        width: 100%;
+        box-sizing: border-box;
+        font-size: 17px;
+        font-weight: 700;
+        padding: 10px 12px;
+        border: 3px solid #7c3aed;
+        border-radius: 12px;
+        color: #1e2a5e;
+        background: #ffffff;
+        text-align: center;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    }
+    .interval-input:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18);
+    }
+    /* A resolved field is disabled so it cannot be re-submitted, but the UA
+       default fades disabled text to roughly 40% alpha, which put the student's
+       own answer below AA. Pin it back to ink navy on a light chip. */
+    .interval-input:disabled {
+        color: #1e2a5e;
+        -webkit-text-fill-color: #1e2a5e;
+        opacity: 1;
+        background: #f4f6fd;
+        border-color: #b9a9ee;
+    }
+    .toolbar {
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+        margin-top: 8px;
+        flex-wrap: wrap;
+    }
+    .toolbar-btn {
+        background: #e6e9f6;
+        color: #2e3d8f;
+        padding: 6px 13px;
+        font-size: 14px;
+        font-weight: 800;
+        border-radius: 999px;
+    }
+    .toolbar-btn:hover { background: #d9def2; }
+    .allreals-btn {
+        background: #f3eefe;
+        color: #6d28d9;
+    }
+    .allreals-btn:hover { background: #e9defc; }
+    .input-area {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        margin: 18px 0 6px;
+        flex-wrap: wrap;
+    }
+    input[type="text"] {
+        width: 140px;
+        font-size: 22px;
+        font-weight: bold;
+        text-align: center;
+        padding: 10px;
+        border: 3px solid #7c3aed;
+        border-radius: 12px;
+        color: #1e2a5e;
+        background: #ffffff;
+        font-family: inherit;
+    }
+    input[type="text"]:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18);
+    }
+    .key-btn {
+        background: #e6e9f6;
+        color: #2e3d8f;
+        padding: 12px 16px;
+        font-size: 17px;
+        font-weight: 800;
+        border-radius: 12px;
+    }
+    .key-btn:hover { background: #d9def2; }
+    .feedback {
+        text-align: center;
+        font-size: 19px;
+        font-weight: 800;
+        margin: 16px 0 8px;
+        min-height: 28px;
+    }
+    .correct { color: #059669; }
+    .incorrect { color: #1e2a5e; font-size: 15px; font-weight: 700; line-height: 1.5; }
+    .hint-btn, .answer-btn, .skip-btn, .solution-btn {
+        background: #f3eefe;
+        color: #6d28d9;
+        margin: 4px;
+        font-size: 13px;
+        padding: 10px 18px;
+    }
+    .hint-btn:hover, .answer-btn:hover, .skip-btn:hover, .solution-btn:hover { background: #e9defc; }
+    .reset-btn {
+        background: #4a5480;
+        color: white;
+        font-size: 12px;
+        padding: 8px 16px;
+    }
+    .reset-btn:hover { background: #3c4569; }
+    .hint-box, .answer-box {
+        background: #f7f5ff;
+        border: 2px solid #d8ccf7;
+        border-radius: 14px;
+        padding: 15px;
+        margin: 14px 0;
+        color: #3b3568;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+    .progress-cups {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin: 4px 0 6px;
+        flex-wrap: wrap;
+    }
+    .cup-container { text-align: center; width: 72px; }
+    .cup-label {
+        font-size: 9.5px;
+        font-weight: 800;
+        color: #4a5480;
+        margin-bottom: 3px;
+        line-height: 1.2;
+        min-height: 22px;
+    }
+    .cup {
+        width: 34px;
+        height: 34px;
+        border: 2px solid #2e3d8f;
+        border-radius: 0 0 10px 10px;
+        position: relative;
+        overflow: hidden;
+        background: #f4f6fd;
+        margin: 0 auto;
+    }
+    .cup-fill {
+        position: absolute;
+        bottom: 0; left: 0; right: 0;
+        transition: height 0.5s ease;
+    }
+    /* Sample item S3: the middle tier was orange (#d97706 -> #fbbf24), which
+       the system bans outright. The three tiers now run royal navy (low),
+       violet (mid), mint (full) -- separated by hue AND lightness, matching
+       the ramp the rest of the suite settled on. */
+    .cup-fill.full { background: linear-gradient(to top, #059669, #34d399); }
+    .cup-fill.half { background: linear-gradient(to top, #7c3aed, #a78bfa); }
+    .cup-fill.partial { background: linear-gradient(to top, #2e3d8f, #8b96d8); }
+    .cup-stats {
+        font-size: 9px;
+        color: #5d6798;
+        margin-top: 2px;
+    }
+    /* ===== Settings row (design item 9: confetti is always paired with an
+       on/off switch, persisted per device) ===== */
+    .settings-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin: 16px 0 0;
+        padding-top: 14px;
+        border-top: 1px solid #e6e9f6;
+    }
+    .settings-label { font-size: 13px; font-weight: 700; color: #4a5480; }
+    .switch {
+        position: relative;
+        flex: 0 0 44px;
+        width: 44px;
+        height: 24px;
+        padding: 0;
+        border-radius: 999px;
+        background: #d5d9e8;
+        /* The specified track is 1.41:1 against the white card when off and
+           2.54:1 when on, so the control's own boundary fails WCAG 1.4.11.
+           A 1px rim fixes both states without touching the 44x24 geometry or
+           the mint fill: #8a93b8 = 3.02:1 off, #0b7a70 = 5.21:1 on. */
+        border: 1px solid #8a93b8;
+        cursor: pointer;
+        transition: background 0.2s;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+    }
+    .switch-knob {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #ffffff;
+        box-shadow: 0 1px 3px rgba(8, 12, 40, 0.4);
+        transition: transform 0.2s;
+    }
+    .switch[aria-pressed="true"] { background: #10b981; border-color: #0b7a70; }
+    .switch[aria-pressed="true"] .switch-knob { transform: translateX(20px); }
+
+    /* ===== Confetti ===== */
+    .confetti {
+        position: fixed;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 9999;
+    }
+    @keyframes confetti-fall {
+        0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(110vh) rotate(720deg); opacity: 1; }
+    }
+    @keyframes confetti-fall-slow {
+        0% { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 1; }
+        100% { transform: translateY(115vh) rotate(1080deg) scale(0.85); opacity: 1; }
+    }
+    /* An explicit, high-contrast focus ring on every interactive control, so
+       keyboard focus never depends on the UA default surviving a transition. */
+    button:focus-visible,
+    input:focus-visible,
+    [tabindex]:focus-visible {
+        outline: 3px solid #1e2a5e;
+        outline-offset: 2px;
+    }
+    /* Visually hidden, still announced by screen readers */
+    .sr-only {
+        position: absolute;
+        width: 1px; height: 1px;
+        padding: 0; margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .confetti { display: none !important; }
+        * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+    }
+    @media (max-width: 480px) {
+        .card { padding: 24px 14px 20px; }
+        h1 { font-size: 19px; }
+        .mode-btn { padding: 8px 11px; font-size: 11.5px; }
+        input[type="text"] { width: 110px; font-size: 19px; }
+        .interval-input { font-size: 15px; padding: 9px 8px; }
+        .toolbar-btn { padding: 5px 10px; font-size: 13px; }
+        .equation { font-size: 19px; padding: 12px 8px; }
+        .cup-container { width: 62px; }
+    }
+</style>
+</head>
+<body>
+<main class="card" id="game-card">
+    <h1>Domain, Range & Function Values</h1>
+
+    <noscript>
+        <p style="text-align:center; color:#1e2a5e; font-weight:700; background:#f3eefe; border:2px solid #d8ccf7; border-radius:14px; padding:14px;">
+            This practice game needs JavaScript to run. Please enable JavaScript in your browser settings and reload the page.
+        </p>
+    </noscript>
+
+    <div class="info">
+        <div class="info-item">Problem: <span id="problemNum">1</span></div>
+        <div class="info-item" id="streak-display">Streak: <span id="streakVal">0</span></div>
+        <div class="info-item">Best: <span id="bestStreakVal">0</span></div>
+        <div class="info-item">Accuracy: <span id="accVal">--</span></div>
+    </div>
+
+    <div class="mode-panel">
+        <div class="mode-panel-label">Choose a category</div>
+        <div class="mode-btns">
+            <button class="mode-btn active" data-mode="domain-range" aria-pressed="true" onclick="setMode('domain-range')">Domain &amp; Range</button>
+            <button class="mode-btn" data-mode="read-graph" aria-pressed="false" onclick="setMode('read-graph')">Read the Graph</button>
+            <button class="mode-btn" data-mode="evaluate" aria-pressed="false" onclick="setMode('evaluate')">Evaluate f(x)</button>
+            <button class="mode-btn" data-mode="is-function" aria-pressed="false" onclick="setMode('is-function')">Is It a Function?</button>
+        </div>
+        <div id="stats-panel"></div>
+        <div style="text-align: center; margin-top: 2px;">
+            <button class="reset-btn" onclick="confirmReset()">Reset Progress</button>
+        </div>
+    </div>
+
+    <div id="main-content" tabindex="-1"></div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <div id="next-btn-wrap" style="display: none; text-align: center; margin: 4px 0 10px;">
+        <button class="submit-btn" onclick="generateProblem()">Next Problem &rarr;</button>
+    </div>
+
+    <div id="helper-buttons" style="text-align: center; margin: 16px 0 4px;">
+        <button class="hint-btn" onclick="toggleHint()">Show Hint</button>
+        <button class="answer-btn" onclick="toggleAnswer()">Show Answer</button>
+        <button class="solution-btn" id="solution-btn" onclick="toggleSolution()" style="display: none;">Show Solution</button>
+        <button class="skip-btn" onclick="skipProblem()">Skip</button>
+    </div>
+
+    <div id="hint" class="hint-box" style="display: none;"></div>
+    <div id="answer-box" class="answer-box" style="display: none;"></div>
+    <div id="solution-box" class="answer-box" style="display: none;"></div>
+
+    <div class="settings-row">
+        <span class="settings-label" id="confetti-label">Confetti celebrations</span>
+        <button type="button" class="switch" id="confetti-switch" aria-pressed="true"
+                aria-label="Confetti celebrations" onclick="toggleConfettiSetting()"><span class="switch-knob" aria-hidden="true"></span></button>
+    </div>
+
+    <!-- Screen-reader live regions: visually hidden, announce problems and results -->
+    <div id="sr-problem" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+    <div id="sr-feedback" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
+</main>
+
+<script>
+/* =====================================================================
+   Tested core math logic (ported verbatim from standalone Node tests)
+   ===================================================================== */
+function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function evalLinear(m, b, x) { return m * x + b; }
+function evalQuadVertex(a, h, k, x) { return a * (x - h) * (x - h) + k; }
+function evalQuadStd(a, b, c, x) { return a * x * x + b * x + c; }
+
+/* 'closed' = filled dot, endpoint INCLUDED;  'open' = hollow dot, endpoint
+   EXCLUDED;  'arrow' = the graph continues forever that way.
+   'open' was missing here, so mathDomainFromTypes() could only ever build a
+   closed finite endpoint: every generated answer used square brackets on both
+   finite ends and the open-interval half of interval notation was never
+   practised (and never wrong). The weighting keeps closed endpoints the
+   commonest case; the do/while still forbids arrow-on-both-sides, so a
+   restricted domain always has at least one real endpoint to read. */
+function pickEndpointTypes(allowArrow) {
+    var types = allowArrow ? ['closed', 'closed', 'open', 'arrow'] : ['closed', 'closed', 'open'];
+    var left, right;
+    do {
+        left = pick(types);
+        right = pick(types);
+    } while (left === 'arrow' && right === 'arrow');
+    return [left, right];
+}
+
+
+function computeLineRange(m, b, dom) {
+    var fLower = (dom.lower === -Infinity) ? null : evalLinear(m, b, dom.lower);
+    var fUpper = (dom.upper === Infinity) ? null : evalLinear(m, b, dom.upper);
+    var lo, loInc, hi, hiInc;
+    if (m > 0) {
+        if (dom.lower === -Infinity) { lo = -Infinity; loInc = false; } else { lo = fLower; loInc = dom.lowerInclusive; }
+        if (dom.upper === Infinity) { hi = Infinity; hiInc = false; } else { hi = fUpper; hiInc = dom.upperInclusive; }
+    } else {
+        if (dom.upper === Infinity) { lo = -Infinity; loInc = false; } else { lo = fUpper; loInc = dom.upperInclusive; }
+        if (dom.lower === -Infinity) { hi = Infinity; hiInc = false; } else { hi = fLower; hiInc = dom.lowerInclusive; }
+    }
+    return { lower: lo, lowerInclusive: loInc, upper: hi, upperInclusive: hiInc };
+}
+
+function vertexIncluded(h, dom) {
+    var leftOk = (dom.lower === -Infinity) || (dom.lower < h) || (dom.lower === h && dom.lowerInclusive);
+    var rightOk = (dom.upper === Infinity) || (dom.upper > h) || (dom.upper === h && dom.upperInclusive);
+    return leftOk && rightOk;
+}
+
+function computeParabolaRange(a, h, k, dom) {
+    var fLower = (dom.lower === -Infinity) ? null : evalQuadVertex(a, h, k, dom.lower);
+    var fUpper = (dom.upper === Infinity) ? null : evalQuadVertex(a, h, k, dom.upper);
+
+    if (vertexIncluded(h, dom)) {
+        var unboundedEither = (dom.lower === -Infinity) || (dom.upper === Infinity);
+        if (a > 0) {
+            var hi, hiInc;
+            if (unboundedEither) { hi = Infinity; hiInc = false; }
+            else if (fLower > fUpper) { hi = fLower; hiInc = dom.lowerInclusive; }
+            else if (fUpper > fLower) { hi = fUpper; hiInc = dom.upperInclusive; }
+            else { hi = fLower; hiInc = dom.lowerInclusive || dom.upperInclusive; }
+            return { lower: k, lowerInclusive: true, upper: hi, upperInclusive: hiInc };
+        } else {
+            var lo, loInc;
+            if (unboundedEither) { lo = -Infinity; loInc = false; }
+            else if (fLower < fUpper) { lo = fLower; loInc = dom.lowerInclusive; }
+            else if (fUpper < fLower) { lo = fUpper; loInc = dom.upperInclusive; }
+            else { lo = fLower; loInc = dom.lowerInclusive || dom.upperInclusive; }
+            return { lower: lo, lowerInclusive: loInc, upper: k, upperInclusive: true };
+        }
+    } else {
+        var domCenter = (dom.lower === -Infinity) ? dom.upper - 1 : (dom.upper === Infinity ? dom.lower + 1 : (dom.lower + dom.upper) / 2);
+        var rightOfVertex = domCenter > h;
+        var increasing = (a > 0 && rightOfVertex) || (a < 0 && !rightOfVertex);
+        var lo, loInc, hi, hiInc;
+        if (increasing) {
+            if (dom.lower === -Infinity) { lo = -Infinity; loInc = false; } else { lo = fLower; loInc = dom.lowerInclusive; }
+            if (dom.upper === Infinity) { hi = Infinity; hiInc = false; } else { hi = fUpper; hiInc = dom.upperInclusive; }
+        } else {
+            if (dom.upper === Infinity) { lo = -Infinity; loInc = false; } else { lo = fUpper; loInc = dom.upperInclusive; }
+            if (dom.lower === -Infinity) { hi = Infinity; hiInc = false; } else { hi = fLower; hiInc = dom.lowerInclusive; }
+        }
+        return { lower: lo, lowerInclusive: loInc, upper: hi, upperInclusive: hiInc };
+    }
+}
+
+/* =====================================================================
+   Notation: parsing student input & canonical display strings
+   ===================================================================== */
+function fmtNum(n) {
+    if (Math.abs(n - Math.round(n)) < 1e-9) return String(Math.round(n));
+    return String(Math.round(n * 100) / 100);
+}
+
+function toInequalityStr(bounds, varName) {
+    var lo = bounds.lower, hi = bounds.upper;
+    if (lo === -Infinity && hi === Infinity) return 'All real numbers';
+    if (lo === -Infinity) return varName + ' ' + (bounds.upperInclusive ? '\u2264' : '<') + ' ' + fmtNum(hi);
+    if (hi === Infinity) return varName + ' ' + (bounds.lowerInclusive ? '\u2265' : '>') + ' ' + fmtNum(lo);
+    return fmtNum(lo) + ' ' + (bounds.lowerInclusive ? '\u2264' : '<') + ' ' + varName + ' ' +
+        (bounds.upperInclusive ? '\u2264' : '<') + ' ' + fmtNum(hi);
+}
+
+function toIntervalStr(bounds) {
+    var lo = bounds.lower, hi = bounds.upper;
+    var lb = (lo === -Infinity) ? '(' : (bounds.lowerInclusive ? '[' : '(');
+    var rb = (hi === Infinity) ? ')' : (bounds.upperInclusive ? ']' : ')');
+    var loStr = (lo === -Infinity) ? '-\u221e' : fmtNum(lo);
+    var hiStr = (hi === Infinity) ? '\u221e' : fmtNum(hi);
+    return lb + loStr + ', ' + hiStr + rb;
+}
+
+function normalizeAnswerText(s) {
+    s = String(s).trim().toLowerCase();
+    /* The game prints U+2212 MINUS in its function labels, so a student who
+       copies one back was told their answer was malformed. En/em dashes come
+       from phone keyboards and word processors. All fold to ASCII '-'. */
+    s = s.replace(/[\u2212\u2013\u2014\u2012\u2010\u2011]/g, '-');
+    s = s.replace(/<=/g, '\u2264').replace(/>=/g, '\u2265').replace(/=</g, '\u2264').replace(/=>/g, '\u2265');
+    s = s.replace(/infinity/g, '\u221e').replace(/\binf\b/g, '\u221e');
+    s = s.replace(/\s+/g, ' ').trim();
+    return s;
+}
+
+/* A number a student may reasonably type: optional sign, and a decimal point
+   with digits on either or both sides ("2", "-3.5", "+2", ".5", "-.5"). The old
+   pattern (-?\d+\.?\d*) rejected a leading '+' and a leading '.', and, worse,
+   let a bare 'x' through nothing -- see NUM_RE use below. */
+var NUM_RE = '[-+]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)';
+function parseNumTok(tok) {
+    if (tok === '-\u221e') return -Infinity;
+    if (tok === '\u221e' || tok === '+\u221e') return Infinity;
+    return parseFloat(tok);
+}
+
+function parseAnswer(raw) {
+    var s = normalizeAnswerText(raw);
+    if (/^all real numbers$|^all reals$|^all real$|^\(-?\u221e,\s*\u221e\)$/.test(s)) {
+        return { lower: -Infinity, lowerInclusive: false, upper: Infinity, upperInclusive: false };
+    }
+    var m = s.match(new RegExp('^([\\[\\(])\\s*([-+]?\u221e|' + NUM_RE + ')\\s*,\\s*([-+]?\u221e|' + NUM_RE + ')\\s*([\\]\\)])$'));
+    if (m) {
+        var lb = m[1], loTok = m[2], hiTok = m[3], rb = m[4];
+        /* An unsigned or positive infinity on the LOWER side used to be folded
+           to -infinity, so the nonsense "[inf, 5]" was regraded as "(-inf, 5]"
+           and scored CORRECT. Infinity is only ever legal as -inf on the left
+           and +inf on the right. */
+        if (loTok === '\u221e' || loTok === '+\u221e') return null;
+        if (hiTok === '-\u221e') return null;
+        var lower = parseNumTok(loTok);
+        var upper = parseNumTok(hiTok);
+        if (isNaN(lower) || isNaN(upper)) return null;
+        var lowerInclusive = (lower === -Infinity) ? false : (lb === '[');
+        var upperInclusive = (upper === Infinity) ? false : (rb === ']');
+        if (lower > upper) return null;
+        return { lower: lower, lowerInclusive: lowerInclusive, upper: upper, upperInclusive: upperInclusive };
+    }
+    m = s.match(new RegExp('^(-\u221e|' + NUM_RE + ')\\s*(\u2264|<)\\s*[a-z]\\s*(\u2264|<)\\s*([+]?\u221e|' + NUM_RE + ')$'));
+    if (m) {
+        var loTok = m[1], loSym = m[2], hiSym = m[3], hiTok = m[4];
+        var lower = parseNumTok(loTok);
+        var upper = parseNumTok(hiTok);
+        if (isNaN(lower) || isNaN(upper) || lower > upper) return null;
+        var lowerInclusive = (lower === -Infinity) ? false : (loSym === '\u2264');
+        var upperInclusive = (upper === Infinity) ? false : (hiSym === '\u2264');
+        return { lower: lower, lowerInclusive: lowerInclusive, upper: upper, upperInclusive: upperInclusive };
+    }
+    m = s.match(new RegExp('^([+]?\u221e|' + NUM_RE + ')\\s*(\u2265|>)\\s*[a-z]\\s*(\u2265|>)\\s*(-\u221e|' + NUM_RE + ')$'));
+    if (m) {
+        var hiTok = m[1], hiSym = m[2], loSym = m[3], loTok = m[4];
+        var lower = parseNumTok(loTok);
+        var upper = parseNumTok(hiTok);
+        if (isNaN(lower) || isNaN(upper) || lower > upper) return null;
+        var lowerInclusive = (lower === -Infinity) ? false : (loSym === '\u2265');
+        var upperInclusive = (upper === Infinity) ? false : (hiSym === '\u2265');
+        return { lower: lower, lowerInclusive: lowerInclusive, upper: upper, upperInclusive: upperInclusive };
+    }
+    m = s.match(new RegExp('^[a-z]\\s*(\u2264|\u2265|<|>)\\s*(' + NUM_RE + ')$'));
+    if (m) {
+        var sym = m[1], val = parseFloat(m[2]);
+        if (sym === '\u2265') return { lower: val, lowerInclusive: true, upper: Infinity, upperInclusive: false };
+        if (sym === '>') return { lower: val, lowerInclusive: false, upper: Infinity, upperInclusive: false };
+        if (sym === '\u2264') return { lower: -Infinity, lowerInclusive: false, upper: val, upperInclusive: true };
+        if (sym === '<') return { lower: -Infinity, lowerInclusive: false, upper: val, upperInclusive: false };
+    }
+    m = s.match(new RegExp('^(' + NUM_RE + ')\\s*(\u2264|\u2265|<|>)\\s*[a-z]$'));
+    if (m) {
+        var val = parseFloat(m[1]), sym = m[2];
+        if (sym === '\u2264') return { lower: val, lowerInclusive: true, upper: Infinity, upperInclusive: false };
+        if (sym === '<') return { lower: val, lowerInclusive: false, upper: Infinity, upperInclusive: false };
+        if (sym === '\u2265') return { lower: -Infinity, lowerInclusive: false, upper: val, upperInclusive: true };
+        if (sym === '>') return { lower: -Infinity, lowerInclusive: false, upper: val, upperInclusive: false };
+    }
+    return null;
+}
+
+/* parseFloat() stops at the first character it does not understand, so the
+   old grader accepted "3abc", "3 4" and "3/4" as the number 3 and marked them
+   correct. A student answer has to be a complete number or it is a format
+   problem, not a wrong answer. */
+function parseStrictNumber(str) {
+    var t = String(str).trim().replace(/[\u2212\u2013\u2014\u2012\u2010\u2011]/g, '-');
+    if (!/^[-+]?(\d+(\.\d*)?|\.\d+)$/.test(t)) return NaN;
+    return parseFloat(t);
+}
+
+function boundsEqual(a, b, eps) {
+    eps = eps || 1e-6;
+    function boundEq(x, y) {
+        if (x === Infinity && y === Infinity) return true;
+        if (x === -Infinity && y === -Infinity) return true;
+        if (!isFinite(x) || !isFinite(y)) return false;
+        return Math.abs(x - y) < eps;
+    }
+    if (!boundEq(a.lower, b.lower)) return false;
+    if (!boundEq(a.upper, b.upper)) return false;
+    if (isFinite(a.lower) && a.lowerInclusive !== b.lowerInclusive) return false;
+    if (isFinite(a.upper) && a.upperInclusive !== b.upperInclusive) return false;
+    return true;
+}
+
+/* =====================================================================
+   Graph geometry: FIXED viewing box used for every graph, regardless of
+   the function. This guarantees visual consistency (same grid, same
+   canvas size every time) instead of auto-fitting a window to each
+   function's own range (which produced inconsistent, sometimes
+   narrow/tall results).
+   ===================================================================== */
+var VIEW_MIN = -8, VIEW_MAX = 8, SAFE_MARGIN = 1, MIN_VISIBLE_SPAN = 2.5;
+
+function tickStep(span) {
+    if (span <= 14) return 1;
+    if (span <= 28) return 2;
+    if (span <= 60) return 5;
+    return 10;
+}
+
+function buildViewport(viewXMin, viewXMax, viewYMin, viewYMax, opts) {
+    opts = opts || {};
+    var pxPerUnit = opts.pxPerUnit || 12;
+    var marginLeft = opts.marginLeft || 22, marginRight = opts.marginRight || 12;
+    var marginTop = opts.marginTop || 12, marginBottom = opts.marginBottom || 22;
+    var xSpan = viewXMax - viewXMin;
+    var ySpan = viewYMax - viewYMin;
+    var plotW = xSpan * pxPerUnit;
+    var plotH = ySpan * pxPerUnit;
+    var W = plotW + marginLeft + marginRight;
+    var H = plotH + marginTop + marginBottom;
+    function xToPx(x) { return marginLeft + (x - viewXMin) * pxPerUnit; }
+    function yToPx(y) { return marginTop + (viewYMax - y) * pxPerUnit; }
+    return { W: W, H: H, pxPerUnit: pxPerUnit, marginLeft: marginLeft, marginRight: marginRight,
+             marginTop: marginTop, marginBottom: marginBottom, xToPx: xToPx, yToPx: yToPx,
+             viewXMin: viewXMin, viewXMax: viewXMax, viewYMin: viewYMin, viewYMax: viewYMax };
+}
+
+function inBox(pt) {
+    return pt.x >= VIEW_MIN - 1e-9 && pt.x <= VIEW_MAX + 1e-9 && pt.y >= VIEW_MIN - 1e-9 && pt.y <= VIEW_MAX + 1e-9;
+}
+
+// Find the contiguous visible run of a curve within the fixed box, given
+// optional finite endpoints (null = unbounded that side). Determines whether
+// each end is a true domain endpoint (dot) or a box-clipped exit (arrow).
+function computeVisibleSegment(fn, leftBoundX, rightBoundX) {
+    var sampleXMin = (leftBoundX !== null) ? leftBoundX : VIEW_MIN - 3;
+    var sampleXMax = (rightBoundX !== null) ? rightBoundX : VIEW_MAX + 3;
+    if (sampleXMax <= sampleXMin) return null;
+    var N = 400;
+    var pts = [];
+    for (var i = 0; i <= N; i++) {
+        var x = sampleXMin + (sampleXMax - sampleXMin) * i / N;
+        pts.push({ x: x, y: fn(x) });
+    }
+    var centerX = Math.max(sampleXMin, Math.min(sampleXMax, 0));
+    var centerIdx = Math.round((centerX - sampleXMin) / (sampleXMax - sampleXMin) * N);
+    var seedIdx = -1;
+    for (var d = 0; d <= N && seedIdx < 0; d++) {
+        if (centerIdx - d >= 0 && inBox(pts[centerIdx - d])) seedIdx = centerIdx - d;
+        else if (centerIdx + d <= N && inBox(pts[centerIdx + d])) seedIdx = centerIdx + d;
+    }
+    if (seedIdx < 0) return null;
+
+    var lo = seedIdx, hi = seedIdx;
+    while (lo > 0 && inBox(pts[lo - 1])) lo--;
+    while (hi < N && inBox(pts[hi + 1])) hi++;
+    var runPts = pts.slice(lo, hi + 1);
+
+    var leftExitType = (leftBoundX !== null && Math.abs(runPts[0].x - leftBoundX) < 1e-6) ? 'point' : 'box';
+    var rightExitType = (rightBoundX !== null && Math.abs(runPts[runPts.length - 1].x - rightBoundX) < 1e-6) ? 'point' : 'box';
+    return { points: runPts, leftExitType: leftExitType, rightExitType: rightExitType };
+}
+
+// Rejection-sample finite endpoint(s) that land safely inside the box.
+function pickRestrictedEndpoints(fn, leftIsFinite, rightIsFinite) {
+    var lo = VIEW_MIN + SAFE_MARGIN, hi = VIEW_MAX - SAFE_MARGIN;
+    for (var attempt = 0; attempt < 80; attempt++) {
+        var L = randInt(lo, hi - 2);
+        var R = L + randInt(2, hi - L);
+        if (R > hi) continue;
+        var okL = !leftIsFinite || (fn(L) >= lo && fn(L) <= hi);
+        var okR = !rightIsFinite || (fn(R) >= lo && fn(R) <= hi);
+        if (okL && okR) return { L: L, R: R };
+    }
+    return null;
+}
+
+// Build a mathDomain {lower,lowerInclusive,upper,upperInclusive} from endpoint types.
+function mathDomainFromTypes(leftType, rightType, L, R) {
+    var dom = {};
+    if (leftType === 'arrow') { dom.lower = -Infinity; dom.lowerInclusive = false; }
+    else { dom.lower = L; dom.lowerInclusive = (leftType === 'closed'); }
+    if (rightType === 'arrow') { dom.upper = Infinity; dom.upperInclusive = false; }
+    else { dom.upper = R; dom.upperInclusive = (rightType === 'closed'); }
+    return dom;
+}
+
+// Generate a complete "shape" (linear or quadratic, full or restricted domain)
+// that is guaranteed to render nicely within the fixed box -- rejection-sampled
+// so the visible portion is never a tiny sliver and finite endpoints always
+// land safely inside the frame.
+function generateShape(isLine, isFull) {
+    for (var outer = 0; outer < 25; outer++) {
+        var fn, type, params;
+        if (isLine) {
+            var m = pick([-3, -2, -1, 1, 2, 3]);
+            var b = randInt(-4, 4);
+            fn = (function (m, b) { return function (x) { return evalLinear(m, b, x); }; })(m, b);
+            type = 'linear'; params = { m: m, b: b };
+        } else {
+            var a = pick([-2, -1, 1, 2]);
+            var h = randInt(-3, 3);
+            var k = randInt(-3, 3);
+            fn = (function (a, h, k) { return function (x) { return evalQuadVertex(a, h, k, x); }; })(a, h, k);
+            type = 'quadratic'; params = { a: a, h: h, k: k };
+        }
+
+        var leftType, rightType, L = null, R = null;
+        if (isFull) {
+            leftType = 'arrow'; rightType = 'arrow';
+        } else {
+            var types = pickEndpointTypes(true);
+            leftType = types[0]; rightType = types[1];
+            var needL = leftType !== 'arrow', needR = rightType !== 'arrow';
+            var pts = pickRestrictedEndpoints(fn, needL, needR);
+            if (!pts) continue;
+            L = needL ? pts.L : null;
+            R = needR ? pts.R : null;
+        }
+
+        var mathDomain = mathDomainFromTypes(leftType, rightType, L, R);
+        var leftBoundX = (leftType === 'arrow') ? null : L;
+        var rightBoundX = (rightType === 'arrow') ? null : R;
+
+        var seg = computeVisibleSegment(fn, leftBoundX, rightBoundX);
+        if (!seg) continue;
+        var span = seg.points[seg.points.length - 1].x - seg.points[0].x;
+        if (span < MIN_VISIBLE_SPAN) continue;
+
+        return { type: type, params: params, fn: fn, dom: mathDomain,
+                 leftType: leftType, rightType: rightType, seg: seg };
+    }
+    return null;
+}
+
+/* =====================================================================
+   "Is it a function?" shapes -- reuses the function generator above for
+   line/parabola, adds circle/ellipse/sideways-parabola/wavy as
+   non-function examples (all fully contained within the fixed box).
+   ===================================================================== */
+function generateFunctionShape(isLine) {
+    var shape = generateShape(isLine, true); // full/unrestricted
+    if (!shape) return null;
+    return { subtype: isLine ? 'line' : 'parabola', isFunction: true, points: shape.seg.points, closed: false };
+}
+
+function generateCircleShape() {
+    for (var attempt = 0; attempt < 30; attempt++) {
+        var r = randInt(2, 4);
+        var lo = VIEW_MIN + SAFE_MARGIN + r, hi = VIEW_MAX - SAFE_MARGIN - r;
+        if (lo > hi) continue;
+        var h = randInt(lo, hi), k = randInt(lo, hi);
+        var pts = [];
+        var N = 72;
+        for (var i = 0; i <= N; i++) {
+            var t = 2 * Math.PI * i / N;
+            pts.push({ x: h + r * Math.cos(t), y: k + r * Math.sin(t) });
+        }
+        return { subtype: 'circle', isFunction: false, points: pts, closed: true };
+    }
+    return null;
+}
+
+function generateEllipseShape() {
+    for (var attempt = 0; attempt < 30; attempt++) {
+        var rx = randInt(2, 4), ry = randInt(2, 4);
+        if (Math.abs(rx - ry) < 1) continue; // stay visually distinct from a circle
+        var maxR = Math.max(rx, ry);
+        var lo = VIEW_MIN + SAFE_MARGIN + maxR, hi = VIEW_MAX - SAFE_MARGIN - maxR;
+        if (lo > hi) continue;
+        var h = randInt(lo, hi), k = randInt(lo, hi);
+        var pts = [];
+        var N = 72;
+        for (var i = 0; i <= N; i++) {
+            var t = 2 * Math.PI * i / N;
+            pts.push({ x: h + rx * Math.cos(t), y: k + ry * Math.sin(t) });
+        }
+        return { subtype: 'ellipse', isFunction: false, points: pts, closed: true };
+    }
+    return null;
+}
+
+function generateSidewaysParabolaShape() {
+    for (var attempt = 0; attempt < 40; attempt++) {
+        var A = pick([-2, -1, 1, 2]);
+        var maxOff = (Math.abs(A) >= 2) ? randInt(3, 4) : randInt(4, 6);
+        var Yv = randInt(-3, 3);
+        var Xv = randInt(-3, 3);
+        var yLo = Yv - maxOff, yHi = Yv + maxOff;
+        var N = 100;
+        var allPts = [];
+        for (var i = 0; i <= N; i++) {
+            var y = yLo + (yHi - yLo) * i / N;
+            var x = A * (y - Yv) * (y - Yv) + Xv;
+            allPts.push({ x: x, y: y, inBox: (x >= VIEW_MIN + SAFE_MARGIN && x <= VIEW_MAX - SAFE_MARGIN && y >= VIEW_MIN + SAFE_MARGIN && y <= VIEW_MAX - SAFE_MARGIN) });
+        }
+        var centerIdx = Math.round(N / 2);
+        if (!allPts[centerIdx].inBox) continue;
+        var lo = centerIdx, hi = centerIdx;
+        while (lo > 0 && allPts[lo - 1].inBox) lo--;
+        while (hi < N && allPts[hi + 1].inBox) hi++;
+        var runPts = allPts.slice(lo, hi + 1).map(function (p) { return { x: p.x, y: p.y }; });
+        var span = runPts[runPts.length - 1].y - runPts[0].y;
+        if (span < 3) continue;
+        return { subtype: 'sideways-parabola', isFunction: false, points: runPts, closed: false };
+    }
+    return null;
+}
+
+function generateWavyShape() {
+    var amp = randInt(2, 3);
+    var lo = VIEW_MIN + SAFE_MARGIN + amp, hi = VIEW_MAX - SAFE_MARGIN - amp;
+    var Xc = randInt(lo, hi);
+    var yLo = VIEW_MIN + SAFE_MARGIN, yHi = VIEW_MAX - SAFE_MARGIN;
+    var cycles = pick([1.5, 2, 2.5]);
+    var freq = (2 * Math.PI * cycles) / (yHi - yLo);
+    var pts = [];
+    var N = 100;
+    for (var i = 0; i <= N; i++) {
+        var y = yLo + (yHi - yLo) * i / N;
+        var x = Xc + amp * Math.sin(freq * (y - yLo));
+        pts.push({ x: x, y: y });
+    }
+    return { subtype: 'wavy', isFunction: false, points: pts, closed: false };
+}
+
+function generateIsFunctionShape(subtype) {
+    if (subtype === 'line') return generateFunctionShape(true);
+    if (subtype === 'parabola') return generateFunctionShape(false);
+    if (subtype === 'circle') return generateCircleShape();
+    if (subtype === 'ellipse') return generateEllipseShape();
+    if (subtype === 'sideways-parabola') return generateSidewaysParabolaShape();
+    return generateWavyShape();
+}
+
+/* =====================================================================
+   Read-the-graph helpers
+   ===================================================================== */
+function getValidIntegerXsBox(fn, mathDomain) {
+    var lo = Math.ceil(Math.max(VIEW_MIN, mathDomain.lower === -Infinity ? VIEW_MIN : mathDomain.lower));
+    var hi = Math.floor(Math.min(VIEW_MAX, mathDomain.upper === Infinity ? VIEW_MAX : mathDomain.upper));
+    var candidates = [];
+    for (var x = lo; x <= hi; x++) {
+        if (mathDomain.lower !== -Infinity && x === mathDomain.lower && !mathDomain.lowerInclusive) continue;
+        if (mathDomain.upper !== Infinity && x === mathDomain.upper && !mathDomain.upperInclusive) continue;
+        var y = fn(x);
+        if (y < VIEW_MIN || y > VIEW_MAX) continue;
+        candidates.push(x);
+    }
+    return candidates;
+}
+
+function findAllSolutionsForY(fn, y, candidates, eps) {
+    eps = eps || 1e-9;
+    return candidates.filter(function (x) { return Math.abs(fn(x) - y) < eps; }).sort(function (a, b) { return a - b; });
+}
+
+/* =====================================================================
+   Function label formatting
+   ===================================================================== */
+function fmtCoeffTerm(coef, varPart, isFirst) {
+    if (coef === 0) return '';
+    var sign = coef < 0 ? '\u2212' : '+';
+    var absCoef = Math.abs(coef);
+    var coefStr = (absCoef === 1 && varPart !== '') ? '' : String(absCoef);
+    var term = coefStr + varPart;
+    if (isFirst) return (coef < 0 ? '\u2212' : '') + term;
+    return ' ' + sign + ' ' + term;
+}
+
+function signStr(v) { return (v >= 0 ? '+ ' + v : '\u2212 ' + Math.abs(v)); }
+
+function formatLinearExpr(m, b) {
+    var s = fmtCoeffTerm(m, 'x', true);
+    if (b !== 0) s += fmtCoeffTerm(b, '', false);
+    return s;
+}
+
+function formatQuadExpr(a, b, c) {
+    var s = fmtCoeffTerm(a, 'x\u00b2', true);
+    if (b !== 0) s += fmtCoeffTerm(b, 'x', false);
+    if (c !== 0) s += fmtCoeffTerm(c, '', false);
+    return s;
+}
+
+function formatLinearFn(m, b) { return 'f(x) = ' + formatLinearExpr(m, b); }
+function formatQuadFn(a, b, c) { return 'f(x) = ' + formatQuadExpr(a, b, c); }
+
+function factorStr(root) { return root >= 0 ? '(x \u2212 ' + root + ')' : '(x + ' + Math.abs(root) + ')'; }
+
+/* The design system's pedagogy rules say a coefficient of 1 is never printed
+   (1x -> x, -1x -> -x). The step builders below printed "1(3)\u00b2", "-1x = 5"
+   and "1(x \u2212 3)(x + 1) = 0", which also contradicted the function label
+   shown directly above them ("f(x) = x\u00b2 ..."). */
+function coefPrefix(c) {
+    if (c === 1) return '';
+    if (c === -1) return '\u2212';
+    return (c < 0 ? '\u2212' + Math.abs(c) : String(c));
+}
+function coefTimes(c, rest) { return coefPrefix(c) + rest; }
+
+function buildEvalLinearSteps(m, b, k, answer) {
+    var kP = '(' + k + ')'; // always parenthesized -- bare concatenation like "1" + "3" = "13" is ambiguous/wrong
+    var mk = m * k;
+    var bPart = (b !== 0) ? ' ' + signStr(b) : '';
+    return [
+        'Substitute x = ' + k + ':  f(' + k + ') = ' + coefTimes(m, kP) + bPart,
+        'Multiply:  ' + mk + bPart,
+        'Add:  ' + answer
+    ];
+}
+
+function buildEvalQuadSteps(a, b, c, k, answer) {
+    var kP = '(' + k + ')';
+    var kSq = k * k;
+    var t1 = a * kSq, t2 = b * k;
+    var bPartSub = (b !== 0) ? ' ' + signStr(b) + kP : '';
+    var cPart = (c !== 0) ? ' ' + signStr(c) : '';
+    var bPartMult = (b !== 0) ? ' ' + signStr(t2) : '';
+    return [
+        'Substitute x = ' + k + ':  f(' + k + ') = ' + coefTimes(a, kP + '\u00b2') + bPartSub + cPart,
+        'Square first (watch the sign!):  ' + kP + '\u00b2 = ' + kSq,
+        'Multiply each term:  ' + t1 + bPartMult + cPart,
+        'Add:  ' + answer
+    ];
+}
+
+function buildSolveLinearSteps(m, b, V, answer) {
+    var steps = ['Set f(x) equal to ' + V + ':  ' + formatLinearExpr(m, b) + ' = ' + V];
+    if (b !== 0) {
+        var moveLabel = (b > 0) ? ('Subtract ' + b + ' from both sides') : ('Add ' + Math.abs(b) + ' to both sides');
+        steps.push(moveLabel + ':  ' + coefTimes(m, 'x') + ' = ' + (V - b));
+    }
+    if (m === 1) {
+        steps.push('x is already by itself:  x = ' + answer);
+    } else if (m === -1) {
+        steps.push('Multiply both sides by \u22121:  x = ' + answer);
+    } else {
+        steps.push('Divide both sides by ' + m + ':  x = ' + answer);
+    }
+    return steps;
+}
+
+function buildSolveQuadSteps(a, b, c, V, x0, x1) {
+    return [
+        'Set f(x) equal to ' + V + ' and move everything to one side:  ' + formatQuadExpr(a, b, c - V) + ' = 0',
+        'Factor the quadratic:  ' + coefTimes(a, factorStr(x0) + factorStr(x1)) + ' = 0',
+        'Set each factor equal to zero and solve:  x = ' + x0 + ' or x = ' + x1
+    ];
+}
+
+/* =====================================================================
+   Game state
+   ===================================================================== */
+var SAVE_KEY = 'domainRangeFnValuesGame_v1';
+var currentMode = 'domain-range';
+var currentProblem = null;
+var chancesLeft = 2;
+var streak = 0, bestStreak = 0, problemCount = 0;
+var domainChancesLeft = 2, rangeChancesLeft = 2, domainResolved = false, rangeResolved = false;
+var graphIdCounter = 0;
+
+var stats = {
+    'domain-range': {
+        'line-full': { attempts: 0, correct: 0 },
+        'line-restricted': { attempts: 0, correct: 0 },
+        'parabola-full': { attempts: 0, correct: 0 },
+        'parabola-restricted': { attempts: 0, correct: 0 }
+    },
+    'read-graph': {
+        'eval-linear': { attempts: 0, correct: 0 },
+        'eval-quadratic': { attempts: 0, correct: 0 },
+        'solve-linear': { attempts: 0, correct: 0 },
+        'solve-quadratic': { attempts: 0, correct: 0 }
+    },
+    'evaluate': {
+        'linear-pos': { attempts: 0, correct: 0 },
+        'linear-neg': { attempts: 0, correct: 0 },
+        'quad-pos': { attempts: 0, correct: 0 },
+        'quad-neg': { attempts: 0, correct: 0 },
+        'solve-linear': { attempts: 0, correct: 0 },
+        'solve-quadratic': { attempts: 0, correct: 0 }
+    },
+    'is-function': {
+        'line': { attempts: 0, correct: 0 },
+        'parabola': { attempts: 0, correct: 0 },
+        'circle': { attempts: 0, correct: 0 },
+        'ellipse': { attempts: 0, correct: 0 },
+        'sideways-parabola': { attempts: 0, correct: 0 },
+        'wavy': { attempts: 0, correct: 0 }
+    }
+};
+
+var subtypeLabels = {
+    'domain-range': { 'line-full': 'Full Line', 'line-restricted': 'Line Segment', 'parabola-full': 'Full Parabola', 'parabola-restricted': 'Parabola Piece' },
+    'read-graph': { 'eval-linear': 'Find f(a) \u00b7 Line', 'eval-quadratic': 'Find f(a) \u00b7 Parabola', 'solve-linear': 'Solve f(x)=b \u00b7 Line', 'solve-quadratic': 'Solve f(x)=b \u00b7 Parabola' },
+    'evaluate': { 'linear-pos': 'Linear (+)', 'linear-neg': 'Linear (\u2212)', 'quad-pos': 'Quadratic (+)', 'quad-neg': 'Quadratic (\u2212)', 'solve-linear': 'Solve \u00b7 Linear', 'solve-quadratic': 'Solve \u00b7 Quadratic' },
+    'is-function': { 'line': 'Line', 'parabola': 'Parabola', 'circle': 'Circle', 'ellipse': 'Ellipse', 'sideways-parabola': 'Sideways Parabola', 'wavy': 'Wavy Curve' }
+};
+
+var modeLabels = { 'domain-range': 'Domain & Range', 'read-graph': 'Read the Graph', 'evaluate': 'Evaluate f(x)', 'is-function': 'Is It a Function?' };
+var modeOrder = ['domain-range', 'read-graph', 'evaluate', 'is-function'];
+
+function pickAdaptiveSubtype(mode, subtypes) {
+    var weights = subtypes.map(function (t) {
+        var s = stats[mode][t];
+        if (s.attempts < 3) return 1.0;
+        var acc = s.correct / s.attempts;
+        return Math.max(0.2, 1 - acc);
+    });
+    var total = weights.reduce(function (a, b) { return a + b; }, 0);
+    var r = Math.random() * total;
+    for (var i = 0; i < subtypes.length; i++) { r -= weights[i]; if (r <= 0) return subtypes[i]; }
+    return subtypes[0];
+}
+
+function recordStat(mode, subtype, success) {
+    stats[mode][subtype].attempts++;
+    if (success) stats[mode][subtype].correct++;
+}
+
+/* =====================================================================
+   Problem generation
+   ===================================================================== */
+/* These fallbacks used to recurse with no depth limit: a generator that could
+   not satisfy its constraints would recurse until the stack blew rather than
+   degrade. The retry budget is generous (the observed failure rate over
+   200,000 generated shapes is zero) and the last resort is a shape that cannot
+   fail: a full, unrestricted domain. */
+function generateDomainRangeProblem(depth) {
+    depth = depth || 0;
+    var subtypes = ['line-full', 'line-restricted', 'parabola-full', 'parabola-restricted'];
+    var subtype = pickAdaptiveSubtype('domain-range', subtypes);
+    var isLine = subtype.indexOf('line') === 0;
+    var isFull = subtype.indexOf('full') !== -1;
+
+    var shape = generateShape(isLine, isFull);
+    if (!shape && depth < 12) { generateDomainRangeProblem(depth + 1); return; }
+    if (!shape) shape = generateShape(isLine, true);            // full domain: always solvable
+    if (!shape) shape = generateShape(true, true);              // a plain line: cannot fail
+    if (!shape) return;
+
+    var problem = { mode: 'domain-range', subtype: subtype, type: shape.type, fn: shape.fn,
+                     dom: shape.dom, leftType: shape.leftType, rightType: shape.rightType, seg: shape.seg };
+    Object.keys(shape.params).forEach(function (k) { problem[k] = shape.params[k]; });
+    problem.range = (shape.type === 'linear')
+        ? computeLineRange(shape.params.m, shape.params.b, shape.dom)
+        : computeParabolaRange(shape.params.a, shape.params.h, shape.params.k, shape.dom);
+
+    currentProblem = problem;
+    renderMainContent();
+}
+
+function pickReadGraphSubtype() {
+    var evalSubtypes = ['eval-linear', 'eval-quadratic'];
+    var solveSubtypes = ['solve-linear', 'solve-quadratic'];
+    var totalEvalAttempts = evalSubtypes.reduce(function (sum, t) { return sum + stats['read-graph'][t].attempts; }, 0);
+    var introduceSolve = totalEvalAttempts >= 5;
+    var candidates = introduceSolve ? evalSubtypes.concat(solveSubtypes) : evalSubtypes;
+    var weights = candidates.map(function (t) {
+        var s = stats['read-graph'][t];
+        if (s.attempts < 3) return (solveSubtypes.indexOf(t) !== -1) ? 0.4 : 1.0;
+        var acc = s.correct / s.attempts;
+        return Math.max(0.2, 1 - acc);
+    });
+    var total = weights.reduce(function (a, b) { return a + b; }, 0);
+    var r = Math.random() * total;
+    for (var i = 0; i < candidates.length; i++) { r -= weights[i]; if (r <= 0) return candidates[i]; }
+    return candidates[0];
+}
+
+function generateReadGraphProblem(depth) {
+    depth = depth || 0;
+    var subtype = pickReadGraphSubtype();
+    var isLine = subtype.indexOf('linear') !== -1;
+    var isEval = subtype.indexOf('eval') === 0;
+
+    var problem = null;
+    for (var attempt = 0; attempt < 20 && !problem; attempt++) {
+        var isFull = Math.random() < (isLine ? 0.5 : 0.4);
+        var shape = generateShape(isLine, isFull);
+        if (!shape) continue;
+        var cands = getValidIntegerXsBox(shape.fn, shape.dom);
+        if (cands.length === 0) continue;
+
+        var built = { mode: 'read-graph', subtype: subtype, isEval: isEval, type: shape.type,
+                      fn: shape.fn, dom: shape.dom, leftType: shape.leftType, rightType: shape.rightType, seg: shape.seg };
+        Object.keys(shape.params).forEach(function (k) { built[k] = shape.params[k]; });
+
+        var x1 = pick(cands);
+        var y = shape.fn(x1);
+        if (isEval) {
+            built.askX = x1; built.answer = [Math.round(y * 1e6) / 1e6];
+        } else {
+            var solutions = findAllSolutionsForY(shape.fn, y, cands);
+            built.askY = Math.round(y * 1e6) / 1e6; built.answer = solutions;
+        }
+        problem = built;
+    }
+    if (!problem && depth < 12) { generateReadGraphProblem(depth + 1); return; }
+    if (!problem) return;
+    currentProblem = problem;
+    renderMainContent();
+}
+
+function pickEvaluateSubtype() {
+    var evalSubtypes = ['linear-pos', 'linear-neg', 'quad-pos', 'quad-neg'];
+    var solveSubtypes = ['solve-linear', 'solve-quadratic'];
+    var totalEvalAttempts = evalSubtypes.reduce(function (sum, t) { return sum + stats.evaluate[t].attempts; }, 0);
+    var introduceSolve = totalEvalAttempts >= 6;
+    var candidates = introduceSolve ? evalSubtypes.concat(solveSubtypes) : evalSubtypes;
+    var weights = candidates.map(function (t) {
+        var s = stats.evaluate[t];
+        if (s.attempts < 3) return (solveSubtypes.indexOf(t) !== -1) ? 0.4 : 1.0;
+        var acc = s.correct / s.attempts;
+        return Math.max(0.2, 1 - acc);
+    });
+    var total = weights.reduce(function (a, b) { return a + b; }, 0);
+    var r = Math.random() * total;
+    for (var i = 0; i < candidates.length; i++) { r -= weights[i]; if (r <= 0) return candidates[i]; }
+    return candidates[0];
+}
+
+function generateEvaluateProblem() {
+    var subtype = pickEvaluateSubtype();
+    var problem = { mode: 'evaluate', subtype: subtype };
+    if (subtype === 'linear-pos' || subtype === 'linear-neg') {
+        var m = subtype === 'linear-pos' ? randInt(1, 7) : randInt(-7, -1);
+        var b = randInt(-9, 9);
+        var k = randInt(-8, 8);
+        problem.type = 'linear'; problem.isSolve = false; problem.m = m; problem.b = b; problem.k = k;
+        problem.answer = evalLinear(m, b, k);
+        problem.fnLabel = formatLinearFn(m, b);
+        problem.solutionSteps = buildEvalLinearSteps(m, b, k, problem.answer);
+    } else if (subtype === 'quad-pos' || subtype === 'quad-neg') {
+        var a = subtype === 'quad-pos' ? pick([1, 2, 3]) : pick([-1, -2, -3]);
+        var b = randInt(-6, 6);
+        var c = randInt(-8, 8);
+        var k = randInt(-6, 6);
+        problem.type = 'quadratic'; problem.isSolve = false; problem.a = a; problem.b = b; problem.c = c; problem.k = k;
+        problem.answer = evalQuadStd(a, b, c, k);
+        problem.fnLabel = formatQuadFn(a, b, c);
+        problem.solutionSteps = buildEvalQuadSteps(a, b, c, k, problem.answer);
+    } else if (subtype === 'solve-linear') {
+        var m = pick([-4, -3, -2, -1, 1, 2, 3, 4]);
+        var b = randInt(-9, 9);
+        var x0 = randInt(-8, 8);
+        var V = evalLinear(m, b, x0);
+        problem.type = 'linear'; problem.isSolve = true; problem.m = m; problem.b = b; problem.targetV = V;
+        problem.answer = [x0];
+        problem.fnLabel = formatLinearFn(m, b);
+        problem.solutionSteps = buildSolveLinearSteps(m, b, V, x0);
+    } else { // solve-quadratic
+        var a = pick([1, 2, -1, -2]);
+        var h = randInt(-4, 4);
+        var k = randInt(-6, 6);
+        var delta = randInt(1, 4);
+        var x0 = h + delta, x1 = h - delta;
+        var V = a * delta * delta + k;
+        var b = -2 * a * h;
+        var c = a * h * h + k;
+        problem.type = 'quadratic'; problem.isSolve = true; problem.a = a; problem.b = b; problem.c = c; problem.targetV = V;
+        problem.answer = [x0, x1].sort(function (p, q) { return p - q; });
+        problem.fnLabel = formatQuadFn(a, b, c);
+        problem.solutionSteps = buildSolveQuadSteps(a, b, c, V, x0, x1);
+    }
+    currentProblem = problem;
+    renderMainContent();
+}
+
+function showNextButton() {
+    var el = document.getElementById('next-btn-wrap');
+    if (el) el.style.display = 'block';
+}
+function hideNextButton() {
+    var el = document.getElementById('next-btn-wrap');
+    if (el) el.style.display = 'none';
+}
+
+function generateIsFunctionProblem(depth) {
+    depth = depth || 0;
+    var subtypes = ['line', 'parabola', 'circle', 'ellipse', 'sideways-parabola', 'wavy'];
+    var subtype = pickAdaptiveSubtype('is-function', subtypes);
+    var shape = generateIsFunctionShape(subtype);
+    if (!shape && depth < 12) { generateIsFunctionProblem(depth + 1); return; }
+    if (!shape) { subtype = 'wavy'; shape = generateIsFunctionShape('wavy'); }  // cannot fail
+    if (!shape) return;
+    currentProblem = { mode: 'is-function', subtype: subtype, isFunction: shape.isFunction,
+                        points: shape.points, closed: shape.closed };
+    renderMainContent();
+}
+
+function announceProblem() {
+    var el = document.getElementById('sr-problem');
+    if (!el || !currentProblem) return;
+    var text;
+    if (currentMode === 'domain-range') {
+        text = 'New problem. ' + describeGraph(currentProblem) + ' Enter the domain and range in interval notation. You can check each one separately.';
+    } else if (currentMode === 'read-graph') {
+        text = 'New problem. ' + describeGraph(currentProblem);
+    } else if (currentMode === 'evaluate') {
+        text = currentProblem.isSolve
+            ? 'New problem. Given ' + currentProblem.fnLabel + ', find the value or values of x for which f of x equals ' + currentProblem.targetV + '.'
+            : 'New problem. Given ' + currentProblem.fnLabel + ', find f of ' + currentProblem.k + '.';
+    } else {
+        text = 'New problem. ' + describeIsFunctionGraph(currentProblem);
+    }
+    el.textContent = text;
+}
+
+function announceFeedback(text) {
+    var el = document.getElementById('sr-feedback');
+    if (el) el.textContent = text;
+}
+
+function generateProblem() {
+    /* "Is it a function?" has exactly two possible answers, so a second chance
+       is a guaranteed correct answer: a wrong first guess cost nothing and
+       still scored, streak intact. One attempt only in that mode. */
+    chancesLeft = (currentMode === 'is-function') ? 1 : 2;
+    missRecorded = false;
+    domainChancesLeft = 2; rangeChancesLeft = 2; domainResolved = false; rangeResolved = false;
+    var fb = document.getElementById('feedback');
+    fb.textContent = ''; fb.className = 'feedback';
+    document.getElementById('hint').style.display = 'none';
+    document.getElementById('answer-box').style.display = 'none';
+    solutionRevealed = 0;
+    document.getElementById('solution-box').style.display = 'none';
+    document.getElementById('solution-btn').style.display = (currentMode === 'evaluate') ? 'inline-block' : 'none';
+    hideNextButton();
+    announceFeedback('');
+    if (currentMode === 'domain-range') generateDomainRangeProblem();
+    else if (currentMode === 'read-graph') generateReadGraphProblem();
+    else if (currentMode === 'evaluate') generateEvaluateProblem();
+    else generateIsFunctionProblem();
+    announceProblem();
+    updateDisplay();
+}
+
+function skipProblem() { generateProblem(); }
+
+/* =====================================================================
+   SVG graph rendering
+   ===================================================================== */
+/* The `type` argument was accepted and then ignored: every endpoint, included
+   or excluded, drew as the same filled dot. A hollow dot is the only thing that
+   distinguishes [a,b] from (a,b] on a graph, so an excluded endpoint drawn
+   filled makes the problem unanswerable -- the stated answer looks wrong.
+   Closed: solid disc. Open: white disc with a ring, which also masks the end of
+   the curve so it visibly stops short.
+
+   Design item 19 moved the curve from green to violet #7c3aed. The endpoint
+   markers do NOT follow it: they are drawn in ink navy #1e2a5e instead, so the
+   marker always reads as a separate object sitting on the curve rather than
+   melting into it, and the hollow ring's white core stays the loudest thing on
+   the plot. The open marker is also drawn a little larger (r 5.2, ring 3) than
+   the filled one (r 4.8) so included vs excluded survives a phone screen, a
+   greyscale printout and every common colour-vision deficiency -- the
+   distinction is carried by fill and size, never by hue. */
+function endpointMarkerSVG(vp, x, y, type) {
+    var px = vp.xToPx(x), py = vp.yToPx(y);
+    if (type === 'open') {
+        return '<circle cx="' + px + '" cy="' + py + '" r="5.2" fill="#ffffff" stroke="#1e2a5e" stroke-width="3"/>';
+    }
+    return '<circle cx="' + px + '" cy="' + py + '" r="4.8" fill="#1e2a5e" stroke="#ffffff" stroke-width="1.2"/>';
+}
+
+function buildGraphSVG(problem, opts) {
+    opts = opts || {};
+    var vp = buildViewport(VIEW_MIN, VIEW_MAX, VIEW_MIN, VIEW_MAX);
+    var markerId = 'gArrow' + (graphIdCounter++);
+
+    /* The wrapper carries role="img" plus the full description, so the drawing
+       itself (grid numbers, tick labels) must not be walked separately. */
+    var svg = '<svg class="graph-svg" aria-hidden="true" focusable="false" viewBox="0 0 ' + vp.W + ' ' + vp.H + '" xmlns="http://www.w3.org/2000/svg">';
+    svg += '<defs><marker id="' + markerId + '" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7c3aed"/></marker>';
+    svg += '<marker id="' + markerId + 'ax" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2e3d8f"/></marker></defs>';
+
+    var majorStep = tickStep(vp.viewXMax - vp.viewXMin);
+    var minorStep = 1;
+
+    // minor gridlines (every integer -- lets students count precisely to any point,
+    // even ones that fall between the labeled major gridlines)
+    for (var gx = vp.viewXMin; gx <= vp.viewXMax; gx += minorStep) {
+        var px = vp.xToPx(gx);
+        svg += '<line x1="' + px + '" y1="' + vp.marginTop + '" x2="' + px + '" y2="' + (vp.H - vp.marginBottom) + '" stroke="#f1f2fa" stroke-width="1"/>';
+    }
+    for (var gy = vp.viewYMin; gy <= vp.viewYMax; gy += minorStep) {
+        var py = vp.yToPx(gy);
+        svg += '<line x1="' + vp.marginLeft + '" y1="' + py + '" x2="' + (vp.W - vp.marginRight) + '" y2="' + py + '" stroke="#f1f2fa" stroke-width="1"/>';
+    }
+    // major gridlines (labeled)
+    for (var gx = Math.ceil(vp.viewXMin / majorStep) * majorStep; gx <= vp.viewXMax; gx += majorStep) {
+        var px = vp.xToPx(gx);
+        svg += '<line x1="' + px + '" y1="' + vp.marginTop + '" x2="' + px + '" y2="' + (vp.H - vp.marginBottom) + '" stroke="#dde1f5" stroke-width="1"/>';
+    }
+    for (var gy = Math.ceil(vp.viewYMin / majorStep) * majorStep; gy <= vp.viewYMax; gy += majorStep) {
+        var py = vp.yToPx(gy);
+        svg += '<line x1="' + vp.marginLeft + '" y1="' + py + '" x2="' + (vp.W - vp.marginRight) + '" y2="' + py + '" stroke="#dde1f5" stroke-width="1"/>';
+    }
+    // axes (always visible: box is fixed and always straddles 0) -- arrows point both directions
+    var px0 = vp.xToPx(0), py0 = vp.yToPx(0);
+    svg += '<line x1="' + px0 + '" y1="' + (vp.H - vp.marginBottom) + '" x2="' + px0 + '" y2="' + (vp.marginTop - 6) + '" stroke="#2e3d8f" stroke-width="2" marker-start="url(#' + markerId + 'ax)" marker-end="url(#' + markerId + 'ax)"/>';
+    svg += '<line x1="' + (vp.marginLeft - 6) + '" y1="' + py0 + '" x2="' + (vp.W - vp.marginRight) + '" y2="' + py0 + '" stroke="#2e3d8f" stroke-width="2" marker-start="url(#' + markerId + 'ax)" marker-end="url(#' + markerId + 'ax)"/>';
+    // tick labels (major gridlines only, to avoid crowding -- minor gridlines let students count precisely between them)
+    for (var gx = Math.ceil(vp.viewXMin / majorStep) * majorStep; gx <= vp.viewXMax; gx += majorStep) {
+        if (gx === 0) continue;
+        var px = vp.xToPx(gx);
+        svg += '<text x="' + px + '" y="' + (py0 + 15) + '" text-anchor="middle" font-size="10" fill="#4a5480" font-family="Consolas, monospace">' + gx + '</text>';
+    }
+    for (var gy = Math.ceil(vp.viewYMin / majorStep) * majorStep; gy <= vp.viewYMax; gy += majorStep) {
+        if (gy === 0) continue;
+        var py = vp.yToPx(gy);
+        svg += '<text x="' + (px0 - 8) + '" y="' + (py + 3) + '" text-anchor="end" font-size="10" fill="#4a5480" font-family="Consolas, monospace">' + gy + '</text>';
+    }
+
+    // curve (uses the pre-computed visible segment -- already clipped to the box)
+    var seg = problem.seg;
+    var pathPts = seg.points.map(function (p) { return vp.xToPx(p.x) + ',' + vp.yToPx(p.y); });
+    var pathD = 'M ' + pathPts.join(' L ');
+    var markerStart = (seg.leftExitType === 'box') ? ' marker-start="url(#' + markerId + ')"' : '';
+    var markerEnd = (seg.rightExitType === 'box') ? ' marker-end="url(#' + markerId + ')"' : '';
+    /* Design item 19: the curve was green #059669. Green is reserved for
+       success in this system, so a green curve told the student the answer was
+       already right. Violet #7c3aed is the system's neutral drawing ink. */
+    svg += '<path d="' + pathD + '" stroke="#7c3aed" stroke-width="3" fill="none"' + markerStart + markerEnd + '/>';
+
+    if (seg.leftExitType === 'point') svg += endpointMarkerSVG(vp, seg.points[0].x, seg.points[0].y, problem.leftType);
+    if (seg.rightExitType === 'point') svg += endpointMarkerSVG(vp, seg.points[seg.points.length - 1].x, seg.points[seg.points.length - 1].y, problem.rightType);
+
+    if (opts.markX !== undefined) {
+        var mx = opts.markX, my = problem.fn(mx);
+        var pxm = vp.xToPx(mx), pym = vp.yToPx(my);
+        /* The guides and the marked point were violet, which is now the
+           curve's colour. Moved to heritage rose #c76b8f (3.31:1 on white,
+           clears the 3:1 needed for a graphical object) so the answer marker
+           can never be mistaken for the function itself. The guides stay
+           dashed and the curve stays solid, so the two also differ in form. */
+        svg += '<line x1="' + pxm + '" y1="' + py0 + '" x2="' + pxm + '" y2="' + pym + '" stroke="#c76b8f" stroke-width="1.5" stroke-dasharray="4,3"/>';
+        svg += '<circle cx="' + pxm + '" cy="' + pym + '" r="5.5" fill="#c76b8f" stroke="#ffffff" stroke-width="1.2"/>';
+    }
+    if (opts.guideY !== undefined) {
+        var pyg = vp.yToPx(opts.guideY);
+        svg += '<line x1="' + vp.marginLeft + '" y1="' + pyg + '" x2="' + (vp.W - vp.marginRight) + '" y2="' + pyg + '" stroke="#c76b8f" stroke-width="1.5" stroke-dasharray="4,3"/>';
+    }
+
+    svg += '</svg>';
+    return svg;
+}
+
+function buildIsFunctionGraphSVG(problem) {
+    var vp = buildViewport(VIEW_MIN, VIEW_MAX, VIEW_MIN, VIEW_MAX);
+    var markerId = 'gArrow' + (graphIdCounter++);
+    var svg = '<svg class="graph-svg" aria-hidden="true" focusable="false" viewBox="0 0 ' + vp.W + ' ' + vp.H + '" xmlns="http://www.w3.org/2000/svg">';
+    svg += '<defs><marker id="' + markerId + 'ax" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2e3d8f"/></marker></defs>';
+
+    var majorStep = tickStep(vp.viewXMax - vp.viewXMin);
+    var minorStep = 1;
+    for (var gx = vp.viewXMin; gx <= vp.viewXMax; gx += minorStep) {
+        var px = vp.xToPx(gx);
+        svg += '<line x1="' + px + '" y1="' + vp.marginTop + '" x2="' + px + '" y2="' + (vp.H - vp.marginBottom) + '" stroke="#f1f2fa" stroke-width="1"/>';
+    }
+    for (var gy = vp.viewYMin; gy <= vp.viewYMax; gy += minorStep) {
+        var py = vp.yToPx(gy);
+        svg += '<line x1="' + vp.marginLeft + '" y1="' + py + '" x2="' + (vp.W - vp.marginRight) + '" y2="' + py + '" stroke="#f1f2fa" stroke-width="1"/>';
+    }
+    for (var gx = Math.ceil(vp.viewXMin / majorStep) * majorStep; gx <= vp.viewXMax; gx += majorStep) {
+        var px = vp.xToPx(gx);
+        svg += '<line x1="' + px + '" y1="' + vp.marginTop + '" x2="' + px + '" y2="' + (vp.H - vp.marginBottom) + '" stroke="#dde1f5" stroke-width="1"/>';
+    }
+    for (var gy = Math.ceil(vp.viewYMin / majorStep) * majorStep; gy <= vp.viewYMax; gy += majorStep) {
+        var py = vp.yToPx(gy);
+        svg += '<line x1="' + vp.marginLeft + '" y1="' + py + '" x2="' + (vp.W - vp.marginRight) + '" y2="' + py + '" stroke="#dde1f5" stroke-width="1"/>';
+    }
+    var px0 = vp.xToPx(0), py0 = vp.yToPx(0);
+    svg += '<line x1="' + px0 + '" y1="' + (vp.H - vp.marginBottom) + '" x2="' + px0 + '" y2="' + (vp.marginTop - 6) + '" stroke="#2e3d8f" stroke-width="2" marker-start="url(#' + markerId + 'ax)" marker-end="url(#' + markerId + 'ax)"/>';
+    svg += '<line x1="' + (vp.marginLeft - 6) + '" y1="' + py0 + '" x2="' + (vp.W - vp.marginRight) + '" y2="' + py0 + '" stroke="#2e3d8f" stroke-width="2" marker-start="url(#' + markerId + 'ax)" marker-end="url(#' + markerId + 'ax)"/>';
+    for (var gx = Math.ceil(vp.viewXMin / majorStep) * majorStep; gx <= vp.viewXMax; gx += majorStep) {
+        if (gx === 0) continue;
+        var px = vp.xToPx(gx);
+        svg += '<text x="' + px + '" y="' + (py0 + 15) + '" text-anchor="middle" font-size="10" fill="#4a5480" font-family="Consolas, monospace">' + gx + '</text>';
+    }
+    for (var gy = Math.ceil(vp.viewYMin / majorStep) * majorStep; gy <= vp.viewYMax; gy += majorStep) {
+        if (gy === 0) continue;
+        var py = vp.yToPx(gy);
+        svg += '<text x="' + (px0 - 8) + '" y="' + (py + 3) + '" text-anchor="end" font-size="10" fill="#4a5480" font-family="Consolas, monospace">' + gy + '</text>';
+    }
+
+    var pathPts = problem.points.map(function (p) { return vp.xToPx(p.x) + ',' + vp.yToPx(p.y); });
+    var pathD = 'M ' + pathPts.join(' L ') + (problem.closed ? ' Z' : '');
+    svg += '<path d="' + pathD + '" stroke="#7c3aed" stroke-width="3" fill="none" stroke-linejoin="round"/>';
+
+    svg += '</svg>';
+    return svg;
+}
+
+/* =====================================================================
+   UI rendering per mode
+   ===================================================================== */
+/* Escape text before it goes into an HTML attribute or innerHTML. Also the
+   safety net for any persisted/localStorage-derived value. */
+function escAttr(s) {
+    return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+/* Text alternative describing the ACTUAL content of a graph, not just "a graph".
+   Required by Pass 4 of the accessibility checklist. */
+function describeShapeWords(problem) {
+    if (problem.type === 'linear') {
+        var dir = problem.m > 0 ? 'rising' : 'falling';
+        return 'a straight line ' + dir + ' from left to right, ' + formatLinearFn(problem.m, problem.b).replace('f(x) = ', 'y = ');
+    }
+    var opens = problem.a > 0 ? 'opening upward' : 'opening downward';
+    return 'a parabola ' + opens + ' with vertex at (' + problem.h + ', ' + problem.k + ')';
+}
+
+/* This said "with a filled dot" for BOTH endpoint kinds, so a screen-reader
+   student was told every endpoint was included -- the same defect as the
+   drawing above, and equally fatal to the question. It now reads the same
+   inclusivity flag the answer is graded against, and says in words whether the
+   point is in the domain, so nothing depends on hearing "filled" vs "hollow". */
+function describeDomainEnds(problem) {
+    var d = problem.dom;
+    var parts = [];
+    if (d.lower === -Infinity) {
+        parts.push('extending left with an arrow');
+    } else {
+        parts.push('starting at x = ' + fmtNum(d.lower) + ' with ' +
+            (d.lowerInclusive ? 'a closed (filled) dot, so x = ' + fmtNum(d.lower) + ' IS included'
+                  : 'an open (hollow) dot, so x = ' + fmtNum(d.lower) + ' is NOT included'));
+    }
+    if (d.upper === Infinity) {
+        parts.push('extending right with an arrow');
+    } else {
+        parts.push('ending at x = ' + fmtNum(d.upper) + ' with ' +
+            (d.upperInclusive ? 'a closed (filled) dot, so x = ' + fmtNum(d.upper) + ' IS included'
+                  : 'an open (hollow) dot, so x = ' + fmtNum(d.upper) + ' is NOT included'));
+    }
+    return parts.join(', ');
+}
+
+function describeGraph(problem) {
+    var base = 'Graph on a grid from negative 8 to 8 on both axes, showing ' + describeShapeWords(problem) + ', ' + describeDomainEnds(problem) + '.';
+    if (problem.mode === 'read-graph') {
+        base += problem.isEval
+            ? ' You need to read the y-value at x = ' + problem.askX + '.'
+            : ' You need to read the x-value(s) where y = ' + problem.askY + '.';
+    }
+    return base;
+}
+
+function describeIsFunctionGraph(problem) {
+    var shapeWords = {
+        'line': 'a straight line',
+        'parabola': 'a parabola opening upward or downward',
+        'circle': 'a circle',
+        'ellipse': 'an oval (ellipse)',
+        'sideways-parabola': 'a parabola opening sideways, to the left or right',
+        'wavy': 'a wavy S-shaped curve running vertically'
+    };
+    return 'Graph on a grid from negative 8 to 8 on both axes, showing ' + (shapeWords[problem.subtype] || 'a curve') + '. Decide whether it passes the vertical line test.';
+}
+
+function buildIntervalInputRow(key, label, varLetter) {
+    var html = '<div class="answer-row">';
+    html += '<label class="field-label" for="' + key + '-input">' + label + ':</label>';
+    html += '<input type="text" id="' + key + '-input" class="interval-input" inputmode="decimal" placeholder="e.g. [-3, 5)" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" onkeydown="if(event.key===\'Enter\'){checkIntervalField(\'' + key + '\');}">';
+    /* A bare "(" or "," is not a usable accessible name -- most screen readers
+       announce punctuation-only buttons as "button" and nothing else. Each key
+       now carries a spoken name AND says what it means for the interval. */
+    html += '<div class="toolbar" role="group" aria-label="' + escAttr(label) + ' notation keys">';
+    [['(', 'Open parenthesis, endpoint not included'],
+     ['[', 'Open square bracket, endpoint included'],
+     [')', 'Close parenthesis, endpoint not included'],
+     [']', 'Close square bracket, endpoint included'],
+     [',', 'Comma'],
+     ['\u221e', 'Infinity'],
+     ['-\u221e', 'Negative infinity']].forEach(function (pair) {
+        html += '<button type="button" class="toolbar-btn" aria-label="' + escAttr(pair[1]) +
+                '" onclick="insertSymbol(\'' + key + '-input\',\'' + pair[0] + '\')">' + pair[0] + '</button>';
+    });
+    html += '<button type="button" class="toolbar-btn allreals-btn" aria-label="Fill in all real numbers" onclick="setAllReals(\'' + key + '-input\')">All Reals</button>';
+    html += '</div>';
+    html += '<button class="submit-btn field-check-btn" onclick="checkIntervalField(\'' + key + '\')">Check ' + label + '</button>';
+    html += '<div class="field-feedback" id="' + key + '-feedback"></div>';
+    html += '</div>';
+    return html;
+}
+
+function renderDomainRangeUI(problem) {
+    var svg = buildGraphSVG(problem, {});
+    var html = '<div class="graph-wrap" role="img" aria-label="' + escAttr(describeGraph(problem)) + '">' + svg + '</div>';
+    html += '<div class="dr-question">Identify the domain and range of the function shown. (You can check each one separately.)</div>';
+    html += buildIntervalInputRow('domain', 'Domain', 'x');
+    html += buildIntervalInputRow('range', 'Range', 'y');
+    document.getElementById('main-content').innerHTML = html;
+}
+
+function renderReadGraphUI(problem) {
+    var svg = buildGraphSVG(problem, {});
+    var html = '<div class="graph-wrap" role="img" aria-label="' + escAttr(describeGraph(problem)) + '">' + svg + '</div>';
+    var qText = problem.isEval
+        ? 'Using the graph, find f(' + problem.askX + ').'
+        : 'Using the graph, find all value(s) of x for which f(x) = ' + problem.askY + '. (Separate multiple answers with a comma.)';
+    html += '<div class="dr-question" aria-hidden="true">' + qText + '</div>';
+    html += '<div class="input-area">';
+    html += '<label class="sr-only" for="rg-input">' + escAttr(qText) + '</label>';
+    html += '<input type="text" id="rg-input" inputmode="decimal" placeholder="' + (problem.isEval ? 'y-value' : 'x-value(s)') + '" autocomplete="off" onkeydown="if(event.key===\'Enter\'){checkAnswer();}">';
+    html += '<button class="key-btn" aria-label="Toggle positive or negative sign" onclick="toggleSignField(\'rg-input\')">\u00b1</button>';
+    html += '</div>';
+    html += '<button class="submit-btn" onclick="checkAnswer()">Check Answer</button>';
+    document.getElementById('main-content').innerHTML = html;
+}
+
+function renderEvaluateUI(problem) {
+    var html = '<div class="equation" aria-hidden="true">' + problem.fnLabel + '</div>';
+    var qText;
+    if (problem.isSolve) {
+        qText = 'Given ' + problem.fnLabel + ', find the value(s) of x for which f(x) = ' + problem.targetV + '. If there are two, separate them with a comma.';
+        html += '<div class="dr-question" aria-hidden="true">Find the value(s) of x for which f(x) = ' + problem.targetV + '. (If there are two, separate them with a comma.)</div>';
+        html += '<div class="input-area">';
+        html += '<label class="sr-only" for="ev-input">' + escAttr(qText) + '</label>';
+        html += '<input type="text" id="ev-input" inputmode="decimal" placeholder="x-value(s)" autocomplete="off" onkeydown="if(event.key===\'Enter\'){checkAnswer();}">';
+        html += '<button class="key-btn" aria-label="Toggle positive or negative sign" onclick="toggleSignField(\'ev-input\')">\u00b1</button>';
+        html += '</div>';
+    } else {
+        qText = 'Given ' + problem.fnLabel + ', find f(' + problem.k + ').';
+        html += '<div class="dr-question" aria-hidden="true">Find f(' + problem.k + ').</div>';
+        html += '<div class="input-area">';
+        html += '<label class="sr-only" for="ev-input">' + escAttr(qText) + '</label>';
+        html += '<input type="text" id="ev-input" inputmode="decimal" placeholder="value" autocomplete="off" onkeydown="if(event.key===\'Enter\'){checkAnswer();}">';
+        html += '<button class="key-btn" aria-label="Toggle positive or negative sign" onclick="toggleSignField(\'ev-input\')">\u00b1</button>';
+        html += '</div>';
+    }
+    html += '<button class="submit-btn" onclick="checkAnswer()">Check Answer</button>';
+    document.getElementById('main-content').innerHTML = html;
+}
+
+function renderIsFunctionUI(problem) {
+    var svg = buildIsFunctionGraphSVG(problem);
+    var html = '<div class="graph-wrap" role="img" aria-label="' + escAttr(describeIsFunctionGraph(problem)) + '">' + svg + '</div>';
+    html += '<div class="dr-question">Is this a function?</div>';
+    html += '<div class="yesno-row">';
+    html += '<button class="yesno-btn yes-btn" onclick="checkIsFunctionAnswer(true)">Yes <span class="yesno-sub">(passes the vertical line test)</span></button>';
+    html += '<button class="yesno-btn no-btn" onclick="checkIsFunctionAnswer(false)">No <span class="yesno-sub">(fails the vertical line test)</span></button>';
+    html += '</div>';
+    document.getElementById('main-content').innerHTML = html;
+}
+
+var bootComplete = false;
+function renderMainContent() {
+    if (currentMode === 'domain-range') renderDomainRangeUI(currentProblem);
+    else if (currentMode === 'read-graph') renderReadGraphUI(currentProblem);
+    else if (currentMode === 'evaluate') renderEvaluateUI(currentProblem);
+    else renderIsFunctionUI(currentProblem);
+    /* "Next Problem" hides the button that has focus, which used to drop focus
+       to <body> -- a keyboard student was returned to the top of the document
+       on every problem, and only Domain & Range ever placed focus at all.
+       Nothing is focused during boot, so the page does not scroll or raise a
+       mobile keyboard on load. */
+    if (!bootComplete) return;
+    var target = document.getElementById('domain-input') ||
+                 document.getElementById('rg-input') ||
+                 document.getElementById('ev-input') ||
+                 document.getElementById('main-content');
+    if (target) { try { target.focus(); } catch (e) {} }
+}
+
+/* =====================================================================
+   Input helpers
+   ===================================================================== */
+function insertSymbol(fieldId, sym) {
+    var el = document.getElementById(fieldId);
+    if (!el) return;
+    var start = el.selectionStart != null ? el.selectionStart : el.value.length;
+    var end = el.selectionEnd != null ? el.selectionEnd : el.value.length;
+    var val = el.value;
+    el.value = val.slice(0, start) + sym + val.slice(end);
+    el.focus();
+    var pos = start + sym.length;
+    try { el.setSelectionRange(pos, pos); } catch (e) {}
+}
+
+function setAllReals(fieldId) {
+    var el = document.getElementById(fieldId);
+    if (!el) return;
+    el.value = '(-\u221e, \u221e)';
+    el.focus();
+}
+
+function toggleSignField(fieldId) {
+    var el = document.getElementById(fieldId);
+    if (!el) return;
+    el.value = el.value.charAt(0) === '-' ? el.value.slice(1) : '-' + el.value;
+    el.focus();
+}
+
+/* =====================================================================
+   Answer checking
+   ===================================================================== */
+/* This wrote only to the visual div, so "Please enter a number." was silent to
+   a screen reader while every other validation message was announced. */
+function handleFormatIssue(msg) {
+    var feedback = document.getElementById('feedback');
+    feedback.textContent = msg;
+    feedback.className = 'feedback incorrect';
+    announceFeedback(msg);
+}
+
+var isFunctionExplanations = {
+    'line': 'a line \u2014 every vertical line crosses it exactly once.',
+    'parabola': 'a parabola opening up or down \u2014 every vertical line crosses it exactly once.',
+    'circle': 'a circle \u2014 a vertical line through the middle crosses it twice (once on top, once on bottom).',
+    'ellipse': 'an ellipse \u2014 just like a circle, a vertical line through the middle crosses it twice.',
+    'sideways-parabola': 'a parabola that opens sideways (left or right) \u2014 a vertical line through it crosses it twice.',
+    'wavy': 'a wavy curve \u2014 a vertical line through it crosses more than once.'
+};
+
+function getAnswerHtml() {
+    if (currentMode === 'domain-range') {
+        var d = { lower: currentProblem.dom.lower, lowerInclusive: currentProblem.dom.lowerInclusive,
+                  upper: currentProblem.dom.upper, upperInclusive: currentProblem.dom.upperInclusive };
+        var r = currentProblem.range;
+        return '<strong>Domain:</strong> ' + toIntervalStr(d) + '<br>' +
+               '<strong>Range:</strong> ' + toIntervalStr(r);
+    } else if (currentMode === 'read-graph') {
+        var ansStr = currentProblem.answer.join(', ');
+        return currentProblem.isEval
+            ? '<strong>Answer:</strong> f(' + currentProblem.askX + ') = ' + ansStr
+            : '<strong>Answer:</strong> x = ' + ansStr;
+    } else if (currentMode === 'evaluate') {
+        return currentProblem.isSolve
+            ? '<strong>Answer:</strong> x = ' + currentProblem.answer.join(', ')
+            : '<strong>Answer:</strong> f(' + currentProblem.k + ') = ' + currentProblem.answer;
+    } else {
+        var verdict = currentProblem.isFunction ? 'Yes' : 'No';
+        return '<strong>Answer:</strong> ' + verdict + ' \u2014 this is ' + isFunctionExplanations[currentProblem.subtype];
+    }
+}
+
+function getHintHtml() {
+    if (currentMode === 'domain-range') {
+        return '<strong>Hint:</strong><br>Domain = all the x-values the graph covers.<br>' +
+               'Range = all the y-values the graph covers.<br>' +
+               'A <strong>filled</strong> dot means that endpoint IS included \u2014 use a square bracket, like [3.<br>' +
+               'A <strong>hollow</strong> dot means that endpoint is NOT included \u2014 use a parenthesis, like (3.<br>' +
+               'An arrow means the graph keeps going forever that way \u2014 always a parenthesis next to \u221e.<br>' +
+               'Write your answer in interval notation, like <strong>[-3, 5)</strong> or <strong>(-\u221e, 4]</strong>.';
+    } else if (currentMode === 'read-graph') {
+        if (currentProblem.isEval) {
+            return '<strong>Hint:</strong><br>Find x = ' + currentProblem.askX + ' on the x-axis, trace straight up or down to the graph, then read the y-value at that point.';
+        }
+        return '<strong>Hint:</strong><br>Find y = ' + currentProblem.askY + ' on the y-axis, trace straight across to where the graph crosses that height, then read the x-value(s) there. A parabola can cross the same height twice!';
+    } else if (currentMode === 'evaluate') {
+        if (currentProblem.isSolve) {
+            if (currentProblem.type === 'linear') {
+                return '<strong>Hint:</strong><br>Set the function equal to ' + currentProblem.targetV + ', then solve like a regular equation: undo addition/subtraction first, then undo multiplication.';
+            }
+            return '<strong>Hint:</strong><br>Set the function equal to ' + currentProblem.targetV + ', move everything to one side so it equals 0, then factor. A quadratic can have two solutions!';
+        }
+        if (currentProblem.type === 'linear') {
+            return '<strong>Hint:</strong><br>Substitute x = ' + currentProblem.k + ' into the function, then multiply first and add second.';
+        }
+        return '<strong>Hint:</strong><br>Substitute x = ' + currentProblem.k + '. Square it FIRST \u2014 watch the sign! \u2014 then multiply by the leading coefficient, then add the rest.';
+    } else {
+        return '<strong>Hint:</strong><br>Picture a vertical line sweeping across the graph from left to right. If it EVER crosses the curve more than once at the same time, the graph is NOT a function \u2014 that x-value would have two different outputs.';
+    }
+}
+
+/* ---------------------------------------------------------------------
+   Revealing the answer, or opening the step-by-step solution, books the
+   problem as attempted and ends the streak -- exactly like a wrong try.
+   Without this a student could press Show Answer, read the interval off the
+   panel, type it back and take clean first-try credit with the streak intact,
+   which quietly inflated every accuracy figure on the stats cups.
+
+   Show HINT is deliberately NOT charged: every hint in this game is strategy
+   ("trace across to where the graph crosses that height"), never the answer.
+
+   In Domain & Range the panel reveals BOTH intervals, so both still-unresolved
+   fields are booked here; checkIntervalField() then knows not to book again.
+   --------------------------------------------------------------------- */
+var missRecorded = false;
+
+function recordReveal() {
+    if (missRecorded || !currentProblem) return;
+    missRecorded = true;
+    if (currentMode === 'domain-range') {
+        if (!domainResolved) recordStat('domain-range', currentProblem.subtype, false);
+        if (!rangeResolved) recordStat('domain-range', currentProblem.subtype, false);
+    } else {
+        recordStat(currentMode, currentProblem.subtype, false);
+    }
+    streak = 0;
+    updateDisplay();
+    saveState();
+    announceFeedback('Answer shown. This problem counts as attempted and the streak resets.');
+}
+
+function toggleHint() {
+    var hint = document.getElementById('hint');
+    if (hint.style.display === 'none') { hint.innerHTML = getHintHtml(); hint.style.display = 'block'; }
+    else hint.style.display = 'none';
+}
+
+function toggleAnswer() {
+    var box = document.getElementById('answer-box');
+    if (box.style.display === 'none') {
+        recordReveal();
+        box.innerHTML = getAnswerHtml() +
+            '<div style="margin-top:8px;font-size:12.5px;font-weight:700;color:#3b3568;">' +
+            'Shown answers count as an attempt, and the streak restarts.</div>';
+        box.style.display = 'block';
+    } else {
+        box.style.display = 'none';
+    }
+}
+
+var solutionRevealed = 0;
+function toggleSolution() {
+    var box = document.getElementById('solution-box');
+    if (box.style.display === 'none') {
+        if (!currentProblem || !currentProblem.solutionSteps) return;
+        /* The walkthrough ends on the answer, so opening it is a reveal too --
+           the same rule Radical Expressions needed for Show Steps. */
+        recordReveal();
+        if (!solutionRevealed) solutionRevealed = 1;   // reopening keeps your place
+        renderSolutionBox();
+    } else {
+        box.style.display = 'none';
+    }
+}
+
+function showNextSolutionStep() {
+    solutionRevealed++;
+    renderSolutionBox();
+}
+
+function renderSolutionBox() {
+    var box = document.getElementById('solution-box');
+    var steps = currentProblem.solutionSteps;
+    var total = steps.length;
+    var shown = Math.min(solutionRevealed, total);
+    var html = '<div style="font-weight: bold; margin-bottom: 8px;">Step-by-Step Solution (' + shown + ' of ' + total + ')</div>';
+    html += '<div style="font-size: 13px;">Start with:</div>';
+    html += '<div style="font-family: Consolas, monospace; font-weight: bold; font-size: 17px; margin: 4px 0 10px 8px; color: #1e2a5e;">' + currentProblem.fnLabel + '</div>';
+    for (var i = 0; i < shown; i++) {
+        var parts = steps[i].split(':  ');
+        var stepLabel = parts[0];
+        var stepEq = parts.length > 1 ? parts.slice(1).join(':  ') : '';
+        html += '<div style="padding: 8px 0 4px; border-top: 1px dashed rgba(0,0,0,0.15);">';
+        html += '<div><b>' + (i + 1) + '.</b> ' + stepLabel + (stepEq ? ':' : '') + '</div>';
+        if (stepEq) {
+            html += '<div style="font-family: Consolas, monospace; font-weight: bold; font-size: 17px; margin: 5px 0 4px 8px; color: #1e2a5e;">' + stepEq + '</div>';
+        }
+        html += '</div>';
+    }
+    if (shown < total) {
+        html += '<div style="text-align: center; margin-top: 10px;"><button class="submit-btn" onclick="showNextSolutionStep()">Next Step</button></div>';
+    } else {
+        html += '<div style="text-align: center; margin-top: 10px; font-weight: bold; color: #047857;">That\'s the complete solution!</div>';
+    }
+    box.className = 'answer-box';
+    box.style.display = 'block';
+    box.innerHTML = html;
+}
+
+function stripTags(html) { return String(html).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim(); }
+
+function handleResolution(success, customMsg) {
+    var feedback = document.getElementById('feedback');
+    if (success) {
+        problemCount++;
+        if (!missRecorded) {
+            recordStat(currentMode, currentProblem.subtype, true);
+            streak++;
+            if (streak > bestStreak) bestStreak = streak;
+            celebrateStreak(streak);
+            feedback.innerHTML = 'Correct!';
+            feedback.className = 'feedback correct';
+            announceFeedback('Correct! Streak ' + streak + '. Select Next Problem to continue.');
+        } else {
+            /* Right, but the answer had already been shown: the attempt is
+               already booked, so do not book it again and do not restart the
+               streak on a revealed problem. */
+            feedback.innerHTML = 'That\'s the right value \u2014 but the answer was shown, so this one is not counted.';
+            feedback.className = 'feedback incorrect';
+            announceFeedback('That is the right value, but the answer was shown, so this one is not counted. Select Next Problem to continue.');
+        }
+        updateDisplay(); saveState();
+        showNextButton();
+    } else {
+        chancesLeft--;
+        if (chancesLeft > 0) {
+            feedback.textContent = customMsg || 'Not quite \u2014 try again!';
+            feedback.className = 'feedback incorrect';
+            announceFeedback((customMsg || 'Not quite, try again.') + ' You have one more try.');
+        } else {
+            /* problemCount was only advanced on the success path, so the
+               "Problem: N" counter used to stall on every missed problem. */
+            problemCount++;
+            if (!missRecorded) { missRecorded = true; recordStat(currentMode, currentProblem.subtype, false); }
+            streak = 0;
+            feedback.innerHTML = 'Not quite. ' + getAnswerHtml();
+            feedback.className = 'feedback incorrect';
+            updateDisplay(); saveState();
+            showNextButton();
+            announceFeedback('Not quite. ' + stripTags(getAnswerHtml()) + '. Select Next Problem to continue.');
+        }
+    }
+}
+
+function getChancesLeft(which) { return which === 'domain' ? domainChancesLeft : rangeChancesLeft; }
+function decrementFieldChances(which) { if (which === 'domain') domainChancesLeft--; else rangeChancesLeft--; }
+function isFieldResolved(which) { return which === 'domain' ? domainResolved : rangeResolved; }
+function setFieldResolved(which) { if (which === 'domain') domainResolved = true; else rangeResolved = true; }
+
+function setFieldFeedback(which, msg, cls) {
+    var el = document.getElementById(which + '-feedback');
+    if (!el) return;
+    el.innerHTML = msg;
+    el.className = 'field-feedback' + (cls ? ' ' + cls : '');
+    var label = (which === 'domain') ? 'Domain' : 'Range';
+    announceFeedback(label + ': ' + stripTags(msg));
+}
+
+function disableIntervalField(which) {
+    var input = document.getElementById(which + '-input');
+    if (input) input.disabled = true;
+}
+
+function getFieldTargetBounds(which) {
+    if (which === 'domain') {
+        return { lower: currentProblem.dom.lower, lowerInclusive: currentProblem.dom.lowerInclusive,
+                 upper: currentProblem.dom.upper, upperInclusive: currentProblem.dom.upperInclusive };
+    }
+    return currentProblem.range;
+}
+
+function maybeAdvanceAfterBothFieldsResolved() {
+    if (!domainResolved || !rangeResolved) return;
+    problemCount++;
+    updateDisplay(); saveState();
+    var feedback = document.getElementById('feedback');
+    feedback.textContent = 'Nice work \u2014 both done!';
+    feedback.className = 'feedback correct';
+    showNextButton();
+    announceFeedback('Domain and range are both done. Select Next Problem to continue.');
+}
+
+// Detects a bracket (rather than parenthesis) sitting right next to an
+// infinity symbol -- mathematically harmless (infinity can't be "included"
+// either way) but worth a gentle style note since it's never correct notation.
+function hasWrongBracketNearInfinity(raw) {
+    var s = normalizeAnswerText(raw);
+    return /\[\s*-?\u221e/.test(s) || /\u221e\s*\]/.test(s);
+}
+
+// Detects the specific near-miss where both boundary NUMBERS are exactly
+// right, but the open/closed choice on a finite side doesn't match --
+// worth a targeted hint instead of a generic "not quite".
+function valuesMatchButBracketWrong(parsed, target) {
+    function valEq(a, b) {
+        if (a === Infinity && b === Infinity) return true;
+        if (a === -Infinity && b === -Infinity) return true;
+        if (!isFinite(a) || !isFinite(b)) return false;
+        return Math.abs(a - b) < 1e-6;
+    }
+    if (!valEq(parsed.lower, target.lower) || !valEq(parsed.upper, target.upper)) return false;
+    var lowerMismatch = isFinite(target.lower) && parsed.lowerInclusive !== target.lowerInclusive;
+    var upperMismatch = isFinite(target.upper) && parsed.upperInclusive !== target.upperInclusive;
+    return lowerMismatch || upperMismatch;
+}
+
+function checkIntervalField(which) {
+    if (currentMode !== 'domain-range' || isFieldResolved(which)) return;
+    var label = (which === 'domain') ? 'Domain' : 'Range';
+    var raw = document.getElementById(which + '-input').value;
+    if (!raw.trim()) { setFieldFeedback(which, 'Please enter the ' + which + '.', 'incorrect'); return; }
+    var parsed = parseAnswer(raw);
+    if (!parsed) { setFieldFeedback(which, 'Please use interval notation, e.g., [2, \u221e) or (-3, 5].', 'incorrect'); return; }
+
+    var target = getFieldTargetBounds(which);
+    var ok = boundsEqual(parsed, target);
+    if (ok) {
+        setFieldResolved(which);
+        var note = hasWrongBracketNearInfinity(raw)
+            ? ' <span style="color:#3b3568;font-weight:600;">(Small note: infinity is never actually reached, so always use a parenthesis next to \u221e, not a bracket.)</span>'
+            : '';
+        setFieldFeedback(which, 'Correct! ' + toIntervalStr(target) + note +
+            (missRecorded ? ' <span style="color:#3b3568;font-weight:600;">(The answer was shown, so this one is not counted.)</span>' : ''), 'correct');
+        disableIntervalField(which);
+        if (!missRecorded) {
+            streak++; if (streak > bestStreak) bestStreak = streak;
+            celebrateStreak(streak);
+            recordStat('domain-range', currentProblem.subtype, true);
+        }
+        maybeAdvanceAfterBothFieldsResolved();
+    } else {
+        var bracketHint = valuesMatchButBracketWrong(parsed, target);
+        decrementFieldChances(which);
+        if (getChancesLeft(which) > 0) {
+            var msg = bracketHint
+                ? 'Your number is right \u2014 check whether that endpoint should use [ ] (included) or ( ) (not included).'
+                : 'Not quite \u2014 try again!';
+            setFieldFeedback(which, msg, 'incorrect');
+        } else {
+            setFieldResolved(which);
+            var revealMsg = (bracketHint ? 'So close \u2014 just the bracket type was off. ' : '') + label + ': ' + toIntervalStr(target);
+            setFieldFeedback(which, revealMsg, 'incorrect');
+            disableIntervalField(which);
+            streak = 0;
+            if (!missRecorded) recordStat('domain-range', currentProblem.subtype, false);
+            maybeAdvanceAfterBothFieldsResolved();
+        }
+    }
+    updateDisplay(); saveState();
+}
+
+function checkReadGraphAnswer() {
+    var raw = document.getElementById('rg-input').value;
+    if (!raw.trim()) { handleFormatIssue('Please enter a value.'); return; }
+    var parts = raw.split(',').map(function (s) { return s.trim(); }).filter(function (s) { return s.length > 0; });
+    var nums = parts.map(parseStrictNumber);
+    if (!nums.length || nums.some(isNaN)) { handleFormatIssue('Please enter number(s) only, separated by a comma if more than one.'); return; }
+    nums.sort(function (a, b) { return a - b; });
+    var expected = currentProblem.answer.slice().sort(function (a, b) { return a - b; });
+    var ok = nums.length === expected.length && nums.every(function (v, i) { return Math.abs(v - expected[i]) < 1e-6; });
+    if (ok) { handleResolution(true); return; }
+    var msg = (expected.length > 1 && nums.length < expected.length) ? 'You found one, but there\'s another value too \u2014 look again!' : undefined;
+    handleResolution(false, msg);
+}
+
+function checkEvaluateAnswer() {
+    var raw = document.getElementById('ev-input').value;
+    if (!raw.trim()) { handleFormatIssue('Please enter a value.'); return; }
+    if (currentProblem.isSolve) {
+        var parts = raw.split(',').map(function (s) { return s.trim(); }).filter(function (s) { return s.length > 0; });
+        var nums = parts.map(parseStrictNumber);
+        if (!nums.length || nums.some(isNaN)) { handleFormatIssue('Please enter number(s) only, separated by a comma if more than one.'); return; }
+        nums.sort(function (a, b) { return a - b; });
+        var expected = currentProblem.answer.slice().sort(function (a, b) { return a - b; });
+        var ok = nums.length === expected.length && nums.every(function (v, i) { return Math.abs(v - expected[i]) < 1e-6; });
+        if (ok) { handleResolution(true); return; }
+        var msg = (expected.length > 1 && nums.length < expected.length) ? 'You found one, but there\'s another value too \u2014 look again!' : undefined;
+        handleResolution(false, msg);
+    } else {
+        var val = parseStrictNumber(raw);
+        if (isNaN(val)) { handleFormatIssue('Please enter a number.'); return; }
+        var ok = Math.abs(val - currentProblem.answer) < 1e-6;
+        handleResolution(ok);
+    }
+}
+
+function checkIsFunctionAnswer(userSaysYes) {
+    if (currentMode !== 'is-function') return;
+    var ok = (userSaysYes === currentProblem.isFunction);
+    handleResolution(ok);
+}
+
+function checkAnswer() {
+    if (currentMode === 'read-graph') checkReadGraphAnswer();
+    else if (currentMode === 'evaluate') checkEvaluateAnswer();
+}
+
+/* =====================================================================
+   Mode switching, stats panel, display, persistence
+   ===================================================================== */
+function setMode(mode) {
+    currentMode = mode;
+    var btns = document.querySelectorAll('.mode-btn');
+    for (var i = 0; i < btns.length; i++) {
+        var isActive = btns[i].getAttribute('data-mode') === mode;
+        btns[i].classList.toggle('active', isActive);
+        btns[i].setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    }
+    renderStatsPanel();
+    generateProblem();
+}
+
+function renderStatsPanel() {
+    var html = '<div class="progress-cups">';
+    modeOrder.forEach(function (mode) {
+        var totalAttempts = 0, totalCorrect = 0;
+        Object.keys(stats[mode]).forEach(function (t) {
+            totalAttempts += stats[mode][t].attempts;
+            totalCorrect += stats[mode][t].correct;
+        });
+        var acc = totalAttempts > 0 ? totalCorrect / totalAttempts : 0;
+        var fillClass = totalAttempts === 0 ? '' : (acc >= 0.8 ? 'full' : (acc >= 0.5 ? 'half' : 'partial'));
+        var fillHeight = totalAttempts === 0 ? 0 : Math.round(acc * 100);
+        html += '<div class="cup-container"><div class="cup-label">' + modeLabels[mode] + '</div>' +
+                '<div class="cup"><div class="cup-fill ' + fillClass + '" style="height:' + fillHeight + '%"></div></div>' +
+                '<div class="cup-stats">' + (totalAttempts > 0 ? totalCorrect + '/' + totalAttempts : 'no data yet') + '</div></div>';
+    });
+    html += '</div>';
+    document.getElementById('stats-panel').innerHTML = html;
+}
+
+function updateDisplay() {
+    document.getElementById('problemNum').textContent = problemCount + 1;
+    document.getElementById('streakVal').textContent = streak;
+    document.getElementById('bestStreakVal').textContent = bestStreak;
+    var sd = document.getElementById('streak-display');
+    sd.className = streak >= 5 ? 'info-item streak-hot' : 'info-item';
+    var totalC = 0, totalT = 0;
+    Object.keys(stats).forEach(function (m) {
+        Object.keys(stats[m]).forEach(function (t) { totalC += stats[m][t].correct; totalT += stats[m][t].attempts; });
+    });
+    document.getElementById('accVal').textContent = totalT > 0 ? Math.round(totalC / totalT * 100) + '%' : '--';
+    renderStatsPanel();
+}
+
+function saveState() {
+    try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify({ stats: stats, bestStreak: bestStreak, problemCount: problemCount }));
+    } catch (e) { /* storage unavailable -- play without saving */ }
+}
+
+/* Coerce anything read back from localStorage to a plain bounded integer.
+   Flooring alone still let 1e308 (or 1e9) through into the header and the cup
+   labels; MAX_COUNT keeps every derived figure printable and finite. */
+var MAX_COUNT = 1000000;
+function sanitizeCount(v) {
+    var n = Number(v);
+    if (!isFinite(n) || n < 0) return 0;
+    n = Math.floor(n);
+    return n > MAX_COUNT ? MAX_COUNT : n;
+}
+
+function loadState() {
+    try {
+        var raw = localStorage.getItem(SAVE_KEY);
+        if (!raw) return;
+        var st = JSON.parse(raw);
+        if (st && st.stats) {
+            Object.keys(stats).forEach(function (m) {
+                Object.keys(stats[m]).forEach(function (t) {
+                    var src = st.stats[m] && st.stats[m][t];
+                    if (!src || typeof src !== 'object') return;
+                    var attempts = sanitizeCount(src.attempts);
+                    var correct = sanitizeCount(src.correct);
+                    if (correct > attempts) correct = attempts;
+                    stats[m][t] = { attempts: attempts, correct: correct };
+                });
+            });
+        }
+        bestStreak = sanitizeCount(st && st.bestStreak);
+        problemCount = sanitizeCount(st && st.problemCount);
+    } catch (e) { /* corrupt or unavailable storage -- start fresh */ }
+}
+
+var resetArmed = false;
+var resetTimer = null;
+function confirmReset() {
+    if (!resetArmed) {
+        resetArmed = true;
+        var btns = document.querySelectorAll('.reset-btn');
+        for (var i = 0; i < btns.length; i++) btns[i].textContent = 'Tap again to confirm';
+        resetTimer = setTimeout(function () {
+            resetArmed = false;
+            var b2 = document.querySelectorAll('.reset-btn');
+            for (var j = 0; j < b2.length; j++) b2[j].textContent = 'Reset Progress';
+        }, 4000);
+        return;
+    }
+    clearTimeout(resetTimer);
+    resetArmed = false;
+    Object.keys(stats).forEach(function (m) {
+        Object.keys(stats[m]).forEach(function (t) { stats[m][t] = { attempts: 0, correct: 0 }; });
+    });
+    streak = 0;
+    bestStreak = 0;
+    problemCount = 0;
+    saveState();
+    var btns2 = document.querySelectorAll('.reset-btn');
+    for (var k = 0; k < btns2.length; k++) btns2[k].textContent = 'Reset Progress';
+    generateProblem();
+    updateDisplay();
+}
+
+/* =====================================================================
+   Confetti
+   ===================================================================== */
+function celebrateStreak(s) {
+    if (s === 0 || s % 5 !== 0) return;
+    if (s % 10 === 0) createConfetti(200, 3);
+    else createConfetti(100, 2);
+}
+
+/* Design item 9: the switch lives under its own localStorage key, so clearing
+   progress does not silently switch the animation back on. Every access is
+   wrapped -- storage can throw outright in private-mode Safari. */
+var CONFETTI_KEY = 'domainRangeConfetti_v1';
+var confettiEnabled = true;
+function loadConfettiSetting() {
+    try {
+        var v = localStorage.getItem(CONFETTI_KEY);
+        if (v === '0') confettiEnabled = false;
+        else if (v === '1') confettiEnabled = true;
+    } catch (e) { /* storage unavailable -- default to on */ }
+}
+function syncConfettiSwitch() {
+    var btn = document.getElementById('confetti-switch');
+    if (btn) btn.setAttribute('aria-pressed', confettiEnabled ? 'true' : 'false');
+}
+function toggleConfettiSetting() {
+    confettiEnabled = !confettiEnabled;
+    try { localStorage.setItem(CONFETTI_KEY, confettiEnabled ? '1' : '0'); } catch (e) {}
+    syncConfettiSwitch();
+}
+
+function createConfetti(count, tier) {
+    if (!confettiEnabled) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var host = document.body;
+    /* Design-system confetti palette (the one place orange is permitted). */
+    /* Design item 10: '#ef4444' (red, not in the palette) and '#f59e0b'
+       (orange, banned outright) swapped for mint '#10b981' and heritage
+       rose '#c76b8f'. Still eight colours. */
+    var colors = ['#7c3aed', '#22c55e', '#2e3d8f', '#c76b8f', '#10b981', '#ffeb3b', '#0d9488', '#a78bfa'];
+    var isMassive = tier === 3;
+    for (var i = 0; i < count; i++) {
+        var piece = document.createElement('div');
+        piece.className = 'confetti';
+        piece.setAttribute('aria-hidden', 'true');
+        var base;
+        if (tier === 1) base = 7 + Math.random() * 5;
+        else if (tier === 2) base = 10 + Math.random() * 7;
+        else base = 11 + Math.random() * 9;
+        var color = colors[Math.floor(Math.random() * colors.length)];
+        var shape = Math.floor(Math.random() * 4);
+        if (shape === 0) {
+            piece.style.width = base + 'px'; piece.style.height = base + 'px';
+            piece.style.background = color; piece.style.borderRadius = '50%';
+        } else if (shape === 1) {
+            piece.style.width = base + 'px'; piece.style.height = base + 'px';
+            piece.style.background = color; piece.style.borderRadius = '2px';
+        } else if (shape === 2) {
+            piece.style.width = Math.max(4, base * 0.35) + 'px'; piece.style.height = (base * 1.7) + 'px';
+            piece.style.background = color; piece.style.borderRadius = '2px';
+        } else {
+            piece.style.width = '0'; piece.style.height = '0'; piece.style.background = 'transparent';
+            piece.style.borderLeft = (base * 0.6) + 'px solid transparent';
+            piece.style.borderRight = (base * 0.6) + 'px solid transparent';
+            piece.style.borderBottom = base + 'px solid ' + color;
+        }
+        piece.style.left = Math.random() * 100 + '%';
+        piece.style.top = '-20px';
+        var dur;
+        if (tier === 1) dur = 1.6 + Math.random() * 1.0;
+        else if (tier === 2) dur = 2.0 + Math.random() * 1.5;
+        else dur = 2.5 + Math.random() * 2.0;
+        piece.style.animation = (isMassive ? 'confetti-fall-slow' : 'confetti-fall') + ' ' + dur + 's ease-out forwards';
+        piece.style.animationDelay = (Math.random() * (isMassive ? 0.8 : 0.4)) + 's';
+        host.appendChild(piece);
+        setTimeout(function (el) { return function () { if (el.parentNode) el.parentNode.removeChild(el); }; }(piece), isMassive ? 6000 : 4500);
+    }
+}
+
+/* =====================================================================
+   Boot
+   ===================================================================== */
+loadState();
+loadConfettiSetting();
+syncConfettiSwitch();
+renderStatsPanel();
+generateProblem();
+updateDisplay();
+bootComplete = true;
+</script>
+</body>
+</html>
