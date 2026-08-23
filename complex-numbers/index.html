@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Defence in depth: the page is entirely self-contained apart from the Google
+     Fonts stylesheet, so nothing else is allowed to load or run. Inline scripts
+     and styles stay permitted because this game is built from inline handlers. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data:; base-uri 'none'; form-action 'none'">
+<title>Complex Numbers Practice</title>
+<meta name="theme-color" content="#1b2450">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+    /* ===== MIDNIGHT SCHOLAR - navy stage, white card, violet + mint accents ===== */
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+        background:
+            radial-gradient(900px 500px at 85% -10%, rgba(124, 58, 237, 0.28), transparent 60%),
+            radial-gradient(800px 500px at -10% 110%, rgba(16, 185, 129, 0.18), transparent 55%),
+            linear-gradient(160deg, #141b3d 0%, #1b2450 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 16px 12px;
+        margin: 0;
+    }
+    .card {
+        background: #ffffff;
+        border-radius: 22px;
+        box-shadow: 0 24px 60px rgba(8, 12, 40, 0.55);
+        max-width: 700px;
+        width: 100%;
+        padding: 30px 24px 26px;
+        position: relative;
+        overflow: hidden;
+    }
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+    }
+    /* The heading box shrinks to its text so the rule below can match it. */
+    h1 {
+        text-align: center;
+        color: #1e2a5e;
+        margin: 4px auto 6px;
+        font-size: 25px;
+        letter-spacing: 0.3px;
+        width: fit-content;
+        max-width: 100%;
+    }
+    /* Sample item S4: the gradient rule is exactly as wide as the title
+       text, at any title length. */
+    h1::after {
+        content: '';
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        height: 4px;
+        border-radius: 2px;
+        margin: 8px auto 14px;
+        background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+    }
+    .mode-btns {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 10px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    .mode-btns::-webkit-scrollbar { display: none; }
+    .mode-btn {
+        background: #e6e9f6;
+        color: #4a5480;
+        border: none;
+        border-radius: 999px;
+        padding: 9px 16px;
+        font-size: 13px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.15s;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        font-family: inherit;
+    }
+    .mode-btn:hover { background: #d9def2; }
+    .mode-btn.addsub-btn {
+        font-size: 11px;
+        white-space: nowrap;
+    }
+    .mode-btn.active {
+        background: linear-gradient(135deg, #1e3a5f, #0b7a70) !important;
+        color: #ffffff !important;
+    }
+    .subtab-btns {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+    .subtab-btn {
+        background: #e6e9f6;
+        color: #4a5480;
+        border: none;
+        border-radius: 999px;
+        padding: 8px 15px;
+        font-size: 12.5px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.15s;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        font-family: inherit;
+    }
+    .subtab-btn:hover { background: #d9def2; }
+    .subtab-btn.active {
+        background: #0b7a70 !important;
+        color: #ffffff !important;
+    }
+    .chip-note {
+        text-align: center;
+        font-size: 12.5px;
+        font-weight: 800;
+        background: #f3eefe;
+        color: #6d28d9;
+        border: 2px solid #d8ccf7;
+        border-radius: 12px;
+        padding: 7px 10px;
+        margin: 0 auto 12px;
+        max-width: 260px;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    }
+    .problem {
+        font-size: 30px;
+        font-weight: 800;
+        text-align: center;
+        margin: 10px auto 18px;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+        color: #1e2a5e;
+        background: #eef0fb;
+        border: 2px solid #c7cdf0;
+        border-radius: 14px;
+        padding: 22px 14px;
+        max-width: 100%;
+        overflow-wrap: break-word;
+        letter-spacing: 0.5px;
+    }
+    .problem.compact {
+        font-size: 22px;
+        letter-spacing: 0.2px;
+        white-space: nowrap;
+    }
+    /* Radical: stretching inline SVG whose tip joins the overbar as one stroke.
+       Never a bare &radic; glyph + border-top -- the glyph hook can't meet the bar. */
+    .radical {
+        display: inline-flex;
+        align-items: stretch;
+        vertical-align: middle;
+    }
+    .radical-sign {
+        width: 18px;
+        flex: 0 0 18px;
+        display: flex;
+        margin-right: -1px;
+        position: relative;
+    }
+    .radical-sign svg {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+    .radical-body {
+        border-top: 2px solid currentColor;
+        padding-top: 4px;
+        padding-right: 5px;
+    }
+    .radical-sm { line-height: 1; }
+    .radical-sm .radical-sign { width: 12px; flex: 0 0 12px; }
+    .radical-sm .radical-body { border-top-width: 2px; padding-top: 2px; padding-right: 3px; }
+    /* Fraction: real stacked fraction, never a slash. */
+    .frac {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: stretch;
+        vertical-align: middle;
+        margin: 0 4px;
+        line-height: 1.25;
+    }
+    .frac-num, .frac-den {
+        padding: 3px 10px;
+        text-align: center;
+    }
+    .frac-bar {
+        height: 3px;
+        border-radius: 2px;
+        background: currentColor;
+        width: 100%;
+    }
+    button:focus, input:focus, [tabindex]:focus {
+        outline: 3px solid #7c3aed;
+        outline-offset: 2px;
+        transition: none;
+    }
+    :focus-visible {
+        outline: 3px solid #7c3aed;
+        outline-offset: 2px;
+        transition: none;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .confetti { display: none !important; }
+        * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+    .sr-only {
+        position: absolute;
+        width: 1px; height: 1px;
+        padding: 0; margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+    .instructions {
+        text-align: center;
+        color: #5d6798;
+        font-size: 14px;
+        margin: 6px 0 12px;
+    }
+    .input-area {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin: 16px 0;
+        flex-wrap: wrap;
+    }
+    .eq-label {
+        font-size: 24px;
+        font-weight: 800;
+        color: #1e2a5e;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    }
+    .answer-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+    }
+    .insert-row {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+    }
+    .insert-row .key-btn {
+        min-width: 46px;
+        font-size: 18px;
+        font-weight: 800;
+    }
+    input[type="text"] {
+        width: 90px;
+        font-size: 24px;
+        font-weight: 800;
+        text-align: center;
+        padding: 10px;
+        border: 3px solid #7c3aed;
+        border-radius: 12px;
+        color: #1e2a5e;
+        background: #ffffff;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    }
+    input[type="text"]:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18);
+    }
+    button {
+        padding: 12px 22px;
+        font-size: 15px;
+        font-weight: 800;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.15s;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        font-family: inherit;
+    }
+    button:active { transform: scale(0.95); }
+    .submit-btn {
+        background: linear-gradient(135deg, #2e3d8f, #4b3bbd);
+        color: white;
+        box-shadow: 0 6px 16px rgba(46, 61, 143, 0.35);
+    }
+    .submit-btn:hover { filter: brightness(1.1); }
+    .next-btn {
+        background: linear-gradient(135deg, #1e3a5f, #0b7a70);
+        color: white;
+        box-shadow: 0 6px 16px rgba(13, 148, 136, 0.35);
+    }
+    .next-btn:hover { filter: brightness(1.1); }
+    .skip-btn {
+        background: #eef0fb;
+        color: #4a5480;
+        box-shadow: none;
+    }
+    .skip-btn:hover { background: #d9def2; }
+    .key-btn {
+        background: #e6e9f6;
+        color: #2e3d8f;
+        padding: 12px 14px;
+        font-size: 16px;
+        border-radius: 12px;
+    }
+    .key-btn:hover { background: #d9def2; }
+    .feedback {
+        text-align: center;
+        font-size: 19px;
+        font-weight: 800;
+        margin: 10px 0 8px;
+        min-height: 32px;
+    }
+    .feedback:not(:empty) {
+        padding: 8px 14px;
+        border-radius: 10px;
+    }
+    .feedback.correct { background: #ecfdf5; border: 2px solid #34d399; color: #059669; }
+    .feedback.incorrect { background: #f3eefe; border: 2px solid #d8ccf7; color: #1e2a5e; font-size: 16px; font-weight: 700; }
+    .action-row {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin: 6px 0 4px;
+        flex-wrap: wrap;
+    }
+    .helper-row {
+        text-align: center;
+        margin: 12px 0 4px;
+    }
+    /* Design item 24: the hint button joins the same violet helper family as
+       Show Solution -- #f3eefe on #6d28d9 is 7.53:1, comfortably AA. */
+    .solution-btn, .hint-btn, .stats-btn, .reset-btn {
+        background: #f3eefe;
+        color: #6d28d9;
+        margin: 4px;
+        font-size: 13px;
+        padding: 10px 16px;
+    }
+    .solution-btn:hover, .hint-btn:hover { background: #e9defc; }
+    .stats-btn {
+        background: #ecfdf5;
+        color: #047857;
+    }
+    .stats-btn:hover { background: #d1fae5; }
+    .reset-btn {
+        background: #eef0fb;
+        color: #4a5480;
+    }
+    .reset-btn:hover { background: #d9def2; }
+    .solution-box {
+        background: #f7f5ff;
+        border: 2px solid #d8ccf7;
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin: 10px 0;
+        font-size: 14px;
+        color: #1e2a5e;
+        display: none;
+    }
+    .solution-line {
+        margin: 6px 0;
+    }
+    .solution-line .step-label {
+        color: #5d6798;
+        font-size: 13px;
+    }
+    .solution-line .step-line {
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+        font-weight: 800;
+        margin-left: 6px;
+    }
+    /* Design item 24: the hint panel. Violet hint-box background from the
+       system; ink navy text on #f3eefe is 12.4:1. */
+    .hint-box {
+        background: #f3eefe;
+        border: 2px solid #d8ccf7;
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin: 10px 0;
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1.5;
+        color: #1e2a5e;
+        text-align: left;
+        display: none;
+    }
+    .settings-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin: 16px 0 4px;
+        font-size: 13px;
+        color: #4a5480;
+    }
+    .toggle-switch {
+        width: 44px;
+        height: 24px;
+        background: #d5d9e8;
+        border-radius: 999px;
+        position: relative;
+        cursor: pointer;
+        transition: background 0.2s;
+        flex-shrink: 0;
+    }
+    .toggle-switch.on { background: #10b981; }
+    .toggle-knob {
+        position: absolute;
+        top: 3px; left: 3px;
+        width: 18px; height: 18px;
+        background: white;
+        border-radius: 50%;
+        transition: left 0.2s;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .toggle-switch.on .toggle-knob { left: 23px; }
+    .divider {
+        border: none;
+        border-top: 2px solid #e6e9f6;
+        margin: 18px 0 12px;
+    }
+    .stats-panel {
+        font-size: 14px;
+        color: #1e2a5e;
+    }
+    /* The stats panel heading is an h2 (a page must have exactly one h1);
+       these rules reproduce the previous h1 appearance exactly. */
+    .stats-panel h2 {
+        text-align: center;
+        color: #1e2a5e;
+        margin: 4px 0 6px;
+        font-size: 20px;
+        letter-spacing: 0.3px;
+    }
+    .stats-panel h2::after {
+        content: '';
+        display: block;
+        width: 100%;
+        max-width: 340px;
+        height: 4px;
+        border-radius: 2px;
+        margin: 8px auto 14px;
+        background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+    }
+    .stat-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 8px 0 2px;
+    }
+    .stat-name {
+        width: 130px;
+        font-weight: 800;
+        font-size: 13px;
+        flex-shrink: 0;
+    }
+    .stat-bar-wrap {
+        flex: 1;
+        background: #eef0fb;
+        border-radius: 999px;
+        height: 10px;
+        overflow: hidden;
+    }
+    .stat-bar { height: 100%; border-radius: 999px; }
+    .stat-bar.high { background: #10b981; }
+    .stat-bar.mid { background: #7c3aed; }
+    .stat-bar.low { background: #2e3d8f; }
+    .stat-num {
+        width: 92px;
+        font-size: 12.5px;
+        color: #5d6798;
+        text-align: right;
+        flex-shrink: 0;
+    }
+    .stats-actions {
+        text-align: center;
+        margin-top: 14px;
+    }
+    .insignia {
+        display: block;
+        margin: 20px auto 4px;
+        width: 62px;
+        opacity: 0.9;
+    }
+    .insignia-caption {
+        text-align: center;
+        font-size: 6.5px;
+        letter-spacing: 1.2px;
+        color: #5d6798;
+        opacity: 0.9;
+        margin-top: 2px;
+    }
+    .confetti {
+        position: fixed;
+        top: -20px;
+        pointer-events: none;
+        z-index: 9999;
+    }
+    @keyframes confetti-fall {
+        to { transform: translateY(112vh) rotate(360deg); opacity: 1; }
+    }
+    @keyframes confetti-fall-slow {
+        to { transform: translateY(115vh) rotate(540deg); opacity: 1; }
+    }
+    @media (max-width: 480px) {
+        .card { padding: 22px 16px 20px; }
+        h1 { font-size: 21px; }
+        .problem { font-size: 24px; padding: 18px 10px; }
+        .problem.compact { font-size: 17px; padding: 16px 8px; }
+        input[type="text"] { width: 76px; font-size: 20px; }
+        input.free-input { width: 130px !important; font-size: 20px; }
+        .eq-label { font-size: 20px; }
+    }
+</style>
+</head>
+<body>
+<main class="card">
+    <h1>Complex Numbers Practice</h1>
+
+    <div class="mode-btns" id="category-btns">
+        <button class="mode-btn active" aria-pressed="true" data-category="simplify" onclick="setCategory('simplify')">Simplify</button>
+        <button class="mode-btn addsub-btn" aria-pressed="false" data-category="addsub" onclick="setCategory('addsub')">Add &amp; Subtract</button>
+        <button class="mode-btn" aria-pressed="false" data-category="multiply" onclick="setCategory('multiply')">Multiply</button>
+        <button class="mode-btn" aria-pressed="false" data-category="divide" onclick="setCategory('divide')">Divide</button>
+    </div>
+    <div class="subtab-btns" id="subtab-btns"></div>
+
+    <div id="main-content">
+        <p class="sr-only" id="announcer" aria-live="polite" aria-atomic="true"></p>
+        <div class="instructions" id="instructions"></div>
+        <div class="problem" id="problem-display" aria-hidden="true"></div>
+        <div class="chip-note" id="chip-note" style="display:none;" aria-hidden="true"></div>
+
+        <div class="input-area" id="answer-area"></div>
+
+        <div class="feedback" id="feedback" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+        <div class="action-row" id="action-row">
+            <button class="submit-btn" onclick="checkAnswer()" id="submit-btn">Check Answer</button>
+            <button class="skip-btn" onclick="skipProblem()" id="skip-btn">Skip</button>
+            <button class="next-btn" onclick="nextProblem()" id="next-btn" style="display:none;">Next Problem</button>
+        </div>
+
+        <div class="helper-row">
+            <button class="hint-btn" id="hint-btn" aria-expanded="false" aria-controls="hint-box" onclick="toggleHint()">Show Hint</button>
+            <button class="solution-btn" id="solution-btn" onclick="revealSolutionStep()">Show Solution</button>
+        </div>
+        <!-- Design item 24: a hint is free help, not a reveal. role=status so
+             the text is announced when it appears, without stealing focus. -->
+        <div class="hint-box" id="hint-box" role="status" aria-live="polite" aria-atomic="true"></div>
+        <div class="solution-box" id="solution-box"></div>
+    </div>
+
+    <hr class="divider">
+    <div style="text-align:center;">
+        <button class="stats-btn" onclick="showStats()">My Stats</button>
+    </div>
+
+    <div class="settings-row">
+        <span>Confetti celebrations</span>
+        <button type="button" class="toggle-switch on" id="confetti-toggle" aria-pressed="true" aria-label="Confetti celebrations" onclick="toggleConfettiSetting()"><span class="toggle-knob"></span></button>
+    </div>
+
+    <!-- Purely decorative studio mark: it carries no title, so it says nothing
+         useful to a screen reader. Hidden, matching the rest of the suite. -->
+    <svg class="insignia" viewBox="-28 -26 56 64" aria-hidden="true" focusable="false" role="presentation">
+        <defs>
+            <linearGradient id="pr-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1e3a5f"/>
+                <stop offset="100%" stop-color="#0d9488"/>
+            </linearGradient>
+        </defs>
+        <path id="pr-path" fill="none" stroke="url(#pr-grad)" stroke-width="1.7"/>
+    </svg>
+    <div class="insignia-caption">POLAR ROSE STUDIO</div>
+</main>
+
+<script>
+/* =====================================================================
+   Polar rose insignia path
+   ===================================================================== */
+(function () {
+    var d = '';
+    var steps = 240;
+    for (var i = 0; i <= steps; i++) {
+        var t = (i / steps) * 4 * Math.PI;
+        var r = 2 * Math.cos(1.5 * t);
+        var x = r * Math.cos(t) * 12;
+        var y = r * Math.sin(t) * 12;
+        d += (i === 0 ? 'M ' : 'L ') + x.toFixed(2) + ' ' + y.toFixed(2) + ' ';
+    }
+    var el = document.getElementById('pr-path');
+    if (el) el.setAttribute('d', d.trim());
+})();
+
+/* =====================================================================
+   State
+   ===================================================================== */
+var SAVE_KEY = 'complex-numbers-stats-v1';
+var category = 'simplify';     // 'simplify' | 'multiply' | 'addsub'
+var subMode = 'perfect';       // simplify: perfect|notperfect ; multiply: ii|distribute ; addsub: n/a
+
+var streak = 0, bestStreak = 0, problemNum = 0;
+var confettiOn = true;
+var current = null;
+var solutionStepIndex = 0;
+var awaitingNext = false;
+var revealCounted = false;     // has this problem already been charged for a reveal?
+
+var stats = {
+    'simplify-perfect':     { c: 0, t: 0, shown: 0 },
+    'simplify-notperfect':  { c: 0, t: 0, shown: 0 },
+    'multiply-ii':          { c: 0, t: 0, shown: 0 },
+    'multiply-distribute':  { c: 0, t: 0, shown: 0 },
+    'addsub':               { c: 0, t: 0, shown: 0 },
+    'divide':               { c: 0, t: 0, shown: 0 }
+};
+var lastValues = {}; // anti-repeat memory per mode key (stores last generated N/pair string)
+
+var statNames = {
+    'simplify-perfect': 'Simplify: Perfect Sq.',
+    'simplify-notperfect': 'Simplify: Not Perfect',
+    'multiply-ii': 'Multiply: i times i',
+    'multiply-distribute': 'Multiply: Distribute',
+    'addsub': 'Add & Subtract',
+    'divide': 'Divide'
+};
+
+function modeKey() {
+    if (category === 'addsub') return 'addsub';
+    if (category === 'divide') return 'divide';
+    return category + '-' + subMode;
+}
+
+/* =====================================================================
+   Math helpers
+   ===================================================================== */
+function randInt(min, max) { return min + Math.floor(Math.random() * (max - min + 1)); }
+function randNonZero(min, max) {
+    var v;
+    do { v = randInt(min, max); } while (v === 0);
+    return v;
+}
+// Largest perfect-square extraction: N = coeff^2 * radicand, radicand minimal.
+function simplifyRadical(N) {
+    for (var d = Math.floor(Math.sqrt(N)); d >= 1; d--) {
+        if (N % (d * d) === 0) return { coeff: d, radicand: N / (d * d) };
+    }
+    return { coeff: 1, radicand: N };
+}
+// "2i", "-2i", "i", "-i"
+function fmtCoeffI(c) {
+    if (c === 1) return 'i';
+    if (c === -1) return '-i';
+    return c + 'i';
+}
+// "a + bi" / "a - bi" with proper sign and coeff-1 handling for b
+function fmtComplex(a, b) {
+    var absB = Math.abs(b);
+    var imStr = (absB === 1 ? 'i' : absB + 'i');
+    var sign = b >= 0 ? '+' : '-';
+    return a + ' ' + sign + ' ' + imStr;
+}
+// Renders sqrt(inner) with a real vinculum (line) over the radicand via CSS border-top,
+// e.g. radicalHTML('-9') -> the radical symbol followed by an overlined "-9".
+function radicalHTML(inner, small) {
+    return '<span class="radical' + (small ? ' radical-sm' : '') + '">' +
+        '<span class="radical-sign">' +
+        '<svg viewBox="0 0 14 40" preserveAspectRatio="none" aria-hidden="true">' +
+        '<path d="M0.5,24 L4,24 L7.5,37.5 L12.5,1 L14,1" fill="none" stroke="currentColor" ' +
+        'stroke-width="2" vector-effect="non-scaling-stroke" ' +
+        'stroke-linecap="round" stroke-linejoin="round"/>' +
+        '</svg></span>' +
+        '<span class="radical-body">' + inner + '</span>' +
+        '</span>';
+}
+// Real stacked fraction (design system .frac / .frac-bar spec).
+function fractionHTML(numerHTML, denomHTML) {
+    return '<span class="frac">' +
+        '<span class="frac-num">' + numerHTML + '</span>' +
+        '<span class="frac-bar"></span>' +
+        '<span class="frac-den">' + denomHTML + '</span>' +
+        '</span>';
+}
+
+/* ---------------------------------------------------------------------
+   Spoken forms. The radical and the fraction carry their meaning in CSS
+   layout (an SVG stroke and a bar div), which a screen reader cannot see.
+   Every generator therefore also supplies a `spoken` string, and the
+   visual problem is aria-hidden so this is the only thing announced.
+   --------------------------------------------------------------------- */
+function spokenNum(n) {
+    return (n < 0 ? 'negative ' + Math.abs(n) : String(n));
+}
+function spokenCoeffI(c) {
+    if (c === 1) return 'i';
+    if (c === -1) return 'negative i';
+    return spokenNum(c) + ' i';
+}
+function spokenComplex(a, b) {
+    var absB = Math.abs(b);
+    var imStr = (absB === 1 ? 'i' : absB + ' i');
+    return spokenNum(a) + (b >= 0 ? ' plus ' : ' minus ') + imStr;
+}
+function pickAvoidingRepeat(pool, key) {
+    if (pool.length === 1) return pool[0];
+    var v;
+    var tries = 0;
+    do {
+        v = pool[Math.floor(Math.random() * pool.length)];
+        tries++;
+    } while (v === lastValues[key] && tries < 10);
+    lastValues[key] = v;
+    return v;
+}
+
+/* =====================================================================
+   Generators
+   ===================================================================== */
+function genSimplifyPerfect(shown) {
+    var perfectList = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144];
+    var pool = shown < 4 ? perfectList.filter(function (n) { return n <= 25; }) : perfectList;
+    var N = pickAvoidingRepeat(pool, 'simplify-perfect');
+    var k = Math.round(Math.sqrt(N));
+    return {
+        promptHTML: radicalHTML('-' + N),
+        spoken: 'The square root of negative ' + N + '.',
+        type: 'single-i',
+        answer: { b: k },
+        showChip: shown < 4,
+        chipText: 'i = ' + radicalHTML('-1', true),
+        chipSpoken: 'Reminder: i equals the square root of negative one.',
+        hint: 'Pull the -1 out first: sqrt(-N) = i * sqrt(N). Then find sqrt(N).',
+        solutionSteps: [
+            { label: 'Split into two radicals:', line: radicalHTML('-' + N) + ' = ' + radicalHTML('-1') + ' &middot; ' + radicalHTML(N) },
+            { label: 'Evaluate each radical:', line: 'i &middot; ' + k },
+            { label: 'Result:', line: fmtCoeffI(k) }
+        ]
+    };
+}
+
+function genSimplifyNotPerfect(shown) {
+    var earlySet = [8, 12, 18, 20];
+    var mFull = [2, 3, 5, 6, 7, 10, 11, 13, 14, 15];
+    var N;
+    if (shown < 3) {
+        N = pickAvoidingRepeat(earlySet, 'simplify-notperfect');
+    } else if (Math.random() < 0.2) {
+        var k2 = randInt(2, 12);
+        N = k2 * k2;
+        if (N === lastValues['simplify-notperfect']) N = (k2 + 1) * (k2 + 1);
+        lastValues['simplify-notperfect'] = N;
+    } else {
+        var k = randInt(2, 6);
+        var m = mFull[Math.floor(Math.random() * mFull.length)];
+        N = k * k * m;
+        var tries = 0;
+        while (N === lastValues['simplify-notperfect'] && tries < 8) {
+            k = randInt(2, 6);
+            m = mFull[Math.floor(Math.random() * mFull.length)];
+            N = k * k * m;
+            tries++;
+        }
+        lastValues['simplify-notperfect'] = N;
+    }
+    var s = simplifyRadical(N);
+    var isWhole = s.radicand === 1;
+    return {
+        promptHTML: radicalHTML('-' + N),
+        spoken: 'The square root of negative ' + N + '.',
+        type: 'coeff-radical',
+        answer: { coeff: s.coeff, radicand: s.radicand },
+        N: N,
+        isWhole: isWhole,
+        hint: 'Find the largest perfect square that divides ' + N + '. Its square root comes out front; the rest stays under the radical.',
+        solutionSteps: [
+            { label: 'Split into two radicals:', line: radicalHTML('-' + N) + ' = ' + radicalHTML('-1') + ' &middot; ' + radicalHTML(N) },
+            { label: 'Find the largest perfect square factor of ' + N + ':', line: N + ' = ' + (s.coeff * s.coeff) + ' &middot; ' + s.radicand },
+            { label: 'Evaluate and combine:', line: isWhole ? ('i &middot; ' + s.coeff) : ('i &middot; ' + s.coeff + radicalHTML(s.radicand)) },
+            { label: 'Result:', line: isWhole ? (s.coeff + 'i') : (s.coeff + 'i' + radicalHTML(s.radicand)) }
+        ]
+    };
+}
+
+function genMultiplyII(shown) {
+    var a, b;
+    if (shown < 3) {
+        a = randInt(2, 5);
+        b = randInt(2, 5);
+    } else {
+        a = randNonZero(-9, 9);
+        b = randNonZero(-9, 9);
+    }
+    var key = 'multiply-ii';
+    var pairKey = a + ',' + b;
+    var tries = 0;
+    while (pairKey === lastValues[key] && tries < 6) {
+        if (shown < 3) { a = randInt(2, 5); b = randInt(2, 5); }
+        else { a = randNonZero(-9, 9); b = randNonZero(-9, 9); }
+        pairKey = a + ',' + b;
+        tries++;
+    }
+    lastValues[key] = pairKey;
+    var answer = -(a * b);
+    return {
+        promptHTML: '(' + fmtCoeffI(a) + ')(' + fmtCoeffI(b) + ')',
+        spoken: spokenCoeffI(a) + ', times ' + spokenCoeffI(b) + '.',
+        type: 'single-real',
+        answer: { val: answer },
+        showChip: shown < 4,
+        chipText: 'i&sup2; = -1',
+        chipSpoken: 'Reminder: i squared equals negative one.',
+        hint: 'Multiply the coefficients, and remember i times i is i-squared, which equals -1.',
+        solutionSteps: [
+            { label: 'Multiply straight across:', line: '(' + fmtCoeffI(a) + ')(' + fmtCoeffI(b) + ') = ' + (a * b) + 'i&sup2;' },
+            { label: 'Use i&sup2; = -1:', line: (a * b) + ' &middot; (-1) = ' + answer }
+        ]
+    };
+}
+
+function genMultiplyDistribute(shown) {
+    var c, d, e, form;
+    if (shown < 3) {
+        c = randInt(1, 5);
+        d = randNonZero(-9, 9);
+        form = 'A';
+    } else {
+        c = randNonZero(-5, 5);
+        d = randNonZero(-9, 9);
+        e = randNonZero(-9, 9);
+        var forms = ['A', 'B', 'C'];
+        form = forms[Math.floor(Math.random() * forms.length)];
+    }
+    var real, imag, inner, distributedLine;
+    if (form === 'A') {
+        real = -c;
+        imag = c * d;
+        inner = 'i ' + (d >= 0 ? '+ ' + d : '- ' + Math.abs(d));
+        distributedLine = c + 'i&sup2; ' + (c * d >= 0 ? '+ ' : '- ') + Math.abs(c * d) + 'i';
+    } else if (form === 'B') {
+        real = -c * d;
+        imag = c * e;
+        inner = fmtCoeffI(d) + ' ' + (e >= 0 ? '+ ' + e : '- ' + Math.abs(e));
+        distributedLine = (c * d) + 'i&sup2; ' + (c * e >= 0 ? '+ ' : '- ') + Math.abs(c * e) + 'i';
+    } else {
+        real = c;
+        imag = c * d;
+        inner = d + ' - i';
+        distributedLine = (c * d) + 'i ' + (-c >= 0 ? '+ ' : '- ') + Math.abs(c) + 'i&sup2;';
+    }
+    var promptHTML = fmtCoeffI(c) + '(' + inner + ')';
+    var spokenInner = inner
+        .replace(/i/g, ' i ')
+        .replace(/\+/g, ' plus ')
+        .replace(/-\s*/g, ' minus ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    return {
+        promptHTML: promptHTML,
+        spoken: spokenCoeffI(c) + ', times, open parenthesis, ' + spokenInner + ', close parenthesis.',
+        type: 'a-bi',
+        answer: { real: real, imag: imag },
+        hint: 'Distribute first, then replace i-squared with -1, then combine the real parts and the i-parts separately.',
+        solutionSteps: [
+            { label: 'Distribute:', line: promptHTML + ' = ' + distributedLine },
+            { label: 'Use i&sup2; = -1 and combine:', line: fmtComplex(real, imag) }
+        ]
+    };
+}
+
+function genAddSub(shown) {
+    var a, b, c, d, op;
+    if (shown < 4) {
+        op = 'add';
+        a = randInt(1, 9); b = randInt(1, 9); c = randInt(1, 9); d = randInt(1, 9);
+    } else if (shown < 8) {
+        op = Math.random() < 0.5 ? 'add' : 'sub';
+        a = randInt(1, 9); b = randInt(1, 9); c = randInt(1, 9); d = randInt(1, 9);
+    } else {
+        op = Math.random() < 0.5 ? 'add' : 'sub';
+        a = randNonZero(-9, 9); b = randNonZero(-9, 9); c = randNonZero(-9, 9); d = randNonZero(-9, 9);
+    }
+    var real, imag;
+    if (op === 'add') { real = a + c; imag = b + d; }
+    else { real = a - c; imag = b - d; }
+    var promptHTML = '(' + fmtComplex(a, b) + ') ' + (op === 'add' ? '+' : '-') + ' (' + fmtComplex(c, d) + ')';
+    var opWord = op === 'add' ? 'Add' : 'Subtract';
+    return {
+        promptHTML: promptHTML,
+        spoken: 'Open parenthesis, ' + spokenComplex(a, b) + ', close parenthesis, ' +
+                (op === 'add' ? 'plus' : 'minus') + ', open parenthesis, ' +
+                spokenComplex(c, d) + ', close parenthesis.',
+        type: 'a-bi',
+        answer: { real: real, imag: imag },
+        hint: 'Combine the real parts together, then combine the i-parts together.',
+        solutionSteps: [
+            { label: 'Combine the real parts:', line: op === 'add' ? (a + ' + ' + c + ' = ' + real) : (a + ' - ' + c + ' = ' + real) },
+            { label: 'Combine the i-parts:', line: op === 'add' ? (b + ' + ' + d + ' = ' + imag) : (b + ' - ' + d + ' = ' + imag) },
+            { label: 'Result:', line: fmtComplex(real, imag) }
+        ]
+    };
+}
+
+function genDivide(shown) {
+    // Mostly divide by a pure-imaginary denominator (5/i, 6/3i, etc.) -- only
+    // rationalizing by i. Only occasionally, and only once warmed up, ask for
+    // a full binomial denominator that needs the conjugate.
+    var useBinomial = (shown >= 6) && (Math.random() < 0.22);
+
+    if (!useBinomial) {
+        var k, c;
+        if (shown < 3) { k = randInt(1, 4); c = randNonZero(-6, 6); }
+        else { k = randInt(1, 9); c = randNonZero(-9, 9); }
+        var N = -c * k; // chosen so N / (k*i) simplifies to exactly c*i
+        var promptHTML = fractionHTML(N, fmtCoeffI(k));
+        // The denominator after multiplying by i is k*i^2, not i^2 -- the old
+        // step dropped the k whenever k was not 1.
+        var denomSquared = (k === 1 ? 'i&sup2;' : k + 'i&sup2;');
+        return {
+            promptHTML: promptHTML,
+            spoken: 'The fraction ' + spokenNum(N) + ' over ' + spokenCoeffI(k) + '.',
+            type: 'a-bi',
+            answer: { real: 0, imag: c },
+            hint: 'Multiply the top and bottom by i to clear i out of the bottom. Remember i times i is -1.',
+            solutionSteps: [
+                { label: 'Multiply top and bottom by i:', line: fractionHTML(N + ' &middot; i', fmtCoeffI(k) + ' &middot; i') + ' = ' + fractionHTML(fmtCoeffI(N), denomSquared) },
+                { label: 'Use i&sup2; = -1:', line: fractionHTML(fmtCoeffI(N), -k) },
+                { label: 'Result:', line: fmtCoeffI(c) }
+            ]
+        };
+    } else {
+        var pairs = [[1, 1], [1, 2], [2, 1], [1, 3], [3, 1], [2, 3], [3, 2], [1, 4], [4, 1]];
+        var pair = pairs[randInt(0, pairs.length - 1)];
+        var a = pair[0], b = pair[1];
+        if (Math.random() < 0.5) a = -a;
+        if (Math.random() < 0.5) b = -b;
+        var scale = randNonZero(-4, 4);
+        var D = a * a + b * b;
+        var Nb = scale * D;
+        var real = scale * a, imag = -scale * b;
+        var denomText = fmtComplex(a, b);
+        var conjText = fmtComplex(a, -b);
+        var promptHTML = fractionHTML(Nb, denomText);
+        return {
+            promptHTML: promptHTML,
+            spoken: 'The fraction ' + spokenNum(Nb) + ' over, open parenthesis, ' + spokenComplex(a, b) + ', close parenthesis.',
+            type: 'a-bi',
+            answer: { real: real, imag: imag },
+            hint: 'Multiply the top and bottom by the conjugate of the bottom (flip the sign of its i-part). That clears i out of the bottom.',
+            solutionSteps: [
+                { label: 'Multiply top and bottom by the conjugate:', line: fractionHTML(Nb, denomText) + ' &middot; ' + fractionHTML(conjText, conjText) },
+                { label: 'The bottom becomes a real number:', line: fractionHTML(fmtComplex(Nb * a, -Nb * b), D) },
+                { label: 'Result:', line: fmtComplex(real, imag) }
+            ]
+        };
+    }
+}
+
+function generateNewProblem() {
+    var key = modeKey();
+    stats[key].shown = (stats[key].shown || 0) + 1;
+    var shown = stats[key].shown - 1; // 0-indexed for warm-up gating
+    if (key === 'simplify-perfect') current = genSimplifyPerfect(shown);
+    else if (key === 'simplify-notperfect') current = genSimplifyNotPerfect(shown);
+    else if (key === 'multiply-ii') current = genMultiplyII(shown);
+    else if (key === 'multiply-distribute') current = genMultiplyDistribute(shown);
+    else if (key === 'divide') current = genDivide(shown);
+    else current = genAddSub(shown);
+    solutionStepIndex = 0;
+    awaitingNext = false;
+    revealCounted = false;
+}
+
+/* =====================================================================
+   Rendering
+   ===================================================================== */
+var instructionsText = {
+    'simplify-perfect': 'Simplify the square root of a negative perfect square.',
+    'simplify-notperfect': 'Simplify completely. Pull out the largest perfect square factor.',
+    'multiply-ii': 'Multiply. Remember: i times i is not just "i-squared" left as-is.',
+    'multiply-distribute': 'Distribute, then simplify using i-squared = -1.',
+    'addsub': 'Combine the real parts and the i-parts separately.',
+    'divide': 'Divide, then clear i out of the bottom.'
+};
+
+function renderSubtabs() {
+    var el = document.getElementById('subtab-btns');
+    if (category === 'simplify') {
+        el.style.display = 'flex';
+        el.innerHTML =
+            '<button class="subtab-btn' + (subMode === 'perfect' ? ' active' : '') + '" aria-pressed="' + (subMode === 'perfect') + '" onclick="setSubMode(\'perfect\')">Level 1</button>' +
+            '<button class="subtab-btn' + (subMode === 'notperfect' ? ' active' : '') + '" aria-pressed="' + (subMode === 'notperfect') + '" onclick="setSubMode(\'notperfect\')">Level 2</button>';
+    } else if (category === 'multiply') {
+        el.style.display = 'flex';
+        el.innerHTML =
+            '<button class="subtab-btn' + (subMode === 'ii' ? ' active' : '') + '" aria-pressed="' + (subMode === 'ii') + '" onclick="setSubMode(\'ii\')">Level 1</button>' +
+            '<button class="subtab-btn' + (subMode === 'distribute' ? ' active' : '') + '" aria-pressed="' + (subMode === 'distribute') + '" onclick="setSubMode(\'distribute\')">Level 2</button>';
+    } else {
+        el.style.display = 'none';
+        el.innerHTML = '';
+    }
+}
+
+function renderAnswerArea() {
+    var el = document.getElementById('answer-area');
+    var t = current.type;
+    if (t === 'single-i') {
+        el.innerHTML =
+            '<div class="answer-wrap">' +
+                '<label class="sr-only" for="ans1">Your answer</label>' +
+                '<input type="text" inputmode="decimal" id="ans1" class="free-input" autocomplete="off" placeholder="e.g. 2i" style="width:150px;">' +
+                '<div class="insert-row">' +
+                    '<button class="key-btn" onclick="insertChar(\'ans1\',\'+\')">+</button>' +
+                    '<button class="key-btn" onclick="insertChar(\'ans1\',\'-\')">-</button>' +
+                    '<button class="key-btn" onclick="insertChar(\'ans1\',\'i\')">i</button>' +
+                '</div>' +
+            '</div>';
+    } else if (t === 'single-real') {
+        el.innerHTML =
+            '<div class="answer-wrap">' +
+                '<label class="sr-only" for="ans1">Your answer</label>' +
+                '<input type="text" inputmode="decimal" id="ans1" class="free-input" autocomplete="off" placeholder="e.g. -6" style="width:120px;">' +
+                '<div class="insert-row">' +
+                    '<button class="key-btn" onclick="insertChar(\'ans1\',\'+\')">+</button>' +
+                    '<button class="key-btn" onclick="insertChar(\'ans1\',\'-\')">-</button>' +
+                    '<button class="key-btn" onclick="insertChar(\'ans1\',\'i\')">i</button>' +
+                '</div>' +
+            '</div>';
+    } else if (t === 'coeff-radical') {
+        el.innerHTML =
+            '<label class="sr-only" for="ans1">Number in front of the radical</label>' +
+            '<input type="text" inputmode="decimal" id="ans1" autocomplete="off" style="width:64px;">' +
+            '<span class="eq-label" aria-hidden="true">i&radic;</span>' +
+            '<label class="sr-only" for="ans2">Number under the radical</label>' +
+            '<input type="text" inputmode="decimal" id="ans2" autocomplete="off" style="width:64px;">';
+    } else { // a-bi
+        el.innerHTML =
+            '<div class="answer-wrap">' +
+                '<label class="sr-only" for="ans1">Your answer</label>' +
+                '<input type="text" inputmode="decimal" id="ans1" class="free-input" autocomplete="off" placeholder="e.g. 3+5i" style="width:170px;">' +
+                '<div class="insert-row">' +
+                    '<button class="key-btn" onclick="insertChar(\'ans1\',\'+\')">+</button>' +
+                    '<button class="key-btn" onclick="insertChar(\'ans1\',\'-\')">-</button>' +
+                    '<button class="key-btn" onclick="insertChar(\'ans1\',\'i\')">i</button>' +
+                '</div>' +
+            '</div>';
+    }
+}
+
+// Lets the student place '+', '-', and 'i' themselves at the cursor position,
+// instead of us pre-formatting the answer into fixed real/imaginary boxes.
+function insertChar(id, ch) {
+    var input = document.getElementById(id);
+    if (!input) return;
+    input.focus();
+    var start = (input.selectionStart != null) ? input.selectionStart : input.value.length;
+    var end = (input.selectionEnd != null) ? input.selectionEnd : input.value.length;
+    var val = input.value;
+    input.value = val.slice(0, start) + ch + val.slice(end);
+    var newPos = start + ch.length;
+    input.setSelectionRange(newPos, newPos);
+}
+
+// Parses a freely-typed expression like "3+5i", "-2-7i", "-i", "6i", "-9"
+// into {real, imag}. Terms can appear in any order. Returns null if unreadable.
+function parseComplexExpression(raw) {
+    if (typeof raw !== 'string') return null;
+    var s = raw.replace(/\s+/g, '');
+    if (s === '') return null;
+    if (s.charAt(0) !== '+' && s.charAt(0) !== '-') s = '+' + s;
+    var terms = s.match(/[+-][^+-]+/g);
+    if (!terms) return null;
+    if (terms.join('') !== s) return null; // catches leftover/dangling chars like "3+" or "--5"
+    var real = 0, imag = 0;
+    for (var k = 0; k < terms.length; k++) {
+        var term = terms[k];
+        var sign = (term.charAt(0) === '-') ? -1 : 1;
+        var body = term.slice(1);
+        if (body === '') return null;
+        var isImag = /i$/i.test(body);
+        if (isImag) {
+            var numPart = body.slice(0, -1);
+            var coeff;
+            if (numPart === '') coeff = 1;
+            else if (!/^\d+(\.\d+)?$/.test(numPart)) return null;
+            else coeff = parseFloat(numPart);
+            imag += sign * coeff;
+        } else {
+            if (!/^\d+(\.\d+)?$/.test(body)) return null;
+            real += sign * parseFloat(body);
+        }
+    }
+    return { real: real, imag: imag };
+}
+
+function render() {
+    document.getElementById('instructions').textContent = instructionsText[modeKey()];
+    var pd = document.getElementById('problem-display');
+    pd.innerHTML = current.promptHTML;
+    pd.classList.toggle('compact', modeKey() === 'addsub');
+    // The visual problem is aria-hidden (its meaning lives in CSS layout),
+    // so this announcement is the only thing a screen reader gets.
+    var ann = document.getElementById('announcer');
+    if (ann) {
+        // The reminder chip is aria-hidden (its notation lives in CSS layout),
+        // so its content is spoken here in words instead of being lost.
+        var chipSay = (current.showChip && current.chipSpoken) ? (' ' + current.chipSpoken) : '';
+        ann.textContent = 'Problem ' + (problemNum + 1) + '. ' +
+            (current.spoken || '') + chipSay + ' What is the answer?';
+    }
+    var chip = document.getElementById('chip-note');
+    if (current.showChip) {
+        chip.style.display = 'block';
+        chip.innerHTML = current.chipText;
+    } else {
+        chip.style.display = 'none';
+    }
+    renderAnswerArea();
+    document.getElementById('feedback').textContent = '';
+    document.getElementById('feedback').className = 'feedback';
+    document.getElementById('solution-box').style.display = 'none';
+    document.getElementById('solution-box').innerHTML = '';
+    document.getElementById('solution-btn').style.display = 'inline-block';
+    closeHint();
+    document.getElementById('submit-btn').style.display = 'inline-block';
+    document.getElementById('skip-btn').style.display = 'inline-block';
+    document.getElementById('next-btn').style.display = 'none';
+    updateDisplay();
+}
+
+function nextProblem() {
+    generateNewProblem();
+    render();
+}
+
+// Skip moves straight to a new problem without grading the current one --
+// it does not touch stats or streak, since nothing was submitted.
+function skipProblem() {
+    generateNewProblem();
+    render();
+}
+
+/* =====================================================================
+   Grading
+   ===================================================================== */
+function checkAnswer() {
+    if (awaitingNext) return;
+    var key = modeKey();
+    var correct = false;
+    var msg = '';
+    var t = current.type;
+
+    if (t === 'single-i') {
+        var raw1 = document.getElementById('ans1').value;
+        var parsed1 = parseComplexExpression(raw1);
+        if (!parsed1) { flashUnreadable(); return; }
+        if (parsed1.real === 0 && parsed1.imag === current.answer.b) correct = true;
+        else if (parsed1.real === 0 && parsed1.imag === -current.answer.b) msg = 'Careful: the principal square root of a negative number is always positive. Check your sign.';
+    } else if (t === 'single-real') {
+        var rawR = document.getElementById('ans1').value;
+        var parsedR = parseComplexExpression(rawR);
+        if (!parsedR) { flashUnreadable(); return; }
+        correct = (parsedR.imag === 0 && parsedR.real === current.answer.val);
+    } else if (t === 'coeff-radical') {
+        var coeffRaw = document.getElementById('ans1').value.trim();
+        var radRaw = document.getElementById('ans2').value.trim();
+        if (coeffRaw === '') { flashEmpty(); return; }
+        // parseFloat used to accept "3abc" (it stops at the first bad character)
+        // and "3.7" was silently kept as a decimal. Only whole numbers count.
+        if (!WHOLE_RE.test(coeffRaw) || (radRaw !== '' && !WHOLE_RE.test(radRaw))) { flashWholeNumber(); return; }
+        var coeff = parseInt(coeffRaw, 10);
+        var radicand = radRaw === '' ? 1 : parseInt(radRaw, 10);
+        if (coeff === current.answer.coeff && radicand === current.answer.radicand) {
+            correct = true;
+        } else if (coeff > 0 && radicand > 0 && coeff * coeff * radicand === current.N) {
+            // coeff must be positive: -2i*sqrt(3) is NOT equivalent to 2i*sqrt(3),
+            // and telling the student it is was actively misleading.
+            msg = 'Equivalent, but not fully simplified - pull out the largest perfect square.';
+        }
+    } else { // a-bi
+        var rawAB = document.getElementById('ans1').value;
+        var parsedAB = parseComplexExpression(rawAB);
+        if (!parsedAB) { flashUnreadable(); return; }
+        correct = (parsedAB.real === current.answer.real && parsedAB.imag === current.answer.imag);
+    }
+
+    var fb = document.getElementById('feedback');
+    /* If the worked solution was opened, recordReveal() has already booked this
+       problem as attempted and ended the streak. Booking it again here would
+       double-count the denominator, and crediting it would let a
+       revealed-then-typed answer still read as a success. */
+    if (!revealCounted) stats[key].t++;
+    if (correct) {
+        if (!revealCounted) {
+            stats[key].c++;
+            streak++;
+            if (streak > bestStreak) bestStreak = streak;
+            celebrateStreak(streak);
+        }
+        fb.textContent = revealCounted
+            ? 'Correct - but the solution was shown, so this one does not count.'
+            : 'Correct!';
+        fb.className = 'feedback correct';
+        problemNum++;
+        awaitingNext = true;
+        document.getElementById('submit-btn').style.display = 'none';
+        document.getElementById('skip-btn').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'inline-block';
+    } else {
+        streak = 0;
+        fb.textContent = msg || 'Not quite. Try again!';
+        fb.className = 'feedback incorrect';
+        // Stay on the same problem -- don't reveal the answer, let them retry.
+    }
+    saveState();
+    updateDisplay();
+}
+
+function flashEmpty() {
+    var fb = document.getElementById('feedback');
+    fb.textContent = 'Enter an answer first.';
+    fb.className = 'feedback incorrect';
+}
+
+// Strict whole-number test for the two-box radical answer.
+var WHOLE_RE = /^[+-]?\d+$/;
+
+function flashWholeNumber() {
+    var fb = document.getElementById('feedback');
+    fb.textContent = 'Enter whole numbers only.';
+    fb.className = 'feedback incorrect';
+}
+
+function flashUnreadable() {
+    var fb = document.getElementById('feedback');
+    fb.textContent = "Enter an answer first, using the digits and the + - i buttons below.";
+    fb.className = 'feedback incorrect';
+}
+
+/* =====================================================================
+   Hint (design item 24)
+   ===================================================================== */
+/* Every generator already builds a hint string; until now nothing rendered
+   one. A hint is a nudge, not the answer, so -- unlike revealSolutionStep --
+   it deliberately does NOT call recordReveal(): it charges no attempt and
+   leaves the streak alone. */
+function closeHint() {
+    var btn = document.getElementById('hint-btn');
+    var box = document.getElementById('hint-box');
+    if (box) { box.style.display = 'none'; box.textContent = ''; }
+    if (btn) { btn.setAttribute('aria-expanded', 'false'); btn.textContent = 'Show Hint'; }
+}
+
+function toggleHint() {
+    var btn = document.getElementById('hint-btn');
+    var box = document.getElementById('hint-box');
+    if (!btn || !box) return;
+    if (btn.getAttribute('aria-expanded') === 'true') {
+        closeHint();
+        return;
+    }
+    // textContent, so a hint string is never parsed as markup
+    box.textContent = (current && current.hint) ? current.hint : 'No hint for this one.';
+    box.style.display = 'block';
+    btn.setAttribute('aria-expanded', 'true');
+    btn.textContent = 'Hide Hint';
+}
+
+/* =====================================================================
+   Solution reveal
+   ===================================================================== */
+/* Opening the worked solution records the problem as attempted, exactly like a
+   wrong try, and ends the streak. Without this a student could walk the steps
+   to the printed answer, type it back and take clean first-try credit, which
+   quietly inflated every accuracy figure. Recorded once per problem, and never
+   after the problem has already been graded correct. */
+function recordReveal() {
+    if (revealCounted || awaitingNext) return;
+    revealCounted = true;
+    stats[modeKey()].t++;
+    streak = 0;
+    saveState();
+    updateDisplay();
+}
+
+function revealSolutionStep() {
+    if (solutionStepIndex >= current.solutionSteps.length) return;
+    recordReveal();
+    solutionStepIndex++;
+    document.getElementById('solution-btn').style.display = 'none';
+    renderSolutionBox();
+}
+
+function renderSolutionBox() {
+    var box = document.getElementById('solution-box');
+    var html = '';
+    for (var i = 0; i < solutionStepIndex; i++) {
+        var step = current.solutionSteps[i];
+        html += '<div class="solution-line"><div class="step-label">' + step.label + '</div><div class="step-line">' + step.line + '</div></div>';
+    }
+    if (solutionStepIndex < current.solutionSteps.length) {
+        html += '<button class="submit-btn" onclick="revealSolutionStep()" style="margin-top:8px;">Next Step</button>';
+    }
+    box.innerHTML = html;
+    box.style.display = 'block';
+}
+
+/* =====================================================================
+   Mode switching
+   ===================================================================== */
+function setCategory(c) {
+    category = c;
+    if (c === 'simplify') subMode = 'perfect';
+    else if (c === 'multiply') subMode = 'ii';
+    else subMode = null;
+    var btns = document.querySelectorAll('#category-btns .mode-btn');
+    for (var i = 0; i < btns.length; i++) {
+        var on = btns[i].getAttribute('data-category') === c;
+        btns[i].classList.toggle('active', on);
+        btns[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    renderSubtabs();
+    generateNewProblem();
+    render();
+}
+
+function setSubMode(m) {
+    subMode = m;
+    renderSubtabs();
+    generateNewProblem();
+    render();
+}
+
+/* =====================================================================
+   Stats panel
+   ===================================================================== */
+/* Defense in depth: even though loadState() sanitises, anything interpolated
+   into innerHTML is forced to a plain number at the point of output too. */
+function num(v) {
+    var n = Number(v);
+    return (isFinite(n) && !isNaN(n)) ? String(Math.floor(n)) : '0';
+}
+
+function showStats() {
+    var html = '<div class="stats-panel"><h2>My Stats</h2>';
+    html += '<div class="stat-row"><div class="stat-name">Current Problem</div><div class="stat-num" style="width:auto;">' + num(problemNum + 1) + '</div></div>';
+    html += '<div class="stat-row"><div class="stat-name">Current Streak</div><div class="stat-num" style="width:auto;">' + num(streak) + '</div></div>';
+    var keys = ['simplify-perfect', 'simplify-notperfect', 'multiply-ii', 'multiply-distribute', 'addsub', 'divide'];
+    keys.forEach(function (k) {
+        var s = stats[k];
+        var c = safeCount(s.c), t = safeCount(s.t);
+        if (c > t) c = t;
+        var pct = t > 0 ? Math.round((c / t) * 100) : 0;
+        var barCls = 'low';
+        if (t === 0) barCls = 'low';
+        else if (pct >= 85) barCls = 'high';
+        else if (pct >= 60) barCls = 'mid';
+        html += '<div class="stat-row">';
+        html += '<div class="stat-name">' + statNames[k] + '</div>';
+        html += '<div class="stat-bar-wrap"><div class="stat-bar ' + barCls + '" style="width:' + num(t > 0 ? pct : 0) + '%;"></div></div>';
+        html += '<div class="stat-num">' + (t > 0 ? (num(c) + '/' + num(t) + ' (' + num(pct) + '%)') : 'not tried yet') + '</div>';
+        html += '</div>';
+    });
+    html += '<div class="stat-row" style="margin-top:10px;"><div class="stat-name">Best Streak</div><div class="stat-num" style="width:auto;">' + num(bestStreak) + '</div></div>';
+    html += '<div class="stats-actions">';
+    html += '<button class="submit-btn" onclick="hideStats()">Back to Practice</button>';
+    html += '<button class="reset-btn" onclick="confirmReset()" style="margin-left:8px;">Reset Stats</button>';
+    html += '</div></div>';
+    document.getElementById('main-content').innerHTML = html;
+}
+
+function hideStats() {
+    document.getElementById('main-content').innerHTML =
+        '<p class="sr-only" id="announcer" aria-live="polite" aria-atomic="true"></p>' +
+        '<div class="instructions" id="instructions"></div>' +
+        '<div class="problem" id="problem-display" aria-hidden="true"></div>' +
+        '<div class="chip-note" id="chip-note" style="display:none;" aria-hidden="true"></div>' +
+        '<div class="input-area" id="answer-area"></div>' +
+        '<div class="feedback" id="feedback" role="alert" aria-live="assertive" aria-atomic="true"></div>' +
+        '<div class="action-row" id="action-row">' +
+            '<button class="submit-btn" onclick="checkAnswer()" id="submit-btn">Check Answer</button>' +
+            '<button class="skip-btn" onclick="skipProblem()" id="skip-btn">Skip</button>' +
+            '<button class="next-btn" onclick="nextProblem()" id="next-btn" style="display:none;">Next Problem</button>' +
+        '</div>' +
+        '<div class="helper-row">' +
+            '<button class="hint-btn" id="hint-btn" aria-expanded="false" aria-controls="hint-box" onclick="toggleHint()">Show Hint</button>' +
+            '<button class="solution-btn" id="solution-btn" onclick="revealSolutionStep()">Show Solution</button>' +
+        '</div>' +
+        '<div class="hint-box" id="hint-box" role="status" aria-live="polite" aria-atomic="true"></div>' +
+        '<div class="solution-box" id="solution-box"></div>';
+    render();
+}
+
+var resetArmed = false;
+var resetTimer = null;
+function confirmReset() {
+    if (!resetArmed) {
+        resetArmed = true;
+        var btns = document.querySelectorAll('.reset-btn');
+        for (var i = 0; i < btns.length; i++) btns[i].textContent = 'Tap again to confirm';
+        resetTimer = setTimeout(function () {
+            resetArmed = false;
+            var b2 = document.querySelectorAll('.reset-btn');
+            for (var j = 0; j < b2.length; j++) b2[j].textContent = 'Reset Stats';
+        }, 3500);
+        return;
+    }
+    clearTimeout(resetTimer);
+    resetArmed = false;
+    stats = {
+        'simplify-perfect':    { c: 0, t: 0, shown: 0 },
+        'simplify-notperfect': { c: 0, t: 0, shown: 0 },
+        'multiply-ii':         { c: 0, t: 0, shown: 0 },
+        'multiply-distribute': { c: 0, t: 0, shown: 0 },
+        'addsub':              { c: 0, t: 0, shown: 0 },
+        'divide':              { c: 0, t: 0, shown: 0 }
+    };
+    streak = 0;
+    bestStreak = 0;
+    problemNum = 0;
+    saveState();
+    showStats();
+}
+
+/* =====================================================================
+   Display / persistence
+   ===================================================================== */
+function updateDisplay() {
+    // Problem count and streak are no longer shown on the main screen --
+    // they're rendered directly inside the stats panel each time it opens.
+}
+
+function toggleConfettiSetting() {
+    confettiOn = !confettiOn;
+    syncConfettiToggle();
+    saveState();
+}
+
+function saveState() {
+    try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify({
+            stats: stats, bestStreak: bestStreak, problemNum: problemNum, confettiOn: confettiOn
+        }));
+    } catch (e) { /* storage unavailable - play without saving */ }
+}
+/* localStorage is user-writable, so nothing read back from it is trusted.
+   Coerce every stored count into a safe, bounded, non-negative integer. */
+function safeCount(v) {
+    var n = (typeof v === 'number') ? v : parseInt(v, 10);
+    if (!isFinite(n) || isNaN(n) || n < 0) return 0;
+    return Math.min(Math.floor(n), 1000000);
+}
+function loadState() {
+    try {
+        var raw = localStorage.getItem(SAVE_KEY);
+        if (!raw) return;
+        var st = JSON.parse(raw);
+        if (!st || typeof st !== 'object') return;
+        if (st.stats && typeof st.stats === 'object') {
+            Object.keys(stats).forEach(function (k) {
+                var rec = st.stats[k];
+                if (!rec || typeof rec !== 'object') return;
+                var c = safeCount(rec.c);
+                var t = safeCount(rec.t);
+                if (c > t) c = t;              /* correct can never exceed attempted */
+                stats[k] = { c: c, t: t, shown: safeCount(rec.shown) };
+            });
+        }
+        bestStreak = safeCount(st.bestStreak);
+        problemNum = safeCount(st.problemNum);
+        if (typeof st.confettiOn === 'boolean') confettiOn = st.confettiOn;
+    } catch (e) { /* corrupt or unavailable storage - start fresh */ }
+}
+
+/* =====================================================================
+   Confetti
+   ===================================================================== */
+function celebrateStreak(s) {
+    if (!confettiOn) return;
+    if (s === 2) createConfetti(40, 1);
+    else if (s === 4 || s === 6 || s === 8) createConfetti(100, 2);
+    else if (s === 10 || (s > 10 && s % 4 === 0)) createConfetti(200, 3);
+}
+
+function prefersReducedMotion() {
+    try {
+        return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    } catch (e) { return false; }
+}
+
+function createConfetti(count, tier) {
+    // CSS already hides .confetti under reduced motion; this also stops the
+    // DOM churn so nothing is created that a reader could stumble over.
+    if (prefersReducedMotion()) return;
+    var host = document.body;
+    /* Design item 10: '#ef4444' (red, not in the palette) and '#f59e0b'
+       (orange, banned outright) swapped for mint '#10b981' and heritage
+       rose '#c76b8f'. Still eight colours. */
+    var colors = ['#7c3aed', '#22c55e', '#2e3d8f', '#c76b8f', '#10b981', '#ffeb3b', '#0d9488', '#a78bfa'];
+    var isMassive = tier === 3;
+    for (var i = 0; i < count; i++) {
+        var piece = document.createElement('div');
+        piece.className = 'confetti';
+        piece.setAttribute('aria-hidden', 'true');
+        var base;
+        if (tier === 1) base = 7 + Math.random() * 5;
+        else if (tier === 2) base = 10 + Math.random() * 7;
+        else base = 11 + Math.random() * 9;
+        var color = colors[Math.floor(Math.random() * colors.length)];
+        var shape = Math.floor(Math.random() * 4);
+        if (shape === 0) {
+            piece.style.width = base + 'px'; piece.style.height = base + 'px';
+            piece.style.background = color; piece.style.borderRadius = '50%';
+        } else if (shape === 1) {
+            piece.style.width = base + 'px'; piece.style.height = base + 'px';
+            piece.style.background = color; piece.style.borderRadius = '2px';
+        } else if (shape === 2) {
+            piece.style.width = Math.max(4, base * 0.35) + 'px';
+            piece.style.height = (base * 1.7) + 'px';
+            piece.style.background = color; piece.style.borderRadius = '2px';
+        } else {
+            piece.style.width = '0'; piece.style.height = '0';
+            piece.style.background = 'transparent';
+            piece.style.borderLeft = (base * 0.6) + 'px solid transparent';
+            piece.style.borderRight = (base * 0.6) + 'px solid transparent';
+            piece.style.borderBottom = base + 'px solid ' + color;
+        }
+        piece.style.left = Math.random() * 100 + '%';
+        piece.style.top = '-20px';
+        var dur;
+        if (tier === 1) dur = 1.3 + Math.random() * 0.8;
+        else if (tier === 2) dur = 1.6 + Math.random() * 1.2;
+        else dur = 2.0 + Math.random() * 1.6;
+        piece.style.animation = (isMassive ? 'confetti-fall-slow' : 'confetti-fall') + ' ' + dur + 's ease-out forwards';
+        piece.style.animationDelay = (Math.random() * (isMassive ? 0.6 : 0.3)) + 's';
+        host.appendChild(piece);
+        setTimeout(function (el) {
+            return function () { if (el.parentNode) el.parentNode.removeChild(el); };
+        }(piece), isMassive ? 5000 : 3800);
+    }
+}
+
+/* The former global touchend guard called e.preventDefault() on ANY second tap
+   within 350ms, anywhere on the page. Because preventDefault on touchend
+   cancels the synthetic click, it silently swallowed legitimate rapid taps
+   (two presses of the +/-/i keypad, Check then Next) and could block
+   assistive-technology activation. Every button already carries
+   `touch-action: manipulation`, which removes the 300ms double-tap delay and
+   the double-tap-to-zoom that the guard existed to work around, so the guard
+   is both unnecessary and harmful. Removed.
+   ===================================================================== */
+
+// Enter submits an answer (delegated, so it survives DOM rebuilds).
+document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter') return;
+    var t = e.target;
+    if (!t || t.tagName !== 'INPUT') return;
+    e.preventDefault();
+    if (awaitingNext) {
+        var nb = document.getElementById('next-btn');
+        if (nb && nb.style.display !== 'none') nextProblem();
+    } else {
+        checkAnswer();
+    }
+});
+
+// Also give the toggle-switch button a neutral look reset.
+(function () {
+    var t = document.getElementById('confetti-toggle');
+    if (t) { t.style.padding = '0'; t.style.border = 'none'; }
+})();
+
+/* =====================================================================
+   Boot
+   ===================================================================== */
+/* The toggle carries both a class and aria-pressed. Boot used to set only the
+   class, so a device that had confetti switched off came back with a switch
+   that looked off but still announced itself as "pressed". Sync both here and
+   in toggleConfettiSetting() from one place. */
+function syncConfettiToggle() {
+    var el = document.getElementById('confetti-toggle');
+    if (!el) return;
+    el.classList.toggle('on', confettiOn);
+    el.setAttribute('aria-pressed', confettiOn ? 'true' : 'false');
+}
+
+loadState();
+renderSubtabs();
+generateNewProblem();
+render();
+syncConfettiToggle();
+</script>
+</body>
+</html>
