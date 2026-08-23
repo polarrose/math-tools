@@ -1,0 +1,2209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radical Expressions Practice</title>
+<meta name="theme-color" content="#1b2450">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+    /* ===== MIDNIGHT SCHOLAR - navy stage, white card, violet + mint accents ===== */
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+        background:
+            radial-gradient(900px 500px at 85% -10%, rgba(124, 58, 237, 0.28), transparent 60%),
+            radial-gradient(800px 500px at -10% 110%, rgba(16, 185, 129, 0.18), transparent 55%),
+            linear-gradient(160deg, #141b3d 0%, #1b2450 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 16px 12px;
+        margin: 0;
+    }
+    .card {
+        background: #ffffff;
+        border-radius: 22px;
+        box-shadow: 0 24px 60px rgba(8, 12, 40, 0.55);
+        max-width: 700px;
+        width: 100%;
+        padding: 30px 24px 26px;
+        position: relative;
+        overflow: hidden;
+    }
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+    }
+    /* The heading box shrinks to its text so the rule below can match it. */
+    h1 {
+        text-align: center;
+        color: #1e2a5e;
+        margin: 4px auto 6px;
+        font-size: 25px;
+        letter-spacing: 0.3px;
+        width: fit-content;
+        max-width: 100%;
+    }
+    /* The gradient rule is exactly as wide as the title text. */
+    h1::after {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 4px;
+        border-radius: 2px;
+        margin: 8px auto 14px;
+        background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+    }
+    .info {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+    .info-item {
+        font-size: 12px;
+        font-weight: 800;
+        background: #eef0fb;
+        color: #2e3d8f;
+        padding: 6px 14px;
+        border-radius: 999px;
+    }
+    .info-item.streak-hot {
+        background: linear-gradient(135deg, #15803d, #2e3d8f);
+        color: white;
+    }
+    .mode-btns {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+    }
+    .mode-btn {
+        background: #e6e9f6;
+        color: #4a5480;
+        border: none;
+        border-radius: 999px;
+        padding: 9px 16px;
+        font-size: 13px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.15s;
+        -webkit-tap-highlight-color: transparent;
+        font-family: inherit;
+    }
+    .mode-btn:hover { background: #d9def2; }
+    .mode-btn.active {
+        background: #15803d !important;
+        color: white !important;
+        box-shadow: 0 0 0 4px rgba(21, 128, 61, 0.25), 0 6px 14px rgba(21, 128, 61, 0.35);
+    }
+    .sub-mode-btns {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+    }
+    .sub-mode-btn {
+        background: #e6e9f6;
+        color: #4a5480;
+        border: none;
+        border-radius: 999px;
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.15s;
+        -webkit-tap-highlight-color: transparent;
+        font-family: inherit;
+    }
+    .sub-mode-btn:hover { background: #d9def2; }
+    .sub-mode-btn.active {
+        background: linear-gradient(135deg, #1e3a5f, #0b7a70) !important;
+        color: white !important;
+        box-shadow: 0 6px 14px rgba(13, 148, 136, 0.35);
+    }
+    .problem {
+        font-size: 27px;
+        font-weight: 800;
+        text-align: center;
+        margin: 18px auto;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+        color: #1e2a5e;
+        background: #eef0fb;
+        border: 2px solid #c7cdf0;
+        border-radius: 14px;
+        padding: 22px 14px;
+        max-width: 100%;
+        overflow-wrap: break-word;
+        letter-spacing: 0.5px;
+    }
+    /* Radical component -- the design system's stretching inline SVG. The old
+       build (a bare &radic; glyph next to a CSS border-top) is forbidden: the
+       hook is baked into the font, so its tip can never meet the overbar. Here
+       the SVG stretches to whatever the radical wraps -- a digit, an
+       expression, or an input box -- and its tip and the overbar are one
+       continuous 2px stroke because the border width matches stroke-width. */
+    .radical {
+        display: inline-flex;
+        align-items: stretch;
+        vertical-align: middle;
+    }
+    .rad-coef {
+        font-weight: 800;
+        margin-right: 3px;
+        align-self: flex-end;
+    }
+    .radical-sign {
+        width: 18px;
+        flex: 0 0 18px;
+        display: flex;
+        margin-right: -1px;
+        position: relative;
+    }
+    .radical-sign svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+        overflow: visible;
+    }
+    /* Root index (the small 3 of a cube root) sits in the crook of the sign. */
+    .rad-index {
+        position: absolute;
+        left: -0.15em;
+        top: 0;
+        font-size: 0.46em;
+        line-height: 1;
+        font-weight: 800;
+        z-index: 1;
+    }
+    .radical-body {
+        border-top: 2px solid currentColor;
+        padding-top: 4px;
+        padding-right: 5px;
+    }
+    /* Small contexts (recap / Show Steps lines) use a narrower sign. */
+    .radical.rad-sm .radical-sign { width: 12px; flex: 0 0 12px; }
+    /* A radical that wraps an answer input: same component, ink-navy stroke. */
+    .radical.rad-input .radical-sign { color: #1e2a5e; }
+    .radical.rad-input .radical-body {
+        border-top-color: #1e2a5e;
+        padding-top: 5px;
+        padding-right: 4px;
+    }
+    .radicand-box {
+        width: 92px !important;
+    }
+    /* Fraction display (Divide category) */
+    .frac-disp {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        vertical-align: middle;
+        margin: 0 6px;
+    }
+    .frac-num {
+        padding: 0 4px 4px;
+        border-bottom: 3px solid currentColor;
+    }
+    .frac-den {
+        padding: 4px 4px 0;
+    }
+    /* Term-entry rows for FOIL / binomial answers and the divide fraction answer */
+    .term-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin: 8px 0;
+        flex-wrap: wrap;
+    }
+    .term-label {
+        font-size: 12px;
+        font-weight: 800;
+        color: #5d6798;
+        min-width: 52px;
+        text-align: right;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+    .term-plus {
+        font-size: 20px;
+        font-weight: 800;
+        color: #1e2a5e;
+        text-align: center;
+    }
+    .term-int-input {
+        width: 76px !important;
+    }
+    .term-coef-input {
+        width: 66px !important;
+    }
+    .term-rad-input {
+        width: 76px !important;
+    }
+    .frac-row {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        margin: 14px 0;
+    }
+    .frac-row .frac-line {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .frac-divider {
+        width: 100%;
+        height: 3px;
+        background: #1e2a5e;
+        margin: 2px 0;
+    }
+    .no-simplify-note {
+        text-align: center;
+        color: #5d6798;
+        font-size: 12px;
+        margin-top: 8px;
+        font-style: italic;
+    }
+    .instructions {
+        text-align: center;
+        color: #5d6798;
+        font-size: 14px;
+        margin: 6px 0 12px;
+    }
+    .input-area {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin: 18px 0;
+        flex-wrap: wrap;
+    }
+    .eq-label {
+        font-size: 26px;
+        font-weight: 800;
+        color: #1e2a5e;
+    }
+    input[type="text"] {
+        width: 110px;
+        font-size: 26px;
+        font-weight: 800;
+        text-align: center;
+        padding: 10px;
+        border: 3px solid #7c3aed;
+        border-radius: 12px;
+        color: #1e2a5e;
+        background: #ffffff;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    }
+    input[type="text"]:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18);
+    }
+    button {
+        padding: 12px 22px;
+        font-size: 15px;
+        font-weight: 800;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.15s;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        font-family: inherit;
+    }
+    button:active { transform: scale(0.95); }
+    .submit-btn {
+        background: linear-gradient(135deg, #2e3d8f, #4b3bbd);
+        color: white;
+        box-shadow: 0 6px 16px rgba(46, 61, 143, 0.35);
+    }
+    .submit-btn:hover { filter: brightness(1.1); }
+    .feedback {
+        text-align: center;
+        font-size: 21px;
+        font-weight: 800;
+        margin: 12px 0 8px;
+        min-height: 32px;
+    }
+    .feedback:not(:empty) {
+        padding: 8px 14px;
+        border-radius: 10px;
+    }
+    .feedback.correct { background: #ecfdf5; border: 2px solid #34d399; color: #047857; }
+    .feedback.incorrect { background: #f3eefe; border: 2px solid #d8ccf7; color: #1e2a5e; font-size: 17px; }
+    .helper-row {
+        text-align: center;
+        margin: 14px 0 4px;
+    }
+    .hint-btn, .answer-btn, .skip-btn, .explain-btn, .stats-btn {
+        background: #f3eefe;
+        color: #6d28d9;
+        margin: 4px;
+        font-size: 13px;
+        padding: 10px 16px;
+    }
+    .hint-btn:hover, .answer-btn:hover, .skip-btn:hover, .explain-btn:hover, .stats-btn:hover {
+        background: #e9defc;
+    }
+    .stats-btn {
+        background: #ecfdf5;
+        color: #047857;
+    }
+    .stats-btn:hover { background: #d1fae5; }
+    .hint-box, .answer-box, .explain-box {
+        background: #f7f5ff;
+        border: 2px solid #d8ccf7;
+        border-radius: 14px;
+        padding: 15px;
+        margin: 14px 0;
+        color: #3b3568;
+        font-size: 15px;
+        line-height: 1.55;
+    }
+    .hint-box b, .answer-box b, .explain-box b { color: #6d28d9; }
+    /* Guided step area */
+    .step-area { margin: 14px 0; }
+    .step-lines { margin-bottom: 10px; }
+    .step-line {
+        background: #ecfdf5;
+        border: 2px solid #34d399;
+        border-radius: 10px;
+        padding: 9px 12px;
+        margin-bottom: 6px;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+        font-size: 15px;
+        color: #1e2a5e;
+        font-weight: 700;
+    }
+    .step-line-check { color: #047857; margin-right: 6px; }
+    .step-prompt {
+        background: #eef0fb;
+        border: 2px solid #c7cdf0;
+        border-radius: 12px;
+        padding: 14px;
+        text-align: center;
+        font-size: 16px;
+        font-weight: 700;
+        color: #1e2a5e;
+    }
+    .step-count {
+        text-align: center;
+        font-size: 12px;
+        color: #5d6798;
+        font-weight: 700;
+        margin-bottom: 6px;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+    }
+    .step-final {
+        text-align: center;
+        font-size: 22px;
+        font-weight: 800;
+        color: #047857;
+        margin-top: 10px;
+    }
+    .step-line-reveal { margin-bottom: 10px; }
+    .step-instr { font-size: 14px; color: #5d6798; margin-bottom: 2px; }
+    .step-result {
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+        font-weight: 800;
+        color: #1e2a5e;
+        padding-left: 10px;
+    }
+    /* Settings row (bottom) */
+    /* Visually hidden but available to screen readers */
+    .sr-only {
+        position: absolute;
+        width: 1px; height: 1px;
+        padding: 0; margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+    .toggle-row {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        padding: 8px 10px;
+        -webkit-tap-highlight-color: transparent;
+        background: none;
+        border: none;
+        font-family: inherit;
+    }
+    .toggle-label { font-size: 13px; font-weight: 800; color: #4a5480; }
+    .toggle-track {
+        width: 44px; height: 24px;
+        border-radius: 999px;
+        background: #d5d9e8;
+        /* WCAG 1.4.11: the track alone is 1.41:1 on white off and 2.54:1 on,
+           so the control's own boundary was effectively invisible. A hairline
+           rim carries the edge -- #8a93b8 is 3.02:1, #0b7a70 is 5.21:1. */
+        border: 1px solid #8a93b8;
+        box-sizing: border-box;
+        position: relative;
+        display: inline-block;
+        transition: background 0.2s, border-color 0.2s;
+    }
+    .toggle-track.on { background: #10b981; border-color: #0b7a70; }
+    .toggle-knob {
+        position: absolute;
+        /* offsets are from the track's padding box, which the 1px rim inset by 1 */
+        top: 2px; left: 2px;
+        width: 18px; height: 18px;
+        border-radius: 50%;
+        background: white;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+        transition: left 0.2s;
+    }
+    .toggle-track.on .toggle-knob { left: 22px; }
+    /* Stats view */
+    .stats-view {
+        background: #eef0fb;
+        border: 2px solid #c7cdf0;
+        border-radius: 14px;
+        padding: 20px 18px;
+    }
+    .stats-view h2 {
+        text-align: center;
+        color: #1e2a5e;
+        margin: 0 0 10px;
+        font-size: 22px;
+    }
+    .stats-overall {
+        text-align: center;
+        margin-bottom: 18px;
+    }
+    .stats-overall .big {
+        font-size: 42px;
+        font-weight: 800;
+        color: #047857;
+    }
+    .stats-overall .lbl {
+        font-size: 13px;
+        color: #4a5480;
+        font-weight: 700;
+    }
+    .stat-row {
+        background: #ffffff;
+        border-radius: 10px;
+        padding: 12px 14px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .stat-name {
+        font-weight: 800;
+        color: #2e3d8f;
+        font-size: 14px;
+        min-width: 118px;
+    }
+    .stat-bar-wrap {
+        flex: 1;
+        height: 14px;
+        background: #eef0fb;
+        border-radius: 7px;
+        overflow: hidden;
+        position: relative;
+    }
+    .stat-bar {
+        height: 100%;
+        border-radius: 7px;
+        transition: width 0.4s ease;
+    }
+    .stat-bar.good { background: linear-gradient(90deg, #10b981, #34d399); }
+    .stat-bar.mid  { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+    .stat-bar.low  { background: linear-gradient(90deg, #6d28d9, #a78bfa); }
+    .stat-bar.none { background: #d1d5db; }
+    .stat-num {
+        font-size: 13px;
+        color: #4a5480;
+        font-weight: 700;
+        min-width: 96px;
+        text-align: right;
+        font-family: 'Consolas', monospace;
+    }
+    .recommend {
+        background: #f3eefe;
+        border-left: 4px solid #7c3aed;
+        border-radius: 0 10px 10px 0;
+        padding: 12px 14px;
+        margin-top: 10px;
+        font-size: 14px;
+        color: #5b21b6;
+    }
+    .stats-actions {
+        text-align: center;
+        margin-top: 16px;
+    }
+    .reset-btn {
+        background: #4a5480;
+        color: white;
+        font-size: 13px;
+        padding: 10px 18px;
+    }
+    .reset-btn:hover { background: #3c4569; }
+    /* Confetti */
+    .confetti {
+        position: fixed;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 9999;
+    }
+    @keyframes confetti-fall {
+        0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(110vh) rotate(720deg); opacity: 1; }
+    }
+    @keyframes confetti-fall-slow {
+        0% { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 1; }
+        100% { transform: translateY(115vh) rotate(1080deg) scale(0.85); opacity: 1; }
+    }
+    /* Clear, high-contrast focus ring for keyboard users on every control */
+    button:focus-visible,
+    input:focus-visible,
+    .toggle-row:focus-visible {
+        outline: 3px solid #1e2a5e;
+        outline-offset: 3px;
+    }
+    /* Respect a reduced-motion preference: no confetti, no transitions */
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: 0.001ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.001ms !important;
+        }
+        .confetti { display: none !important; }
+    }
+    @media (max-width: 480px) {
+        .card { padding: 24px 14px 20px; }
+        h1 { font-size: 21px; }
+        .problem { font-size: 21px; padding: 16px 8px; }
+        .mode-btn, .sub-mode-btn { padding: 8px 12px; font-size: 12px; }
+        .radical-sign { width: 14px; flex: 0 0 14px; }
+        .radical.rad-sm .radical-sign { width: 10px; flex: 0 0 10px; }
+        input[type="text"] { width: 88px; font-size: 22px; }
+        .stat-name { min-width: 96px; font-size: 12px; }
+        .stat-num { min-width: 80px; font-size: 11px; }
+    }
+</style>
+</head>
+<body>
+<main class="card" id="game-card">
+    <h1>Radical Expressions</h1>
+    <div class="info">
+        <div class="info-item">Problem: <span id="problemNum">1</span></div>
+        <div class="info-item" id="streak-display">Streak: <span id="streak">0</span></div>
+        <div class="info-item" id="acc-display">Accuracy: --</div>
+    </div>
+    <div class="mode-btns" id="main-mode-btns" role="group" aria-label="Choose a topic">
+        <button class="mode-btn active" type="button" aria-pressed="true" onclick="setMode('squares')">Perfect Squares</button>
+        <button class="mode-btn" type="button" aria-pressed="false" onclick="setMode('cubes')">Perfect Cubes</button>
+        <button class="mode-btn" type="button" aria-pressed="false" onclick="setMode('simplify')">Simplify Radicals</button>
+        <button class="mode-btn" type="button" aria-pressed="false" onclick="setMode('multiply')">Multiplication</button>
+        <button class="mode-btn" type="button" aria-pressed="false" onclick="setMode('divide')">Division</button>
+    </div>
+    <div class="sub-mode-btns" id="sub-mode-btns" style="display:none;" role="group" aria-label="Choose a level"></div>
+
+    <!-- Screen-reader announcements. The visual problem is aria-hidden so it is not read twice. -->
+    <p class="sr-only" id="problem-announcer" aria-live="polite" aria-atomic="true"></p>
+    <p class="sr-only" id="feedback-announcer" aria-live="assertive" aria-atomic="true"></p>
+
+    <div id="main-content"></div>
+    <div class="feedback" id="feedback" aria-hidden="true"></div>
+    <div id="input-content"></div>
+    <div class="helper-row" id="helper-buttons"></div>
+    <div class="hint-box" id="hint" style="display:none;"></div>
+    <div class="answer-box" id="answer-box" style="display:none;"></div>
+    <div class="explain-box" id="steps-box" style="display:none;"></div>
+    <div id="stats-panel" style="display:none;"></div>
+
+    <div style="text-align: center; margin-top: 18px; border-top: 1px solid #e6e9f6; padding-top: 14px;">
+        <button class="stats-btn" onclick="showStats()">My Stats</button>
+        <button class="toggle-row" type="button" id="confetti-toggle" role="switch" aria-checked="true" aria-label="Confetti celebrations" onclick="toggleConfetti()">
+            <span class="toggle-label">Confetti</span>
+            <span class="toggle-track" id="confetti-track" aria-hidden="true"><span class="toggle-knob"></span></span>
+        </button>
+    </div>
+
+    <!-- Polar Rose Studio insignia -->
+    <div style="text-align: center; margin-top: 16px;">
+        <svg width="90" height="64" viewBox="-28 -26 56 64" style="opacity: 0.9;" aria-hidden="true" focusable="false">
+            <defs><linearGradient id="pr-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#1e3a5f"/><stop offset="100%" stop-color="#0d9488"/></linearGradient></defs>
+            <path d="M24.0,0.0 L23.9,1.3 L23.6,2.5 L23.0,3.7 L22.3,4.7 L21.4,5.7 L20.3,6.6 L19.1,7.3 L17.7,7.9 L16.3,8.3 L14.7,8.5 L13.1,8.5 L11.4,8.3 L9.7,7.9 L8.1,7.3 L6.5,6.5 L5.0,5.5 L3.5,4.4 L2.2,3.0 L1.0,1.6 L0.0,0.0 L-0.9,-1.7 L-1.5,-3.4 L-2.0,-5.2 L-2.3,-7.1 L-2.4,-8.9 L-2.3,-10.7 L-2.0,-12.4 L-1.5,-14.0 L-0.8,-15.6 L-0.0,-17.0 L1.0,-18.2 L2.0,-19.3 L3.2,-20.2 L4.4,-20.9 L5.7,-21.4 L7.1,-21.7 L8.4,-21.8 L9.6,-21.7 L10.9,-21.3 L12.0,-20.8 L13.0,-20.1 L13.9,-19.2 L14.7,-18.1 L15.3,-17.0 L15.7,-15.7 L15.9,-14.3 L15.9,-12.9 L15.7,-11.4 L15.3,-9.9 L14.7,-8.5 L13.9,-7.1 L12.9,-5.7 L11.7,-4.5 L10.4,-3.4 L8.9,-2.4 L7.3,-1.5 L5.5,-0.9 L3.7,-0.4 L1.9,-0.1 L0.0,-0.0 L-1.9,-0.1 L-3.7,-0.4 L-5.5,-0.9 L-7.3,-1.5 L-8.9,-2.4 L-10.4,-3.4 L-11.7,-4.5 L-12.9,-5.7 L-13.9,-7.1 L-14.7,-8.5 L-15.3,-9.9 L-15.7,-11.4 L-15.9,-12.9 L-15.9,-14.3 L-15.7,-15.7 L-15.3,-17.0 L-14.7,-18.1 L-13.9,-19.2 L-13.0,-20.1 L-12.0,-20.8 L-10.9,-21.3 L-9.6,-21.7 L-8.4,-21.8 L-7.1,-21.7 L-5.7,-21.4 L-4.4,-20.9 L-3.2,-20.2 L-2.0,-19.3 L-1.0,-18.2 L-0.0,-17.0 L0.8,-15.6 L1.5,-14.0 L2.0,-12.4 L2.3,-10.7 L2.4,-8.9 L2.3,-7.1 L2.0,-5.2 L1.5,-3.4 L0.9,-1.7 L0.0,-0.0 L-1.0,1.6 L-2.2,3.0 L-3.5,4.4 L-5.0,5.5 L-6.5,6.5 L-8.1,7.3 L-9.7,7.9 L-11.4,8.3 L-13.1,8.5 L-14.7,8.5 L-16.3,8.3 L-17.7,7.9 L-19.1,7.3 L-20.3,6.6 L-21.4,5.7 L-22.3,4.7 L-23.0,3.7 L-23.6,2.5 L-23.9,1.3 L-24.0,0.0 L-23.9,-1.3 L-23.6,-2.5 L-23.0,-3.7 L-22.3,-4.7 L-21.4,-5.7 L-20.3,-6.6 L-19.1,-7.3 L-17.7,-7.9 L-16.3,-8.3 L-14.7,-8.5 L-13.1,-8.5 L-11.4,-8.3 L-9.7,-7.9 L-8.1,-7.3 L-6.5,-6.5 L-5.0,-5.5 L-3.5,-4.4 L-2.2,-3.0 L-1.0,-1.6 L-0.0,-0.0 L0.9,1.7 L1.5,3.4 L2.0,5.2 L2.3,7.1 L2.4,8.9 L2.3,10.7 L2.0,12.4 L1.5,14.0 L0.8,15.6 L0.0,17.0 L-1.0,18.2 L-2.0,19.3 L-3.2,20.2 L-4.4,20.9 L-5.7,21.4 L-7.1,21.7 L-8.4,21.8 L-9.6,21.7 L-10.9,21.3 L-12.0,20.8 L-13.0,20.1 L-13.9,19.2 L-14.7,18.1 L-15.3,17.0 L-15.7,15.7 L-15.9,14.3 L-15.9,12.9 L-15.7,11.4 L-15.3,9.9 L-14.7,8.5 L-13.9,7.1 L-12.9,5.7 L-11.7,4.5 L-10.4,3.4 L-8.9,2.4 L-7.3,1.5 L-5.5,0.9 L-3.7,0.4 L-1.9,0.1 L-0.0,0.0 L1.9,0.1 L3.7,0.4 L5.5,0.9 L7.3,1.5 L8.9,2.4 L10.4,3.4 L11.7,4.5 L12.9,5.7 L13.9,7.1 L14.7,8.5 L15.3,9.9 L15.7,11.4 L15.9,12.9 L15.9,14.3 L15.7,15.7 L15.3,17.0 L14.7,18.1 L13.9,19.2 L13.0,20.1 L12.0,20.8 L10.9,21.3 L9.6,21.7 L8.4,21.8 L7.1,21.7 L5.7,21.4 L4.4,20.9 L3.2,20.2 L2.0,19.3 L1.0,18.2 L0.0,17.0 L-0.8,15.6 L-1.5,14.0 L-2.0,12.4 L-2.3,10.7 L-2.4,8.9 L-2.3,7.1 L-2.0,5.2 L-1.5,3.4 L-0.9,1.7 L0.0,-0.0 L1.0,-1.6 L2.2,-3.0 L3.5,-4.4 L5.0,-5.5 L6.5,-6.5 L8.1,-7.3 L9.7,-7.9 L11.4,-8.3 L13.1,-8.5 L14.7,-8.5 L16.3,-8.3 L17.7,-7.9 L19.1,-7.3 L20.3,-6.6 L21.4,-5.7 L22.3,-4.7 L23.0,-3.7 L23.6,-2.5 L23.9,-1.3 L24.0,-0.0" fill="none" stroke="url(#pr-grad)" stroke-width="1.6"/>
+            <text x="0" y="33" text-anchor="middle" font-family="Nunito, Segoe UI, Arial, sans-serif" font-size="6.5" fill="#5d6798" letter-spacing="1.2">POLAR ROSE STUDIO</text>
+        </svg>
+    </div>
+</main>
+
+<script>
+/* =====================================================================
+   State
+   ===================================================================== */
+var mode = 'squares';             // squares | cubes | simplify | multiply | divide
+var simplifySubMode = 'guided';   // guided | practice
+var multiplySubMode = 'single';   // single | binomial (shown as Level 1 / Level 2)
+var divideSubMode = 'divide';     // divide | divideReduce (shown as Level 1 / Level 2)
+var current = null;
+var streak = 0;
+var bestStreak = 0;
+var problemNum = 0;
+var missRecorded = false;
+var showStepsIndex = 0;
+/* Handles for pending delayed work, so a mode switch can cancel them.
+   Without this, a stale auto-advance fires ~1.1s later and replaces the
+   problem the student is already looking at. */
+var advanceTimer = null;
+var stepTimer = null;
+
+function cancelPendingAdvance() {
+    if (advanceTimer !== null) { clearTimeout(advanceTimer); advanceTimer = null; }
+    if (stepTimer !== null) { clearTimeout(stepTimer); stepTimer = null; }
+}
+
+/* Auto-advance after a correct answer. 1100ms so announcements finish. */
+function scheduleAdvance() {
+    cancelPendingAdvance();
+    advanceTimer = setTimeout(function () {
+        advanceTimer = null;
+        problemNum++;
+        generateProblem();
+        updateDisplay();
+    }, 1100);
+}
+
+var stats = {
+    squares: { c: 0, t: 0 },
+    cubes: { c: 0, t: 0 },
+    simplifyGuided: { c: 0, t: 0 },
+    simplifyPractice: { c: 0, t: 0 },
+    mulSingle: { c: 0, t: 0 },
+    mulBinomial: { c: 0, t: 0 },
+    divide: { c: 0, t: 0 },
+    divideReduce: { c: 0, t: 0 }
+};
+var modeAttempts = { squares: 0, cubes: 0, simplifyGuided: 0, simplifyPractice: 0, mulSingle: 0, mulBinomial: 0, divide: 0, divideReduce: 0 };
+var recent = { squares: [], cubes: [], simplify: [], mulSingle: [], divideReduce: [] };
+
+var SAVE_KEY = 'radical-expressions-stats-v1';
+var CONFETTI_KEY = 'radical-expressions-confetti-v1';
+var categoryNames = {
+    squares: 'Perfect Squares',
+    cubes: 'Perfect Cubes',
+    simplifyGuided: 'Simplify (Guided)',
+    simplifyPractice: 'Simplify (Practice)',
+    mulSingle: 'Multiply (Single x Single)',
+    mulBinomial: 'Multiply (Binomials)',
+    divide: 'Divide (No Reduction)',
+    divideReduce: 'Divide (Reduce Fraction)'
+};
+var ALL_STAT_KEYS = ['squares', 'cubes', 'simplifyGuided', 'simplifyPractice', 'mulSingle', 'mulBinomial', 'divide', 'divideReduce'];
+
+/* =====================================================================
+   Utilities
+   ===================================================================== */
+function ri(lo, hi) { return Math.floor(Math.random() * (hi - lo + 1)) + lo; }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+/* parseInt() stops at the first character it cannot use, so "3.7", "3abc",
+   "5.0", "1e3" and "0x10" all used to be silently accepted as whole numbers.
+   Every answer box goes through this instead: null unless the whole string is
+   an integer. */
+var WHOLE_RE = /^[+-]?\d+$/;
+function parseWhole(raw) {
+    var s = String(raw == null ? '' : raw).trim();
+    if (!WHOLE_RE.test(s)) return null;
+    return parseInt(s, 10);
+}
+
+/* Two radical terms are the same number when coef^2 * radicand matches
+   (both coefficients being positive). Used where the instructions say the
+   answer need not be simplified, so a student who DOES simplify -- writing 4
+   instead of sqrt(16) -- is still marked correct. */
+function sameRadicalValue(userCoef, userRad, expCoef, expRad) {
+    if (userCoef <= 0 || userRad <= 0) return false;
+    return userCoef * userCoef * userRad === expCoef * expCoef * expRad;
+}
+
+function pickNoRepeat(pool, recentArr, keyFn) {
+    keyFn = keyFn || function (x) { return x; };
+    var tries = 0;
+    var choice;
+    do {
+        choice = pool[Math.floor(Math.random() * pool.length)];
+        tries++;
+    } while (recentArr.indexOf(keyFn(choice)) !== -1 && tries < 20 && pool.length > 1);
+    recentArr.push(keyFn(choice));
+    if (recentArr.length > 3) recentArr.shift();
+    return choice;
+}
+
+/* Turns a fragment of math markup into the words a screen reader should say.
+   Tags go first so that any aria-label already inside them is dropped, then the
+   ASCII entities become words. */
+function plainMath(s) {
+    return String(s === undefined || s === null ? '' : s)
+        /* The radical sign is now an SVG, so there is no &radic; character left
+           to translate. The sign span carries data-rad so the words survive
+           tag-stripping, and the root index is dropped rather than left behind
+           as a stray digit ("3 square root of 8"). */
+        .replace(/<sup class="rad-index">[\s\S]*?<\/sup>/g, '')
+        .replace(/<span class="radical-sign" data-rad="cube"[^>]*>/g, ' cube root of ')
+        .replace(/<span class="radical-sign" data-rad="square"[^>]*>/g, ' square root of ')
+        .replace(/<[^>]*>/g, '')
+        .replace(/&radic;/g, ' square root of ')
+        .replace(/&times;/g, ' times ')
+        .replace(/&divide;/g, ' divided by ')
+        .replace(/&minus;/g, ' minus ')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/"/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+/* The radical sign itself: one stretching inline SVG whose tip joins the
+   overbar as a single continuous stroke. preserveAspectRatio="none" lets the V
+   stretch to any height; vector-effect="non-scaling-stroke" keeps the stroke an
+   even 2px whatever that height is, and 2px is exactly the border-top width of
+   .radical-body, which is what makes the joint read as one line. ASCII only. */
+var RADICAL_SVG = '<svg viewBox="0 0 14 40" preserveAspectRatio="none" aria-hidden="true" focusable="false">' +
+    '<path d="M0.5,24 L4,24 L7.5,37.5 L12.5,1 L14,1" fill="none" stroke="currentColor" stroke-width="2" ' +
+    'vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+/* The sign span. data-rad survives into plainMath() so the spoken sentence
+   still gets the words the SVG cannot say. */
+function radicalSignHTML(index) {
+    var idx = index === 3 ? '<sup class="rad-index">3</sup>' : '';
+    return '<span class="radical-sign" data-rad="' + (index === 3 ? 'cube' : 'square') +
+        '" aria-hidden="true">' + idx + RADICAL_SVG + '</span>';
+}
+
+/* Radical display. The overbar that says how far the radicand reaches is a CSS
+   border and the sign is an SVG -- neither is visible to a screen reader -- so
+   the whole component is exposed as one labelled image instead of a run of
+   loose numbers. */
+function radicalHTML(radicand, index, coef) {
+    var c = (coef !== undefined && coef !== null) ? '<span class="rad-coef">' + coef + '</span>' : '';
+    /* "square root of 9 times 2" would be heard as (sqrt 9) x 2; the overbar
+       actually covers both, so a compound radicand is announced as a quantity. */
+    var radText = plainMath(radicand);
+    var spoken = ((coef !== undefined && coef !== null) ? plainMath(coef) + ' times ' : '') +
+        (index === 3 ? 'cube root of ' : 'square root of ') +
+        (radText.indexOf(' ') === -1 ? '' : 'the quantity ') + radText;
+    return '<span class="radical" role="img" aria-label="' + spoken + '">' +
+        c + radicalSignHTML(index) +
+        '<span class="radical-body">' + radicand + '</span></span>';
+}
+
+/* Radical drawn around an answer input. The input is focusable, so the wrapper
+   is NEVER aria-hidden and carries no role="img" that would swallow it -- only
+   the decorative sign is hidden; the input keeps its own aria-label. */
+function radicalInputHTML(inputHtml) {
+    return '<span class="radical rad-input">' + radicalSignHTML(2) +
+        '<span class="radical-body">' + inputHtml + '</span></span>';
+}
+
+/* A "term" is {coef, radicand}; radicand === 1 means a plain integer. */
+function termHTML(t) {
+    if (t.radicand === 1) return String(t.coef);
+    return radicalHTML(t.radicand, 2, t.coef === 1 ? undefined : t.coef);
+}
+
+/* A "factor" is either a single term (monomial) or an array of two terms (binomial). */
+function factorHTML(factor) {
+    if (Array.isArray(factor)) {
+        return '(' + termHTML(factor[0]) + ' + ' + termHTML(factor[1]) + ')';
+    }
+    return termHTML(factor);
+}
+
+/* The fraction bar is a CSS border and the stacking is flex layout, so without a
+   label a screen reader reads "3 square root of 6" for 3 over sqrt 6. */
+function fractionHTML(numeratorHtml, denominatorHtml) {
+    var spoken = plainMath(numeratorHtml) + ' all over ' + plainMath(denominatorHtml);
+    return '<span class="frac-disp" role="img" aria-label="' + spoken + '"><span class="frac-num">' + numeratorHtml + '</span><span class="frac-den">' + denominatorHtml + '</span></span>';
+}
+
+/* =====================================================================
+   Spoken text for screen readers -- math read in words, not symbols
+   ===================================================================== */
+function spokenRadical(radicand, index) {
+    return (index === 3 ? 'cube root of ' : 'square root of ') + radicand;
+}
+function spokenTerm(t) {
+    if (t.radicand === 1) return String(t.coef);
+    if (t.coef === 1) return spokenRadical(t.radicand, 2);
+    return t.coef + ' times ' + spokenRadical(t.radicand, 2);
+}
+function spokenFactor(f) {
+    if (Array.isArray(f)) return '(' + spokenTerm(f[0]) + ' plus ' + spokenTerm(f[1]) + ')';
+    return spokenTerm(f);
+}
+
+/* Describes the current problem in words. */
+function spokenProblem() {
+    var c = current;
+    if (!c) return '';
+    if (c.type === 'squares') return 'Evaluate ' + spokenRadical(c.radicand, 2) + '.';
+    if (c.type === 'cubes') return 'Evaluate ' + spokenRadical(c.radicand, 3) + '.';
+    if (c.type === 'simplify') return 'Simplify ' + spokenRadical(c.radicand, 2) + '.';
+    if (c.type === 'mulSingle') {
+        return 'Multiply and simplify: ' + spokenRadical(c.a, 2) + ' times ' + spokenRadical(c.b, 2) + '.';
+    }
+    if (c.type === 'mulBinomial') {
+        if (c.shape === 'diffSquares') {
+            return 'Multiply and simplify completely: (' + c.a + ' minus ' + spokenRadical(c.b, 2) + ') times (' +
+                   c.a + ' plus ' + spokenRadical(c.b, 2) + ').';
+        }
+        return 'Distribute, no need to simplify: ' + spokenFactor(c.factor1) + ' times ' + spokenFactor(c.factor2) + '.';
+    }
+    if (c.type === 'divide') {
+        return 'Rationalize the denominator: ' + c.n + ' over ' + spokenRadical(c.d, 2) + '.';
+    }
+    return '';
+}
+
+/* Polite announcement: a new problem, or the current guided step. */
+function announceProblem(extra) {
+    var el = document.getElementById('problem-announcer');
+    if (!el) return;
+    var msg = spokenProblem();
+    if (extra) msg += ' ' + extra;
+    /* Reassign after a clear so repeated identical text is still announced. */
+    el.textContent = '';
+    setTimeout(function () { el.textContent = msg; }, 60);
+}
+
+/* Assertive announcement: grading feedback. */
+function announceFeedback(msg) {
+    var el = document.getElementById('feedback-announcer');
+    if (!el) return;
+    el.textContent = '';
+    setTimeout(function () { el.textContent = msg; }, 60);
+}
+
+/* Sets both the visible feedback (aria-hidden) and the spoken one. */
+function setFeedback(text, cls, spoken) {
+    var fb = document.getElementById('feedback');
+    fb.textContent = text;
+    fb.className = cls;
+    if (spoken !== false) announceFeedback(spoken || text);
+}
+
+/* =====================================================================
+   Data pools
+   ===================================================================== */
+var squaresPool = [];
+for (var _i = 2; _i <= 12; _i++) squaresPool.push(_i);
+
+var cubesPool = [];
+for (var _j = 1; _j <= 10; _j++) cubesPool.push(_j);
+
+function computeLargestSquareFactor(n) {
+    for (var k = Math.floor(Math.sqrt(n)); k >= 2; k--) {
+        if (n % (k * k) === 0) return { root: k, factor: k * k, remainder: n / (k * k) };
+    }
+    return null;
+}
+
+function buildSimplifyPool() {
+    var pool = [];
+    for (var n = 5; n <= 150; n++) {
+        if (Number.isInteger(Math.sqrt(n))) continue; // skip perfect squares themselves
+        var res = computeLargestSquareFactor(n);
+        if (!res) continue; // square-free, cannot be simplified
+        pool.push({ radicand: n, root: res.root, factor: res.factor, remainder: res.remainder });
+    }
+    return pool;
+}
+var simplifyPool = buildSimplifyPool();
+var simplifyEasyPool = simplifyPool.filter(function (p) { return p.radicand <= 50; });
+
+/* ---- Multiply: Single x Single (always needs simplifying) ---- */
+var mulSingleRadicandPool = [2, 3, 5, 6, 7, 8, 10, 11, 12];
+
+function simplifyRadicalGeneral(n) {
+    /* Returns {coef, radicand} such that coef*sqrt(radicand) === sqrt(n), radicand square-free (or 1 if n is a perfect square). */
+    var root = Math.sqrt(n);
+    if (Number.isInteger(root)) return { coef: root, radicand: 1 };
+    var res = computeLargestSquareFactor(n);
+    if (!res) return { coef: 1, radicand: n };
+    return { coef: res.root, radicand: res.remainder };
+}
+
+function generateMulSingleProblem() {
+    var a = pick(mulSingleRadicandPool);
+    var b = pickNoRepeat(mulSingleRadicandPool, recent.mulSingle);
+    var product = a * b;
+    var simplified = simplifyRadicalGeneral(product);
+    return { type: 'mulSingle', a: a, b: b, product: product, coef: simplified.coef, radicand: simplified.radicand };
+}
+
+/* ---- Multiply: With Binomials (no simplifying required, except difference of squares) ---- */
+var termIntPool = [2, 3, 4, 5, 6, 7, 8, 9];
+var termRadPool = [2, 3, 5, 6, 7, 8, 10, 11];
+
+function multiplyTerms(t1, t2) {
+    return { coef: t1.coef * t2.coef, radicand: t1.radicand * t2.radicand };
+}
+function pickDistinct(pool, avoid) {
+    var val = pick(pool);
+    var tries = 0;
+    while (val === avoid && tries < 5) { val = pick(pool); tries++; }
+    return val;
+}
+
+/* Three fixed shapes:
+   1. intRadical:     m(c + n)          e.g. sqrt2 (4 + sqrt5)      -- do not simplify
+   2. radicalRadical: m(n + p)          e.g. sqrt2 (sqrt3 + sqrt6)  -- do not simplify
+   3. diffSquares:    (a - b)(a + b)    e.g. (9 - sqrt3)(9 + sqrt3) -- radicals cancel, simplify fully
+*/
+function generateMulBinomialProblem() {
+    var shape = pick(['intRadical', 'radicalRadical', 'diffSquares']);
+
+    if (shape === 'intRadical') {
+        var m = pick(termRadPool);
+        var c = pick(termIntPool);
+        var n = pick(termRadPool);
+        var factor1 = { coef: 1, radicand: m };
+        var factor2 = [{ coef: c, radicand: 1 }, { coef: 1, radicand: n }];
+        var terms = [multiplyTerms(factor1, factor2[0]), multiplyTerms(factor1, factor2[1])];
+        return { type: 'mulBinomial', shape: shape, factor1: factor1, factor2: factor2, terms: terms };
+    }
+
+    if (shape === 'radicalRadical') {
+        var m2 = pick(termRadPool);
+        var n2 = pick(termRadPool);
+        var p2 = pickDistinct(termRadPool, n2);
+        var factor1b = { coef: 1, radicand: m2 };
+        var factor2b = [{ coef: 1, radicand: n2 }, { coef: 1, radicand: p2 }];
+        var termsb = [multiplyTerms(factor1b, factor2b[0]), multiplyTerms(factor1b, factor2b[1])];
+        return { type: 'mulBinomial', shape: shape, factor1: factor1b, factor2: factor2b, terms: termsb };
+    }
+
+    /* diffSquares: (a - sqrt(b))(a + sqrt(b)) = a*a - b, radicals always cancel */
+    var a = ri(5, 12);
+    var b = pick(termRadPool);
+    return { type: 'mulBinomial', shape: 'diffSquares', a: a, b: b, answer: a * a - b };
+}
+
+/* ---- Divide: rationalize a single-radical denominator ----
+   The denominators must be SQUARE-FREE. 8 used to be in this pool, so 3/sqrt(8)
+   had "expected answer" 3*sqrt(8)/8 -- not fully simplified -- and a student who
+   correctly wrote 3*sqrt(2)/4 was marked wrong. */
+var divRadicandPool = [2, 3, 5, 6, 7, 10, 11];
+
+/* Tier 2 needs a denominator that can share a factor with the numerator WITHOUT
+   the fraction collapsing entirely, which is only possible when d is composite:
+   if d is prime, any common factor is d itself and the answer always reduces to
+   a denominator of 1. */
+var divReduceRadicandPool = [6, 10, 14, 15];
+
+function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+
+/* Tier 1: n and d share no common factor -- the rationalized fraction is already in lowest terms. */
+function generateDivideProblem() {
+    var d = pick(divRadicandPool);
+    var n;
+    var tries = 0;
+    do {
+        n = ri(1, 12);
+        tries++;
+    } while (gcd(n, d) !== 1 && tries < 30);
+    /* Belt and braces: if the loop ever gave up, still state the reduced answer. */
+    var g = gcd(n, d);
+    return { type: 'divide', n: n, d: d, redN: n / g, redD: d / g };
+}
+
+/* Tier 2: n and d share a common factor -- the rationalized fraction must also
+   be reduced, and must still have a real denominator afterwards. Every
+   candidate n satisfies 1 < gcd(n, d) < d, which guarantees both. */
+function generateDivideReduceProblem() {
+    var d = pick(divReduceRadicandPool);
+    var candidates = [];
+    for (var n = 2; n <= 2 * d; n++) {
+        var g0 = gcd(n, d);
+        if (g0 > 1 && g0 < d) candidates.push(n);
+    }
+    var chosen = pickNoRepeat(candidates, recent.divideReduce);
+    var g = gcd(chosen, d);
+    return { type: 'divide', n: chosen, d: d, redN: chosen / g, redD: d / g };
+}
+
+/* =====================================================================
+   Problem generation
+   ===================================================================== */
+function generateProblem() {
+    cancelPendingAdvance();
+    missRecorded = false;
+    showStepsIndex = 0;
+
+    if (mode === 'squares') {
+        modeAttempts.squares++;
+        var pool = modeAttempts.squares <= 3 ? squaresPool.filter(function (n) { return n <= 8; }) : squaresPool;
+        var n = pickNoRepeat(pool, recent.squares);
+        current = { type: 'squares', n: n, answer: n, radicand: n * n };
+    } else if (mode === 'cubes') {
+        modeAttempts.cubes++;
+        var poolC = modeAttempts.cubes <= 2 ? cubesPool.filter(function (n) { return n <= 5; }) : cubesPool;
+        var n2 = pickNoRepeat(poolC, recent.cubes);
+        current = { type: 'cubes', n: n2, answer: n2, radicand: n2 * n2 * n2 };
+    } else if (mode === 'simplify') {
+        var key = simplifySubMode === 'guided' ? 'simplifyGuided' : 'simplifyPractice';
+        modeAttempts[key]++;
+        var sPool = modeAttempts[key] <= 3 ? simplifyEasyPool : simplifyPool;
+        var item = pickNoRepeat(sPool, recent.simplify, function (p) { return p.radicand; });
+        current = {
+            type: 'simplify',
+            radicand: item.radicand,
+            root: item.root,
+            factor: item.factor,
+            remainder: item.remainder
+        };
+        if (simplifySubMode === 'guided') {
+            current.guidedStep = 0;
+            current.guidedWrong = 0;
+            current.guidedLines = [];
+        }
+    } else if (mode === 'multiply') {
+        var mKey = multiplySubMode === 'single' ? 'mulSingle' : 'mulBinomial';
+        modeAttempts[mKey]++;
+        if (multiplySubMode === 'single') current = generateMulSingleProblem();
+        else current = generateMulBinomialProblem();
+    } else {
+        var dKey = divideSubMode === 'divideReduce' ? 'divideReduce' : 'divide';
+        modeAttempts[dKey]++;
+        if (divideSubMode === 'divideReduce') current = generateDivideReduceProblem();
+        else current = generateDivideProblem();
+    }
+
+    render();
+    var fb = document.getElementById('feedback');
+    fb.textContent = '';
+    fb.className = 'feedback';
+    announceProblem(guidedStepSpoken());
+}
+
+/* For guided mode, append the current step's instruction to the announcement. */
+function guidedStepSpoken() {
+    if (!current || current.type !== 'simplify' || current.guidedStep === undefined) return '';
+    var steps = getGuidedSteps();
+    var step = steps[current.guidedStep];
+    if (!step) return '';
+    var plain = plainMath(step.prompt);
+    return 'Step ' + (current.guidedStep + 1) + ' of ' + steps.length + '. ' + plain;
+}
+
+function getGuidedSteps() {
+    var c = current;
+    return [
+        {
+            type: 'input',
+            prompt: 'Find the largest perfect square that divides ' + c.radicand + '.',
+            answer: c.factor,
+            lines: [
+                c.radicand + ' = ' + c.factor + ' &times; ' + c.remainder,
+                radicalHTML(c.radicand, 2) + ' = ' + radicalHTML(c.factor + ' &times; ' + c.remainder, 2)
+            ]
+        },
+        {
+            type: 'display',
+            prompt: 'Use the product rule to split it into two square roots.',
+            lines: [
+                radicalHTML(c.radicand, 2) + ' = ' + radicalHTML(c.factor, 2) + ' &times; ' + radicalHTML(c.remainder, 2)
+            ]
+        },
+        {
+            type: 'input',
+            prompt: 'Simplify ' + radicalHTML(c.factor, 2) + '.',
+            answer: c.root,
+            lines: [
+                radicalHTML(c.radicand, 2) + ' = ' + radicalHTML(c.remainder, 2, c.root)
+            ]
+        }
+    ];
+}
+
+function pushStepLines(step) {
+    step.lines.forEach(function (ln) {
+        current.guidedLines.push('<div class="step-line"><span class="step-line-check">&#10003;</span>' + ln + '</div>');
+    });
+}
+
+/* ---- Show Steps content for Multiply (Single x Single) ---- */
+function getMulSingleSteps() {
+    var c = current;
+    var steps = [
+        {
+            prompt: 'Multiply the radicands under one square root.',
+            lines: [radicalHTML(c.a, 2) + ' &times; ' + radicalHTML(c.b, 2) + ' = ' + radicalHTML(c.product, 2)]
+        }
+    ];
+    if (c.radicand === 1) {
+        steps.push({
+            prompt: c.product + ' is a perfect square, so it simplifies to a whole number.',
+            lines: ['= ' + c.coef]
+        });
+    } else if (c.coef > 1) {
+        steps.push({
+            prompt: 'Simplify ' + radicalHTML(c.product, 2) + ' by pulling out the largest perfect square factor.',
+            lines: ['= ' + radicalHTML(c.radicand, 2, c.coef)]
+        });
+    } else {
+        steps.push({
+            prompt: c.product + ' has no perfect square factors, so this is already fully simplified.',
+            lines: ['= ' + radicalHTML(c.radicand, 2)]
+        });
+    }
+    return steps;
+}
+
+/* ---- Show Steps content for Multiply (With Binomials) ---- */
+function getMulBinomialSteps() {
+    var c = current;
+    if (c.shape === 'diffSquares') {
+        return [
+            {
+                prompt: 'This is a difference of squares -- the middle terms cancel out.',
+                lines: [
+                    '(' + c.a + ' &minus; ' + radicalHTML(c.b, 2) + ') &times; (' + c.a + ' + ' + radicalHTML(c.b, 2) + ') = ' + c.a + ' &times; ' + c.a + ' &minus; ' + c.b
+                ]
+            },
+            {
+                prompt: 'Evaluate.',
+                lines: ['= ' + (c.a * c.a) + ' &minus; ' + c.b + ' = ' + c.answer]
+            }
+        ];
+    }
+    var f1 = c.factor1, f2 = c.factor2;
+    var rawParts, combinedParts;
+    if (!Array.isArray(f1)) {
+        rawParts = [termHTML(f1) + ' &times; ' + termHTML(f2[0]), termHTML(f1) + ' &times; ' + termHTML(f2[1])];
+    } else {
+        rawParts = [
+            termHTML(f1[0]) + ' &times; ' + termHTML(f2[0]),
+            termHTML(f1[0]) + ' &times; ' + termHTML(f2[1]),
+            termHTML(f1[1]) + ' &times; ' + termHTML(f2[0]),
+            termHTML(f1[1]) + ' &times; ' + termHTML(f2[1])
+        ];
+    }
+    combinedParts = c.terms.map(function (t) { return termHTML(t); });
+    return [
+        {
+            prompt: 'Distribute every term in the first factor across every term in the second.',
+            lines: ['= ' + rawParts.join(' + ')]
+        },
+        {
+            prompt: 'Multiply each pair of terms (no need to simplify any of the radicals further).',
+            lines: ['= ' + combinedParts.join(' + ')]
+        }
+    ];
+}
+
+/* ---- Show Steps content for Divide ---- */
+function getDivideSteps() {
+    var c = current;
+    var steps = [
+        {
+            prompt: 'Multiply the top and bottom by ' + radicalHTML(c.d, 2) + '.',
+            lines: [
+                fractionHTML(c.n, radicalHTML(c.d, 2)) + ' &times; ' + fractionHTML(radicalHTML(c.d, 2), radicalHTML(c.d, 2))
+            ]
+        },
+        {
+            prompt: 'Multiply straight across. The bottom becomes a whole number.',
+            lines: ['= ' + fractionHTML(radicalHTML(c.d, 2, c.n), c.d)]
+        }
+    ];
+    if (c.redN !== c.n || c.redD !== c.d) {
+        steps.push({
+            prompt: c.n + ' and ' + c.d + ' share a common factor -- reduce the fraction.',
+            lines: ['= ' + fractionHTML(radicalHTML(c.d, 2, c.redN), c.redD)]
+        });
+    }
+    return steps;
+}
+
+function getCurrentShowSteps() {
+    if (current.type === 'simplify') return getGuidedSteps();
+    if (current.type === 'mulSingle') return getMulSingleSteps();
+    if (current.type === 'mulBinomial') return getMulBinomialSteps();
+    if (current.type === 'divide') return getDivideSteps();
+    return [];
+}
+
+/* =====================================================================
+   Render dispatch
+   ===================================================================== */
+function render() {
+    if (mode === 'squares') renderSimple(2);
+    else if (mode === 'cubes') renderSimple(3);
+    else if (mode === 'simplify') {
+        if (simplifySubMode === 'guided') renderGuided();
+        else renderPractice();
+    } else if (mode === 'multiply') {
+        if (multiplySubMode === 'single') renderMulSingle();
+        else renderMulBinomial();
+    } else {
+        renderDivide();
+    }
+    updateHelperButtons();
+}
+
+function focusAnswer(id) {
+    setTimeout(function () {
+        var el = document.getElementById(id || 'answer');
+        if (el) el.focus();
+    }, 100);
+}
+
+function renderSimple(idx) {
+    var html = '<div class="problem" aria-hidden="true">' + radicalHTML(current.radicand, idx) + ' = ?</div>';
+    document.getElementById('main-content').innerHTML = html;
+
+    var inputHtml = '';
+    inputHtml += '<div class="instructions">Enter your answer</div>';
+    inputHtml += '<div class="input-area">';
+    inputHtml += '<span class="eq-label">= </span>';
+    inputHtml += '<input type="text" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="answer" aria-label="Your answer" placeholder="?" onkeypress="if(event.key===\'Enter\')checkSimpleAnswer()">';
+    inputHtml += '<button class="submit-btn" onclick="checkSimpleAnswer()">Check</button>';
+    inputHtml += '</div>';
+    document.getElementById('input-content').innerHTML = inputHtml;
+    focusAnswer();
+}
+
+function renderGuided() {
+    var steps = getGuidedSteps();
+    var step = steps[current.guidedStep];
+    var html = '<div class="problem" aria-hidden="true">' + radicalHTML(current.radicand, 2) + ' = ?</div>';
+    html += '<div class="step-area">';
+    if (current.guidedLines.length) {
+        html += '<div class="step-lines">' + current.guidedLines.join('') + '</div>';
+    }
+    html += '<div class="step-count">Step ' + (current.guidedStep + 1) + ' of ' + steps.length + '</div>';
+    html += '<div class="step-prompt">' + step.prompt + '</div>';
+    html += '</div>';
+    document.getElementById('main-content').innerHTML = html;
+
+    var inputHtml = '<div class="input-area">';
+    if (step.type === 'display') {
+        inputHtml += '<button class="submit-btn" onclick="continueGuidedStep()">Continue</button>';
+    } else {
+        inputHtml += '<input type="text" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="answer" aria-label="Your answer for this step" placeholder="?" onkeypress="if(event.key===\'Enter\')checkGuidedStep()">';
+        inputHtml += '<button class="submit-btn" onclick="checkGuidedStep()">Check Step</button>';
+    }
+    inputHtml += '</div>';
+    document.getElementById('input-content').innerHTML = inputHtml;
+    if (step.type !== 'display') focusAnswer();
+    /* Step 0 is announced by generateProblem; announce only later transitions. */
+    if (current.guidedStep > 0) announceProblem(guidedStepSpoken());
+}
+
+function continueGuidedStep() {
+    var steps = getGuidedSteps();
+    var step = steps[current.guidedStep];
+    pushStepLines(step);
+    current.guidedStep++;
+    if (current.guidedStep >= steps.length) finishGuidedProblem();
+    else render();
+}
+
+function renderPractice() {
+    var html = '<div class="problem" aria-hidden="true">' + radicalHTML(current.radicand, 2) + ' = ?</div>';
+    document.getElementById('main-content').innerHTML = html;
+
+    var inputHtml = '<div class="instructions">Enter the simplified form</div>';
+    inputHtml += '<div class="input-area">';
+    inputHtml += '<input type="text" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="coef-answer" aria-label="Number in front of the radical" placeholder="coef" style="width:78px;">';
+    inputHtml += radicalInputHTML('<input type="text" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="radicand-answer" class="radicand-box" aria-label="Number left under the square root" placeholder="left over" onkeypress="if(event.key===\'Enter\')checkPracticeAnswer()">');
+    inputHtml += '<button class="submit-btn" onclick="checkPracticeAnswer()">Check</button>';
+    inputHtml += '</div>';
+    document.getElementById('input-content').innerHTML = inputHtml;
+    focusAnswer('coef-answer');
+}
+
+/* =====================================================================
+   Answer checking -- Perfect Squares / Perfect Cubes
+   ===================================================================== */
+function checkSimpleAnswer() {
+    var el = document.getElementById('answer');
+    if (!el) return;
+    var raw = el.value.trim();
+    if (raw === '') return;
+    var userNum = parseWhole(raw);
+    var fb = document.getElementById('feedback');
+    if (userNum === null) {
+        setFeedback('Enter a whole number.', 'feedback incorrect');
+        return;
+    }
+    var correct = userNum === current.answer;
+    var s = stats[mode];
+    if (correct) {
+        /* A problem that was missed or revealed does not restart the streak:
+           recordMiss() already ended it, and a revealed answer must leave the
+           streak at 0 the way it does in the rest of the suite. */
+        if (!missRecorded) {
+            s.c++; s.t++;
+            streak++;
+            if (streak > bestStreak) bestStreak = streak;
+            celebrateStreak(streak);
+        } else {
+            streak = 0;
+        }
+        setFeedback(pick(['Correct!', 'Nice!', 'Got it!', 'Perfect!', 'Nailed it!', 'Yes!']), 'feedback correct', 'Correct.');
+        updateDisplay();
+        saveState();
+        scheduleAdvance();
+    } else {
+        if (!missRecorded) { missRecorded = true; s.t++; }
+        streak = 0;
+        setFeedback('Not quite -- try again.', 'feedback incorrect', 'Not quite. Try again.');
+        updateDisplay();
+        saveState();
+        el.select();
+    }
+}
+
+/* =====================================================================
+   Answer checking -- Simplify Radicals (Guided)
+   ===================================================================== */
+function checkGuidedStep() {
+    var el = document.getElementById('answer');
+    if (!el) return;
+    var raw = el.value.trim();
+    if (raw === '') return;
+    var userNum = parseWhole(raw);
+    var fb = document.getElementById('feedback');
+    var steps = getGuidedSteps();
+    var step = steps[current.guidedStep];
+
+    if (userNum === null) {
+        setFeedback('Enter a whole number.', 'feedback incorrect');
+        return;
+    }
+
+    if (userNum === step.answer) {
+        pushStepLines(step);
+        current.guidedStep++;
+        current.guidedWrong = 0;
+        fb.textContent = '';
+        fb.className = 'feedback';
+        announceFeedback('Correct.');
+        if (current.guidedStep >= steps.length) finishGuidedProblem();
+        else render();
+    } else {
+        current.guidedWrong++;
+        missRecorded = true;
+        streak = 0;
+        updateDisplay();
+        saveState();
+        if (current.guidedWrong >= 2) {
+            fb.innerHTML = 'The answer is <b>' + step.answer + '</b>. Moving to the next step.';
+            fb.className = 'feedback incorrect';
+            announceFeedback('The answer is ' + step.answer + '. Moving to the next step.');
+            pushStepLines(step);
+            current.guidedStep++;
+            current.guidedWrong = 0;
+            cancelPendingAdvance();
+            stepTimer = setTimeout(function () {
+                stepTimer = null;
+                if (current.guidedStep >= steps.length) finishGuidedProblem();
+                else render();
+            }, 1500);
+        } else {
+            setFeedback('Not quite -- try again.', 'feedback incorrect', 'Not quite. Try again.');
+            el.select();
+        }
+    }
+}
+
+function finishGuidedProblem() {
+    var s = stats.simplifyGuided;
+    s.t++;
+    if (!missRecorded) {
+        s.c++;
+        streak++;
+        if (streak > bestStreak) bestStreak = streak;
+        celebrateStreak(streak);
+    }
+    var html = '<div class="problem" aria-hidden="true">' + radicalHTML(current.radicand, 2) + ' = ' + radicalHTML(current.remainder, 2, current.root) + '</div>';
+    html += '<div class="step-lines">' + current.guidedLines.join('') + '</div>';
+    document.getElementById('main-content').innerHTML = html;
+    document.getElementById('input-content').innerHTML = '<div class="input-area"><button class="submit-btn" onclick="nextProblem()">Next Problem</button></div>';
+    updateHelperButtons();
+    var fb = document.getElementById('feedback');
+    fb.textContent = missRecorded ? '' : pick(['Correct!', 'Nice work!', 'Nailed it!']);
+    fb.className = missRecorded ? 'feedback' : 'feedback correct';
+    announceFeedback((missRecorded ? '' : 'Correct. ') + 'Problem complete. ' +
+        spokenRadical(current.radicand, 2) + ' equals ' +
+        spokenTerm({ coef: current.root, radicand: current.remainder }) + '. Select Next Problem to continue.');
+    updateDisplay();
+    saveState();
+}
+
+function nextProblem() {
+    problemNum++;
+    generateProblem();
+    updateDisplay();
+}
+
+/* =====================================================================
+   Answer checking -- Simplify Radicals (Practice)
+   ===================================================================== */
+function checkPracticeAnswer() {
+    var c1 = document.getElementById('coef-answer');
+    var c2 = document.getElementById('radicand-answer');
+    if (!c1 || !c2) return;
+    var rawC = c1.value.trim();
+    var rawR = c2.value.trim();
+    if (rawC === '' || rawR === '') return;
+    var coefNum = parseWhole(rawC);
+    var radNum = parseWhole(rawR);
+    var fb = document.getElementById('feedback');
+    if (coefNum === null || radNum === null) {
+        setFeedback('Enter whole numbers in both boxes.', 'feedback incorrect');
+        return;
+    }
+    var correct = (coefNum === current.root && radNum === current.remainder);
+    var s = stats.simplifyPractice;
+    if (correct) {
+        /* A problem that was missed or revealed does not restart the streak:
+           recordMiss() already ended it, and a revealed answer must leave the
+           streak at 0 the way it does in the rest of the suite. */
+        if (!missRecorded) {
+            s.c++; s.t++;
+            streak++;
+            if (streak > bestStreak) bestStreak = streak;
+            celebrateStreak(streak);
+        } else {
+            streak = 0;
+        }
+        setFeedback(pick(['Correct!', 'Nice!', 'Got it!', 'Perfect!', 'Nailed it!', 'Yes!']), 'feedback correct', 'Correct.');
+        updateDisplay();
+        saveState();
+        scheduleAdvance();
+    } else {
+        if (!missRecorded) { missRecorded = true; s.t++; }
+        streak = 0;
+        setFeedback('Not quite -- try again.', 'feedback incorrect', 'Not quite. Try again.');
+        updateDisplay();
+        saveState();
+    }
+}
+
+/* =====================================================================
+   Answer checking -- shared correct/incorrect bookkeeping
+   ===================================================================== */
+function resolveAnswer(correct, statsKey) {
+    var fb = document.getElementById('feedback');
+    var s = stats[statsKey];
+    if (correct) {
+        /* A problem that was missed or revealed does not restart the streak:
+           recordMiss() already ended it, and a revealed answer must leave the
+           streak at 0 the way it does in the rest of the suite. */
+        if (!missRecorded) {
+            s.c++; s.t++;
+            streak++;
+            if (streak > bestStreak) bestStreak = streak;
+            celebrateStreak(streak);
+        } else {
+            streak = 0;
+        }
+        setFeedback(pick(['Correct!', 'Nice!', 'Got it!', 'Perfect!', 'Nailed it!', 'Yes!']), 'feedback correct', 'Correct.');
+        updateDisplay();
+        saveState();
+        scheduleAdvance();
+    } else {
+        if (!missRecorded) { missRecorded = true; s.t++; }
+        streak = 0;
+        setFeedback('Not quite -- try again.', 'feedback incorrect', 'Not quite. Try again.');
+        updateDisplay();
+        saveState();
+    }
+}
+
+/* =====================================================================
+   Multiply: Single x Single
+   ===================================================================== */
+function renderMulSingle() {
+    var html = '<div class="problem" aria-hidden="true">' + radicalHTML(current.a, 2) + ' &times; ' + radicalHTML(current.b, 2) + '</div>';
+    document.getElementById('main-content').innerHTML = html;
+
+    var inputHtml = '<div class="instructions">Multiply and simplify (use 1 in the second box if the answer is a whole number)</div>';
+    inputHtml += '<div class="input-area">';
+    inputHtml += '<input type="text" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="coef-answer" aria-label="Number in front of the radical" placeholder="coef" style="width:78px;">';
+    inputHtml += radicalInputHTML('<input type="text" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="radicand-answer" class="radicand-box" aria-label="Number under the square root" placeholder="radicand" onkeypress="if(event.key===\'Enter\')checkMulSingleAnswer()">');
+    inputHtml += '<button class="submit-btn" onclick="checkMulSingleAnswer()">Check</button>';
+    inputHtml += '</div>';
+    document.getElementById('input-content').innerHTML = inputHtml;
+    focusAnswer('coef-answer');
+}
+
+function checkMulSingleAnswer() {
+    var c1 = document.getElementById('coef-answer');
+    var c2 = document.getElementById('radicand-answer');
+    if (!c1 || !c2) return;
+    var rawC = c1.value.trim();
+    var rawR = c2.value.trim();
+    if (rawC === '' || rawR === '') return;
+    var coefNum = parseWhole(rawC);
+    var radNum = parseWhole(rawR);
+    var fb = document.getElementById('feedback');
+    if (coefNum === null || radNum === null) {
+        setFeedback('Enter whole numbers in both boxes.', 'feedback incorrect');
+        return;
+    }
+    var correct = (coefNum === current.coef && radNum === current.radicand);
+    resolveAnswer(correct, 'mulSingle');
+}
+
+/* =====================================================================
+   Multiply: With Binomials
+   ===================================================================== */
+function renderMulBinomial() {
+    var c = current;
+    if (c.shape === 'diffSquares') {
+        var dsHtml = '<div class="problem" aria-hidden="true">(' + c.a + ' &minus; ' + radicalHTML(c.b, 2) + ') &times; (' + c.a + ' + ' + radicalHTML(c.b, 2) + ')</div>';
+        document.getElementById('main-content').innerHTML = dsHtml;
+        var dsInputHtml = '<div class="instructions">Multiply and simplify completely</div>';
+        dsInputHtml += '<div class="input-area">';
+        dsInputHtml += '<span class="eq-label">= </span>';
+        dsInputHtml += '<input type="text" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="answer" aria-label="Your answer" placeholder="?" onkeypress="if(event.key===\'Enter\')checkMulBinomialAnswer()">';
+        dsInputHtml += '<button class="submit-btn" onclick="checkMulBinomialAnswer()">Check</button>';
+        dsInputHtml += '</div>';
+        document.getElementById('input-content').innerHTML = dsInputHtml;
+        focusAnswer();
+        return;
+    }
+
+    var html = '<div class="problem" aria-hidden="true">' + factorHTML(current.factor1) + ' &times; ' + factorHTML(current.factor2) + '</div>';
+    document.getElementById('main-content').innerHTML = html;
+
+    var labels = ['Term 1', 'Term 2'];
+    var inputHtml = '<div class="instructions">Distribute and enter each term -- no need to simplify</div>';
+    for (var i = 0; i < current.terms.length; i++) {
+        var t = current.terms[i];
+        inputHtml += '<div class="term-row">';
+        inputHtml += '<span class="term-label">' + labels[i] + '</span>';
+        if (t.radicand === 1) {
+            inputHtml += '<input type="text" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="term-int-' + i + '" class="term-int-input" aria-label="' + labels[i] + ', whole number" placeholder="value">';
+        } else {
+            inputHtml += '<input type="text" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="term-coef-' + i + '" class="term-coef-input" aria-label="' + labels[i] + ', number in front of the radical" placeholder="coef">';
+            inputHtml += radicalInputHTML('<input type="text" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="term-rad-' + i + '" class="term-rad-input" aria-label="' + labels[i] + ', number under the square root" placeholder="radicand">');
+        }
+        if (i < current.terms.length - 1) inputHtml += '<span class="term-plus">+</span>';
+        inputHtml += '</div>';
+    }
+    inputHtml += '<div class="input-area"><button class="submit-btn" onclick="checkMulBinomialAnswer()">Check</button></div>';
+    document.getElementById('input-content').innerHTML = inputHtml;
+    setTimeout(function () {
+        var first = document.getElementById('term-int-0') || document.getElementById('term-coef-0');
+        if (first) first.focus();
+    }, 100);
+}
+
+function checkMulBinomialAnswer() {
+    if (current.shape === 'diffSquares') {
+        var elAns = document.getElementById('answer');
+        if (!elAns) return;
+        var rawAns = elAns.value.trim();
+        if (rawAns === '') return;
+        var userAns = parseWhole(rawAns);
+        if (userAns === null) {
+            /* setFeedback, not a bare textContent write: the visible feedback div
+               is aria-hidden, so a direct write is silent to a screen reader. */
+            setFeedback('Enter a whole number.', 'feedback incorrect');
+            return;
+        }
+        resolveAnswer(userAns === current.answer, 'mulBinomial');
+        return;
+    }
+    var userTerms = [];
+    for (var i = 0; i < current.terms.length; i++) {
+        var t = current.terms[i];
+        if (t.radicand === 1) {
+            var elInt = document.getElementById('term-int-' + i);
+            if (!elInt || elInt.value.trim() === '') return;
+            userTerms.push({ coef: parseWhole(elInt.value), radicand: 1 });
+        } else {
+            var elC = document.getElementById('term-coef-' + i);
+            var elR = document.getElementById('term-rad-' + i);
+            if (!elC || !elR || elC.value.trim() === '' || elR.value.trim() === '') return;
+            userTerms.push({ coef: parseWhole(elC.value), radicand: parseWhole(elR.value) });
+        }
+    }
+    var fb = document.getElementById('feedback');
+    var hasNaN = userTerms.some(function (t) { return t.coef === null || t.radicand === null; });
+    if (hasNaN) {
+        setFeedback('Enter whole numbers in every box.', 'feedback incorrect');
+        return;
+    }
+    var correct = true;
+    for (var j = 0; j < current.terms.length; j++) {
+        var exp = current.terms[j], got = userTerms[j];
+        if (exp.radicand === 1) {
+            if (got.coef !== exp.coef) { correct = false; break; }
+        } else if (!sameRadicalValue(got.coef, got.radicand, exp.coef, exp.radicand)) {
+            /* The instruction is "no need to simplify", so both the raw product
+               (e.g. sqrt(16)) and its simplified equal (4) are accepted. */
+            correct = false;
+            break;
+        }
+    }
+    resolveAnswer(correct, 'mulBinomial');
+}
+
+/* =====================================================================
+   Divide (rationalize a single-radical denominator)
+   ===================================================================== */
+function renderDivide() {
+    var html = '<div class="problem" aria-hidden="true">' + fractionHTML(current.n, radicalHTML(current.d, 2)) + '</div>';
+    document.getElementById('main-content').innerHTML = html;
+
+    var inputHtml = '<div class="instructions">Rationalize the denominator</div>';
+    inputHtml += '<div class="frac-row">';
+    inputHtml += '<div class="frac-line">';
+    inputHtml += '<input type="text" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="div-coef" class="term-coef-input" aria-label="Numerator, number in front of the radical" placeholder="coef">';
+    inputHtml += radicalInputHTML('<input type="text" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="div-radicand" class="term-rad-input" aria-label="Numerator, number under the square root" placeholder="radicand">');
+    inputHtml += '</div>';
+    inputHtml += '<div class="frac-divider"></div>';
+    inputHtml += '<input type="text" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="div-denominator" class="term-int-input" aria-label="Denominator" placeholder="denominator" onkeypress="if(event.key===\'Enter\')checkDivideAnswer()">';
+    inputHtml += '</div>';
+    inputHtml += '<div class="input-area"><button class="submit-btn" onclick="checkDivideAnswer()">Check</button></div>';
+    document.getElementById('input-content').innerHTML = inputHtml;
+    focusAnswer('div-coef');
+}
+
+function checkDivideAnswer() {
+    var c1 = document.getElementById('div-coef');
+    var c2 = document.getElementById('div-radicand');
+    var c3 = document.getElementById('div-denominator');
+    if (!c1 || !c2 || !c3) return;
+    var rawC = c1.value.trim();
+    var rawR = c2.value.trim();
+    var rawD = c3.value.trim();
+    if (rawC === '' || rawR === '' || rawD === '') return;
+    var coefNum = parseWhole(rawC);
+    var radNum = parseWhole(rawR);
+    var denNum = parseWhole(rawD);
+    var fb = document.getElementById('feedback');
+    if (coefNum === null || radNum === null || denNum === null) {
+        setFeedback('Enter whole numbers in every box.', 'feedback incorrect');
+        return;
+    }
+    var correct = (coefNum === current.redN && radNum === current.d && denNum === current.redD);
+    resolveAnswer(correct, divideSubMode === 'divideReduce' ? 'divideReduce' : 'divide');
+}
+function updateHelperButtons() {
+    var row = document.getElementById('helper-buttons');
+    var html = '';
+    if (mode === 'simplify' && simplifySubMode === 'guided') {
+        html += '<button class="hint-btn" onclick="showHint()">Hint</button>';
+        html += '<button class="skip-btn" onclick="skipProblem()">Skip</button>';
+    } else if (mode === 'simplify' && simplifySubMode === 'practice') {
+        html += '<button class="hint-btn" onclick="showHint()">Hint</button>';
+        html += '<button class="explain-btn" onclick="openShowSteps()">Show Steps</button>';
+        html += '<button class="skip-btn" onclick="skipProblem()">Skip</button>';
+    } else if (mode === 'multiply' || mode === 'divide') {
+        html += '<button class="hint-btn" onclick="showHint()">Hint</button>';
+        html += '<button class="explain-btn" onclick="openShowSteps()">Show Steps</button>';
+        html += '<button class="skip-btn" onclick="skipProblem()">Skip</button>';
+    } else {
+        html += '<button class="hint-btn" onclick="showHint()">Hint</button>';
+        html += '<button class="answer-btn" onclick="showAnswer()">Answer</button>';
+        html += '<button class="skip-btn" onclick="skipProblem()">Skip</button>';
+    }
+    row.innerHTML = html;
+    document.getElementById('hint').style.display = 'none';
+    document.getElementById('answer-box').style.display = 'none';
+    document.getElementById('steps-box').style.display = 'none';
+}
+
+function showHint() {
+    var box = document.getElementById('hint');
+    if (box.style.display === 'none') {
+        var txt = '';
+        if (mode === 'squares') txt = 'What number times itself equals ' + current.radicand + '?';
+        else if (mode === 'cubes') txt = 'What number times itself, then times itself again, equals ' + current.radicand + '?';
+        else if (current.type === 'simplify' && simplifySubMode === 'guided') {
+            if (current.guidedStep === 0) {
+                txt = 'Check perfect squares in order -- 4, 9, 16, 25, 36, 49, 64, 81, 100, 121 -- and find the largest one that divides evenly into ' + current.radicand + '.';
+            } else if (current.guidedStep === 1) {
+                txt = 'There is nothing to solve here -- just click Continue to see the product rule applied.';
+            } else {
+                txt = 'What number times itself equals ' + current.factor + '?';
+            }
+        }
+        else if (current.type === 'simplify') txt = 'The largest perfect square that divides ' + current.radicand + ' is ' + current.factor + '.';
+        else if (current.type === 'mulSingle') txt = 'Multiply the radicands first: ' + current.a + ' &times; ' + current.b + ' = ' + current.product + '. Then simplify that square root.';
+        else if (current.type === 'mulBinomial' && current.shape === 'diffSquares') txt = 'This is a difference of squares -- multiply First and Last only. The middle terms cancel out.';
+        else if (current.type === 'mulBinomial') txt = 'Distribute every term in the first factor across every term in the second, one pair at a time.';
+        else if (current.type === 'divide') txt = 'Multiply the top and bottom by ' + radicalHTML(current.d, 2) + '.';
+        box.innerHTML = '<b>Hint:</b> ' + txt;
+        box.style.display = 'block';
+    } else {
+        box.style.display = 'none';
+    }
+}
+
+/* Which stats bucket the problem on screen belongs to. */
+function currentStatsKey() {
+    if (mode === 'squares') return 'squares';
+    if (mode === 'cubes') return 'cubes';
+    if (mode === 'simplify') return simplifySubMode === 'guided' ? 'simplifyGuided' : 'simplifyPractice';
+    if (mode === 'multiply') return multiplySubMode === 'single' ? 'mulSingle' : 'mulBinomial';
+    return divideSubMode === 'divideReduce' ? 'divideReduce' : 'divide';
+}
+
+/* Revealing the answer records the problem as attempted, exactly like a wrong
+   try. Without this a student could reveal, type it back and take full
+   first-try credit, which quietly inflated every accuracy figure.
+   Guided mode books its own attempt in finishGuidedProblem(), so it is skipped
+   here to avoid double-counting -- it offers no reveal button anyway. */
+function recordMiss() {
+    if (missRecorded || !current) return;
+    missRecorded = true;
+    var key = currentStatsKey();
+    if (key !== 'simplifyGuided') stats[key].t++;
+    streak = 0;
+    updateDisplay();
+    saveState();
+}
+
+function showAnswer() {
+    var box = document.getElementById('answer-box');
+    if (box.style.display === 'none') {
+        recordMiss();
+        var txt = String(current.answer);
+        box.innerHTML = '<b>Answer:</b> ' + txt;
+        box.style.display = 'block';
+    } else {
+        box.style.display = 'none';
+    }
+}
+
+function getFinalAnswerHTML() {
+    var c = current;
+    if (c.type === 'simplify') {
+        return radicalHTML(c.radicand, 2) + ' = ' + radicalHTML(c.remainder, 2, c.root);
+    }
+    if (c.type === 'mulSingle') {
+        var rhs = c.radicand === 1 ? String(c.coef) : radicalHTML(c.radicand, 2, c.coef === 1 ? undefined : c.coef);
+        return radicalHTML(c.a, 2) + ' &times; ' + radicalHTML(c.b, 2) + ' = ' + rhs;
+    }
+    if (c.type === 'mulBinomial') {
+        if (c.shape === 'diffSquares') {
+            return '(' + c.a + ' &minus; ' + radicalHTML(c.b, 2) + ') &times; (' + c.a + ' + ' + radicalHTML(c.b, 2) + ') = ' + c.answer;
+        }
+        return factorHTML(c.factor1) + ' &times; ' + factorHTML(c.factor2) + ' = ' + c.terms.map(termHTML).join(' + ');
+    }
+    if (c.type === 'divide') {
+        return fractionHTML(c.n, radicalHTML(c.d, 2)) + ' = ' + fractionHTML(radicalHTML(c.d, 2, c.redN), c.redD);
+    }
+    return '';
+}
+
+function openShowSteps() {
+    /* Step 1 of every walkthrough already prints concrete numbers (for Simplify
+       it prints the factorisation itself), and the last panel prints the final
+       answer outright, so opening it counts as a reveal -- same rule as the
+       Answer button. */
+    recordMiss();
+    showStepsIndex = 1;
+    var box = document.getElementById('steps-box');
+    box.style.display = 'block';
+    renderShowSteps();
+}
+
+function renderShowSteps() {
+    var box = document.getElementById('steps-box');
+    var steps = getCurrentShowSteps();
+    var html = '<b>Steps</b>';
+    for (var i = 0; i < showStepsIndex; i++) {
+        html += '<div class="step-line-reveal"><div class="step-instr">' + steps[i].prompt + '</div>';
+        for (var j = 0; j < steps[i].lines.length; j++) {
+            html += '<div class="step-result">' + steps[i].lines[j] + '</div>';
+        }
+        html += '</div>';
+    }
+    if (showStepsIndex < steps.length) {
+        html += '<div style="text-align:center; margin-top:6px;"><button class="submit-btn" onclick="advanceShowSteps()">Next Step</button></div>';
+    } else {
+        html += '<div class="step-final">' + getFinalAnswerHTML() + '</div>';
+    }
+    box.innerHTML = html;
+}
+
+function advanceShowSteps() {
+    var steps = getCurrentShowSteps();
+    if (showStepsIndex < steps.length) showStepsIndex++;
+    renderShowSteps();
+}
+
+/* =====================================================================
+   Mode / sub-mode switching, skip, display
+   ===================================================================== */
+function levelBtn(isActive, setter, value, label, describe) {
+    return '<button class="sub-mode-btn' + (isActive ? ' active' : '') +
+        '" type="button" aria-pressed="' + (isActive ? 'true' : 'false') +
+        '" aria-label="' + label + ': ' + describe +
+        '" onclick="' + setter + '(\'' + value + '\')">' + label + '</button>';
+}
+
+function renderSubModeButtons() {
+    var container = document.getElementById('sub-mode-btns');
+    if (mode === 'simplify') {
+        container.style.display = 'flex';
+        container.innerHTML =
+            levelBtn(simplifySubMode === 'guided', 'setSimplifySubMode', 'guided', 'Level 1', 'guided step by step') +
+            levelBtn(simplifySubMode === 'practice', 'setSimplifySubMode', 'practice', 'Level 2', 'answer on your own');
+    } else if (mode === 'multiply') {
+        container.style.display = 'flex';
+        container.innerHTML =
+            levelBtn(multiplySubMode === 'single', 'setMultiplySubMode', 'single', 'Level 1', 'one radical times one radical') +
+            levelBtn(multiplySubMode === 'binomial', 'setMultiplySubMode', 'binomial', 'Level 2', 'multiplying with binomials');
+    } else if (mode === 'divide') {
+        container.style.display = 'flex';
+        container.innerHTML =
+            levelBtn(divideSubMode === 'divide', 'setDivideSubMode', 'divide', 'Level 1', 'rationalize the denominator') +
+            levelBtn(divideSubMode === 'divideReduce', 'setDivideSubMode', 'divideReduce', 'Level 2', 'rationalize and reduce the fraction');
+    } else {
+        container.style.display = 'none';
+        container.innerHTML = '';
+    }
+}
+
+function setMode(m) {
+    mode = m;
+    var btns = document.querySelectorAll('#main-mode-btns .mode-btn');
+    var order = ['squares', 'cubes', 'simplify', 'multiply', 'divide'];
+    for (var i = 0; i < btns.length; i++) {
+        var on = order[i] === m;
+        btns[i].classList.toggle('active', on);
+        btns[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    renderSubModeButtons();
+    problemNum++;
+    generateProblem();
+    updateDisplay();
+}
+
+function setSimplifySubMode(sm) {
+    simplifySubMode = sm;
+    renderSubModeButtons();
+    problemNum++;
+    generateProblem();
+    updateDisplay();
+}
+
+function setMultiplySubMode(sm) {
+    multiplySubMode = sm;
+    renderSubModeButtons();
+    problemNum++;
+    generateProblem();
+    updateDisplay();
+}
+
+function setDivideSubMode(sm) {
+    divideSubMode = sm;
+    renderSubModeButtons();
+    problemNum++;
+    generateProblem();
+    updateDisplay();
+}
+
+function skipProblem() {
+    problemNum++;
+    generateProblem();
+    updateDisplay();
+}
+
+function updateDisplay() {
+    document.getElementById('problemNum').textContent = problemNum + 1;
+    document.getElementById('streak').textContent = streak;
+    var sd = document.getElementById('streak-display');
+    sd.className = streak >= 5 ? 'info-item streak-hot' : 'info-item';
+    /* The guided scaffold is meant to be pressure-free, and the convention for
+       guided levels is no streak display at all. */
+    var inGuided = (mode === 'simplify' && simplifySubMode === 'guided');
+    sd.style.display = inGuided ? 'none' : '';
+    var totalC = 0, totalT = 0;
+    ALL_STAT_KEYS.forEach(function (k) {
+        totalC += stats[k].c; totalT += stats[k].t;
+    });
+    var accEl = document.getElementById('acc-display');
+    accEl.textContent = totalT > 0 ? 'Accuracy: ' + Math.round(totalC / totalT * 100) + '%' : 'Accuracy: --';
+}
+
+/* =====================================================================
+   Stats panel
+   ===================================================================== */
+/* Defense in depth: even though loadState() sanitises, anything interpolated
+   into innerHTML is forced to a plain number at the point of output too. */
+function num(v) {
+    var n = Number(v);
+    return (isFinite(n) && !isNaN(n)) ? String(Math.floor(n)) : '0';
+}
+
+function showStats() {
+    /* A correct answer schedules an auto-advance 1100ms later. Without this,
+       opening the stats panel inside that window let the stale timer fire and
+       replace the panel with a fresh problem. */
+    cancelPendingAdvance();
+    var totalC = 0, totalT = 0;
+    var keys = ALL_STAT_KEYS;
+    keys.forEach(function (k) { totalC += safeCount(stats[k].c); totalT += safeCount(stats[k].t); });
+
+    var html = '<div class="stats-view">';
+    html += '<h2>Your Stats</h2>';
+    html += '<div class="stats-overall">';
+    html += '<div class="big">' + (totalT > 0 ? Math.round(totalC / totalT * 100) + '%' : '--') + '</div>';
+    html += '<div class="lbl">Overall Accuracy (' + num(totalC) + '/' + num(totalT) + ')</div>';
+    html += '<div class="lbl" style="margin-top:4px;">Best Streak: ' + num(bestStreak) + '</div>';
+    html += '</div>';
+
+    keys.forEach(function (k) {
+        var s = stats[k];
+        var pct = s.t > 0 ? Math.round(safeCount(s.c) / safeCount(s.t) * 100) : null;
+        var barCls = 'none';
+        if (s.t > 0) {
+            if (pct >= 85) barCls = 'good';
+            else if (pct >= 60) barCls = 'mid';
+            else barCls = 'low';
+        }
+        var w = s.t > 0 ? pct : 0;
+        html += '<div class="stat-row">';
+        html += '<div class="stat-name">' + categoryNames[k] + '</div>';
+        html += '<div class="stat-bar-wrap"><div class="stat-bar ' + barCls + '" style="width:' + num(w) + '%;"></div></div>';
+        html += '<div class="stat-num">' + (s.t > 0 ? num(s.c) + '/' + num(s.t) + ' (' + num(pct) + '%)' : 'not tried yet') + '</div>';
+        html += '</div>';
+    });
+
+    var recommend = buildRecommendation(keys);
+    if (recommend) html += '<div class="recommend">' + recommend + '</div>';
+
+    html += '<div class="stats-actions">';
+    html += '<button class="submit-btn" onclick="hideStats()">Back to Practice</button>';
+    html += '<button class="reset-btn" onclick="confirmReset()" style="margin-left:8px;">Reset Stats</button>';
+    html += '</div>';
+    html += '</div>';
+
+    document.getElementById('main-content').innerHTML = html;
+    document.getElementById('input-content').innerHTML = '';
+    document.getElementById('feedback').textContent = '';
+    document.getElementById('helper-buttons').innerHTML = '';
+    document.getElementById('hint').style.display = 'none';
+    document.getElementById('answer-box').style.display = 'none';
+    document.getElementById('steps-box').style.display = 'none';
+}
+
+function buildRecommendation(keys) {
+    var weakest = null;
+    var weakestPct = 101;
+    keys.forEach(function (k) {
+        var s = stats[k];
+        if (s.t < 1) return;
+        var p = s.c / s.t * 100;
+        if (p < weakestPct) { weakestPct = p; weakest = k; }
+    });
+    if (!weakest) return null;
+    if (weakestPct >= 85) {
+        return '<b>Great work overall!</b> You are strong across the board. Try mixing in the tougher Simplify Radicals problems to keep sharp.';
+    }
+    return '<b>Focus area:</b> ' + categoryNames[weakest] + ' is your weakest (' + num(Math.round(weakestPct)) + '%). A little more practice there will help.';
+}
+
+function hideStats() {
+    generateProblem();
+    updateDisplay();
+}
+
+var resetArmed = false;
+var resetTimer = null;
+function confirmReset() {
+    if (!resetArmed) {
+        resetArmed = true;
+        var btns = document.querySelectorAll('.reset-btn');
+        for (var i = 0; i < btns.length; i++) btns[i].textContent = 'Tap again to confirm';
+        resetTimer = setTimeout(function () {
+            resetArmed = false;
+            var b2 = document.querySelectorAll('.reset-btn');
+            for (var j = 0; j < b2.length; j++) b2[j].textContent = 'Reset Stats';
+        }, 3500);
+        return;
+    }
+    clearTimeout(resetTimer);
+    resetArmed = false;
+    stats = {
+        squares: { c: 0, t: 0 },
+        cubes: { c: 0, t: 0 },
+        simplifyGuided: { c: 0, t: 0 },
+        simplifyPractice: { c: 0, t: 0 },
+        mulSingle: { c: 0, t: 0 },
+        mulBinomial: { c: 0, t: 0 },
+        divide: { c: 0, t: 0 },
+        divideReduce: { c: 0, t: 0 }
+    };
+    streak = 0;
+    bestStreak = 0;
+    problemNum = 0;
+    modeAttempts = { squares: 0, cubes: 0, simplifyGuided: 0, simplifyPractice: 0, mulSingle: 0, mulBinomial: 0, divide: 0, divideReduce: 0 };
+    recent = { squares: [], cubes: [], simplify: [], mulSingle: [], divideReduce: [] };
+    saveState();
+    updateDisplay();
+    showStats();
+}
+
+/* =====================================================================
+   Persistence
+   ===================================================================== */
+function saveState() {
+    try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify({
+            stats: stats, bestStreak: bestStreak, problemNum: problemNum
+        }));
+    } catch (e) { /* storage unavailable -- play without saving */ }
+}
+/* Coerce anything read from storage into a safe, bounded, non-negative integer.
+   Storage is user-writable, so nothing from it is trusted. */
+function safeCount(v) {
+    var n = (typeof v === 'number') ? v : parseInt(v, 10);
+    if (!isFinite(n) || isNaN(n) || n < 0) return 0;
+    return Math.min(Math.floor(n), 1000000);
+}
+
+function loadState() {
+    try {
+        var raw = localStorage.getItem(SAVE_KEY);
+        if (!raw) return;
+        var st = JSON.parse(raw);
+        if (st && typeof st === 'object' && st.stats && typeof st.stats === 'object') {
+            ALL_STAT_KEYS.forEach(function (k) {
+                var rec = st.stats[k];
+                if (!rec || typeof rec !== 'object') return;
+                var c = safeCount(rec.c);
+                var t = safeCount(rec.t);
+                if (c > t) c = t;              /* correct can never exceed attempted */
+                stats[k] = { c: c, t: t };
+            });
+        }
+        bestStreak = safeCount(st && st.bestStreak);
+        problemNum = safeCount(st && st.problemNum);
+    } catch (e) { /* corrupt or unavailable storage -- start fresh */ }
+}
+
+var confettiEnabled = true;
+function loadConfettiPref() {
+    try {
+        var v = localStorage.getItem(CONFETTI_KEY);
+        confettiEnabled = (v === null) ? true : v === '1';
+    } catch (e) { confettiEnabled = true; }
+}
+function prefersReducedMotion() {
+    try {
+        return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    } catch (e) { return false; }
+}
+
+function toggleConfetti() {
+    confettiEnabled = !confettiEnabled;
+    try { localStorage.setItem(CONFETTI_KEY, confettiEnabled ? '1' : '0'); } catch (e) { /* ignore */ }
+    document.getElementById('confetti-track').classList.toggle('on', confettiEnabled);
+    var btn = document.getElementById('confetti-toggle');
+    if (btn) btn.setAttribute('aria-checked', confettiEnabled ? 'true' : 'false');
+    announceFeedback('Confetti ' + (confettiEnabled ? 'on' : 'off') + '.');
+    if (confettiEnabled) createConfetti(40, 1);
+}
+
+/* =====================================================================
+   Confetti
+   ===================================================================== */
+function celebrateStreak(s) {
+    if (!confettiEnabled) return;
+    if (s === 0 || s % 5 !== 0) return;
+    if (s % 10 === 0) createConfetti(200, 3);
+    else createConfetti(100, 2);
+}
+
+function createConfetti(count, tier) {
+    if (prefersReducedMotion()) return;
+    var host = document.body;
+    /* Palette colours only: the system bans orange outright and red is not in it. */
+    var colors = ['#7c3aed', '#22c55e', '#2e3d8f', '#c76b8f', '#10b981', '#ffeb3b', '#0d9488', '#a78bfa'];
+    var isMassive = tier === 3;
+    for (var i = 0; i < count; i++) {
+        var piece = document.createElement('div');
+        piece.className = 'confetti';
+        piece.setAttribute('aria-hidden', 'true');
+        var base;
+        if (tier === 1) base = 7 + Math.random() * 5;
+        else if (tier === 2) base = 10 + Math.random() * 7;
+        else base = 11 + Math.random() * 9;
+        var color = colors[Math.floor(Math.random() * colors.length)];
+        var shape = Math.floor(Math.random() * 4);
+        if (shape === 0) {
+            piece.style.width = base + 'px';
+            piece.style.height = base + 'px';
+            piece.style.background = color;
+            piece.style.borderRadius = '50%';
+        } else if (shape === 1) {
+            piece.style.width = base + 'px';
+            piece.style.height = base + 'px';
+            piece.style.background = color;
+            piece.style.borderRadius = '2px';
+        } else if (shape === 2) {
+            piece.style.width = Math.max(4, base * 0.35) + 'px';
+            piece.style.height = (base * 1.7) + 'px';
+            piece.style.background = color;
+            piece.style.borderRadius = '2px';
+        } else {
+            piece.style.width = '0';
+            piece.style.height = '0';
+            piece.style.background = 'transparent';
+            piece.style.borderLeft = (base * 0.6) + 'px solid transparent';
+            piece.style.borderRight = (base * 0.6) + 'px solid transparent';
+            piece.style.borderBottom = base + 'px solid ' + color;
+        }
+        piece.style.left = Math.random() * 100 + '%';
+        piece.style.top = '-20px';
+        var dur;
+        if (tier === 1) dur = 1.3 + Math.random() * 0.8;
+        else if (tier === 2) dur = 1.6 + Math.random() * 1.2;
+        else dur = 2.0 + Math.random() * 1.6;
+        piece.style.animation = (isMassive ? 'confetti-fall-slow' : 'confetti-fall') + ' ' + dur + 's ease-out forwards';
+        piece.style.animationDelay = (Math.random() * (isMassive ? 0.8 : 0.4)) + 's';
+        host.appendChild(piece);
+        setTimeout(function (el) {
+            return function () { if (el.parentNode) el.parentNode.removeChild(el); };
+        }(piece), isMassive ? 6000 : 4500);
+    }
+}
+
+/* =====================================================================
+   Boot
+   ===================================================================== */
+loadState();
+loadConfettiPref();
+document.getElementById('confetti-track').classList.toggle('on', confettiEnabled);
+document.getElementById('confetti-toggle').setAttribute('aria-checked', confettiEnabled ? 'true' : 'false');
+renderSubModeButtons();
+generateProblem();
+updateDisplay();
+</script>
+</body>
+</html>
