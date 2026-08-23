@@ -3,15 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Math Games & Visualizations (Mockup)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Math Games &amp; Visualizations - Polar Rose Studio</title>
+<meta name="description" content="Interactive algebra and calculus practice games from Polar Rose Studio. Free, no login, works on phones and laptops.">
+<meta name="theme-color" content="#1b2450">
+<meta name="referrer" content="no-referrer">
+<!-- Locks the page to its own inline code plus the Google Fonts stylesheet:
+     no external scripts, frames, or form posts can be introduced. Matches
+     the CSP carried by every game in the suite. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
 <style>
+    /* ===== MIDNIGHT SCHOLAR - navy stage, white cards, violet + mint accents ===== */
     * { box-sizing: border-box; }
     body {
         font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
-        background:
+        background-color: #141b3d;
+        background-image:
             radial-gradient(900px 500px at 85% -10%, rgba(124, 58, 237, 0.28), transparent 60%),
             radial-gradient(800px 500px at -10% 110%, rgba(16, 185, 129, 0.18), transparent 55%),
             linear-gradient(160deg, #141b3d 0%, #1b2450 100%);
@@ -22,18 +32,46 @@
     }
     .wrap { max-width: 780px; margin: 0 auto; }
 
-    .mock-banner {
-        text-align: center;
-        background: rgba(124, 58, 237, 0.18);
-        border: 1px dashed #a78bfa;
-        border-radius: 12px;
-        padding: 8px 14px;
-        font-size: 12px;
-        font-weight: 800;
-        letter-spacing: 0.5px;
-        color: #d8c9fc;
-        margin-bottom: 22px;
+    /* Visually hidden, still read by screen readers */
+    .sr-only {
+        position: absolute;
+        width: 1px; height: 1px;
+        padding: 0; margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
     }
+
+    /* Keyboard users get a way past the two category headers straight to
+       the games; it is off-screen until it takes focus. */
+    .skip-link {
+        position: absolute;
+        left: 8px; top: -60px;
+        z-index: 50;
+        background: #1e2a5e;
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 800;
+        padding: 10px 16px;
+        border-radius: 10px;
+        text-decoration: none;
+        transition: top 0.15s ease;
+    }
+    .skip-link:focus { top: 8px; }
+
+    /* One visible focus ring for every interactive element on the page.
+       Plain :focus, not :focus-visible, so it is never silently absent. */
+    a:focus, button:focus {
+        outline: 3px solid #7c3aed;
+        outline-offset: 3px;
+    }
+    /* Light violet only on the dark stage, where the skip link lives; on the
+       white card it would be 2.65:1 and fail WCAG 1.4.11. */
+    .skip-link:focus { outline-color: #a78bfa; }
+    /* The category card clips its children, so an outset ring on the header
+       would be shaved down to a stray line. Draw this one inside instead. */
+    .section-toggle:focus { outline-offset: -3px; }
 
     header { text-align: center; margin-bottom: 8px; }
     header h1 {
@@ -45,7 +83,7 @@
     header .underline {
         width: 100%; max-width: 780px; height: 4px; border-radius: 2px;
         margin: 0 auto 12px;
-        background: #2dd4bf;
+        background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
     }
     header p {
         color: #c3cbe8;
@@ -70,18 +108,27 @@
         top: 0; left: 0; right: 0;
         height: 5px;
         background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+        z-index: 1;
     }
-    .category-header {
+    .category-heading { margin: 0; }
+    .section-toggle {
         display: flex;
         align-items: center;
         justify-content: space-between;
+        width: 100%;
         padding: 22px 20px 20px;
         min-height: 76px;
         cursor: pointer;
+        background: transparent;
+        border: 0;
+        font-family: inherit;
+        text-align: left;
         -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
         user-select: none;
     }
-    .category-header:active { background: #f7f8fe; }
+    .section-toggle:hover { background: #f7f8fe; }
+    .section-toggle:active { background: #f0f2fc; }
     .category-name {
         font-size: 20px;
         font-weight: 900;
@@ -102,12 +149,19 @@
         color: #7c3aed;
     }
     .category.open .category-chevron { transform: rotate(180deg); }
+    /* visibility:hidden while collapsed keeps the Play links of a closed
+       section out of the tab order - max-height alone does not. */
     .category-body {
         max-height: 0;
         overflow: hidden;
-        transition: max-height 0.4s ease;
+        visibility: hidden;
+        transition: max-height 0.4s ease, visibility 0s linear 0.4s;
     }
-    .category.open .category-body { max-height: 4000px; }
+    .category.open .category-body {
+        max-height: 4000px;
+        visibility: visible;
+        transition: max-height 0.4s ease, visibility 0s linear 0s;
+    }
     .category-body-inner {
         padding: 6px 16px 20px;
         border-top: 1px solid #eef0f8;
@@ -140,6 +194,7 @@
         color: #1e2a5e;
         margin: 0 0 5px;
         line-height: 1.25;
+        overflow-wrap: break-word;
     }
     .game-desc {
         font-size: 12.5px;
@@ -147,6 +202,7 @@
         line-height: 1.4;
         margin-bottom: 10px;
         min-height: 30px;
+        overflow-wrap: break-word;
     }
     .play-link {
         display: inline-block;
@@ -155,12 +211,22 @@
         font-size: 11.5px;
         font-weight: 800;
         color: #ffffff;
-        background: linear-gradient(135deg, #1e3a5f, #0d9488);
+        /* Favorite gradient, accessible variant: white is 11.5:1 on #1e3a5f
+           and 5.2:1 on #0b7a70, so both ends of the ramp pass AA. */
+        background: linear-gradient(135deg, #1e3a5f, #0b7a70);
         padding: 6px 12px;
         border-radius: 8px;
         letter-spacing: 0.2px;
         text-decoration: none;
         -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+    }
+    .play-link:hover {
+        /* darker, not lighter: white stays above 7:1 on both stops */
+        background: linear-gradient(135deg, #17304f, #096459);
+        box-shadow: 0 3px 10px rgba(11, 122, 112, 0.45);
+        transform: translateY(-1px);
     }
     .play-link:active { transform: scale(0.96); }
     .soon-link {
@@ -169,34 +235,55 @@
         margin-top: auto;
         font-size: 11.5px;
         font-weight: 800;
-        color: #4a5480;
+        /* darkened from #4a5480: through the pending card's 0.85 opacity the
+           old value measured 4.27:1, this one measures 5.20:1 */
+        color: #3c4569;
         background: #e7eaf2;
         padding: 6px 12px;
         border-radius: 8px;
         letter-spacing: 0.2px;
     }
     .card.pending { opacity: 0.85; }
-    .fake-link {
-        display: inline-block;
-        align-self: flex-start;
-        margin-top: auto;
-        font-size: 11.5px;
-        font-weight: 800;
-        color: #ffffff;
-        background: linear-gradient(135deg, #1e3a5f, #0d9488);
-        padding: 6px 12px;
-        border-radius: 8px;
-        cursor: not-allowed;
-        letter-spacing: 0.2px;
-    }
 
-    .footer {
+    footer.footer {
         text-align: center;
         margin-top: 46px;
+    }
+    .insignia {
+        display: block;
+        margin: 0 auto 2px;
+        width: 90px;
+        opacity: 0.9;
+    }
+    .insignia-caption {
+        text-align: center;
+        font-size: 6.5px;
+        letter-spacing: 1.2px;
+        font-weight: 800;
+        /* the spec value #5d6798 is the on-white caption colour; on this
+           navy stage it measures 2.7:1, so the same violet-slate is used at
+           a light-on-dark lightness (7.9:1 on #141b3d) */
+        color: #a8b0d8;
+        opacity: 0.9;
+        margin-top: 2px;
+    }
+
+    @media (max-width: 480px) {
+        body { padding: 22px 12px 40px; }
+        header h1 { font-size: 24px; }
+        header p { font-size: 13.5px; margin-bottom: 24px; }
+        .section-toggle { padding: 18px 16px 16px; min-height: 68px; }
+        .category-name { font-size: 18px; }
+        .category-body-inner { padding: 6px 12px 18px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        * { transition: none !important; }
     }
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to the game list</a>
 <div class="wrap">
 
     <header>
@@ -205,74 +292,92 @@
         <p>A growing collection of interactive practice tools for algebra and calculus.</p>
     </header>
 
-    <div class="category" id="cat-algebra">
-        <div class="category-header" onclick="toggleCategory('cat-algebra')">
-            <div class="category-name">Algebra <span class="cat-count">10 games</span></div>
-            <svg class="category-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-        </div>
-        <div class="category-body">
+    <p class="sr-only" id="announcer" aria-live="polite" aria-atomic="true"></p>
+
+    <main id="main">
+
+    <div class="category open" id="cat-algebra">
+        <h2 class="category-heading">
+            <button type="button" class="section-toggle" aria-expanded="true" aria-controls="body-algebra" data-cat="cat-algebra" data-name="Algebra" data-count="12 games">
+                <span class="category-name">Algebra <span class="cat-count">12 games</span></span>
+                <svg class="category-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+        </h2>
+        <div class="category-body" id="body-algebra">
             <div class="category-body-inner">
                 <div class="grid">
 
 
-        <div class="card pending">
-            <div class="game-name">Arithmetic Fluency</div>
+        <div class="card">
+            <h3 class="game-name">Arithmetic Fluency</h3>
             <div class="game-desc">Addition &amp; subtraction drills plus multiplication tables practice.</div>
-            <span class="soon-link">Coming Soon</span>
+            <a class="play-link" href="arithmetic-fluency/" aria-label="Play Arithmetic Fluency">Play &rarr;</a>
         </div>
 
         <div class="card">
-            <div class="game-name">Signed Numbers</div>
+            <h3 class="game-name">Signed Numbers</h3>
             <div class="game-desc">Add, subtract, multiply, and divide positive and negative integers.</div>
-            <a class="play-link" href="signed-numbers/">Play &rarr;</a>
+            <a class="play-link" href="signed-numbers/" aria-label="Play Signed Numbers">Play &rarr;</a>
         </div>
 
         <div class="card">
-            <div class="game-name">Solving Linear Equations</div>
+            <h3 class="game-name">Solving Linear Equations</h3>
             <div class="game-desc">Guided boot-camp mode plus three practice levels, step-by-step solutions.</div>
-            <a class="play-link" href="solving-linear-equations/">Play &rarr;</a>
+            <a class="play-link" href="solving-linear-equations/" aria-label="Play Solving Linear Equations">Play &rarr;</a>
         </div>
 
-        <div class="card pending">
-            <div class="game-name">Linear Applications</div>
+        <div class="card">
+            <h3 class="game-name">Linear Applications</h3>
             <div class="game-desc">Plug In, Build It, Two Points, Break Even, and Mix It word problems.</div>
-            <span class="soon-link">Coming Soon</span>
+            <a class="play-link" href="linear-applications/" aria-label="Play Linear Applications">Play &rarr;</a>
         </div>
 
-        <div class="card pending">
-            <div class="game-name">Finding the Slope</div>
+        <div class="card">
+            <h3 class="game-name">Finding the Slope</h3>
             <div class="game-desc">From graphs, two points, equations, and special horizontal/vertical cases.</div>
-            <span class="soon-link">Coming Soon</span>
+            <a class="play-link" href="finding-the-slope/" aria-label="Play Finding the Slope">Play &rarr;</a>
         </div>
 
-        <div class="card pending">
-            <div class="game-name">Graphing Linear Equations</div>
+        <div class="card">
+            <h3 class="game-name">Graphing Linear Equations</h3>
             <div class="game-desc">Plot points, find intercepts, and graph using slope and intercept.</div>
-            <span class="soon-link">Coming Soon</span>
+            <a class="play-link" href="graphing-linear-equations/" aria-label="Play Graphing Linear Equations">Play &rarr;</a>
         </div>
 
-        <div class="card pending">
-            <div class="game-name">Exponent Rules</div>
+        <div class="card">
+            <h3 class="game-name">Exponent Rules</h3>
             <div class="game-desc">Multiply, divide, zero and negative powers, fractional exponents, and more.</div>
-            <span class="soon-link">Coming Soon</span>
+            <a class="play-link" href="exponent-rules/" aria-label="Play Exponent Rules">Play &rarr;</a>
         </div>
 
-        <div class="card pending">
-            <div class="game-name">Systems of Equations</div>
+        <div class="card">
+            <h3 class="game-name">Radical Expressions</h3>
+            <div class="game-desc">Simplify, add, multiply, and rationalize square-root expressions.</div>
+            <a class="play-link" href="radical-expressions/" aria-label="Play Radical Expressions">Play &rarr;</a>
+        </div>
+
+        <div class="card">
+            <h3 class="game-name">Complex Numbers</h3>
+            <div class="game-desc">Simplify roots of negatives, powers of i, and multiply or combine terms.</div>
+            <a class="play-link" href="complex-numbers/" aria-label="Play Complex Numbers">Play &rarr;</a>
+        </div>
+
+        <div class="card">
+            <h3 class="game-name">Systems of Equations</h3>
             <div class="game-desc">Substitution, elimination, and real-world applications.</div>
-            <span class="soon-link">Coming Soon</span>
+            <a class="play-link" href="systems-of-equations/" aria-label="Play Systems of Equations">Play &rarr;</a>
         </div>
 
-        <div class="card pending">
-            <div class="game-name">Solving Linear and Quadratic Equations</div>
+        <div class="card">
+            <h3 class="game-name">Solving Linear and Quadratic Equations</h3>
             <div class="game-desc">Linear, quadratic by factoring, quadratic formula, and mixed review.</div>
-            <span class="soon-link">Coming Soon</span>
+            <a class="play-link" href="quadratic-equations/" aria-label="Play Solving Linear and Quadratic Equations">Play &rarr;</a>
         </div>
 
-        <div class="card pending">
-            <div class="game-name">Domain, Range &amp; Functions</div>
+        <div class="card">
+            <h3 class="game-name">Domain, Range &amp; Functions</h3>
             <div class="game-desc">Domain and range, reading graphs, evaluating f(x), and function tests.</div>
-            <span class="soon-link">Coming Soon</span>
+            <a class="play-link" href="domain-range-functions/" aria-label="Play Domain, Range and Functions">Play &rarr;</a>
         </div>
 
                     </div>
@@ -281,41 +386,43 @@
     </div>
 
     <div class="category" id="cat-calculus">
-        <div class="category-header" onclick="toggleCategory('cat-calculus')">
-            <div class="category-name">Calculus &amp; Beyond <span class="cat-count">5 games</span></div>
-            <svg class="category-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-        </div>
-        <div class="category-body">
+        <h2 class="category-heading">
+            <button type="button" class="section-toggle" aria-expanded="false" aria-controls="body-calculus" data-cat="cat-calculus" data-name="Calculus and Beyond" data-count="5 tools, all coming soon">
+                <span class="category-name">Calculus &amp; Beyond <span class="cat-count">5 games</span></span>
+                <svg class="category-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+        </h2>
+        <div class="category-body" id="body-calculus">
             <div class="category-body-inner">
                 <div class="grid">
 
 
         <div class="card pending">
-            <div class="game-name">Taylor Series Explorer</div>
+            <h3 class="game-name">Taylor Series Explorer</h3>
             <div class="game-desc">Interactive visualization of polynomial approximations to a function.</div>
             <span class="soon-link">Coming Soon</span>
         </div>
 
         <div class="card pending">
-            <div class="game-name">Sequence vs. Series</div>
+            <h3 class="game-name">Sequence vs. Series</h3>
             <div class="game-desc">Visualizing convergence and divergence side by side.</div>
             <span class="soon-link">Coming Soon</span>
         </div>
 
         <div class="card pending">
-            <div class="game-name">Alternating Series</div>
+            <h3 class="game-name">Alternating Series</h3>
             <div class="game-desc">Visualizing the alternating series test and error bounds.</div>
             <span class="soon-link">Coming Soon</span>
         </div>
 
         <div class="card pending">
-            <div class="game-name">Distance vs. Displacement</div>
+            <h3 class="game-name">Distance vs. Displacement</h3>
             <div class="game-desc">Comparing position, distance traveled, and displacement over time.</div>
             <span class="soon-link">Coming Soon</span>
         </div>
 
         <div class="card pending">
-            <div class="game-name">Newton's Method</div>
+            <h3 class="game-name">Newton's Method</h3>
             <div class="game-desc">Visualizing iterative root-finding, one tangent line at a time.</div>
             <span class="soon-link">Coming Soon</span>
         </div>
@@ -325,19 +432,63 @@
         </div>
     </div>
 
-    <div class="footer">
-        <svg width="170" height="78" viewBox="-64 -32 128 78" style="opacity: 0.9;">
-            <path d="M22.0,0.0 L21.9,1.1 L21.6,2.3 L21.1,3.3 L20.5,4.4 L19.6,5.3 L18.6,6.1 L17.5,6.7 L16.3,7.2 L14.9,7.6 L13.5,7.8 L12.0,7.8 L10.5,7.6 L8.9,7.2 L7.4,6.7 L6.0,6.0 L4.5,5.1 L3.2,4.0 L2.0,2.8 L0.9,1.4 L0.0,0.0 L-0.8,-1.5 L-1.4,-3.1 L-1.8,-4.8 L-2.1,-6.5 L-2.2,-8.1 L-2.1,-9.8 L-1.8,-11.4 L-1.4,-12.9 L-0.7,-14.3 L-0.0,-15.6 L0.9,-16.7 L1.9,-17.7 L2.9,-18.5 L4.1,-19.2 L5.3,-19.6 L6.5,-19.9 L7.7,-20.0 L8.8,-19.9 L10.0,-19.5 L11.0,-19.1 L11.9,-18.4 L12.8,-17.6 L13.5,-16.6 L14.0,-15.5 L14.4,-14.4 L14.6,-13.1 L14.6,-11.8 L14.4,-10.5 L14.0,-9.1 L13.5,-7.8 L12.7,-6.5 L11.8,-5.3 L10.7,-4.1 L9.5,-3.1 L8.1,-2.2 L6.6,-1.4 L5.1,-0.8 L3.4,-0.4 L1.7,-0.1 L0.0,-0.0 L-1.7,-0.1 L-3.4,-0.4 L-5.1,-0.8 L-6.6,-1.4 L-8.1,-2.2 L-9.5,-3.1 L-10.7,-4.1 L-11.8,-5.3 L-12.7,-6.5 L-13.5,-7.8 L-14.0,-9.1 L-14.4,-10.5 L-14.6,-11.8 L-14.6,-13.1 L-14.4,-14.4 L-14.0,-15.5 L-13.5,-16.6 L-12.8,-17.6 L-11.9,-18.4 L-11.0,-19.1 L-10.0,-19.5 L-8.8,-19.9 L-7.7,-20.0 L-6.5,-19.9 L-5.3,-19.6 L-4.1,-19.2 L-2.9,-18.5 L-1.9,-17.7 L-0.9,-16.7 L-0.0,-15.6 L0.7,-14.3 L1.4,-12.9 L1.8,-11.4 L2.1,-9.8 L2.2,-8.1 L2.1,-6.5 L1.8,-4.8 L1.4,-3.1 L0.8,-1.5 L0.0,-0.0 L-0.9,1.4 L-2.0,2.8 L-3.2,4.0 L-4.5,5.1 L-6.0,6.0 L-7.4,6.7 L-8.9,7.2 L-10.5,7.6 L-12.0,7.8 L-13.5,7.8 L-14.9,7.6 L-16.3,7.2 L-17.5,6.7 L-18.6,6.1 L-19.6,5.3 L-20.5,4.4 L-21.1,3.3 L-21.6,2.3 L-21.9,1.1 L-22.0,0.0 L-21.9,-1.1 L-21.6,-2.3 L-21.1,-3.3 L-20.5,-4.4 L-19.6,-5.3 L-18.6,-6.1 L-17.5,-6.7 L-16.3,-7.2 L-14.9,-7.6 L-13.5,-7.8 L-12.0,-7.8 L-10.5,-7.6 L-8.9,-7.2 L-7.4,-6.7 L-6.0,-6.0 L-4.5,-5.1 L-3.2,-4.0 L-2.0,-2.8 L-0.9,-1.4 L-0.0,-0.0 L0.8,1.5 L1.4,3.1 L1.8,4.8 L2.1,6.5 L2.2,8.1 L2.1,9.8 L1.8,11.4 L1.4,12.9 L0.7,14.3 L0.0,15.6 L-0.9,16.7 L-1.9,17.7 L-2.9,18.5 L-4.1,19.2 L-5.3,19.6 L-6.5,19.9 L-7.7,20.0 L-8.8,19.9 L-10.0,19.5 L-11.0,19.1 L-11.9,18.4 L-12.8,17.6 L-13.5,16.6 L-14.0,15.5 L-14.4,14.4 L-14.6,13.1 L-14.6,11.8 L-14.4,10.5 L-14.0,9.1 L-13.5,7.8 L-12.7,6.5 L-11.8,5.3 L-10.7,4.1 L-9.5,3.1 L-8.1,2.2 L-6.6,1.4 L-5.1,0.8 L-3.4,0.4 L-1.7,0.1 L-0.0,0.0 L1.7,0.1 L3.4,0.4 L5.1,0.8 L6.6,1.4 L8.1,2.2 L9.5,3.1 L10.7,4.1 L11.8,5.3 L12.7,6.5 L13.5,7.8 L14.0,9.1 L14.4,10.5 L14.6,11.8 L14.6,13.1 L14.4,14.4 L14.0,15.5 L13.5,16.6 L12.8,17.6 L11.9,18.4 L11.0,19.1 L10.0,19.5 L8.8,19.9 L7.7,20.0 L6.5,19.9 L5.3,19.6 L4.1,19.2 L2.9,18.5 L1.9,17.7 L0.9,16.7 L0.0,15.6 L-0.7,14.3 L-1.4,12.9 L-1.8,11.4 L-2.1,9.8 L-2.2,8.1 L-2.1,6.5 L-1.8,4.8 L-1.4,3.1 L-0.8,1.5 L0.0,-0.0 L0.9,-1.4 L2.0,-2.8 L3.2,-4.0 L4.5,-5.1 L6.0,-6.0 L7.4,-6.7 L8.9,-7.2 L10.5,-7.6 L12.0,-7.8 L13.5,-7.8 L14.9,-7.6 L16.3,-7.2 L17.5,-6.7 L18.6,-6.1 L19.6,-5.3 L20.5,-4.4 L21.1,-3.3 L21.6,-2.3 L21.9,-1.1 L22.0,-0.0" fill="none" stroke="#2dd4bf" stroke-width="1.8"/>
-            <text x="0" y="34" text-anchor="middle" font-family="Nunito, Segoe UI, Arial, sans-serif" font-size="9.5" font-weight="800" fill="#9ca3af" letter-spacing="1.6">POLAR ROSE STUDIO</text>
+    </main>
+
+    <footer class="footer">
+        <!-- Purely decorative studio mark: it carries no title, so it says
+             nothing useful to a screen reader. Hidden, matching the games. -->
+        <svg class="insignia" viewBox="-28 -26 56 64" aria-hidden="true" focusable="false" role="presentation">
+            <defs>
+                <linearGradient id="pr-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#1e3a5f"/>
+                    <stop offset="100%" stop-color="#0d9488"/>
+                </linearGradient>
+            </defs>
+            <path id="pr-path" fill="none" stroke="url(#pr-grad)" stroke-width="1.8"/>
         </svg>
-    </div>
+        <div class="insignia-caption" aria-hidden="true">POLAR ROSE STUDIO</div>
+    </footer>
 
 </div>
 
 <script>
-    function toggleCategory(id) {
-        document.getElementById(id).classList.toggle('open');
+/* =====================================================================
+   Polar rose insignia path - r = 2cos(3/2 theta), 240 steps
+   ===================================================================== */
+(function () {
+    var d = '';
+    var steps = 240;
+    for (var i = 0; i <= steps; i++) {
+        var t = (i / steps) * 4 * Math.PI;
+        var r = 2 * Math.cos(1.5 * t);
+        var x = r * Math.cos(t) * 12;
+        var y = r * Math.sin(t) * 12;
+        d += (i === 0 ? 'M ' : 'L ') + x.toFixed(2) + ' ' + y.toFixed(2) + ' ';
     }
+    var el = document.getElementById('pr-path');
+    if (el) el.setAttribute('d', d.trim());
+})();
+
+/* =====================================================================
+   Category expand / collapse
+   ===================================================================== */
+(function () {
+    var announcer = document.getElementById('announcer');
+    var headers = document.querySelectorAll('.section-toggle');
+    Array.prototype.forEach.call(headers, function (btn) {
+        btn.addEventListener('click', function () {
+            var cat = document.getElementById(btn.getAttribute('data-cat'));
+            if (!cat) return;
+            var open = cat.classList.toggle('open');
+            btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            if (announcer) {
+                announcer.textContent = btn.getAttribute('data-name') +
+                    (open ? ' expanded, ' : ' collapsed, ') +
+                    btn.getAttribute('data-count') + '.';
+            }
+        });
+    });
+})();
 </script>
 </body>
 </html>
