@@ -1,0 +1,2031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>Systems of Equations</title>
+<meta name="theme-color" content="#1b2450">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+/* ===== MIDNIGHT SCHOLAR - navy stage, white card, violet + mint accents ===== */
+* { box-sizing: border-box; }
+body {
+    font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+    background:
+        radial-gradient(900px 500px at 85% -10%, rgba(124, 58, 237, 0.28), transparent 60%),
+        radial-gradient(800px 500px at -10% 110%, rgba(16, 185, 129, 0.18), transparent 55%),
+        linear-gradient(160deg, #141b3d 0%, #1b2450 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px 12px;
+    margin: 0;
+}
+.card {
+    background: #ffffff;
+    border-radius: 22px;
+    box-shadow: 0 24px 60px rgba(8, 12, 40, 0.55);
+    max-width: 720px;
+    width: 100%;
+    padding: 30px 24px 26px;
+    position: relative;
+    overflow: hidden;
+}
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+}
+/* The heading box shrinks to its text so the rule below can match it. */
+h1 {
+    text-align: center;
+    color: #1e2a5e;
+    margin: 4px auto 6px;
+    font-size: 24px;
+    letter-spacing: 0.3px;
+    width: fit-content;
+    max-width: 100%;
+}
+/* The gradient rule is exactly as wide as the title text. */
+h1::after {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    margin: 8px auto 14px;
+    background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+}
+.equation {
+    font-size: 22px;
+    font-weight: bold;
+    text-align: center;
+    font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    color: #1e2a5e;
+    background: #eef0fb;
+    border: 2px solid #c7cdf0;
+    border-radius: 14px;
+    padding: 10px 12px;
+    max-width: 100%;
+    overflow-wrap: break-word;
+}
+.eq-pair { margin: 16px auto; display: flex; flex-direction: column; gap: 8px; }
+.solve-instruction { text-align: center; font-size: 13.5px; font-weight: 700; color: #4a5480; margin: 6px 0 2px; }
+.eq-write-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    font-size: 19px;
+    font-weight: bold;
+    color: #1e2a5e;
+    margin: 14px 0;
+    flex-wrap: wrap;
+}
+.eq-write-label { font-size: 13px; font-weight: 800; color: #2e3d8f; width: 100%; text-align: center; margin-bottom: -6px; }
+.coef-input {
+    width: 58px !important;
+    font-size: 18px !important;
+    padding: 8px 4px !important;
+    text-align: center;
+    border: 3px solid #7c3aed;
+    border-radius: 10px;
+    color: #1e2a5e;
+    font-weight: bold;
+}
+.coef-input.locked-correct { border-color: #10b981; background: #ecfdf5; color: #047857; } /* a11y: #059669 on #ecfdf5 is 3.58:1 at 18px */
+.story-box {
+    background: #e8f8f0;
+    border: 2px solid #8fd9b6;
+    border-radius: 14px;
+    padding: 14px;
+    margin: 14px 0 10px;
+    font-size: 15px;
+    color: #1e6b46;
+    line-height: 1.45;
+}
+.defs-line {
+    text-align: center;
+    font-size: 13px;
+    color: #4a5480;
+    font-style: italic;
+    margin: 2px 0 10px;
+}
+.input-area {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 18px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+.var-group { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.var-label { display: block; font-size: 13px; font-weight: 800; color: #2e3d8f; }
+.var-input-row { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+input[type="number"], input[type="text"] {
+    width: 100px;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    padding: 10px;
+    border: 3px solid #7c3aed;
+    border-radius: 12px;
+    color: #1e2a5e;
+    background: #ffffff;
+}
+input[type="number"]:focus, input[type="text"]:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18);
+}
+input.locked-correct {
+    border-color: #10b981;
+    background: #ecfdf5;
+    color: #047857; /* a11y: matches .coef-input.locked-correct */
+}
+button {
+    padding: 12px 22px;
+    font-size: 15px;
+    font-weight: 800;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+button:active { transform: scale(0.95); }
+button:disabled { opacity: 0.5; cursor: default; }
+.submit-btn {
+    background: linear-gradient(135deg, #2e3d8f, #4b3bbd);
+    color: white;
+    box-shadow: 0 6px 16px rgba(46, 61, 143, 0.35);
+}
+.submit-btn:hover { filter: brightness(1.1); }
+.sign-btn {
+    background: #e6e9f6;
+    color: #2e3d8f;
+    padding: 5px 16px;
+    font-size: 14px;
+    font-weight: 800;
+    border-radius: 10px;
+}
+.method-btns, .level-btns {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+.method-btn {
+    background: #e6e9f6;
+    color: #2e3d8f;
+    border-radius: 999px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 800;
+}
+.method-btn:hover { background: #d9def2; }
+.method-btn.active {
+    background: linear-gradient(135deg, #2e3d8f, #4b3bbd) !important;
+    color: white !important;
+    box-shadow: 0 6px 14px rgba(46, 61, 143, 0.35);
+}
+.level-btn {
+    background: #e6e9f6;
+    color: #4a5480;
+    border-radius: 999px;
+    padding: 9px 14px;
+    font-size: 12.5px;
+}
+.level-btn:hover { background: #d9def2; }
+.level-btn.active {
+    /* a11y: white on #10b981 is 2.54:1; #047857 is 5.48:1 (mint ring kept) */
+    background: #047857 !important;
+    color: white !important;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.25), 0 6px 14px rgba(16, 185, 129, 0.35);
+}
+.feedback {
+    text-align: center;
+    font-size: 19px;
+    font-weight: 800;
+    margin: 14px 0 6px;
+    min-height: 30px;
+}
+.correct { color: #059669; }
+/* Design item 14: the wrong-answer message was orange #b45309, which broke
+   two rules at once (no orange anywhere; incorrect feedback is ink navy).
+   Orange was also the only thing separating a grading verdict from the
+   royal-blue .partial input prompts, so the verdict now additionally sits in
+   a chip-bg box - a difference of shape, not just of shade. */
+.incorrect { color: #1e2a5e; font-size: 18px; font-weight: 700; }
+/* :not(:empty) matters: showStats() and generateProblem() clear the text but
+   leave the class on, so an unguarded box would linger as an empty slab. */
+.feedback.incorrect:not(:empty) {
+    background: #eef0fb;
+    border: 2px solid #c7cdf0;
+    border-radius: 10px;
+    padding: 8px 14px;
+}
+.partial { color: #2e3d8f; font-size: 16px; font-weight: 700; }
+.victory {
+    text-align: center;
+    font-size: 24px;
+    color: #7c3aed;
+    animation: pulse 1s infinite;
+}
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+.info {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+.info-item {
+    font-size: 11.5px;
+    font-weight: 800;
+    background: #d4f5e6;
+    color: #047857 !important;
+    padding: 6px 12px;
+    border-radius: 999px;
+}
+/* Design item 6: a hot streak is good news but was printed as red-on-pink,
+   i.e. as a warning. It is now a violet chip, which reads as a highlight and
+   stays clearly apart from the mint default chip. #5b21b6 on #ede9fe is
+   7.57:1 (needs 4.5 at 11.5px). */
+.info-item.hot {
+    background: #ede9fe;
+    color: #5b21b6 !important;
+    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.35);
+}
+.hint-btn, .answer-btn, .skip-btn, .solution-btn, .stats-btn {
+    background: #f3eefe;
+    color: #6d28d9;
+    margin: 4px;
+    font-size: 13px;
+}
+.hint-btn:hover, .answer-btn:hover, .skip-btn:hover, .solution-btn:hover, .stats-btn:hover {
+    background: #e9defc;
+}
+.hint-box, .answer-box, .solution-box {
+    background: #f7f5ff;
+    border: 2px solid #d8ccf7;
+    border-radius: 14px;
+    padding: 15px;
+    margin: 14px 0;
+    color: #3b3568;
+    font-size: 14px;
+}
+.progress-cups {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin: 4px 0 14px;
+    flex-wrap: wrap;
+}
+.cup-container { text-align: center; }
+.cup-label { font-size: 10px; font-weight: 800; color: #4a5480; margin-bottom: 3px; }
+.cup {
+    width: 34px;
+    height: 34px;
+    border: 2px solid #2e3d8f;
+    border-radius: 0 0 10px 10px;
+    position: relative;
+    overflow: hidden;
+    background: #f4f6fd;
+    margin: 0 auto;
+}
+.cup-fill { position: absolute; bottom: 0; left: 0; right: 0; transition: height 0.5s ease; }
+/* Design item 18: the "done, but with errors" cup was orange. The three
+   states now run royal navy (still filling) -> violet (done with errors) ->
+   mint (done clean), so they stay three distinct hues with no orange, and
+   the "(n X)" count under the cup still labels the error case in words. */
+.cup-fill.full { background: linear-gradient(to top, #059669, #34d399); }
+.cup-fill.half { background: linear-gradient(to top, #7c3aed, #a78bfa); }
+.cup-fill.partial { background: linear-gradient(to top, #2e3d8f, #8b96d8); }
+.cup-stats { font-size: 9px; color: #5d6798; margin-top: 2px; } /* a11y: #6a74a8 is 4.49:1 on white */
+.scaffold-container {
+    background: #f7f8fe;
+    border: 2px solid #c7cdf0;
+    border-radius: 18px;
+    padding: 16px 14px;
+    margin: 14px 0;
+}
+.step-title { font-size: 15px; font-weight: 800; color: #047857; margin-bottom: 6px; }
+.stack-add {
+    font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    font-size: 17px;
+    font-weight: bold;
+    color: #1e2a5e;
+    background: #eef0fb;
+    border: 2px solid #c7cdf0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin: 10px auto;
+    display: grid;
+    grid-template-columns: auto auto auto auto auto;
+    gap: 2px 6px;
+    width: fit-content;
+    max-width: 100%;
+}
+.stack-add .op { text-align: left; }
+.stack-add .term { text-align: right; white-space: nowrap; }
+.stack-add .eqs { text-align: center; }
+.stack-add .stack-line {
+    grid-column: 1 / -1;
+    border-top: 2px solid #2e3d8f;
+    margin: 4px 0 2px;
+}
+.step-question { font-size: 14.5px; color: #3b3568; margin: 8px 0; }
+.completed-steps {
+    background: #ecfdf5;
+    border: 2px solid #34d399;
+    border-radius: 14px;
+    padding: 10px 12px;
+    margin: 12px 0;
+    font-size: 13px;
+}
+.completed-steps .row { padding: 4px 0; border-top: 1px dashed rgba(0,0,0,0.12); }
+.completed-steps .row:first-child { border-top: none; }
+.step-hint {
+    background: #f3eefe;
+    border-left: 4px solid #7c3aed;
+    border-radius: 0 10px 10px 0;
+    padding: 10px 14px;
+    margin: 10px 0;
+    font-size: 13.5px;
+    color: #5b21b6;
+}
+.stats-panel { font-size: 14px; color: #1e2a5e; }
+.stat-row { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+.stat-name { width: 130px; font-size: 12.5px; font-weight: 800; color: #2e3d8f; flex-shrink: 0; }
+.stat-bar-wrap { flex: 1; background: #eef0fb; border-radius: 8px; height: 14px; overflow: hidden; }
+.stat-bar { height: 100%; border-radius: 8px; transition: width 0.4s ease; }
+/* Design item 18: orange mid tier and red low tier gone. Same cool ramp as
+   the cups and as Signed Numbers - royal navy, violet, mint - so the tiers
+   remain three distinguishable colours without telling a beginner in red
+   that they are failing. The percentage in .stat-num carries the number. */
+.stat-bar.good { background: linear-gradient(90deg, #059669, #34d399); }
+.stat-bar.mid { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+.stat-bar.low { background: linear-gradient(90deg, #2e3d8f, #8b96d8); }
+.stat-bar.none { background: #d9def2; }
+/* widened from 92px so design item 11's "not tried yet" fits on one line */
+.stat-num { font-size: 12px; color: #4a5480; width: 104px; text-align: right; flex-shrink: 0; }
+.recommend {
+    background: #eef0fb;
+    border: 2px solid #8b96d8;
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin: 14px 0;
+    font-size: 13px;
+    color: #2e3d8f;
+}
+/* ===== Confetti ===== */
+.confetti { position: fixed; opacity: 0; pointer-events: none; z-index: 9999; }
+@keyframes confetti-fall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 1; }
+}
+@keyframes confetti-fall-slow {
+    0% { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 1; }
+    100% { transform: translateY(115vh) rotate(1080deg) scale(0.85); opacity: 1; }
+}
+.sparkle {
+    position: fixed;
+    width: 20px; height: 20px;
+    background: radial-gradient(circle, #fff 0%, #ffd700 50%, transparent 70%);
+    border-radius: 50%;
+    animation: sparkle 0.5s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 100;
+}
+@keyframes sparkle {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(1.6); }
+}
+/* Design item 17: red is not in the palette. The navy slate secondary button
+   from the design system instead (white on #4a5480 is 7.31:1, hover 9.34:1).
+   The two-tap "Tap again to confirm" rearm is what marks it destructive. */
+.reset-btn { background: #4a5480; color: #ffffff; }
+.reset-btn:hover { background: #3c4569; }
+
+/* ===== Settings row (design item 9: confetti is always paired with a
+   toggle, persisted per device) ===== */
+.settings-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 16px 0 0;
+    padding-top: 14px;
+    border-top: 1px solid #e6e9f6;
+}
+.settings-label { font-size: 13px; font-weight: 700; color: #4a5480; }
+.switch {
+    position: relative;
+    flex: 0 0 44px;
+    width: 44px;
+    height: 24px;
+    padding: 0;
+    border-radius: 999px;
+    background: #d5d9e8;
+    /* Cross-cutting ruling B: the specified track is 1.41:1 against the white
+       card when off and 2.54:1 when on, so the control's own edge fails WCAG
+       1.4.11. A 1px rim fixes that in both states without touching the 44x24
+       geometry or the mint fill: #8a93b8 = 3.02:1 off, #0b7a70 = 5.21:1 on. */
+    border: 1px solid #8a93b8;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.switch-knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(8, 12, 40, 0.4);
+    transition: transform 0.2s;
+}
+.switch[aria-pressed="true"] { background: #10b981; border-color: #0b7a70; }
+.switch[aria-pressed="true"] .switch-knob { transform: translateX(20px); }
+.sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+    .confetti, .sparkle { display: none !important; }
+    * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    .victory { animation: none !important; }
+}
+@media (max-width: 480px) {
+    .card { padding: 22px 12px 18px; }
+    h1 { font-size: 20px; }
+    .equation { font-size: 17px; padding: 10px 8px; }
+    .method-btn { padding: 8px 12px; font-size: 12px; }
+    .level-btn { padding: 7px 10px; font-size: 11px; }
+    input[type="number"], input[type="text"] { width: 84px; font-size: 21px; }
+}
+</style>
+</head>
+<body>
+<main class="card" id="game-card">
+    <h1>Systems of Equations</h1>
+
+    <div class="info" id="info-bar"></div>
+
+    <div class="method-btns" id="method-btns" role="group" aria-label="Solving method">
+        <button class="method-btn active" aria-pressed="true" onclick="setCategory('sub')">Substitution</button>
+        <button class="method-btn" aria-pressed="false" onclick="setCategory('elim')">Elimination</button>
+        <button class="method-btn" aria-pressed="false" onclick="setCategory('app')">Applications</button>
+    </div>
+
+    <div class="level-btns" id="level-btns" role="group" aria-label="Difficulty level"></div>
+
+    <div id="progress-display"></div>
+
+    <div id="main-content"></div>
+
+    <!-- Polite region: announces each new problem in words for screen readers. -->
+    <div id="problem-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+    <div class="feedback" id="feedback" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+    <div id="next-problem-area" style="text-align:center;"></div>
+
+    <div id="helper-buttons" style="text-align: center; margin: 16px 0;">
+        <button class="hint-btn" onclick="toggleHint()">Show Hint</button>
+        <button class="answer-btn" onclick="toggleAnswer()">Show Answer</button>
+        <button class="solution-btn" onclick="toggleSolution()">Show Solution</button>
+        <button class="skip-btn" onclick="skipProblem()">Skip</button>
+    </div>
+    <div style="text-align:center;">
+        <button class="stats-btn" onclick="showStats()">View Stats</button>
+    </div>
+
+    <div id="hint" style="display: none;"></div>
+    <div id="answer-box" style="display: none;"></div>
+    <div id="solution-box" style="display: none;"></div>
+
+    <div class="settings-row">
+        <span class="settings-label" id="confetti-label">Confetti celebrations</span>
+        <button type="button" class="switch" id="confetti-switch" aria-pressed="true"
+                aria-label="Confetti celebrations" onclick="toggleConfettiSetting()"><span class="switch-knob" aria-hidden="true"></span></button>
+    </div>
+</main>
+
+<script>
+/* =====================================================================
+   Utilities
+   ===================================================================== */
+function ri(lo, hi) { return Math.floor(Math.random() * (hi - lo + 1)) + lo; }
+function nz(lo, hi) { var n = ri(lo, hi); while (n === 0) n = ri(lo, hi); return n; }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { var t = b; b = a % b; a = t; } return a; }
+function lcm(a, b) { a = Math.abs(a); b = Math.abs(b); return (a * b) / gcd(a, b); }
+function cleanNum(n) { return Math.round(n * 1e6) / 1e6; }
+function signed(n) { return (n >= 0 ? '+ ' : '- ') + Math.abs(n); }
+function spellMult(n) { return n < 0 ? 'negative ' + Math.abs(n) : String(n); }
+var ORDINAL_WORDS = { 1: 'first', 2: 'second' };
+
+/* Strict numeric parsing. parseFloat() alone accepted "3abc", "5x", "1e3",
+   "0x10" and "1,000" for an answer of 3/5/1000/0/1, so a wrong entry could be
+   graded correct. A plain decimal or a simple a/b fraction only. */
+var NUM_RE = /^[+-]?(?:\d+(?:\.\d+)?|\.\d+)$/;
+function parseNum(str) {
+    str = (str || '').trim();
+    if (str === '') return NaN;
+    var slash = str.indexOf('/');
+    if (slash !== -1) {
+        var num = str.slice(0, slash).trim(), den = str.slice(slash + 1).trim();
+        if (!NUM_RE.test(num) || !NUM_RE.test(den)) return NaN;
+        var d = parseFloat(den);
+        if (d === 0) return NaN;
+        return parseFloat(num) / d;
+    }
+    if (!NUM_RE.test(str)) return NaN;
+    return parseFloat(str);
+}
+function isClose(a, b) { return Math.abs(a - b) < 0.001; }
+
+/* Format a x + b y = d as a display string. Assumes a, b nonzero. */
+function fmtEq(a, b, vX, vY, d) {
+    var s;
+    if (a === 1) s = vX; else if (a === -1) s = '-' + vX; else s = a + vX;
+    if (b === 1) s += ' + ' + vY;
+    else if (b === -1) s += ' - ' + vY;
+    else s += ' ' + signed(b) + vY;
+    s += ' = ' + d;
+    return s;
+}
+/* Format vLeft = m * vRight + c (isolated form). c may be 0 (omitted). */
+function fmtIsolated(vLeft, m, vRight, c) {
+    var s = vLeft + ' = ';
+    if (m === 1) s += vRight; else if (m === -1) s += '-' + vRight; else s += m + vRight;
+    if (c !== 0) s += ' ' + signed(c);
+    return s;
+}
+/* Format just the RHS expression of an isolated form, e.g. "3x + 4" or "-2y - 5" */
+function fmtIsolatedRHS(m, vRight, c) {
+    var s;
+    if (m === 1) s = vRight; else if (m === -1) s = '-' + vRight; else s = m + vRight;
+    if (c !== 0) s += ' ' + signed(c);
+    return s;
+}
+
+/* Format "d + coef*varName" as text, simplifying coefficients of +-1 */
+function fmtRHS(d, coef, varName) {
+    var s = String(d);
+    if (coef === 1) return s + ' + ' + varName;
+    if (coef === -1) return s + ' - ' + varName;
+    return s + ' ' + signed(coef) + varName;
+}
+function fmtCoefVar(coef, varName) {
+    if (coef === 1) return varName;
+    if (coef === -1) return '-' + varName;
+    return coef + varName;
+}
+function escHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+/* Builds the vertical "add the two equations" display as a 5-column grid so the
+   x-terms, y-terms, equals signs and constants line up in vertical columns. */
+function buildStackAddHtml(a1, b1, d1, a2, b2, d2, dvX, dvY) {
+    function row(op, a, b, d) {
+        var yTerm = (b < 0 ? '- ' : '+ ') + fmtCoefVar(Math.abs(b), dvY);
+        return '<div class="op">' + escHtml(op) + '</div>' +
+            '<div class="term">' + escHtml(fmtCoefVar(a, dvX)) + '</div>' +
+            '<div class="term">' + escHtml(yTerm) + '</div>' +
+            '<div class="eqs">=</div>' +
+            '<div class="term">' + escHtml(d) + '</div>';
+    }
+    /* The sum bar is a CSS border-top and the alignment is a grid, so the whole
+       block carries its meaning in layout. Speak it as one labelled image, with
+       the equations run through speakEquation so "-3x" is not read as "dash 3x". */
+    return '<div class="stack-add" role="img" aria-label="Adding the two equations: ' +
+        escHtml(speakEquation(fmtEq(a1, b1, dvX, dvY, d1))) + ', plus ' +
+        escHtml(speakEquation(fmtEq(a2, b2, dvX, dvY, d2))) + '">' +
+        row('', a1, b1, d1) +
+        row('+', a2, b2, d2) +
+        '<div class="stack-line"></div></div>';
+}
+
+/* =====================================================================
+   SUBSTITUTION GENERATORS  (all build backward from a chosen integer x, y)
+   Level 1: one equation already isolated:  y = mx + c   (or x = my + c)
+   Level 2: one equation has coefficient 1 on the target variable, standard form
+   Level 3: the isolated variable's coefficient is not +-1 (introduces a fraction step)
+   Every returned object carries a1,b1,d1,a2,b2,d2 describing the two equations
+   in standard form (a1 x + b1 y = d1), plus x,y (the solution), for uniform
+   hint/solution/answer-checking logic.
+   ===================================================================== */
+function genSub1_() {
+    var x = nz(-9, 9), y = nz(-9, 9);
+    var isolateY = Math.random() < 0.5;
+    var m, c, a, b, d, guard = 0, ok = false;
+    while (!ok && guard < 300) {
+        guard++;
+        m = nz(-5, 5); a = nz(-6, 6); b = nz(-6, 6);
+        if (isolateY) { c = y - m * x; d = a * x + b * y; if (a + b * m !== 0) ok = true; }
+        else { c = x - m * y; d = a * x + b * y; if (b + a * m !== 0) ok = true; }
+    }
+    if (!ok) return null;
+    var a1, b1, d1;
+    if (isolateY) { a1 = -m; b1 = 1; d1 = c; } // y - mx = c  ->  -m x + 1 y = c (standard form equivalent)
+    else { a1 = 1; b1 = -m; d1 = c; }
+    return { method: 'sub', level: 1, isolateY: isolateY, x: x, y: y, m: m, c: c,
+             a1: a1, b1: b1, d1: d1, a2: a, b2: b, d2: d };
+}
+
+/* =====================================================================
+   ELIMINATION GENERATORS
+   Level 1: target variable coefficient is +-1 in BOTH equations (direct add/subtract)
+   Level 2: target variable coefficient in eq2 is a clean multiple of eq1's (multiply ONE row)
+   Level 3: target variable coefficients share no simple multiple relation (multiply BOTH rows)
+   ===================================================================== */
+function otherCoefL1() {
+    // The eliminated variable is always +-1 (that's the point of Level 1) -- but bias
+    // the OTHER variable's coefficient toward more varied magnitudes (2-6) most of the
+    // time, only occasionally (~15%) letting it also land on +-1, so problems don't all
+    // look like the same trivial "x + y / x - y" pattern.
+    if (Math.random() < 0.15) return pick([1, -1]);
+    return pick([2, 3, 4, 5, 6]) * pick([1, -1]);
+}
+function genElim1_() {
+    var x = nz(-9, 9), y = nz(-9, 9);
+    var elimVar = Math.random() < 0.5 ? 'x' : 'y';
+    var c1 = pick([1, -1]), c2 = pick([1, -1]);
+    var other1 = otherCoefL1(), other2 = otherCoefL1();
+    var a1, b1, a2, b2;
+    if (elimVar === 'x') { a1 = c1; b1 = other1; a2 = c2; b2 = other2; }
+    else { a1 = other1; b1 = c1; a2 = other2; b2 = c2; }
+    var d1 = a1 * x + b1 * y, d2 = a2 * x + b2 * y;
+    if (a1 * b2 - a2 * b1 === 0) return null;
+    return { method: 'elim', level: 1, elimVar: elimVar, x: x, y: y, a1: a1, b1: b1, d1: d1, a2: a2, b2: b2, d2: d2 };
+}
+function genElim2_() {
+    var x = nz(-9, 9), y = nz(-9, 9);
+    var elimVar = Math.random() < 0.5 ? 'x' : 'y';
+    var k1 = nz(2, 5), f = pick([2, 3]);
+    var sign1 = pick([1, -1]), sign2 = pick([1, -1]);
+    var c1 = sign1 * k1, c2 = sign2 * k1 * f;
+    // The other variable shouldn't already be a coefficient-+-1 (zero-multiplication)
+    // shortcut -- that would make elimVar's one-multiplication path look pointless.
+    var other1, other2, guard = 0;
+    do {
+        other1 = nz(-6, 6); other2 = nz(-6, 6);
+        guard++;
+    } while (Math.abs(other1) === 1 && Math.abs(other2) === 1 && guard < 100);
+    var a1, b1, a2, b2;
+    if (elimVar === 'x') { a1 = c1; b1 = other1; a2 = c2; b2 = other2; }
+    else { a1 = other1; b1 = c1; a2 = other2; b2 = c2; }
+    var d1 = a1 * x + b1 * y, d2 = a2 * x + b2 * y;
+    if (a1 * b2 - a2 * b1 === 0) return null;
+    return { method: 'elim', level: 2, elimVar: elimVar, x: x, y: y, a1: a1, b1: b1, d1: d1, a2: a2, b2: b2, d2: d2, mult: f };
+}
+var elimCombinedCount = 0;
+function genElimCombined_() {
+    elimCombinedCount++;
+    var useEasy;
+    if (elimCombinedCount <= 3) useEasy = true;
+    else if (elimCombinedCount <= 6) useEasy = Math.random() < 0.5;
+    else useEasy = Math.random() < 0.35;
+    return useEasy ? genElim1_() : genElim2_();
+}
+function genElim3_() {
+    var x = nz(-9, 9), y = nz(-9, 9);
+    var elimVar = Math.random() < 0.5 ? 'x' : 'y';
+    var pairs = [[2,3],[3,4],[2,5],[3,5],[4,5],[2,7],[3,7],[4,7],[5,6]];
+    var pr = pick(pairs); var p = pr[0], q = pr[1];
+    var sign1 = pick([1, -1]), sign2 = pick([1, -1]);
+    var c1 = sign1 * p, c2 = sign2 * q;
+    // The OTHER (non-eliminated) variable's coefficients must NOT offer an easier
+    // path (already opposite, or one a clean multiple of the other) -- otherwise
+    // a student could rightly ask why we're multiplying both rows for elimVar
+    // when the other variable could be eliminated with no work at all.
+    var other1, other2, guard = 0;
+    do {
+        other1 = nz(-6, 6); other2 = nz(-6, 6);
+        guard++;
+    } while ((other1 % other2 === 0 || other2 % other1 === 0) && guard < 100);
+    var a1, b1, a2, b2;
+    if (elimVar === 'x') { a1 = c1; b1 = other1; a2 = c2; b2 = other2; }
+    else { a1 = other1; b1 = c1; a2 = other2; b2 = c2; }
+    var d1 = a1 * x + b1 * y, d2 = a2 * x + b2 * y;
+    if (a1 * b2 - a2 * b1 === 0) return null;
+    var g = gcd(p, q); var m1 = q / g, m2 = p / g;
+    return { method: 'elim', level: 3, elimVar: elimVar, x: x, y: y, a1: a1, b1: b1, d1: d1, a2: a2, b2: b2, d2: d2, mult1: m1, mult2: m2 };
+}
+function genWithRetry(fn) {
+    var p = null, guard = 0;
+    while (!p && guard < 50) { p = fn(); guard++; }
+    return p;
+}
+
+/* =====================================================================
+   APPLICATIONS GENERATORS (word problems -> systems of 2 equations)
+   Every returned object also carries a1,b1,d1,a2,b2,d2,x,y like the
+   method generators above, plus story/defs/xLabel/yLabel for display.
+   ===================================================================== */
+var SKINS_COUNTVALUE = [
+    { name: 'show', xLabel: 'Adult tickets', yLabel: 'Student tickets',
+      xRange: [15, 60], yRange: [10, 50], priceXOptions: [12, 15, 18], priceYOptions: [7, 8, 9],
+      story: function (total, val, px, py) { return total + ' people attended the community theater show, bringing in $' + val + ' total. Adult tickets cost $' + px + ' each and student tickets (with a student discount) cost $' + py + ' each.'; },
+      defs: 'x = number of adult tickets sold, y = number of student tickets sold' },
+    { name: 'concession', xLabel: 'Hot dogs', yLabel: 'Sodas',
+      xRange: [10, 40], yRange: [10, 40], priceXOptions: [4, 5], priceYOptions: [2, 3],
+      story: function (total, val, px, py) { return 'A concession stand sold ' + total + ' items (hot dogs and sodas combined) for a total of $' + val + '. Hot dogs cost $' + px + ' each and sodas cost $' + py + ' each.'; },
+      defs: 'x = number of hot dogs sold, y = number of sodas sold' },
+    { name: 'parking', xLabel: 'Cars', yLabel: 'Motorcycles',
+      xRange: [20, 70], yRange: [5, 25], priceXOptions: [10, 12, 15], priceYOptions: [5, 6, 7],
+      story: function (total, val, px, py) { return 'A parking garage had ' + total + ' vehicles park today, collecting $' + val + ' in fees. Cars pay $' + px + ' and motorcycles pay $' + py + '.'; },
+      defs: 'x = number of cars parked, y = number of motorcycles parked' },
+    { name: 'market', xLabel: 'Pounds of apples', yLabel: 'Pounds of oranges',
+      xRange: [8, 40], yRange: [8, 40], priceXOptions: [2, 3], priceYOptions: [3, 4],
+      story: function (total, val, px, py) { return 'A farmers market sold ' + total + ' pounds of apples and oranges combined for $' + val + '. Apples cost $' + px + '/lb and oranges cost $' + py + '/lb.'; },
+      defs: 'x = pounds of apples sold, y = pounds of oranges sold' },
+    { name: 'museum', xLabel: 'Adult admissions', yLabel: 'Senior admissions',
+      xRange: [15, 50], yRange: [10, 40], priceXOptions: [14, 16, 18], priceYOptions: [9, 10, 11],
+      story: function (total, val, px, py) { return 'A museum sold ' + total + ' tickets in one day for $' + val + ' total. Adult admission is $' + px + ' and senior admission is $' + py + '.'; },
+      defs: 'x = number of adult admissions, y = number of senior admissions' },
+    { name: 'raffle', xLabel: 'Single tickets', yLabel: 'Bundles of 5',
+      xRange: [20, 80], yRange: [10, 40], priceXOptions: [2, 3], priceYOptions: [8, 10],
+      story: function (total, val, px, py) { return 'A school fundraiser had ' + total + ' raffle purchases (singles and 5-ticket bundles combined), bringing in $' + val + '. A single ticket costs $' + px + ' and a bundle of 5 tickets costs $' + py + '.'; },
+      defs: 'x = number of single tickets sold, y = number of 5-ticket bundles sold' }
+];
+
+function genAppCountValue_() {
+    var skin = pick(SKINS_COUNTVALUE);
+    var x = ri(skin.xRange[0], skin.xRange[1]);
+    var y = ri(skin.yRange[0], skin.yRange[1]);
+    var px = pick(skin.priceXOptions);
+    var py = pick(skin.priceYOptions);
+    var guard = 0;
+    while (py === px && guard < 20) { py = pick(skin.priceYOptions); guard++; }
+    if (py === px) return null;
+    var total = x + y;
+    var val = px * x + py * y;
+    return { method: 'app', appType: 'countValue', x: x, y: y,
+        story: skin.story(total, val, px, py), defs: skin.defs,
+        xLabel: skin.xLabel, yLabel: skin.yLabel,
+        a1: 1, b1: 1, d1: total, a2: px, b2: py, d2: val };
+}
+function genAppRectangle_() {
+    var w = ri(4, 20);
+    var l = ri(w + 1, w + 20); // length longer than width
+    var k = pick([2, 3, 4]);
+    var P = 2 * l + 2 * w;
+    var M = l + k * w;
+    return { method: 'app', appType: 'rectangle', x: l, y: w,
+        story: "A rectangle's perimeter is " + P + ' inches. Its length plus ' + k + ' times its width is ' + M + ' inches.',
+        defs: 'L = the length, W = the width',
+        xLabel: 'Length', yLabel: 'Width', varX: 'L', varY: 'W',
+        a1: 2, b1: 2, d1: P, a2: 1, b2: k, d2: M };
+}
+function genAppInvestment_() {
+    var rates = [0.03, 0.04, 0.05, 0.06, 0.07, 0.08];
+    var r1 = pick(rates), r2 = pick(rates);
+    while (r2 === r1) r2 = pick(rates);
+    var x = ri(5, 40) * 100;
+    var y = ri(5, 40) * 100;
+    var total = x + y;
+    var interest = Math.round((r1 * x + r2 * y) * 100) / 100;
+    var r1pct = Math.round(r1 * 100), r2pct = Math.round(r2 * 100);
+    return { method: 'app', appType: 'investment', x: x, y: y,
+        story: 'Sam invested a total of $' + total + ' in two accounts. One account earned ' + r1pct + '% annual interest and the other earned ' + r2pct + '% annual interest. Together the accounts earned $' + interest + ' in interest after one year.',
+        defs: 'x = amount invested at ' + r1pct + '%, y = amount invested at ' + r2pct + '%',
+        xLabel: 'Invested at ' + r1pct + '%', yLabel: 'Invested at ' + r2pct + '%',
+        a1: 1, b1: 1, d1: total, a2: r1, b2: r2, d2: interest };
+}
+var COIN_TYPES = [
+    { label: 'Nickels', value: 0.05 },
+    { label: 'Dimes', value: 0.10 },
+    { label: 'Quarters', value: 0.25 }
+];
+function genAppCoins_() {
+    var i1 = ri(0, 2), i2 = ri(0, 2);
+    while (i2 === i1) i2 = ri(0, 2);
+    var c1 = COIN_TYPES[i1], c2 = COIN_TYPES[i2];
+    var x = ri(5, 40), y = ri(5, 40);
+    var totalCount = x + y;
+    var totalValue = Math.round((c1.value * x + c2.value * y) * 100) / 100;
+    return { method: 'app', appType: 'coins', x: x, y: y,
+        story: 'A jar contains ' + totalCount + ' coins, only ' + c1.label.toLowerCase() + ' and ' + c2.label.toLowerCase() + ', worth $' + totalValue.toFixed(2) + ' in total.',
+        defs: 'x = number of ' + c1.label.toLowerCase() + ', y = number of ' + c2.label.toLowerCase(),
+        xLabel: c1.label, yLabel: c2.label,
+        a1: 1, b1: 1, d1: totalCount, a2: c1.value, b2: c2.value, d2: totalValue };
+}
+var APP_GENERATORS = [genAppCountValue_, genAppCountValue_, genAppRectangle_, genAppRectangle_, genAppInvestment_, genAppCoins_, genAppCoins_];
+function genApp_() { return genWithRetry(pick(APP_GENERATORS)); }
+
+/* =====================================================================
+   LEVEL 0 GUIDED SCAFFOLD BUILDERS
+   Each returns { eq1Str, eq2Str, steps: [{question, correctAnswer, hint, resultEquation}], x, y }
+   These same steps double as the "Show Solution" content on practice levels
+   (see buildSolutionStrings below).
+   ===================================================================== */
+function buildSubScaffold(p) {
+    var steps = [], eq1Str, eq2Str;
+    if (p.level === 1) {
+        if (p.isolateY) {
+            eq1Str = fmtIsolated('y', p.m, 'x', p.c);
+            eq2Str = fmtEq(p.a2, p.b2, 'x', 'y', p.d2);
+            var isolatedRHS = fmtIsolatedRHS(p.m, 'x', p.c);
+            var b2m = p.b2 * p.m;
+            var bc = p.b2 * p.c;
+            var combinedCoef = p.a2 + b2m;
+            steps.push({
+                informational: true,
+                label: 'Substitute into the second equation',
+                question: 'Since Equation 1 already tells us y, substitute (' + isolatedRHS + ') in place of y into the second equation. It becomes:',
+                resultEquation: p.a2 + 'x + ' + p.b2 + '(' + isolatedRHS + ') = ' + p.d2
+            });
+            steps.push({
+                label: 'Distribute',
+                question: 'Distribute the ' + p.b2 + ' across (' + isolatedRHS + '). What is ' + p.b2 + ' \u00d7 ' + p.m + ' (the new x-term)?',
+                correctAnswer: b2m,
+                hint: p.b2 + ' x ' + p.m + ' = ' + b2m,
+                resultEquation: fmtCoefVar(p.a2, 'x') + ' ' + signed(b2m) + 'x ' + signed(bc) + ' = ' + p.d2
+            });
+            steps.push({
+                label: 'Combine into a single equation',
+                question: 'Combine the two x-terms (' + p.a2 + 'x and ' + fmtCoefVar(b2m, 'x') + ') into one. What is the combined coefficient of x?',
+                correctAnswer: combinedCoef,
+                hint: p.a2 + ' + (' + b2m + ') = ' + combinedCoef,
+                resultEquation: fmtCoefVar(combinedCoef, 'x') + ' ' + signed(bc) + ' = ' + p.d2
+            });
+            steps.push({
+                label: 'Move the constant to the other side',
+                question: 'Move the constant to the other side. What is ' + p.d2 + ' ' + (bc >= 0 ? '-' : '+') + ' ' + Math.abs(bc) + '?',
+                correctAnswer: p.d2 - bc,
+                hint: p.d2 + ' ' + (bc >= 0 ? '-' : '+') + ' ' + Math.abs(bc) + ' = ' + (p.d2 - bc),
+                resultEquation: combinedCoef + 'x = ' + (p.d2 - bc)
+            });
+            steps.push({
+                label: 'Divide both sides by ' + combinedCoef,
+                question: 'Solve for x: divide both sides by ' + combinedCoef + '. What is x?',
+                correctAnswer: p.x,
+                hint: (p.d2 - bc) + ' / ' + combinedCoef + ' = ' + p.x,
+                resultEquation: 'x = ' + p.x
+            });
+            steps.push({
+                label: 'Substitute back into Equation 1',
+                question: 'Substitute x = ' + p.x + ' back into Equation 1 to find y. What is y?',
+                correctAnswer: p.y,
+                hint: 'y = ' + p.m + '(' + p.x + ')' + (p.c !== 0 ? ' ' + signed(p.c) : '') + ' = ' + p.y,
+                resultEquation: 'y = ' + p.y
+            });
+        } else {
+            eq1Str = fmtIsolated('x', p.m, 'y', p.c);
+            eq2Str = fmtEq(p.a2, p.b2, 'x', 'y', p.d2);
+            var isolatedRHSy = fmtIsolatedRHS(p.m, 'y', p.c);
+            var a2m = p.a2 * p.m;
+            var ac = p.a2 * p.c;
+            var combinedCoefY = p.b2 + a2m;
+            steps.push({
+                informational: true,
+                label: 'Substitute into the second equation',
+                question: 'Since Equation 1 already tells us x, substitute (' + isolatedRHSy + ') in place of x into the second equation. It becomes:',
+                resultEquation: p.a2 + '(' + isolatedRHSy + ') + ' + p.b2 + 'y = ' + p.d2
+            });
+            steps.push({
+                label: 'Distribute',
+                question: 'Distribute the ' + p.a2 + ' across (' + isolatedRHSy + '). What is ' + p.a2 + ' \u00d7 ' + p.m + ' (the new y-term)?',
+                correctAnswer: a2m,
+                hint: p.a2 + ' x ' + p.m + ' = ' + a2m,
+                resultEquation: fmtCoefVar(a2m, 'y') + ' ' + signed(p.b2) + 'y ' + signed(ac) + ' = ' + p.d2
+            });
+            steps.push({
+                label: 'Combine into a single equation',
+                question: 'Combine the two y-terms (' + fmtCoefVar(a2m, 'y') + ' and ' + p.b2 + 'y) into one. What is the combined coefficient of y?',
+                correctAnswer: combinedCoefY,
+                hint: '(' + a2m + ') + ' + p.b2 + ' = ' + combinedCoefY,
+                resultEquation: fmtCoefVar(combinedCoefY, 'y') + ' ' + signed(ac) + ' = ' + p.d2
+            });
+            steps.push({
+                label: 'Move the constant to the other side',
+                question: 'Move the constant to the other side. What is ' + p.d2 + ' ' + (ac >= 0 ? '-' : '+') + ' ' + Math.abs(ac) + '?',
+                correctAnswer: p.d2 - ac,
+                hint: p.d2 + ' ' + (ac >= 0 ? '-' : '+') + ' ' + Math.abs(ac) + ' = ' + (p.d2 - ac),
+                resultEquation: combinedCoefY + 'y = ' + (p.d2 - ac)
+            });
+            steps.push({
+                label: 'Divide both sides by ' + combinedCoefY,
+                question: 'Solve for y: divide both sides by ' + combinedCoefY + '. What is y?',
+                correctAnswer: p.y,
+                hint: (p.d2 - ac) + ' / ' + combinedCoefY + ' = ' + p.y,
+                resultEquation: 'y = ' + p.y
+            });
+            steps.push({
+                label: 'Substitute back into Equation 1',
+                question: 'Substitute y = ' + p.y + ' back into Equation 1 to find x. What is x?',
+                correctAnswer: p.x,
+                hint: 'x = ' + p.m + '(' + p.y + ')' + (p.c !== 0 ? ' ' + signed(p.c) : '') + ' = ' + p.x,
+                resultEquation: 'x = ' + p.x
+            });
+        }
+    }
+    return { eq1: eq1Str, eq2: eq2Str, steps: steps, x: p.x, y: p.y };
+}
+
+/* =====================================================================
+   GLOBAL STATE
+   ===================================================================== */
+var category = 'sub';           // 'sub' | 'elim' | 'app'
+var level = 0;                  // 0-3 for sub/elim; ignored for app
+var currentProblem = null;      // underlying p object (a1,b1,d1,a2,b2,d2,x,y,...)
+var currentScaffold = null;     // {eq1,eq2,steps,x,y} -- only set in Level 0 guided mode
+var scaffoldStepIndex = 0;
+var problemToken = 0;
+var streak = 0, problemCount = 0;
+var timer = 0, timerInterval = null, isTimerRunning = false;
+var lifelines = 2;
+var xLocked = false, yLocked = false;
+var missRecorded = false;
+var solutionRevealed = 0;
+/* Cross-cutting ruling A: set by chargeReveal() for the life of the current
+   problem, so a revealed-then-correct answer leaves the streak at 0 instead
+   of restarting it at 1. Kept separate from missRecorded so the existing
+   credit-withholding logic is untouched. */
+var revealUsed = false;
+
+var typeProgress = {
+    elim: { 1: mkProg(), 2: mkProg(), 3: mkProg() }
+};
+function mkProg() { return { completed: 0, required: 2, errors: 0, shown: 0 }; }
+
+var appContextShown = { countValue: 0, rectangle: 0, investment: 0, coins: 0 };
+
+var stats = {
+    sub: { c: 0, t: 0 },
+    elim: { 1: { c: 0, t: 0 }, 2: { c: 0, t: 0 } },
+    app: { countValue: { c: 0, t: 0 }, rectangle: { c: 0, t: 0 }, investment: { c: 0, t: 0 }, coins: { c: 0, t: 0 } }
+};
+
+var SAVE_KEY = 'systemsOfEquationsGame_v1';
+var LEVEL_LABELS = {
+    elim: ['Level 0 (Guided)', 'Level 1', 'Level 2']
+};
+
+/* Generic Cramer's-rule solver -- used for the Applications "Show Solution" (works for any system) */
+function buildAppScaffold(p) {
+    var pX = Object.assign({}, p, { elimVar: 'x' });
+    var pY = Object.assign({}, p, { elimVar: 'y' });
+    var sX = buildElimScaffold(pX);
+    var sY = buildElimScaffold(pY);
+    return sX.steps.length <= sY.steps.length ? sX : sY;
+}
+
+/* =====================================================================
+   Confetti (adapted from the Linear Equations Solver)
+   ===================================================================== */
+function prefersReducedMotion() {
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+/* Design item 9: the toggle lives under its own key, so resetting progress
+   does not silently switch the animation back on. */
+var CONFETTI_KEY = 'systemsOfEquationsConfetti_v1';
+var confettiEnabled = true;
+function loadConfettiSetting() {
+    try {
+        var v = localStorage.getItem(CONFETTI_KEY);
+        if (v === '0') confettiEnabled = false;
+        else if (v === '1') confettiEnabled = true;
+    } catch (e) { /* storage unavailable -- default to on */ }
+}
+function syncConfettiSwitch() {
+    var btn = document.getElementById('confetti-switch');
+    if (btn) btn.setAttribute('aria-pressed', confettiEnabled ? 'true' : 'false');
+}
+function toggleConfettiSetting() {
+    confettiEnabled = !confettiEnabled;
+    try { localStorage.setItem(CONFETTI_KEY, confettiEnabled ? '1' : '0'); } catch (e) {}
+    syncConfettiSwitch();
+}
+function createConfetti(count, tier) {
+    if (!confettiEnabled) return;
+    if (prefersReducedMotion()) return;
+    var host = document.body;
+    /* Design item 10: #ef4444 (red, not in the palette) and #f59e0b (orange,
+       banned outright) replaced with mint and heritage rose. Still 8 colours. */
+    var colors = ['#10b981', '#22c55e', '#3b82f6', '#c76b8f', '#a855f7', '#06b6d4', '#ec4899', '#84cc16'];
+    var isMassive = tier === 3;
+    for (var i = 0; i < count; i++) {
+        var piece = document.createElement('div');
+        piece.className = 'confetti';
+        piece.setAttribute('aria-hidden', 'true');
+        var color = colors[Math.floor(Math.random() * colors.length)];
+        var shapeR = Math.random();
+        var base = 8 + Math.random() * 8;
+        if (shapeR < 0.5) {
+            piece.style.width = base + 'px'; piece.style.height = base + 'px';
+            piece.style.background = color; piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+        } else {
+            piece.style.width = '0'; piece.style.height = '0'; piece.style.background = 'transparent';
+            piece.style.borderLeft = (base * 0.6) + 'px solid transparent';
+            piece.style.borderRight = (base * 0.6) + 'px solid transparent';
+            piece.style.borderBottom = base + 'px solid ' + color;
+        }
+        piece.style.left = Math.random() * 100 + '%';
+        piece.style.top = '-20px';
+        var dur = tier === 1 ? 1.6 + Math.random() : tier === 2 ? 2.0 + Math.random() * 1.5 : 2.5 + Math.random() * 2.0;
+        piece.style.animation = (isMassive ? 'confetti-fall-slow' : 'confetti-fall') + ' ' + dur + 's ease-out forwards';
+        piece.style.animationDelay = (Math.random() * (isMassive ? 0.8 : 0.4)) + 's';
+        host.appendChild(piece);
+        (function (el, life) { setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, life); })(piece, isMassive ? 6000 : 4500);
+    }
+    if (isMassive) {
+        for (var j = 0; j < 15; j++) {
+            var sp = document.createElement('div');
+            sp.className = 'sparkle';
+            sp.setAttribute('aria-hidden', 'true');
+            sp.style.left = (Math.random() * 90 + 5) + '%';
+            sp.style.top = (Math.random() * 55 + 10) + 'vh';
+            sp.style.animationDelay = (Math.random() * 0.5) + 's';
+            host.appendChild(sp);
+            (function (el) { setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 3500); })(sp);
+        }
+    }
+}
+/* Design item 7: this used to fire on EVERY correct answer from streak 2
+   upward, so the burst stopped meaning anything. It is now the sanctioned
+   milestone schedule (Linear Equations reference): streak 2 = tier 1 (40),
+   4/6/8 = tier 2 (100/140/170), 10 and every 4th after that (14, 18, ...) =
+   tier 3 (200). Every other streak value gets nothing. */
+function confettiForStreak(n) {
+    if (n === 2) return { count: 40, tier: 1 };
+    if (n === 4) return { count: 100, tier: 2 };
+    if (n === 6) return { count: 140, tier: 2 };
+    if (n === 8) return { count: 170, tier: 2 };
+    if (n >= 10 && (n - 10) % 4 === 0) return { count: 200, tier: 3 };
+    return null;
+}
+function celebrateStreak(s) {
+    var burst = confettiForStreak(s);
+    if (burst) createConfetti(burst.count, burst.tier);
+}
+
+function toAB(elimVar, cVal, ocVal) {
+    return elimVar === 'x' ? { a: cVal, b: ocVal } : { a: ocVal, b: cVal };
+}
+function buildElimScaffold(p) {
+    var dvX = p.varX || 'x', dvY = p.varY || 'y';
+    function dv(key) { return key === 'x' ? dvX : dvY; }
+    var eq1Str = fmtEq(p.a1, p.b1, dvX, dvY, p.d1);
+    var eq2Str = fmtEq(p.a2, p.b2, dvX, dvY, p.d2);
+    var steps = [];
+    var elimVar = p.elimVar;
+    var otherVar = elimVar === 'x' ? 'y' : 'x';
+    var dElim = dv(elimVar), dOther = dv(otherVar);
+    var c1 = elimVar === 'x' ? p.a1 : p.b1;
+    var c2 = elimVar === 'x' ? p.a2 : p.b2;
+    var oc1 = elimVar === 'x' ? p.b1 : p.a1;
+    var oc2 = elimVar === 'x' ? p.b2 : p.a2;
+    var otherVal = otherVar === 'x' ? p.x : p.y;
+    var elimVal = elimVar === 'x' ? p.x : p.y;
+
+    /* Find the smallest set of multipliers that make the elimVar coefficients
+       exact opposites. If one coefficient evenly divides the other, ONLY that
+       one equation needs multiplying (mult = 1 for the other) -- regardless of
+       whether the original signs happened to already be opposite or the same.
+       Only when neither divides the other (true Level 3 case) do both need it. */
+    var mult1 = 1, mult2 = 1;
+    var c1IsInt = Math.abs(c1 - Math.round(c1)) < 1e-9;
+    var c2IsInt = Math.abs(c2 - Math.round(c2)) < 1e-9;
+    if (!c1IsInt || !c2IsInt) {
+        // Decimal coefficients (e.g. money/rate equations) -- multiply whichever
+        // equation has the clean integer coefficient, rather than scaling the
+        // decimal equation up by a large, less intuitive factor.
+        if (c2IsInt && !c1IsInt) {
+            mult2 = cleanNum(-c1 / c2); mult1 = 1;
+        } else {
+            mult1 = cleanNum(-c2 / c1); mult2 = 1;
+        }
+    } else if (c1 % c2 === 0) {
+        mult2 = -c1 / c2;
+    } else if (c2 % c1 === 0) {
+        mult1 = -c2 / c1;
+    } else {
+        var L = lcm(c1, c2);
+        mult1 = L / Math.abs(c1);
+        mult2 = -(c1 * mult1) / c2;
+    }
+
+    var curC1 = c1, curOc1 = oc1, curD1 = p.d1;
+    var curC2 = c2, curOc2 = oc2, curD2 = p.d2;
+    var intro = 'Let\'s eliminate ' + dElim + '. ';
+    var solutionIntro = 'Let\'s eliminate ' + dElim + ', since it appears in both equations. ';
+
+    if (mult1 !== 1) {
+        var newOc1 = cleanNum(oc1 * mult1), newD1 = cleanNum(p.d1 * mult1), newC1 = cleanNum(c1 * mult1);
+        var ab1 = toAB(elimVar, newC1, newOc1);
+        steps.push({
+            label: 'Multiply the first equation by ' + spellMult(mult1),
+            solutionLabel: solutionIntro + 'Multiply the first equation by ' + spellMult(mult1) + ' so the ' + dElim + '-coefficients become opposites',
+            question: intro + 'The first equation has ' + dElim + '-coefficient ' + c1 + ' and the second equation has ' + dElim + '-coefficient ' + c2 + '. Multiply the first equation by ' + spellMult(mult1) + ' so the ' + dElim + '-coefficients can become opposites. What is the new coefficient of ' + dOther + '?',
+            correctAnswer: newOc1,
+            hint: oc1 + ' x ' + mult1 + ' = ' + newOc1,
+            resultEquation: fmtEq(ab1.a, ab1.b, dvX, dvY, newD1)
+        });
+        curC1 = newC1; curOc1 = newOc1; curD1 = newD1;
+        intro = ''; solutionIntro = '';
+    }
+    if (mult2 !== 1) {
+        var newOc2 = cleanNum(oc2 * mult2), newD2 = cleanNum(p.d2 * mult2), newC2 = cleanNum(c2 * mult2);
+        var ab2 = toAB(elimVar, newC2, newOc2);
+        steps.push({
+            label: 'Multiply the second equation by ' + spellMult(mult2),
+            solutionLabel: solutionIntro + 'Multiply the second equation by ' + spellMult(mult2) + ' so the ' + dElim + '-coefficients become opposites',
+            question: intro + 'Multiply the second equation by ' + spellMult(mult2) + ' so the ' + dElim + '-coefficients become opposites (' + curC1 + ' and ' + newC2 + '). What is the new coefficient of ' + dOther + '?',
+            correctAnswer: newOc2,
+            hint: oc2 + ' x (' + mult2 + ') = ' + newOc2,
+            resultEquation: fmtEq(ab2.a, ab2.b, dvX, dvY, newD2)
+        });
+        curC2 = newC2; curOc2 = newOc2; curD2 = newD2;
+        intro = ''; solutionIntro = '';
+    }
+
+    var abFinal1 = toAB(elimVar, curC1, curOc1);
+    var abFinal2 = toAB(elimVar, curC2, curOc2);
+    var stackedHtml = buildStackAddHtml(abFinal1.a, abFinal1.b, curD1, abFinal2.a, abFinal2.b, curD2, dvX, dvY);
+    var sumOtherCoef = cleanNum(curOc1 + curOc2);
+    var sumD = cleanNum(curD1 + curD2);
+    steps.push({
+        label: 'Add the two equations',
+        solutionLabel: solutionIntro + 'The ' + dElim + '-coefficients (' + curC1 + ' and ' + curC2 + ') are now opposites, so add the two equations',
+        solutionDetail: stackedHtml,
+        question: intro + 'The ' + dElim + '-coefficients (' + curC1 + ' and ' + curC2 + ') are now opposites, so add the two equations, one under the other:' + stackedHtml + 'The ' + dElim + '-terms cancel. What is the coefficient of ' + dOther + ' in the sum?',
+        correctAnswer: sumOtherCoef,
+        hint: '(' + curOc1 + ') + (' + curOc2 + ') = ' + sumOtherCoef,
+        resultEquation: fmtCoefVar(sumOtherCoef, dOther) + ' = ' + sumD
+    });
+    steps.push({
+        label: 'Solve for ' + dOther,
+        question: 'Solve for ' + dOther + '. What is ' + dOther + '?',
+        correctAnswer: otherVal,
+        hint: sumD + ' / ' + sumOtherCoef + ' = ' + otherVal,
+        resultEquation: dOther + ' = ' + otherVal
+    });
+    steps.push({
+        label: 'Substitute back into the first equation',
+        question: 'Substitute ' + dOther + ' = ' + otherVal + ' back into the ORIGINAL first equation to find ' + dElim + '. What is ' + dElim + '?',
+        correctAnswer: elimVal,
+        hint: 'From the first equation: ' + eq1Str + '  ->  ' + c1 + dElim + ' = ' + p.d1 + ' ' + signed(cleanNum(-oc1 * otherVal)) + '  ->  ' + dElim + ' = ' + elimVal,
+        resultEquation: dElim + ' = ' + elimVal
+    });
+
+    return { eq1: eq1Str, eq2: eq2Str, steps: steps, x: p.x, y: p.y };
+}
+
+/* =====================================================================
+   CATEGORY / LEVEL SWITCHING
+   ===================================================================== */
+var appWarmupRemaining = 0;
+var appPhase = 'eq'; // 'eq' (write the equations) -> 'solve' (find x and y)
+var eqLocked = {};
+var eqMissRecorded = false;
+function setCategory(cat) {
+    category = cat;
+    document.querySelectorAll('.method-btn').forEach(function (btn, idx) {
+        var order = ['sub', 'elim', 'app'];
+        var isActive = order[idx] === cat;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+    level = 0;
+    streak = 0;
+    stopTimer();
+    renderLevelButtons();
+    if (cat === 'elim') resetTypeProgress(cat);
+    if (cat === 'app') appWarmupRemaining = 4;
+    generateProblem();
+    updateDisplay();
+}
+function setLevel(newLevel) {
+    level = newLevel;
+    document.querySelectorAll('.level-btn').forEach(function (btn, idx) {
+        var isActive = idx === newLevel;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+    streak = 0;
+    stopTimer();
+    if (newLevel === 0) resetTypeProgress(category);
+    if (newLevel === 1 && category === 'elim') elimCombinedCount = 0;
+    generateProblem();
+    updateDisplay();
+}
+function resetTypeProgress(cat) {
+    typeProgress[cat] = { 1: mkProg(), 2: mkProg(), 3: mkProg() };
+}
+function renderLevelButtons() {
+    var container = document.getElementById('level-btns');
+    if (category !== 'elim') { container.innerHTML = ''; container.style.display = 'none'; return; }
+    container.style.display = 'flex';
+    var labels = LEVEL_LABELS[category];
+    var html = '';
+    for (var i = 0; i < labels.length; i++) {
+        html += '<button class="level-btn' + (i === level ? ' active' : '') + '" aria-pressed="' + (i === level ? 'true' : 'false') + '" onclick="setLevel(' + i + ')">' + labels[i] + '</button>';
+    }
+    container.innerHTML = html;
+}
+
+/* =====================================================================
+   PROBLEM GENERATION DISPATCH
+   ===================================================================== */
+var GEN_MAP = {
+    elim: { 1: genElimCombined_, 2: genElim3_ }
+};
+var GUIDED_GEN_MAP = {
+    elim: { 1: genElim1_, 2: genElim2_, 3: genElim3_ }
+};
+function pickLevel0Type(cat) {
+    var tp = typeProgress[cat];
+    var order = [1, 2, 3];
+    for (var pass = 0; pass < 2; pass++) {
+        for (var i = 0; i < order.length; i++) {
+            var t = order[i];
+            var reqOk = tp[t].completed < tp[t].required;
+            var shownOk = pass === 0 ? tp[t].shown < 3 : true;
+            if (reqOk && shownOk) return t;
+        }
+    }
+    return null; // all complete
+}
+function generateProblem() {
+    problemToken++;
+    xLocked = false; yLocked = false; lifelines = 2; missRecorded = false;
+    scaffoldStepIndex = 0; solutionRevealed = 0; revealUsed = false;
+    document.getElementById('hint').style.display = 'none';
+    document.getElementById('answer-box').style.display = 'none';
+    document.getElementById('solution-box').style.display = 'none';
+    document.getElementById('next-problem-area').innerHTML = '';
+    document.getElementById('helper-buttons').style.display = 'block';
+
+    if (category === 'app') {
+        currentProblem = appWarmupRemaining > 0 ? genWithRetry(genAppRectangle_) : genApp_();
+        if (appWarmupRemaining > 0) appWarmupRemaining--;
+        currentScaffold = null;
+        appPhase = 'eq';
+        eqLocked = { a1: false, b1: false, c1: false, a2: false, b2: false, c2: false };
+        eqMissRecorded = false;
+        appContextShown[currentProblem.appType] = (appContextShown[currentProblem.appType] || 0) + 1;
+        renderApp();
+    } else if (category === 'sub') {
+        currentProblem = genWithRetry(genSub1_);
+        currentScaffold = null;
+        renderPractice();
+    } else if (level === 0) {
+        var t = pickLevel0Type(category);
+        if (t === null) { showLevel0Complete(); return; }
+        typeProgress[category][t].shown++;
+        var p = genWithRetry(GUIDED_GEN_MAP[category][t]);
+        currentProblem = p;
+        currentScaffold = buildElimScaffold(p);
+        renderGuided();
+    } else {
+        var p2 = genWithRetry(GEN_MAP[category][level]);
+        currentProblem = p2;
+        currentScaffold = null;
+        renderPractice();
+    }
+    document.getElementById('feedback').textContent = '';
+}
+/* A reveal (Show Answer / Show Solution, and the guided step hint, which prints
+   the step's answer) or a Skip must cost the same as a wrong answer: one
+   attempt against this problem's category and the end of the streak. Without
+   this a student could reveal, type the answer back, and score a clean 1/1. */
+function chargeReveal() {
+    if (category === 'app' && appPhase === 'eq') {
+        if (!eqMissRecorded) { eqMissRecorded = true; recordStat('app', currentProblem.appType, false); }
+    } else if (isGuidedMode()) {
+        missRecorded = true;
+    } else {
+        if (!missRecorded) {
+            missRecorded = true;
+            var sk = currentStatKey();
+            recordStat(sk.cat, sk.key, false);
+        }
+    }
+    /* Ruling A: the reveal ends the streak here AND is remembered for the rest
+       of the problem, so finishing it correctly cannot restart the streak.
+       The guided Hint prints the step's answer and routes through here too,
+       so it gets exactly the same treatment. */
+    revealUsed = true;
+    streak = 0;
+    stopTimer();
+    updateDisplay();
+}
+function skipProblem() {
+    chargeReveal();
+    problemCount++;
+    generateProblem();
+    updateDisplay();
+}
+
+/* =====================================================================
+   RENDERING
+   ===================================================================== */
+function eqBoxesHtml(eq1, eq2) {
+    return '<div class="solve-instruction">Solve for x and y in the following system of equations:</div>' +
+        '<div class="eq-pair" aria-hidden="true"><div class="equation">' + eq1 + '</div><div class="equation">' + eq2 + '</div></div>';
+}
+function isGuidedMode() { return category === 'elim' && level === 0; }
+function renderProgressCups() {
+    if (!isGuidedMode()) return '';
+    var tp = typeProgress[category];
+    var labels = { 1: 'Opposites \u2192 Add', 2: 'Multiply One', 3: 'Multiply Both' };
+    var html = '<div class="progress-cups">';
+    [1, 2, 3].forEach(function (t) {
+        var prog = tp[t];
+        var pct = Math.min(100, (prog.completed / prog.required) * 100);
+        var cls = prog.completed >= prog.required ? (prog.errors === 0 ? 'full' : 'half') : 'partial';
+        html += '<div class="cup-container"><div class="cup-label">' + labels[t] + '</div>' +
+            '<div class="cup"><div class="cup-fill ' + cls + '" style="height:' + pct + '%"></div></div>' +
+            '<div class="cup-stats">' + prog.completed + '/' + prog.required + (prog.errors > 0 ? ' (' + prog.errors + ' X)' : '') + '</div></div>';
+    });
+    html += '</div>';
+    return html;
+}
+function showLevel0Complete() {
+    document.getElementById('progress-display').innerHTML = renderProgressCups();
+    document.getElementById('main-content').innerHTML =
+        '<div style="text-align:center;padding:20px;">' +
+        '<div style="font-size:50px;" aria-hidden="true">&#127881;</div>' +
+        '<div class="victory-title" style="font-size:22px;color:#7c3aed;font-weight:800;">Guided practice complete!</div>' +
+        '<div style="font-size:14px;color:#4a5480;margin:10px 0 18px;">You have worked through all three patterns. Try the practice levels above (1, 2, 3) for timed reps.</div>' +
+        '</div>';
+    document.getElementById('helper-buttons').style.display = 'none';
+    setFeedback('Guided practice complete. You have worked through all three patterns. Try the practice levels for timed reps.', 'correct');
+}
+function renderGuided() {
+    document.getElementById('progress-display').innerHTML = renderProgressCups();
+    document.getElementById('helper-buttons').style.display = 'block';
+    document.querySelector('.hint-btn').style.display = 'inline-block';
+    document.querySelector('.answer-btn').style.display = 'none';
+    document.querySelector('.solution-btn').style.display = 'none';
+    var s = currentScaffold;
+    var html = eqBoxesHtml(s.eq1, s.eq2);
+    if (scaffoldStepIndex > 0) {
+        html += '<div class="completed-steps">';
+        for (var i = 0; i < scaffoldStepIndex; i++) {
+            html += '<div class="row"><b>' + (i + 1) + '.</b> ' + s.steps[i].resultEquation + '</div>';
+        }
+        html += '</div>';
+    }
+    var step = s.steps[scaffoldStepIndex];
+    html += '<div class="scaffold-container">';
+    html += '<div class="step-title">Step ' + (scaffoldStepIndex + 1) + ' of ' + s.steps.length + '</div>';
+    html += '<div class="step-question" id="step-question-text">' + step.question + '</div>';
+    if (step.informational) {
+        html += '<div class="equation" style="font-size:18px;margin:10px 0;">' + step.resultEquation + '</div>';
+        html += '<div style="text-align:center;"><button class="submit-btn" onclick="continueGuidedStep()">Continue</button></div>';
+    } else {
+        html += '<div class="input-area"><div class="var-input-row">' +
+            '<label class="sr-only" for="step-answer">Your answer for this step</label>' +
+            '<input type="text" inputmode="decimal" id="step-answer" aria-describedby="step-question-text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">' +
+            '<button class="sign-btn" aria-label="Toggle positive or negative sign" onclick="toggleSignOf(\'step-answer\')">&plusmn;</button></div>' +
+            '<button class="submit-btn" onclick="checkGuidedStep()">Submit</button></div>';
+    }
+    html += '</div>';
+    document.getElementById('main-content').innerHTML = html;
+    var inp = document.getElementById('step-answer');
+    if (inp) {
+        inp.focus();
+        inp.onkeydown = function (e) { if (e.key === 'Enter') checkGuidedStep(); };
+    }
+    var plain = step.question.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    announceProblem('Step ' + (scaffoldStepIndex + 1) + ' of ' + s.steps.length + '. ' + plain);
+}
+/* Guided pattern types 1-3 map onto the two practice levels that actually
+   generate them: level 1 mixes the "opposites" and "multiply one" generators,
+   level 2 is "multiply both". Type 3 used to be written to stats.elim[3],
+   which does not exist, so every guided "Multiply Both" success was silently
+   discarded by recordStat's own `if (!bucket) return`. */
+function guidedStatBucket(t) { return t >= 3 ? 2 : 1; }
+function showGuidedProblemComplete() {
+    var t = currentProblem.level;
+    typeProgress[category][t].completed++;
+    // A problem solved only after wrong step attempts (or after a hint that
+    // printed the step's answer) is not a first-try success.
+    recordStat(category, guidedStatBucket(t), !missRecorded);
+    // Ruling A: a revealing Hint (chargeReveal) or a wrong step both leave
+    // this problem outside the streak.
+    if (missRecorded || revealUsed) streak = 0; else streak++;
+    celebrateStreak(streak);
+    document.getElementById('progress-display').innerHTML = renderProgressCups();
+    var s = currentScaffold;
+    var html = eqBoxesHtml(s.eq1, s.eq2);
+    html += '<div class="completed-steps">';
+    for (var i = 0; i < s.steps.length; i++) {
+        html += '<div class="row"><b>' + (i + 1) + '.</b> ' + s.steps[i].resultEquation + '</div>';
+    }
+    html += '</div>';
+    html += '<div style="text-align:center;margin-top:14px;"><div class="feedback correct" style="margin-bottom:8px;">Solved! x = ' + currentProblem.x + ', y = ' + currentProblem.y + '</div>' +
+        '<button class="submit-btn" onclick="problemCount++; generateProblem(); updateDisplay();">Next Problem</button></div>';
+    document.getElementById('main-content').innerHTML = html;
+    document.getElementById('helper-buttons').style.display = 'none';
+    setFeedback('Solved. x = ' + currentProblem.x + ', y = ' + currentProblem.y + '. Choose Next Problem to continue.', 'correct');
+    var nb = document.querySelector('#main-content .submit-btn');
+    if (nb) nb.focus();
+    updateDisplay();
+}
+function continueGuidedStep() {
+    scaffoldStepIndex++;
+    document.getElementById('feedback').textContent = '';
+    if (scaffoldStepIndex >= currentScaffold.steps.length) {
+        showGuidedProblemComplete();
+    } else {
+        renderGuided();
+    }
+}
+function varInputHtml(idPrefix, label, noSign) {
+    var inputId = idPrefix + '-input';
+    return '<div class="var-group">' +
+        '<label class="var-label" for="' + inputId + '">' + escHtml(label) + '</label>' +
+        '<div class="var-input-row"><input type="text" inputmode="decimal" id="' + inputId + '" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">' +
+        (noSign ? '' : '<button class="sign-btn" aria-label="Toggle positive or negative sign for ' + escHtml(label) + '" onclick="toggleSignOf(\'' + inputId + '\')">&plusmn;</button>') + '</div></div>';
+}
+/* Converts an equation string like "-3x + 5y = 12" into words a screen reader
+   speaks correctly, e.g. "negative 3 x plus 5 y equals 12". */
+function speakEquation(s) {
+    var out = String(s).trim();
+    // Leading sign first, before any other minus handling.
+    out = out.replace(/^-/, 'negative ');
+    // Binary operators (spaces around them in every generated equation).
+    out = out.replace(/\s*=\s*/g, ' equals ');
+    out = out.replace(/\s+\+\s*/g, ' plus ');
+    out = out.replace(/\s+-\s*/g, ' minus ');
+    // A minus straight after "equals" is a sign on the constant, not an operation.
+    out = out.replace(/equals\s+minus\s+/g, 'equals negative ');
+    // Any remaining hyphen is a sign attached directly to a term, e.g. "-4y".
+    out = out.replace(/-/g, 'negative ');
+    // Separate coefficient from variable so "4x" is not read as one token.
+    out = out.replace(/(\d)([A-Za-z])/g, '$1 $2');
+    return out.replace(/\s+/g, ' ').trim();
+}
+function announceProblem(text) {
+    var el = document.getElementById('problem-announcer');
+    if (!el) return;
+    // Clearing first forces assistive tech to re-announce identical text.
+    el.textContent = '';
+    var tok = problemToken;
+    setTimeout(function () { if (tok === problemToken) el.textContent = text; }, 60);
+}
+/* Announce a status message through the assertive region. Every state change a
+   sighted student can see must reach a screen reader through here. */
+function setFeedback(text, cls) {
+    var fb = document.getElementById('feedback');
+    if (!fb) return;
+    fb.textContent = text;
+    fb.className = 'feedback' + (cls ? ' ' + cls : '');
+}
+function renderPractice() {
+    document.getElementById('progress-display').innerHTML = '';
+    document.getElementById('helper-buttons').style.display = 'block';
+    document.querySelector('.hint-btn').style.display = 'inline-block';
+    document.querySelector('.answer-btn').style.display = 'inline-block';
+    document.querySelector('.solution-btn').style.display = 'inline-block';
+    var p = currentProblem;
+    var eq1, eq2;
+    if (p.method === 'sub' && p.level === 1) {
+        eq1 = p.isolateY ? fmtIsolated('y', p.m, 'x', p.c) : fmtIsolated('x', p.m, 'y', p.c);
+        eq2 = fmtEq(p.a2, p.b2, 'x', 'y', p.d2);
+    } else {
+        eq1 = fmtEq(p.a1, p.b1, 'x', 'y', p.d1);
+        eq2 = fmtEq(p.a2, p.b2, 'x', 'y', p.d2);
+    }
+    var html = eqBoxesHtml(eq1, eq2);
+    html += '<div class="input-area">' + varInputHtml('x', 'x') + varInputHtml('y', 'y') +
+        '<button class="submit-btn" onclick="checkDualAnswer()" id="submit-btn" style="align-self:center;">Submit</button></div>';
+    document.getElementById('main-content').innerHTML = html;
+    wireDualInputs();
+    announceProblem('New problem. Solve for x and y. Equation 1: ' + speakEquation(eq1) +
+        '. Equation 2: ' + speakEquation(eq2) + '.');
+}
+function renderApp() {
+    if (appPhase === 'eq') renderAppEquations();
+    else renderAppSolve();
+}
+function renderAppEquations() {
+    document.getElementById('progress-display').innerHTML = '';
+    document.getElementById('helper-buttons').style.display = 'block';
+    document.querySelector('.hint-btn').style.display = 'inline-block';
+    document.querySelector('.answer-btn').style.display = 'inline-block';
+    document.querySelector('.solution-btn').style.display = 'inline-block';
+    var p = currentProblem;
+    var dvX = p.varX || 'x', dvY = p.varY || 'y';
+    var showDefs = (appContextShown[p.appType] || 0) <= 2;
+    var html = '<div class="story-box">' + escHtml(p.story) + '</div>';
+    if (showDefs) html += '<div class="defs-line">' + escHtml(p.defs) + '</div>';
+    html += '<div class="solve-instruction">Part 1: Write the two equations for this situation.</div>';
+    html += eqWriteRowHtml(1, dvX, dvY);
+    html += eqWriteRowHtml(2, dvX, dvY);
+    html += '<div style="text-align:center;margin-top:10px;"><button class="submit-btn" onclick="checkAppEquations()">Check Equations</button></div>';
+    document.getElementById('main-content').innerHTML = html;
+    var first = document.getElementById('eq1-a');
+    if (first) first.focus();
+    announceProblem('New word problem, part 1 of 2. ' + p.story + ' ' + p.defs +
+        '. Write the two equations by filling in each coefficient and constant.');
+}
+function eqWriteRowHtml(n, dvX, dvY) {
+    return '<div class="eq-write-label" id="eq' + n + '-heading">Equation ' + n + '</div>' +
+        '<div class="eq-write-row" role="group" aria-labelledby="eq' + n + '-heading">' +
+        '<input type="text" inputmode="decimal" class="coef-input" id="eq' + n + '-a" autocomplete="off" aria-label="Equation ' + n + ', coefficient of ' + escHtml(dvX) + '"> ' + escHtml(dvX) + ' +' +
+        '<input type="text" inputmode="decimal" class="coef-input" id="eq' + n + '-b" autocomplete="off" aria-label="Equation ' + n + ', coefficient of ' + escHtml(dvY) + '"> ' + escHtml(dvY) + ' =' +
+        '<input type="text" inputmode="decimal" class="coef-input" id="eq' + n + '-c" autocomplete="off" aria-label="Equation ' + n + ', constant on the right side">' +
+        '</div>';
+}
+function renderAppSolve() {
+    document.getElementById('progress-display').innerHTML = '';
+    document.getElementById('helper-buttons').style.display = 'block';
+    document.querySelector('.hint-btn').style.display = 'inline-block';
+    document.querySelector('.answer-btn').style.display = 'inline-block';
+    document.querySelector('.solution-btn').style.display = 'inline-block';
+    var p = currentProblem;
+    var showDefs = (appContextShown[p.appType] || 0) <= 2;
+    var html = '<div class="story-box">' + escHtml(p.story) + '</div>';
+    if (showDefs) html += '<div class="defs-line">' + escHtml(p.defs) + '</div>';
+    html += '<div class="solve-instruction">Part 2: Solve the system for ' + (p.varX || 'x') + ' and ' + (p.varY || 'y') + '.</div>';
+    html += '<div class="input-area">' + varInputHtml('x', p.xLabel, true) + varInputHtml('y', p.yLabel, true) +
+        '<button class="submit-btn" onclick="checkDualAnswer()" id="submit-btn" style="align-self:center;">Submit</button></div>';
+    document.getElementById('main-content').innerHTML = html;
+    wireDualInputs();
+    announceProblem('Part 2 of 2. Now solve the system. Equation 1: ' +
+        speakEquation(fmtEq(p.a1, p.b1, p.varX || 'x', p.varY || 'y', p.d1)) + '. Equation 2: ' +
+        speakEquation(fmtEq(p.a2, p.b2, p.varX || 'x', p.varY || 'y', p.d2)) + '.');
+}
+function wireDualInputs() {
+    var xi = document.getElementById('x-input'), yi = document.getElementById('y-input');
+    xi.focus();
+    function handler(e) { if (e.key === 'Enter') checkDualAnswer(); }
+    xi.onkeydown = handler; yi.onkeydown = handler;
+}
+function checkAppEquations() {
+    var p = currentProblem;
+    var feedback = document.getElementById('feedback');
+    var targets = { a1: p.a1, b1: p.b1, c1: p.d1, a2: p.a2, b2: p.b2, c2: p.d2 };
+    var fields = ['a1', 'b1', 'c1', 'a2', 'b2', 'c2'];
+    var ids = { a1: 'eq1-a', b1: 'eq1-b', c1: 'eq1-c', a2: 'eq2-a', b2: 'eq2-b', c2: 'eq2-c' };
+    var allCorrect = true;
+    var anyNewCorrect = false;
+    var blank = false;
+    fields.forEach(function (f) {
+        var el = document.getElementById(ids[f]);
+        if (eqLocked[f]) return;
+        if (el.value.trim() === '') { blank = true; return; }
+        var val = parseNum(el.value);
+        if (isClose(val, targets[f])) {
+            eqLocked[f] = true;
+            el.classList.add('locked-correct');
+            el.disabled = true;
+            el.value = targets[f];
+            anyNewCorrect = true;
+        } else {
+            allCorrect = false;
+        }
+    });
+    if (blank && !fields.every(function (f) { return eqLocked[f]; })) {
+        feedback.textContent = 'Fill in all six blanks (use 0 if a term is missing).';
+        feedback.className = 'feedback partial';
+        return;
+    }
+    allCorrect = fields.every(function (f) { return eqLocked[f]; });
+    if (allCorrect) {
+        if (!eqMissRecorded) recordStat('app', currentProblem.appType, true);
+        /* Design item 7: this fired a burst on part 1 of every single word
+           problem. Milestones only - the streak burst after part 2 covers it. */
+        feedback.textContent = 'Both equations are correct! Now solve the system.';
+        feedback.className = 'feedback correct';
+        var appTok = problemToken;
+        setTimeout(function () {
+            if (appTok !== problemToken || category !== 'app') return;
+            appPhase = 'solve';
+            renderApp();
+            document.getElementById('feedback').textContent = '';
+        }, 1100);
+    } else {
+        if (!eqMissRecorded) { eqMissRecorded = true; recordStat('app', currentProblem.appType, false); }
+        var numRight = fields.filter(function (f) { return eqLocked[f]; }).length;
+        feedback.textContent = numRight + ' of 6 correct so far -- fix the rest.';
+        feedback.className = 'feedback incorrect';
+    }
+}
+function toggleSignOf(id) {
+    var el = document.getElementById(id);
+    if (!el || el.disabled) return;
+    el.value = el.value.charAt(0) === '-' ? el.value.slice(1) : '-' + el.value;
+    el.focus();
+}
+
+/* =====================================================================
+   ANSWER CHECKING -- Level 0 guided steps
+   ===================================================================== */
+function checkGuidedStep() {
+    var input = document.getElementById('step-answer');
+    var val = parseNum(input.value);
+    var feedback = document.getElementById('feedback');
+    if (isNaN(val)) { feedback.textContent = 'Enter a number.'; feedback.className = 'feedback partial'; return; }
+    var step = currentScaffold.steps[scaffoldStepIndex];
+    if (isClose(val, step.correctAnswer)) {
+        scaffoldStepIndex++;
+        feedback.textContent = pick(['Correct!', 'Nice!', 'Got it!', 'Yes!']);
+        feedback.className = 'feedback correct';
+        if (scaffoldStepIndex >= currentScaffold.steps.length) {
+            showGuidedProblemComplete();
+        } else {
+            var tok = problemToken;
+            setTimeout(function () {
+                if (tok !== problemToken || !currentScaffold || scaffoldStepIndex >= currentScaffold.steps.length) return;
+                renderGuided();
+                document.getElementById('feedback').textContent = '';
+            }, 1100);
+        }
+    } else {
+        typeProgress[category][currentProblem.level].errors++;
+        missRecorded = true;   // a wrong step costs this problem its first-try credit
+        streak = 0;
+        feedback.textContent = 'Not quite -- try again.';
+        feedback.className = 'feedback incorrect';
+        input.select();
+    }
+    updateDisplay();
+}
+
+/* =====================================================================
+   ANSWER CHECKING -- dual x/y practice & application problems
+   ===================================================================== */
+function recordStat(cat, subKey, isFirstTry) {
+    var bucket = subKey === null ? stats[cat] : stats[cat][subKey];
+    if (!bucket) return;
+    bucket.t++;
+    if (isFirstTry) bucket.c++;
+    saveState();
+}
+function currentStatKey() {
+    if (category === 'app') return { cat: 'app', key: currentProblem.appType };
+    if (category === 'sub') return { cat: 'sub', key: null };
+    return { cat: category, key: level };
+}
+function checkDualAnswer() {
+    var xi = document.getElementById('x-input'), yi = document.getElementById('y-input');
+    var feedback = document.getElementById('feedback');
+    var correctX = currentProblem.x, correctY = currentProblem.y;
+
+    if ((!xLocked && xi.value.trim() === '') || (!yLocked && yi.value.trim() === '')) {
+        feedback.textContent = 'Enter a value for both.';
+        feedback.className = 'feedback partial';
+        return;
+    }
+    var xVal = xLocked ? correctX : parseNum(xi.value);
+    var yVal = yLocked ? correctY : parseNum(yi.value);
+    var xOk = xLocked || isClose(xVal, correctX);
+    var yOk = yLocked || isClose(yVal, correctY);
+    var sk = currentStatKey();
+
+    if (xOk && yOk) {
+        if (!missRecorded) recordStat(sk.cat, sk.key, true);
+        /* Ruling A: a revealed answer ends the streak; typing the revealed
+           value back in must not restart it at 1. The credit-withholding
+           above (recordStat gated on missRecorded) is untouched. */
+        if (revealUsed) streak = 0; else streak++;
+        /* Design item 7: the unconditional createConfetti(220, 3) that used to
+           follow fired a tier-3 burst on EVERY correct Applications answer.
+           celebrateStreak() alone now decides, on the milestone schedule. */
+        celebrateStreak(streak);
+        feedback.textContent = pick(['Correct!', 'Excellent!', 'Nailed it!', 'Perfect!', 'Great work!']);
+        feedback.className = 'feedback correct';
+        xi.disabled = true; yi.disabled = true;
+        document.getElementById('submit-btn').disabled = true;
+        showNextProblemButton();
+    } else {
+        if (xOk && !xLocked) { xLocked = true; xi.classList.add('locked-correct'); xi.disabled = true; xi.value = correctX; }
+        if (yOk && !yLocked) { yLocked = true; yi.classList.add('locked-correct'); yi.disabled = true; yi.value = correctY; }
+        if (!missRecorded) { missRecorded = true; recordStat(sk.cat, sk.key, false); }
+        streak = 0;
+        stopTimer();
+        if (category !== 'app') lifelines--;
+        if (category !== 'app' && lifelines <= 0) {
+            if (!xLocked) { xi.value = correctX; xi.classList.add('locked-correct'); xi.disabled = true; }
+            if (!yLocked) { yi.value = correctY; yi.classList.add('locked-correct'); yi.disabled = true; }
+            feedback.innerHTML = 'The answer is x = ' + correctX + ', y = ' + correctY + '. Let\'s try another.';
+            feedback.className = 'feedback incorrect';
+            document.getElementById('submit-btn').disabled = true;
+            showNextProblemButton();
+        } else if (category === 'app') {
+            if (xOk && !yOk) feedback.textContent = 'x is correct! Try y again.';
+            else if (yOk && !xOk) feedback.textContent = 'y is correct! Try x again.';
+            else feedback.textContent = 'Not quite -- check both x and y.';
+            feedback.className = 'feedback incorrect';
+        } else {
+            var chanceWord = lifelines === 1 ? 'chance' : 'chances';
+            if (xOk && !yOk) feedback.textContent = 'x is correct! Try y again. (' + lifelines + ' ' + chanceWord + ' left)';
+            else if (yOk && !xOk) feedback.textContent = 'y is correct! Try x again. (' + lifelines + ' ' + chanceWord + ' left)';
+            else feedback.textContent = 'Not quite -- check both x and y. (' + lifelines + ' ' + chanceWord + ' left)';
+            feedback.className = 'feedback incorrect';
+        }
+    }
+    updateDisplay();
+}
+function showNextProblemButton() {
+    document.getElementById('helper-buttons').style.display = 'none';
+    var area = document.getElementById('next-problem-area');
+    area.innerHTML =
+        '<button class="submit-btn" onclick="problemCount++; generateProblem(); updateDisplay();">Next Problem</button>';
+    var btn = area.querySelector('button');
+    if (btn) btn.focus();
+}
+/* =====================================================================
+   HINT / ANSWER / SOLUTION (practice levels 1-3 and applications)
+   ===================================================================== */
+var PRACTICE_HINTS = {
+    sub: 'One equation already tells you a variable in terms of the other. Substitute that whole expression into the other equation, then solve.',
+    elim: {
+        1: 'Look at a variable\'s coefficients in both equations. If they\'re already opposites (or the same, just multiply one equation by -1), add the equations directly. Otherwise, multiply ONE equation by a constant so the coefficients become opposites, then add.',
+        2: 'Multiply BOTH equations by constants so a variable\'s coefficients become opposites, then add the two equations.'
+    }
+};
+function buildHintText() {
+    if (category === 'app') {
+        var p = currentProblem;
+        var dvX = p.varX || 'x', dvY = p.varY || 'y';
+        if (appPhase === 'eq') {
+            return 'Read the story carefully: one fact gives a simple total (count or sum), and the other fact involves the individual values, rates, or prices. Turn each fact into its own equation using ' + dvX + ' and ' + dvY + '.';
+        }
+        return 'Write two equations from the story: ' + fmtEq(p.a1, p.b1, dvX, dvY, p.d1) + '  and  ' + fmtEq(p.a2, p.b2, dvX, dvY, p.d2) + '. Then solve using substitution or elimination.';
+    }
+    if (category === 'sub') return PRACTICE_HINTS.sub;
+    return PRACTICE_HINTS.elim[level];
+}
+function toggleHint() {
+    var box = document.getElementById('hint');
+    if (box.style.display === 'none') {
+        // In guided mode the hint IS the step's answer, so it is charged like a
+        // reveal. On practice levels the hint is strategy only and stays free.
+        if (isGuidedMode()) chargeReveal();
+        var text = isGuidedMode() ? currentScaffold.steps[scaffoldStepIndex].hint : buildHintText();
+        box.className = 'hint-box';
+        box.innerHTML = '<b>Hint:</b> ' + text;
+        box.style.display = 'block';
+    } else box.style.display = 'none';
+}
+function toggleAnswer() {
+    var box = document.getElementById('answer-box');
+    if (box.style.display === 'none') {
+        chargeReveal();
+        box.className = 'answer-box';
+        if (category === 'app' && appPhase === 'eq') {
+            var p = currentProblem;
+            var dvX = p.varX || 'x', dvY = p.varY || 'y';
+            var e1 = fmtEq(p.a1, p.b1, dvX, dvY, p.d1), e2 = fmtEq(p.a2, p.b2, dvX, dvY, p.d2);
+            box.innerHTML = '<b>Answer:</b> <span aria-hidden="true">' + e1 + ' &nbsp; and &nbsp; ' + e2 + '</span>' +
+                '<span class="sr-only">' + escHtml(speakEquation(e1)) + ', and ' + escHtml(speakEquation(e2)) + '</span>';
+        } else {
+            box.innerHTML = '<b>Answer:</b> x = ' + currentProblem.x + ', &nbsp; y = ' + currentProblem.y;
+        }
+        box.style.display = 'block';
+    } else box.style.display = 'none';
+}
+var currentSolutionLines = null; // [{label, eq}, ...] for the currently displayed problem
+var currentSolutionStart = null; // [eq1Str, eq2Str] shown as "Start with:"
+function toggleSolution() {
+    var box = document.getElementById('solution-box');
+    if (box.style.display === 'none') {
+        chargeReveal();
+        var p = currentProblem;
+        var scaffold = category === 'sub' ? buildSubScaffold(p) : category === 'app' ? buildAppScaffold(p) : buildElimScaffold(p);
+        currentSolutionStart = [scaffold.eq1, scaffold.eq2];
+        currentSolutionLines = scaffold.steps.map(function (st) {
+            return { label: st.solutionLabel || st.label || 'Next step', eq: st.resultEquation, detail: st.solutionDetail || null };
+        });
+        solutionRevealed = 1;
+        renderSolutionBox();
+    } else box.style.display = 'none';
+}
+function showNextSolutionStep() {
+    solutionRevealed++;
+    renderSolutionBox();
+}
+function renderSolutionBox() {
+    var box = document.getElementById('solution-box');
+    var total = currentSolutionLines.length;
+    var shown = Math.min(solutionRevealed, total);
+    var html = '<div style="font-weight:800;margin-bottom:8px;">Step-by-Step Solution (' + shown + ' of ' + total + ')</div>';
+    html += '<div style="font-size:13px;">Start with:</div>';
+    html += '<div class="eq-pair" style="margin:6px 0 10px;">' +
+        '<div class="equation" role="img" aria-label="' + escHtml(speakEquation(currentSolutionStart[0])) + '" style="font-size:16px;padding:8px 10px;">' + currentSolutionStart[0] + '</div>' +
+        '<div class="equation" role="img" aria-label="' + escHtml(speakEquation(currentSolutionStart[1])) + '" style="font-size:16px;padding:8px 10px;">' + currentSolutionStart[1] + '</div></div>';
+    for (var i = 0; i < shown; i++) {
+        html += '<div style="padding:8px 0 4px;border-top:1px dashed rgba(0,0,0,0.15);">';
+        html += '<div><b>' + (i + 1) + '.</b> ' + currentSolutionLines[i].label + ':</div>';
+        if (currentSolutionLines[i].detail) {
+            html += currentSolutionLines[i].detail;
+            html += '<div style="font-size:13px;margin:2px 0 4px 4px;">which gives:</div>';
+        }
+        html += '<div style="font-family:\'Consolas\',\'SF Mono\',\'Menlo\',monospace;font-weight:bold;font-size:16px;margin:5px 0 4px 18px;color:#1e2a5e;">' + currentSolutionLines[i].eq + '</div>';
+        html += '</div>';
+    }
+    if (shown < total) {
+        html += '<div style="text-align:center;margin-top:10px;"><button class="submit-btn" onclick="showNextSolutionStep()">Next Step</button></div>';
+    } else {
+        html += '<div style="text-align:center;margin-top:10px;font-weight:800;color:#047857;">That\'s the complete solution.</div>';
+    }
+    box.className = 'solution-box';
+    box.innerHTML = html;
+    box.style.display = 'block';
+}
+
+/* =====================================================================
+   TIMER
+   ===================================================================== */
+function startTimer() {
+    if (isTimerRunning) return;
+    isTimerRunning = true;
+    timerInterval = setInterval(function () {
+        timer++;
+        var td = document.getElementById('timer-display');
+        if (td) td.textContent = 'Time: ' + timer + 's';
+    }, 1000);
+}
+function stopTimer() {
+    isTimerRunning = false;
+    if (timerInterval) clearInterval(timerInterval);
+    timer = 0;
+    var td = document.getElementById('timer-display');
+    if (td) td.textContent = '';
+}
+
+/* =====================================================================
+   DISPLAY / STATS / PERSISTENCE
+   ===================================================================== */
+function updateDisplay() {
+    var info = document.getElementById('info-bar');
+    if (category === 'app') {
+        info.innerHTML = '';
+        return;
+    }
+    var html = '<div class="info-item">Problem: ' + (problemCount + 1) + '</div>';
+    if (!isGuidedMode()) {
+        html += '<div class="info-item' + (streak >= 5 ? ' hot' : '') + '">Streak: ' + streak + '</div>';
+        html += '<div class="info-item" id="timer-display">Time: ' + timer + 's</div>';
+        html += '<div class="info-item">Chances: ' + lifelines + '</div>';
+    }
+    info.innerHTML = html;
+    if (streak === 1 && !isGuidedMode()) startTimer();
+}
+function showStats() {
+    // Bumping the token invalidates any in-flight advance timer, so a queued
+    // renderGuided()/renderApp() cannot paint a problem over the open panel.
+    problemToken++;
+    stopTimer();
+    var html = '<div class="stats-panel"><h3 style="text-align:center;color:#1e2a5e;">Your Progress</h3>';
+    function row(name, s) {
+        // Coerce to numbers at the render boundary: these values originate from
+        // localStorage and are interpolated into innerHTML.
+        var t = Number(s && s.t) || 0, c = Number(s && s.c) || 0;
+        if (t < 0) t = 0;
+        if (c < 0) c = 0;
+        if (c > t) c = t;
+        var pct = t > 0 ? Math.round((c / t) * 100) : 0;
+        var cls = t === 0 ? 'none' : pct >= 80 ? 'good' : pct >= 55 ? 'mid' : 'low';
+        /* Design item 11: a mode that was never opened used to read "0/0",
+           which looks like failing at it. Say so in words instead - the rule
+           forbids implying mastery either way. */
+        var num = t === 0 ? 'not tried yet' : c + '/' + t + ' (' + pct + '%)';
+        return '<div class="stat-row"><div class="stat-name">' + escHtml(name) + '</div>' +
+            '<div class="stat-bar-wrap"><div class="stat-bar ' + cls + '" style="width:' + pct + '%"></div></div>' +
+            '<div class="stat-num">' + escHtml(num) + '</div></div>';
+    }
+    /* The panel had no overall/summary row; one is added here so the same
+       "not tried yet" rule covers the top-line figure too. */
+    function overallRow() {
+        var t = 0, c = 0;
+        [stats.sub, stats.elim[1], stats.elim[2], stats.app.countValue,
+         stats.app.rectangle, stats.app.investment, stats.app.coins].forEach(function (s) {
+            var st = Number(s && s.t) || 0, sc = Number(s && s.c) || 0;
+            if (st < 0) st = 0;
+            if (sc < 0) sc = 0;
+            if (sc > st) sc = st;
+            t += st; c += sc;
+        });
+        return row('All modes', { c: c, t: t });
+    }
+    html += '<div style="margin:10px 0 4px;font-weight:800;color:#2e3d8f;font-size:13px;">Substitution</div>';
+    html += row('Direct Substitution', stats.sub);
+    html += '<div style="margin:14px 0 4px;font-weight:800;color:#2e3d8f;font-size:13px;">Elimination</div>';
+    html += row('Level 1', stats.elim[1]) + row('Level 2', stats.elim[2]);
+    html += '<div style="margin:14px 0 4px;font-weight:800;color:#2e3d8f;font-size:13px;">Applications</div>';
+    html += row('Count/Value', stats.app.countValue) + row('Rectangle', stats.app.rectangle) + row('Investment', stats.app.investment) + row('Coins', stats.app.coins);
+    html += '<div style="margin:14px 0 4px;font-weight:800;color:#2e3d8f;font-size:13px;">Overall</div>';
+    html += overallRow();
+    html += '<div style="text-align:center;margin-top:16px;"><button class="submit-btn" onclick="hideStats()">Back to Practice</button> ' +
+        '<button class="reset-btn" onclick="confirmReset()" id="reset-btn" style="margin-left:8px;">Reset Stats</button></div></div>';
+    document.getElementById('main-content').innerHTML = html;
+    document.getElementById('progress-display').innerHTML = '';
+    document.getElementById('feedback').textContent = '';
+    document.getElementById('helper-buttons').style.display = 'none';
+    document.getElementById('hint').style.display = 'none';
+    document.getElementById('answer-box').style.display = 'none';
+    document.getElementById('solution-box').style.display = 'none';
+}
+function hideStats() { generateProblem(); updateDisplay(); }
+var resetArmed = false, resetTimer2 = null;
+function confirmReset() {
+    var btn = document.getElementById('reset-btn');
+    if (!resetArmed) {
+        resetArmed = true;
+        btn.textContent = 'Tap again to confirm';
+        resetTimer2 = setTimeout(function () { resetArmed = false; btn.textContent = 'Reset Stats'; }, 4000);
+        return;
+    }
+    clearTimeout(resetTimer2);
+    resetArmed = false;
+    stats = {
+        sub: { c: 0, t: 0 },
+        elim: { 1: { c: 0, t: 0 }, 2: { c: 0, t: 0 } },
+        app: { countValue: { c: 0, t: 0 }, rectangle: { c: 0, t: 0 }, investment: { c: 0, t: 0 }, coins: { c: 0, t: 0 } }
+    };
+    problemCount = 0; streak = 0;
+    clearSavedState();
+    showStats();
+}
+function saveState() {
+    try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify({ stats: stats }));
+    } catch (e) { /* storage unavailable */ }
+}
+/* Rebuilds the stats object from untrusted localStorage, keeping only known
+   keys and coercing every value to a finite non-negative integer. Without this,
+   a tampered storage entry could inject markup through the stats panel's
+   innerHTML. */
+function sanitizeStats(raw) {
+    function cell(v) {
+        var src = (v && typeof v === 'object') ? v : {};
+        function num(n) {
+            n = Number(n);
+            if (!isFinite(n) || n < 0) return 0;
+            return Math.floor(n);
+        }
+        var t = num(src.t);
+        var c = num(src.c);
+        if (c > t) c = t; // correct can never exceed total
+        return { c: c, t: t };
+    }
+    var src = (raw && typeof raw === 'object') ? raw : {};
+    var srcElim = (src.elim && typeof src.elim === 'object') ? src.elim : {};
+    var srcApp = (src.app && typeof src.app === 'object') ? src.app : {};
+    return {
+        sub: cell(src.sub),
+        elim: { 1: cell(srcElim[1]), 2: cell(srcElim[2]) },
+        app: {
+            countValue: cell(srcApp.countValue),
+            rectangle: cell(srcApp.rectangle),
+            investment: cell(srcApp.investment),
+            coins: cell(srcApp.coins)
+        }
+    };
+}
+function loadState() {
+    try {
+        var raw = localStorage.getItem(SAVE_KEY);
+        if (!raw) return;
+        var data = JSON.parse(raw);
+        stats = sanitizeStats(data && data.stats);
+    } catch (e) {
+        stats = sanitizeStats(null); // corrupt or hostile state -> clean slate
+    }
+}
+function clearSavedState() {
+    try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* ignore */ }
+}
+
+/* =====================================================================
+   INIT
+   ===================================================================== */
+loadState();
+loadConfettiSetting();
+syncConfettiSwitch();
+renderLevelButtons();
+generateProblem();
+updateDisplay();
+</script>
+
+</body>
+</html>
