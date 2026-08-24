@@ -41,11 +41,9 @@ Open the link. Pick a topic. Start answering. Nothing to install, nothing to
 sign up for, and your progress is saved on your own phone or laptop — not on a
 server, and not visible to anyone else.
 
-## For instructors
+## For instructors 
 
-Paste the site link into a Canvas announcement or module. Every game is a single
-self-contained HTML file, so there is nothing to configure and nothing that can
-break at semester start. Link a single game directly if you only want one topic.
+Paste the site link into a Canvas announcement, email or module page. Every game is a single  self-contained HTML file, so there is nothing to configure.  Once a student clicks on the link, they will be able to start playing the game. If it is preferred to provide a link to a single topic, you can do so easily by copying the URL for that specific game and just sharing that with the students.
 
 ---
 
@@ -54,7 +52,7 @@ My goal was to help students learn basic math concepts in a fun, supportive and 
 
 As a math educator, I do not have much experience with coding.  To bring my vision into reality, programming was outsourced to Claude Sonnet 5.  Later when Opus 5 became available, it was given the task of converting all the programs to accessible format based on WCAG 2.1 AA standards.  Opus 5 was also instrumental in unifying all the games with a common design theme.  In addition, Opus 5 did a thorough check of all the games for mathematical correctness and Roughly 5.5 million generated problems were checked against their own stated answers.
 
-The algebra games (tutorials) took several months from initial idea to final product as it appears here.
+The algebra games (tutorials) took several months of iterative improvements from initial idea to final product as it appears here.
 
 ---
 ## Accessibility
