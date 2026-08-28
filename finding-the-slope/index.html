@@ -170,6 +170,7 @@ h1::after {
 }
 .frac .num { border-bottom: 2px solid currentColor; padding: 0 4px 2px; }
 .frac .den { padding: 2px 4px 0; }
+.frac sub { font-size: 0.7em; line-height: 0; vertical-align: baseline; position: relative; bottom: -0.25em; }
 .input-area {
     display: flex;
     justify-content: center;
@@ -365,6 +366,16 @@ button:focus-visible {
     padding: 6px 10px;
     text-decoration: underline;
 }
+/* ===== Studio insignia (decorative) ===== */
+.insignia { display: block; margin: 20px auto 4px; width: 62px; opacity: 0.9; }
+.insignia-caption {
+    text-align: center;
+    font-size: 6.5px;
+    letter-spacing: 1.2px;
+    color: #5d6798;
+    opacity: 0.9;
+    margin-top: 2px;
+}
 /* ===== Confetti ===== */
 .confetti { position: fixed; opacity: 0; pointer-events: none; z-index: 9999; }
 @keyframes confetti-fall {
@@ -452,7 +463,6 @@ button:focus-visible {
 
     <div class="info" style="margin-top:18px;">
         <div class="info-item">Streak: <span id="streak">0</span></div>
-        <div class="info-item" id="timer-display" style="display:none;"></div>
         <div class="info-item">Best: <span id="best-streak">0</span></div>
         <div class="info-item">First-try: <span id="overall-pct">&mdash;</span></div>
     </div>
@@ -467,9 +477,39 @@ button:focus-visible {
     </div>
 
     <button type="button" class="reset-btn" id="reset-btn" onclick="resetProgress()">Reset Progress</button>
+
+    <!-- Purely decorative studio mark: it carries no title, so it says nothing
+         useful to a screen reader. Hidden, matching the rest of the suite. -->
+    <svg class="insignia" viewBox="-28 -26 56 64" aria-hidden="true" focusable="false" role="presentation">
+        <defs>
+            <linearGradient id="pr-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1e3a5f"/>
+                <stop offset="100%" stop-color="#0d9488"/>
+            </linearGradient>
+        </defs>
+        <path id="pr-path" fill="none" stroke="url(#pr-grad)" stroke-width="1.7"/>
+    </svg>
+    <div class="insignia-caption">POLAR ROSE STUDIO</div>
 </main>
 
 <script>
+/* =====================================================================
+   Polar rose insignia path  r = 2cos(1.5t)
+   ===================================================================== */
+(function () {
+    var d = '';
+    var steps = 240;
+    for (var i = 0; i <= steps; i++) {
+        var t = (i / steps) * 4 * Math.PI;
+        var r = 2 * Math.cos(1.5 * t);
+        var x = r * Math.cos(t) * 12;
+        var y = r * Math.sin(t) * 12;
+        d += (i === 0 ? 'M ' : 'L ') + x.toFixed(2) + ' ' + y.toFixed(2) + ' ';
+    }
+    var el = document.getElementById('pr-path');
+    if (el) el.setAttribute('d', d.trim());
+})();
+
 /* =====================================================================
    Five practice categories plus a Mixed option. Exactly one tile is
    selected at a time; Mixed draws randomly from all five. Persists.
@@ -498,9 +538,6 @@ function encounterTier(n) {
 var selectedCategory = 'graph';
 var streak = 0;
 var bestStreak = 0;
-var timer = 0;
-var timerInterval = null;
-var isTimerRunning = false;
 var currentProblem = null;
 var lastProblemSignature = '';
 var resetArmed = false;
@@ -538,7 +575,7 @@ function shuffle(arr) {
     return a;
 }
 function pctText(c, t) {
-    if (!isFinite(c) || !isFinite(t) || t <= 0) return '\u2014';
+    if (!isFinite(c) || !isFinite(t) || t <= 0) return ' - ';
     return Math.round(c / t * 100) + '%';
 }
 
@@ -547,15 +584,49 @@ function fracText(f) {
     if (f.den === 1) return String(f.num);
     return f.num + '/' + f.den;
 }
+/* Spoken form for screen readers - never let a stacked fraction read as "3 4" */
+function fracSpoken(f) {
+    if (!f) return 'undefined';
+    if (f.den === 1) return String(f.num);
+    return (f.num < 0 ? 'negative ' : '') + Math.abs(f.num) + ' over ' + f.den;
+}
+/* Real stacked fraction with a horizontal bar.
+   The minus is drawn OUTSIDE the fraction bar (correct typography) and is
+   hidden from the accessibility tree: a bare ASCII hyphen is skipped or
+   mispronounced by screen readers, and leaving it exposed alongside the
+   label announced the sign twice. The word "negative" is carried exactly
+   once, inside the fraction's own label. */
+function fracHTML(f) {
+    if (!f) return 'undefined';
+    if (f.den === 1) return String(f.num);
+    var sign = f.num < 0 ? '<span aria-hidden="true">-</span>' : '';
+    return sign + '<span class="frac" role="img" aria-label="' + esc(fracSpoken(f)) + '">'
+        + '<span class="num">' + Math.abs(f.num) + '</span>'
+        + '<span class="den">' + f.den + '</span></span>';
+}
+/* Stacked fraction shown exactly as written, before simplifying */
+function fracHTMLRaw(num, den) {
+    return fracHTMLParts(String(num), String(den), spokenNum(num) + ' over ' + spokenNum(den));
+}
+/* Stacked fraction where the parts may contain markup (subscripts, etc.).
+   spoken is what a screen reader hears instead of the markup. */
+function fracHTMLParts(numHTML, denHTML, spoken) {
+    return '<span class="frac" role="img" aria-label="' + esc(spoken) + '">'
+        + '<span class="num">' + numHTML + '</span>'
+        + '<span class="den">' + denHTML + '</span></span>';
+}
 function slopeTermHTML(m) {
     if (m.den === 1) {
         if (m.num === 1) return 'x';
         if (m.num === -1) return '-x';
         return m.num + 'x';
     }
-    var sign = m.num < 0 ? '-' : '';
+    /* Same rule as fracHTML: the visual minus is decorative, the sign is
+       spoken once inside the label. */
+    var sign = m.num < 0 ? '<span aria-hidden="true">-</span>' : '';
     var an = Math.abs(m.num);
-    return sign + '<span class="frac"><span class="num">' + an + '</span><span class="den">' + m.den + '</span></span>x';
+    return sign + '<span class="frac" role="img" aria-label="' + esc(fracSpoken(m)) + '">'
+        + '<span class="num">' + an + '</span><span class="den">' + m.den + '</span></span>x';
 }
 function slopeTermPlain(m) {
     if (m.den === 1) {
@@ -695,8 +766,9 @@ function genEqHorizontalLine() {
 var MEANING_TEMPLATES = [
     function () {
         var fee = randInt(10, 50), rate = randInt(15, 60);
+        while (rate === fee) { rate = randInt(15, 60); }
         return {
-            scenario: 'A gym charges a $' + fee + ' sign-up fee plus $' + rate + ' per month. In the cost equation, what is the slope, and what does it represent?',
+            scenario: 'A gym charges a $' + fee + ' sign-up fee plus $' + rate + ' per month. What is the slope of the cost equation, and what does it represent?',
             correct: 'The slope is ' + rate + '. It represents the monthly membership cost, $' + rate + '.',
             distractors: [
                 'The slope is ' + fee + '. It represents the amount charged every month.',
@@ -706,19 +778,21 @@ var MEANING_TEMPLATES = [
     },
     function () {
         var start = randInt(5, 40), rate = randInt(2, 10);
+        while (rate === start) { rate = randInt(2, 10); }
         return {
-            scenario: 'A water tank starts with ' + start + ' gallons and fills at a constant rate of ' + rate + ' gallons per minute. What is the slope of the volume-time graph, and what does it represent?',
+            scenario: 'A water tank starts with ' + start + ' gallons and fills at a constant rate of ' + rate + ' gallons per minute. What is the slope of the graph of volume versus time, and what does it represent?',
             correct: 'The slope is ' + rate + '. It represents the rate the tank fills, ' + rate + ' gallons per minute.',
             distractors: [
                 'The slope is ' + start + '. It represents how many gallons were already in the tank at the start.',
-                'The slope is ' + rate + '. It represents the tank\u2019s total capacity.'
+                'The slope is ' + rate + '. It represents the tank\'s total capacity.'
             ]
         };
     },
     function () {
         var start = randInt(200, 600), rate = randInt(10, 40);
+        while (rate === start) { rate = randInt(10, 40); }
         return {
-            scenario: 'A pool contains ' + start + ' gallons and drains at a steady rate of ' + rate + ' gallons per hour. What is the slope of the volume-time graph, and what does it represent?',
+            scenario: 'A pool contains ' + start + ' gallons and drains at a steady rate of ' + rate + ' gallons per hour. What is the slope of the graph of volume versus time, and what does it represent?',
             correct: 'The slope is -' + rate + '. It represents the rate the pool drains, ' + rate + ' gallons per hour.',
             distractors: [
                 'The slope is ' + start + '. It represents how many gallons were in the pool at the start.',
@@ -728,9 +802,10 @@ var MEANING_TEMPLATES = [
     },
     function () {
         var start = randInt(50, 300), rate = randInt(10, 50);
+        while (rate === start) { rate = randInt(10, 50); }
         return {
-            scenario: 'Maria starts with $' + start + ' in savings and adds $' + rate + ' to her account every week. What is the slope, and what does it represent?',
-            correct: 'The slope is ' + rate + '. It represents the amount Maria saves each week, $' + rate + '.',
+            scenario: 'Maria starts with $' + start + ' in savings and adds $' + rate + ' to her account every week. What is the slope of the graph of savings versus time, and what does it represent?',
+            correct: 'The slope is ' + rate + '. It represents the amount she saves each week.',
             distractors: [
                 'The slope is ' + start + '. It represents how much she had in savings when she started.',
                 'The slope is ' + rate + '. It represents her total savings after one year.'
@@ -739,9 +814,10 @@ var MEANING_TEMPLATES = [
     },
     function () {
         var start = randInt(50, 75), rate = randInt(2, 8);
+        while (rate === start) { rate = randInt(2, 8); }
         return {
-            scenario: 'The temperature was ' + start + ' degrees F at sunrise and has been dropping at a steady rate of ' + rate + ' degrees F per hour. What is the slope of the temperature-time graph, and what does it represent?',
-            correct: 'The slope is -' + rate + '. It represents the rate the temperature drops, ' + rate + ' degrees per hour.',
+            scenario: 'The temperature was ' + start + ' degrees F at sunrise and has been dropping at a steady rate of ' + rate + ' degrees F per hour. What is the slope of the graph of temperature versus time, and what does it represent?',
+            correct: 'The slope is -' + rate + '. It represents how fast the temperature is dropping.',
             distractors: [
                 'The slope is ' + start + '. It represents the temperature at sunrise.',
                 'The slope is -' + rate + '. It represents the coldest temperature reached that day.'
@@ -750,19 +826,21 @@ var MEANING_TEMPLATES = [
     },
     function () {
         var start = randInt(2, 10), rate = randInt(1, 5);
+        while (rate === start) { rate = randInt(1, 5); }
         return {
-            scenario: 'A sunflower was ' + start + ' cm tall when it was planted and grows ' + rate + ' cm every week. What is the slope, and what does it represent?',
-            correct: 'The slope is ' + rate + '. It represents the plant\u2019s growth rate, ' + rate + ' cm per week.',
+            scenario: 'A sunflower was ' + start + ' cm tall when it was planted and grows ' + rate + ' cm every week. What is the slope of the graph of height versus time, and what does it represent?',
+            correct: 'The slope is ' + rate + '. It represents how fast the plant grows each week.',
             distractors: [
-                'The slope is ' + start + '. It represents the plant\u2019s height when it was planted.',
-                'The slope is ' + rate + '. It represents the plant\u2019s height one year from now.'
+                'The slope is ' + start + '. It represents the plant\'s height when it was planted.',
+                'The slope is ' + rate + '. It represents the plant\'s height one year from now.'
             ]
         };
     },
     function () {
         var rate = randInt(2, 5), fee = randInt(3, 10);
+        while (fee === rate) { fee = randInt(3, 10); }
         return {
-            scenario: 'A bakery charges $' + rate + ' per cupcake plus a flat $' + fee + ' delivery fee per order. In the total cost equation, what is the slope, and what does it represent?',
+            scenario: 'A bakery charges $' + rate + ' per cupcake plus a flat $' + fee + ' delivery fee per order. What is the slope of the total-cost equation, and what does it represent?',
             correct: 'The slope is ' + rate + '. It represents the price per cupcake, $' + rate + '.',
             distractors: [
                 'The slope is ' + fee + '. It represents the flat fee charged on every order, no matter the size.',
@@ -772,9 +850,10 @@ var MEANING_TEMPLATES = [
     },
     function () {
         var start = randInt(10, 40), rate = randInt(1, 4);
+        while (rate === start) { rate = randInt(1, 4); }
         return {
-            scenario: 'A phone battery level is measured in percentage points, from 0 to 100. It starts at ' + start + ' and charges at a steady rate of ' + rate + ' percentage points per minute. What is the slope of the charge-time graph, and what does it represent?',
-            correct: 'The slope is ' + rate + '. It represents the charging rate, ' + rate + ' percentage points per minute.',
+            scenario: 'A phone battery level is measured in percentage points, from 0 to 100. It starts at ' + start + ' and charges at a steady rate of ' + rate + ' percentage points per minute. What is the slope of the graph of battery level versus time, and what does it represent?',
+            correct: 'The slope is ' + rate + '. It represents how fast the battery is charging.',
             distractors: [
                 'The slope is ' + start + '. It represents the battery level when charging started.',
                 'The slope is ' + rate + '. It represents the total time needed to reach 100.'
@@ -783,8 +862,9 @@ var MEANING_TEMPLATES = [
     },
     function () {
         var start = randInt(60, 95), rate = randInt(5, 20);
+        while (rate === start) { rate = randInt(5, 20); }
         return {
-            scenario: 'A phone battery level is measured in percentage points, from 0 to 100. It starts a trip at ' + start + ' and loses ' + rate + ' percentage points every hour of use. What is the slope, and what does it represent?',
+            scenario: 'A phone battery level is measured in percentage points, from 0 to 100. It starts a trip at ' + start + ' and loses ' + rate + ' percentage points every hour of use. What is the slope of the graph of battery level versus time, and what does it represent?',
             correct: 'The slope is -' + rate + '. It represents the rate the battery drains, ' + rate + ' percentage points per hour.',
             distractors: [
                 'The slope is ' + start + '. It represents the battery level at the start of the trip.',
@@ -794,9 +874,10 @@ var MEANING_TEMPLATES = [
     },
     function () {
         var rise = randInt(4, 12), run = randInt(12, 24);
+        while (run === rise) { run = randInt(12, 24); }
         return {
-            scenario: 'A roof rises ' + rise + ' feet for every ' + run + ' feet of horizontal run. What is the slope, and what does it represent?',
-            correct: 'The slope is ' + rise + '/' + run + '. It represents the roof\u2019s steepness: ' + rise + ' feet of rise for every ' + run + ' feet across.',
+            scenario: 'A roof rises ' + rise + ' feet for every ' + run + ' feet of horizontal run. What is the slope of the roof line, and what does it represent?',
+            correct: 'The slope is ' + rise + '/' + run + '. It represents the steepness of the roof.',
             distractors: [
                 'The slope is ' + run + '/' + rise + '. It represents ' + run + ' feet of rise for every ' + rise + ' feet across.',
                 'The slope is ' + rise + '/' + run + '. It represents the total height of the roof at its peak.'
@@ -805,23 +886,25 @@ var MEANING_TEMPLATES = [
     },
     function () {
         var start = randInt(1500, 6000), rate = randInt(10, 100), sign = pick([1, -1]);
+        while (rate === start) { rate = randInt(10, 100); }
         var rateSigned = (sign > 0 ? '+' : '-') + rate;
         var futurePop = start + sign * rate * 10;
         return {
-            scenario: 'A small town\u2019s population was ' + start + ' people and has been changing by ' + rateSigned + ' people per year. What is the slope, and what does it represent?',
-            correct: 'The slope is ' + rateSigned + '. It represents the rate the population changes, ' + rateSigned + ' people per year.',
+            scenario: 'A small town\'s population was ' + start + ' people and has been changing by ' + rateSigned + ' people per year. What is the slope of the graph of population versus time, and what does it represent?',
+            correct: 'The slope is ' + rateSigned + '. It represents how fast the population is changing.',
             distractors: [
-                'The slope is ' + start + '. It represents the town\u2019s population at the start.',
-                'The slope is ' + futurePop + '. It represents the town\u2019s population 10 years from now.'
+                'The slope is ' + start + '. It represents the town\'s population at the start.',
+                'The slope is ' + futurePop + '. It represents the town\'s population 10 years from now.'
             ]
         };
     },
     function () {
         var warmup = randInt(20, 80), rate = randInt(5, 15);
+        while (rate === warmup) { rate = randInt(5, 15); }
         var perHour = rate * 60;
         return {
-            scenario: 'Before a run, you\u2019ve already burned ' + warmup + ' calories walking to the gym. Running then burns calories at a steady rate of ' + rate + ' calories per minute. This can be written as a function of time: C = ' + rate + 't + ' + warmup + ', where C is total calories burned and t is minutes spent running. What is the slope of this function, and what does it represent?',
-            correct: 'The slope is ' + rate + '. It represents the rate calories are burned, ' + rate + ' calories per minute.',
+            scenario: 'Before a run, you\'ve already burned ' + warmup + ' calories walking to the gym. Running then burns calories at a steady rate of ' + rate + ' calories per minute. This can be written as a function of time: C = ' + rate + 't + ' + warmup + ', where C is total calories burned and t is minutes spent running. What is the slope of this function, and what does it represent?',
+            correct: 'The slope is ' + rate + '. It represents how fast calories are burned.',
             distractors: [
                 'The slope is ' + warmup + '. It represents the calories already burned before the run started.',
                 'The slope is ' + perHour + '. It represents the total calories burned in an hour of running.'
@@ -850,13 +933,16 @@ function pickTwoPointsVariant(tier) {
     if (tier === 0) return 'two-points';
     return Math.random() < 0.5 ? 'two-points' : 'two-points-fraction';
 }
+/* Vertical lines (x = c) are deliberately NOT served here. They belong to the
+   "horizontal and vertical lines" category, and they turn up again in Mixed
+   review. This category exists to practise one skill: solve the equation for y,
+   then read the coefficient of x as the slope. A problem with no y to solve for
+   does not exercise that, so the 15% that used to be x = c now goes to standard
+   form, where the work is. */
 function pickEquationVariant(n) {
     if (n <= 4) return 'eq-slope-intercept';
     if (n === 5) return 'eq-standard-form';
-    var r = Math.random();
-    if (r < 0.15) return 'eq-slope-intercept';
-    if (r < 0.85) return 'eq-standard-form';
-    return 'eq-standard-vertical';
+    return Math.random() < 0.15 ? 'eq-slope-intercept' : 'eq-standard-form';
 }
 function pickHorizVertVariant() {
     return pick(['graph-horizontal', 'graph-vertical', 'eq-horizontal-line', 'eq-standard-vertical']);
@@ -881,9 +967,10 @@ function buildProblem(cat, n) {
     } else if (cat === 'equation') {
         subtype = pickEquationVariant(n);
         kind = 'equation';
+        /* Only two shapes reach here now. Standard form is the fallback, so an
+           unexpected subtype can never produce a vertical line in this category. */
         if (subtype === 'eq-slope-intercept') { data = genEqSlopeIntercept(tier >= 1); correctSlope = data.slope; }
-        else if (subtype === 'eq-standard-form') { data = genEqStandardForm(tier >= 2); correctSlope = data.slope; }
-        else { data = genEqStandardVertical(); correctSlope = null; undef = true; }
+        else { subtype = 'eq-standard-form'; data = genEqStandardForm(tier >= 2); correctSlope = data.slope; }
     } else if (cat === 'horiz-vert') {
         subtype = pickHorizVertVariant();
         if (subtype === 'graph-horizontal') { data = genGraphHorizontal(); kind = 'graph'; correctSlope = { num: 0, den: 1 }; }
@@ -895,6 +982,13 @@ function buildProblem(cat, n) {
         kind = 'choice';
         data = genMeaningProblem();
         correctSlope = null;
+        /* Scaffold: spell out the axis convention the first couple of times a
+           "versus" stem appears, then let it fade so students recall it. */
+        if (n <= 2 && data.scenario.indexOf(' versus time,') !== -1) {
+            data.scenario = data.scenario.replace(
+                ' versus time, and what does it represent?',
+                ' versus time (time on the horizontal axis), and what does it represent?');
+        }
     }
     return {
         category: cat, subtype: subtype, kind: kind, data: data,
@@ -1000,7 +1094,10 @@ function problemSpeech(p) {
     if (p.kind === 'equation') {
         return 'New problem. What is the slope of this equation? ' + equationSpeech(p);
     }
-    return 'New problem. ' + p.data.scenario + ' Three answer choices follow.';
+    /* The visible stem renders " degrees F" as a degree symbol with a spoken
+       label; the live region has no markup, so expand the unit in words here
+       or it is announced as the bare letter "F". */
+    return 'New problem. ' + speakUnits(p.data.scenario) + ' Three answer choices follow.';
 }
 function equationSpeech(p) {
     var d = p.data;
@@ -1092,6 +1189,18 @@ function renderGraphSVG(problem, showHelpers) {
 /* =====================================================================
    Rendering the current problem
    ===================================================================== */
+/* Escape first, then render degree notation as real typography.
+   &deg; keeps the file pure ASCII (no raw high bytes to corrupt on Android),
+   and the spoken label guarantees the symbol is read aloud correctly. */
+function escUnits(s) {
+    return esc(s).replace(/ degrees F\b/g,
+        '<span role="img" aria-label=" degrees Fahrenheit">&deg;F</span>');
+}
+/* Spoken equivalent of escUnits, for the live-region announcement where
+   markup cannot be used. */
+function speakUnits(s) {
+    return String(s).replace(/ degrees F\b/g, ' degrees Fahrenheit');
+}
 function renderProblem(problem) {
     var numericSection = document.getElementById('numeric-input-section');
     if (problem.kind === 'choice') {
@@ -1099,11 +1208,11 @@ function renderProblem(problem) {
         /* Only the duplicated scenario text is hidden. The choice container is
            NEVER aria-hidden - it holds focusable buttons, and hiding a focusable
            control is itself a WCAG failure. */
-        var html = '<div class="question-text" aria-hidden="true">' + esc(problem.data.scenario) + '</div>'
+        var html = '<div class="question-text" aria-hidden="true">' + escUnits(problem.data.scenario) + '</div>'
             + '<div id="choices-container" role="group" aria-label="Answer choices">';
         problem.data.choices.forEach(function (choice, idx) {
             html += '<button type="button" class="choice-btn" id="choice-' + idx + '" onclick="selectChoice(' + idx + ')">'
-                + esc(choice.text) + '</button>';
+                + escUnits(choice.text) + '</button>';
         });
         html += '</div>';
         document.getElementById('main-content').innerHTML = html;
@@ -1145,13 +1254,13 @@ function getHintText(p) {
             return 'This line goes straight up and down without ever moving left or right. Lines like this have an undefined slope.';
         case 'two-points':
         case 'two-points-fraction':
-            return 'Use the slope formula: slope = (y2 - y1) / (x2 - x1). Subtract the y-values, then subtract the x-values in the same order, and divide.';
+            return 'Use the slope formula: the change in y goes on top, the change in x goes on the bottom. Subtract the y-values, then subtract the x-values in the same order, and divide.';
         case 'eq-horizontal-line':
             return 'There is no x in this equation. Every point on it has the same y-value, so the line is perfectly flat and its slope is 0.';
         case 'eq-slope-intercept':
             return 'This equation is written as y = mx + b. The slope is the number in front of x (the coefficient of x).';
         case 'eq-standard-form':
-            return 'Rearrange the equation to solve for y. Once it looks like y = mx + b, the number in front of x (the coefficient of x) is the slope.';
+            return 'Solve the equation for y. Move the x-term to the other side, then divide every term by the number in front of y. Once it looks like y = mx + b, the number in front of x is the slope.';
         case 'eq-standard-vertical':
             return 'There is no y in this equation, which means it describes a vertical line. Vertical lines have an undefined slope.';
         case 'meaning':
@@ -1193,7 +1302,6 @@ function recordReveal() {
     var s = ensureStats(currentProblem.category);
     s.t++; overallStats.t++;
     streak = 0;
-    stopTimer();
     updateDisplay();
     saveState();
 }
@@ -1206,7 +1314,7 @@ function toggleAnswer() {
             var correctChoice = currentProblem.data.choices.filter(function (c) { return c.correct; })[0];
             box.innerHTML = '<strong>Answer:</strong> ' + esc(correctChoice.text);
         } else {
-            box.innerHTML = '<strong>Slope:</strong> ' + esc(fracText(currentProblem.correctSlope));
+            box.innerHTML = '<strong>Slope:</strong> ' + fracHTML(currentProblem.correctSlope);
         }
         box.style.display = 'block';
         setExpanded('answer-btn', true);
@@ -1222,16 +1330,33 @@ function buildSolutionHTML(p) {
         var rise = d.y2 - d.y1, run = d.x2 - d.x1;
         html += '<div>Moving from one marked point to the other:</div>';
         html += '<div style="margin:6px 0;">Rise = ' + rise + ' &nbsp;&nbsp; Run = ' + run + '</div>';
-        html += '<div>Slope = rise / run = ' + rise + '/' + run + ' = <b>' + fracText(p.correctSlope) + '</b></div>';
+        html += '<div>Slope = ' + fracHTMLParts('rise', 'run', 'rise over run')
+            + ' = ' + fracHTMLRaw(rise, run) + ' = <b>' + fracHTML(p.correctSlope) + '</b></div>';
     } else if (p.subtype === 'graph-horizontal') {
         html += '<div>This line never rises (rise = 0), so slope = 0 / run = <b>0</b>.</div>';
     } else if (p.subtype === 'graph-vertical') {
         html += '<div>This line never runs left or right (run = 0). Since we cannot divide by 0, the slope is <b>undefined</b>.</div>';
     } else if (p.subtype === 'two-points' || p.subtype === 'two-points-fraction') {
         var rise2 = d.y2 - d.y1, run2 = d.x2 - d.x1;
-        html += '<div>slope = (y2 - y1) / (x2 - x1)</div>';
-        html += '<div style="margin:6px 0;">= (' + d.y2 + ' - (' + d.y1 + ')) / (' + d.x2 + ' - (' + d.x1 + ')) = ' + rise2 + '/' + run2 + '</div>';
-        html += '<div>Slope = <b>' + fracText(p.correctSlope) + '</b></div>';
+        var formula = fracHTMLParts(
+            'y<sub>2</sub> - y<sub>1</sub>',
+            'x<sub>2</sub> - x<sub>1</sub>',
+            'y sub 2 minus y sub 1, over x sub 2 minus x sub 1');
+        html += '<div><b>Step 1.</b> Use the slope formula:</div>';
+        html += '<div style="margin:4px 0 10px;">slope = ' + formula + '</div>';
+        html += '<div><b>Step 2.</b> Substitute the two points '
+            + '(' + d.x1 + ', ' + d.y1 + ') and (' + d.x2 + ', ' + d.y2 + '):</div>';
+        html += '<div style="margin:4px 0 10px;">slope = ' + fracHTMLParts(
+            '(' + d.y2 + ') - (' + d.y1 + ')',
+            '(' + d.x2 + ') - (' + d.x1 + ')',
+            spokenNum(d.y2) + ' minus ' + spokenNum(d.y1) + ', over '
+                + spokenNum(d.x2) + ' minus ' + spokenNum(d.x1)) + '</div>';
+        html += '<div><b>Step 3.</b> Subtract on the top and on the bottom:</div>';
+        html += '<div style="margin:4px 0 10px;">slope = ' + fracHTMLRaw(rise2, run2) + '</div>';
+        var reduced = fracText(p.correctSlope) !== (rise2 + '/' + run2);
+        html += '<div><b>Step 4.</b> '
+            + (reduced ? 'Simplify:' : 'That is already in simplest form:') + '</div>';
+        html += '<div style="margin:4px 0 0;">slope = <b>' + fracHTML(p.correctSlope) + '</b></div>';
     } else if (p.subtype === 'eq-horizontal-line') {
         html += '<div>The equation <b>y = ' + d.C + '</b> has no x-term, so y is always ' + d.C + ' no matter what x is.</div>';
         html += '<div style="margin:6px 0;">That describes a horizontal line, which never rises.</div>';
@@ -1239,19 +1364,40 @@ function buildSolutionHTML(p) {
     } else if (p.subtype === 'eq-slope-intercept') {
         html += '<div>This equation is already in y = mx + b form:</div>';
         html += '<div style="margin:6px 0;">' + equationHTML(p) + '</div>';
-        html += '<div>The coefficient of x is the slope: m = <b>' + fracText(p.correctSlope) + '</b></div>';
+        html += '<div>The coefficient of x is the slope: m = <b>' + fracHTML(p.correctSlope) + '</b></div>';
     } else if (p.subtype === 'eq-standard-form') {
         var A = d.A, B = d.B, C = d.C;
-        html += '<div>Start with: <b>' + fmtStandardForm(A, B, C) + '</b></div>';
-        html += '<div style="margin:6px 0;">Subtract the x-term from both sides: <b>' + termStr(B, 'y') + ' = ' + termStr(-A, 'x') + (C !== 0 ? (C > 0 ? ' + ' + C : ' - ' + Math.abs(C)) : '') + '</b></div>';
-        html += '<div>Divide every term by ' + B + ': slope = -A/B = -(' + A + ')/(' + B + ') = <b>' + fracText(p.correctSlope) + '</b></div>';
+        var slope = simplifyFrac(-A, B);
+        var inter = simplifyFrac(C, B);
+        var moveWord = (A > 0 ? 'Subtract ' + termStr(A, 'x') + ' from' : 'Add ' + termStr(-A, 'x') + ' to') + ' both sides';
+        var rhs = termStr(-A, 'x') + (C !== 0 ? (C > 0 ? ' + ' + C : ' - ' + Math.abs(C)) : '');
+        var slopeStr = fracText(slope);
+        var interPart = inter.num === 0 ? '' :
+            (inter.num > 0 ? ' + ' + fracHTML(inter) : ' - ' + fracHTML({ num: Math.abs(inter.num), den: inter.den }));
+        var st = 1;
+        html += '<div><b>Step ' + (st++) + '.</b> Start with the equation:</div>';
+        html += '<div style="margin:4px 0 10px;"><b>' + fmtStandardForm(A, B, C) + '</b></div>';
+        html += '<div><b>Step ' + (st++) + '.</b> Get the y-term by itself. ' + moveWord + ':</div>';
+        html += '<div style="margin:4px 0 10px;"><b>' + termStr(B, 'y') + ' = ' + rhs + '</b></div>';
+        var xTerm;
+        if (slopeStr === '1') xTerm = 'x';
+        else if (slopeStr === '-1') xTerm = '-x';
+        else if (slope.den === 1) xTerm = slopeStr + 'x';
+        else xTerm = fracHTML(slope) + 'x';
+        /* dividing by 1 changes nothing, so skip that step entirely */
+        if (B !== 1) {
+            html += '<div><b>Step ' + (st++) + '.</b> Divide every term by ' + B + ' to get y alone:</div>';
+            html += '<div style="margin:4px 0 10px;"><b>y = ' + xTerm + interPart + '</b></div>';
+        }
+        html += '<div><b>Step ' + (st++) + '.</b> The equation is now in y = mx + b form. The number in front of x is the slope:</div>';
+        html += '<div style="margin:4px 0 0;">slope = <b>' + fracHTML(p.correctSlope) + '</b></div>';
     } else if (p.subtype === 'eq-standard-vertical') {
         html += '<div>There is no y-term, so this equation describes a vertical line: <b>x = ' + d.C + '</b>.</div>';
         html += '<div>Vertical lines have no run, so the slope is <b>undefined</b>.</div>';
     } else if (p.subtype === 'meaning') {
         var correctChoice = d.choices.filter(function (c) { return c.correct; })[0];
         html += '<div>The slope is the constant rate of change in this situation:</div>';
-        html += '<div style="margin:6px 0;"><b>' + esc(correctChoice.text) + '</b></div>';
+        html += '<div style="margin:6px 0;"><b>' + escUnits(correctChoice.text) + '</b></div>';
         html += '<div>The other choices describe a fixed starting amount, a total, or a swapped rate - not the rate of change itself.</div>';
     }
     return html;
@@ -1386,7 +1532,7 @@ function ensureStats(cat) {
    Retries are unlimited and never add to the denominator.
    ===================================================================== */
 var PRAISE_FIRST = ['Correct!', 'Nice work!', 'Exactly right!', 'Well done!', 'You got it!', 'Perfect!'];
-var PRAISE_RETRY = ['That\u2019s it!', 'Got it!', 'Yes \u2014 nice recovery!', 'There you go!'];
+var PRAISE_RETRY = ['That\'s it!', 'Got it!', 'Yes  -  nice recovery!', 'There you go!'];
 
 function handleAnswer(isCorrect, detailText, whyWrong) {
     var feedback = document.getElementById('feedback');
@@ -1405,26 +1551,29 @@ function handleAnswer(isCorrect, detailText, whyWrong) {
         if (firstTry) {
             streak++;
             if (streak > bestStreak) bestStreak = streak;
-            if (!isTimerRunning) startTimer();
+            /* innerHTML on the success path only: detailText carries a stacked
+               fraction built purely from numbers. The incorrect path stays on
+               textContent - whyWrong is plain prose and nothing there is
+               generated markup. */
             if (streak % 10 === 0) {
                 feedback.className = 'feedback correct victory';
-                feedback.textContent = streak + ' IN A ROW!' + tail;
+                feedback.innerHTML = streak + ' IN A ROW!' + tail;
                 createConfetti(200, 3);
             } else if (streak % 5 === 0) {
                 feedback.className = 'feedback correct victory';
-                feedback.textContent = streak + ' in a row!' + tail;
+                feedback.innerHTML = streak + ' in a row!' + tail;
                 createConfetti(120, 2);
             } else {
                 feedback.className = 'feedback correct';
-                feedback.textContent = pick(PRAISE_FIRST) + tail;
+                feedback.innerHTML = pick(PRAISE_FIRST) + tail;
             }
         } else {
             feedback.className = 'feedback correct';
-            feedback.textContent = pick(PRAISE_RETRY) + tail;
+            feedback.innerHTML = pick(PRAISE_RETRY) + tail;
         }
         document.getElementById('next-btn').style.display = 'inline-block';
     } else {
-        if (firstTry) { streak = 0; stopTimer(); }
+        if (firstTry) { streak = 0; }
         feedback.className = 'feedback incorrect';
         feedback.textContent = 'Not quite.' + (whyWrong ? whyWrong : ' Try again!');
     }
@@ -1457,7 +1606,7 @@ function checkAnswer() {
         ansEl.value = '';
         ansEl.focus();
     }
-    handleAnswer(correct, 'Slope = ' + fracText(currentProblem.correctSlope),
+    handleAnswer(correct, 'Slope = ' + fracHTML(currentProblem.correctSlope),
                  diagnoseSlope(currentProblem, parsed));
 }
 
@@ -1571,38 +1720,6 @@ function updateDisplay() {
     document.getElementById('best-streak').textContent = bestStreak;
     document.getElementById('overall-pct').textContent = pctText(overallStats.c, overallStats.t);
     renderCategoryTiles();
-    updateTimerDisplay();
-}
-function updateTimerDisplay() {
-    var timerDisplay = document.getElementById('timer-display');
-    if (isTimerRunning) {
-        timerDisplay.textContent = 'Time: ' + formatTime(timer);
-        timerDisplay.style.display = 'inline-block';
-    } else {
-        timerDisplay.style.display = 'none';
-    }
-}
-
-/* =====================================================================
-   Timer
-   ===================================================================== */
-function startTimer() {
-    isTimerRunning = true;
-    timer = 0;
-    if (timerInterval) clearInterval(timerInterval);
-    timerInterval = setInterval(function () {
-        timer++;
-        updateTimerDisplay();
-    }, 1000);
-}
-function stopTimer() {
-    isTimerRunning = false;
-    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-}
-function formatTime(seconds) {
-    var mins = Math.floor(seconds / 60);
-    var secs = seconds % 60;
-    return mins + ':' + (secs < 10 ? '0' : '') + secs;
 }
 
 /* =====================================================================
@@ -1772,7 +1889,7 @@ function resetProgress() {
     selectedCategory = 'graph';
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
     btn.textContent = 'Reset Progress';
-    streak = 0; stopTimer(); timer = 0;
+    streak = 0;
     generateProblem();
     updateDisplay();
 }
