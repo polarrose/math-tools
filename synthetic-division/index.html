@@ -1,0 +1,2257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!-- Defence in depth: the page is entirely self-contained apart from the Google
+     Fonts stylesheet, so nothing else is allowed to load or run. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data:; base-uri 'none'; form-action 'none'">
+<title>Synthetic Division</title>
+<meta name="theme-color" content="#1b2450">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+    /* ===== MIDNIGHT SCHOLAR - navy stage, white card, violet + mint accents ===== */
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+        background:
+            radial-gradient(900px 500px at 85% -10%, rgba(124, 58, 237, 0.28), transparent 60%),
+            radial-gradient(800px 500px at -10% 110%, rgba(16, 185, 129, 0.18), transparent 55%),
+            linear-gradient(160deg, #141b3d 0%, #1b2450 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 16px 12px;
+        margin: 0;
+    }
+    .card {
+        background: #ffffff;
+        border-radius: 22px;
+        box-shadow: 0 24px 60px rgba(8, 12, 40, 0.55);
+        max-width: 700px;
+        width: 100%;
+        padding: 30px 24px 26px;
+        position: relative;
+        overflow: hidden;
+    }
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+    }
+    /* The heading box shrinks to its text so the rule below can match it. */
+    h1 {
+        text-align: center;
+        color: #1e2a5e;
+        margin: 4px auto 6px;
+        font-size: 25px;
+        letter-spacing: 0.3px;
+        width: fit-content;
+        max-width: 100%;
+    }
+    h1::after {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 4px;
+        border-radius: 2px;
+        margin: 8px auto 14px;
+        background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+    }
+    .info {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+    }
+    .info-item {
+        font-size: 12px;
+        font-weight: 800;
+        background: #eef0fb;
+        color: #2e3d8f;
+        padding: 6px 14px;
+        border-radius: 999px;
+    }
+    .info-item.streak-hot {
+        background: linear-gradient(135deg, #1e3a5f, #0b7a70);
+        color: #ffffff;
+    }
+    .mode-btns {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+    }
+    .mode-btn {
+        background: #e6e9f6;
+        color: #4a5480;
+        border: none;
+        border-radius: 999px;
+        padding: 9px 15px;
+        font-size: 12.5px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.15s;
+        -webkit-tap-highlight-color: transparent;
+        font-family: inherit;
+        touch-action: manipulation;
+    }
+    .mode-btn:hover { background: #d9def2; }
+    .mode-btn.active {
+        /* a11y: white on #10b981 is 2.54:1; #047857 is 5.28:1 */
+        background: #047857 !important;
+        color: #ffffff !important;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.25), 0 6px 14px rgba(16, 185, 129, 0.35);
+    }
+    .toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin: 8px 0 14px;
+    }
+    .settings-label {
+        font-size: 12px;
+        font-weight: 800;
+        color: #5d6798;
+    }
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 44px;
+        height: 24px;
+        flex-shrink: 0;
+    }
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    /* Addendum item 1: a hairline rim so the track edge is visible against the
+       white card. #8a93b8 is 3.02:1 off, #0b7a70 is 5.21:1 on. */
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0; left: 0; right: 0; bottom: 0;
+        box-sizing: border-box;
+        border: 1px solid #8a93b8;
+        background: #d5d9e8;
+        transition: 0.2s;
+        border-radius: 999px;
+    }
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 2px;
+        bottom: 2px;
+        background: #ffffff;
+        transition: 0.2s;
+        border-radius: 50%;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .toggle-switch input:checked + .toggle-slider {
+        background: #10b981;
+        border-color: #0b7a70;
+    }
+    .toggle-switch input:checked + .toggle-slider:before {
+        transform: translateX(20px);
+    }
+    .toggle-switch input:focus-visible + .toggle-slider {
+        outline: 3px solid #1e2a5e;
+        outline-offset: 2px;
+    }
+    /* ===== The problem statement ===== */
+    .problem-statement {
+        font-size: 21px;
+        font-weight: bold;
+        text-align: center;
+        margin: 14px auto 6px;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+        color: #1e2a5e;
+        background: #eef0fb;
+        border: 2px solid #c7cdf0;
+        border-radius: 14px;
+        padding: 14px 12px;
+        max-width: 100%;
+        overflow-wrap: break-word;
+        line-height: 1.7;
+    }
+    .problem-statement .ps-label {
+        display: block;
+        font-family: 'Nunito', sans-serif;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.6px;
+        color: #5d6798;
+        margin-bottom: 6px;
+    }
+    .problem-statement sup { font-size: 0.62em; }
+    /* The stacked fraction used to show the division in full */
+    .frac {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+        vertical-align: middle;
+        margin: 0 6px;
+        line-height: 1.3;
+    }
+    .frac .frac-num, .frac .frac-den { padding: 3px 10px; white-space: nowrap; }
+    .frac .frac-bar {
+        width: 100%;
+        height: 3px;
+        background: #1e2a5e;
+        border-radius: 2px;
+        margin: 2px 0;
+    }
+    .step-instruction {
+        text-align: center;
+        font-size: 13.5px;
+        font-weight: 800;
+        color: #2e3d8f;
+        margin: 12px 0 4px;
+        line-height: 1.5;
+        /* no reserved height: the instruction is empty only on the finished
+           screen, where holding a blank line just opens a hole under the problem */
+        min-height: 0;
+    }
+    /* ===== The synthetic division tableau ===== */
+    .tableau-wrap {
+        display: flex;
+        justify-content: center;
+        margin: 10px 0 6px;
+    }
+    /* row-gap must stay 0: any gap breaks the vertical rule into one segment
+       per row, and a synthetic division bar that is visibly stitched together
+       reads as a rendering fault rather than as notation. The cells carry the
+       breathing room in their own height instead. */
+    .tableau {
+        display: grid;
+        justify-content: center;
+        row-gap: 0;
+    }
+    .cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 56px;
+        padding: 0 3px;
+    }
+    /* The classic L: a vertical rule down the left of the coefficient block,
+       and a horizontal rule under the product row. They meet at one corner. */
+    .cell.rule-right { border-right: 3px solid #1e2a5e; }
+    .cell.rule-top   { border-top: 3px solid #1e2a5e; }
+    .cell-input {
+        width: 50px;
+        height: 44px;
+        font-size: 19px;
+        font-weight: 800;
+        text-align: center;
+        padding: 4px 2px;
+        border: 3px solid #7c3aed;
+        border-radius: 10px;
+        color: #1e2a5e;
+        background: #ffffff;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    }
+    .cell-input:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18);
+    }
+    /* A box that is not this step's business: readable, clearly not editable. */
+    .cell-input:disabled {
+        background: #f3f4f8;
+        /* a11y: the student's own entry stays in the box after it locks, so it
+           has to remain readable. #9aa2c4 on #f3f4f8 is 2.29:1; #5d6798 is 5.11:1 */
+        color: #5d6798;
+        border-color: #c7cdf0;
+        opacity: 1;
+        -webkit-text-fill-color: #5d6798;
+    }
+    /* A box that was checked and is right: locked, but marked as banked rather
+       than merely switched off. Colour is not the only signal -- the tick is. */
+    .cell-input.locked-ok:disabled {
+        background: #ecfdf5;
+        border-color: #34d399;
+        color: #065f46;
+        -webkit-text-fill-color: #065f46;
+    }
+    /* Addendum item 8 / design item 15: the error state is carried by three
+       non-hue signals a resting or focused box never has -- a tinted field, a
+       heavy 4px halo, and a bold dashed underline -- because recolouring alone
+       would leave it near-identical to the resting violet border. aria-invalid
+       carries the same information non-visually. */
+    .cell-input.field-error {
+        border-color: #6d28d9 !important;
+        background: #f3eefe
+            repeating-linear-gradient(90deg, #6d28d9 0, #6d28d9 5px, rgba(0,0,0,0) 5px, rgba(0,0,0,0) 10px)
+            bottom left / 100% 3px no-repeat !important;
+        box-shadow: 0 0 0 4px rgba(109, 40, 217, 0.35);
+    }
+    .empty-mark {
+        color: #b7c0ea;
+        font-size: 20px;
+        font-weight: 800;
+    }
+    /* The hand-off between the two halves of the problem. It has to sit between
+       the finished tableau and the answer block: the same words at the bottom of
+       the card, under the Check button, land below where the student is already
+       looking and go unread. */
+    .table-done {
+        text-align: center;
+        font-size: 16px;
+        font-weight: 800;
+        color: #047857;
+        background: #ecfdf5;
+        border: 2px solid #34d399;
+        border-radius: 12px;
+        padding: 11px 12px;
+        margin: 16px 0 2px;
+        line-height: 1.45;
+    }
+    /* ===== The quotient and remainder row ===== */
+    .answer-block {
+        background: #f7f5ff;
+        border: 2px solid #d8ccf7;
+        border-radius: 14px;
+        padding: 14px 12px;
+        margin: 14px 0 6px;
+    }
+    .answer-caption {
+        text-align: center;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        color: #5b21b6;
+        margin-bottom: 10px;
+    }
+    .answer-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 6px;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+        font-size: 19px;
+        font-weight: 800;
+        color: #1e2a5e;
+    }
+    .answer-row sup { font-size: 0.62em; }
+    .answer-row .cell-input { width: 46px; height: 40px; font-size: 17px; }
+    /* An exponent the student has to supply, sitting where the printed
+       superscript used to be. vertical-align does almost nothing against a box
+       this size, so the lift comes from align-self against the flex row: the
+       power box rides at the top of the line while the coefficient boxes stay
+       centred. It also has to be visibly a different KIND of box -- clearly
+       smaller and set apart -- or the row reads as five identical blanks and
+       the student cannot tell which one wants the power. */
+    /* align-self alone only lifts the power box by half the height difference --
+       about 6px -- which leaves it reading as a second factor being multiplied
+       by the coefficient rather than as an exponent. The explicit offset takes
+       the lift to ~18px, so the box clearly sits above the baseline the way a
+       printed superscript does. */
+    .exp-slot {
+        display: inline-flex;
+        align-self: flex-start;
+        position: relative;
+        top: -12px;
+        margin-left: 1px;
+    }
+    .answer-row .cell-input.exp-input {
+        width: 34px;
+        height: 28px;
+        font-size: 13px;
+        padding: 2px 1px;
+        border-width: 2px;
+        border-radius: 8px;
+    }
+    /* Room for the raised power boxes without the block feeling cramped. */
+    /* Headroom for the raised power boxes so they never clip the block edge. */
+    .answer-row.has-powers { padding-top: 16px; min-height: 58px; align-items: center; }
+    /* Each term is one unbreakable unit, and its leading "+" travels with it.
+       Without this the row wraps mid-term on a narrow phone and strands the
+       constant box on its own line under a dangling plus sign. */
+    .answer-term {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+    }
+    .answer-sep {
+        width: 100%;
+        height: 1px;
+        background: #d8ccf7;
+        margin: 12px 0 10px;
+    }
+    /* ===== Buttons ===== */
+    button {
+        padding: 12px 22px;
+        font-size: 15px;
+        font-weight: 800;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.15s;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        font-family: inherit;
+    }
+    button:active { transform: scale(0.95); }
+    .submit-row { text-align: center; margin: 14px 0 4px; }
+    .submit-btn {
+        background: linear-gradient(135deg, #2e3d8f, #4b3bbd);
+        color: #ffffff;
+        box-shadow: 0 6px 16px rgba(46, 61, 143, 0.35);
+    }
+    .submit-btn:hover { filter: brightness(1.1); }
+    .next-btn {
+        /* a11y: white on #10b981 is 2.54:1 and on #059669 is 3.77:1 */
+        background: linear-gradient(135deg, #047857, #065f46) !important;
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35) !important;
+    }
+    .key-row {
+        text-align: center;
+        margin: 4px 0 2px;
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .key-btn {
+        background: #e6e9f6;
+        color: #2e3d8f;
+        padding: 10px 16px;
+        font-size: 15px;
+        border-radius: 12px;
+    }
+    .key-btn:hover { background: #d9def2; }
+    .key-note {
+        font-size: 11px;
+        font-weight: 700;
+        color: #5d6798;
+        align-self: center;
+    }
+    /* ===== Feedback ===== */
+    .feedback {
+        text-align: center;
+        font-size: 20px;
+        font-weight: 800;
+        margin: 10px 0 2px;
+        /* enough to hold the line so the layout does not jump when a verdict
+           appears, but not so much that the resting page has a hole in it */
+        min-height: 24px;
+    }
+    .feedback:not(:empty) { padding: 8px 14px; border-radius: 10px; }
+    .feedback.correct { background: #ecfdf5; border: 2px solid #34d399; }
+    .feedback.incorrect { background: #f3eefe; border: 2px solid #c4b5fd; }
+    .correct { color: #047857; }
+    /* Design item 13: incorrect feedback is ink navy at 18px/700 across the
+       suite, never red (13.57:1 on white). */
+    .incorrect { color: #1e2a5e; font-size: 18px; font-weight: 700; }
+    .running-row {
+        text-align: center;
+        font-size: 13px;
+        font-weight: 800;
+        color: #047857;
+        background: #ecfdf5;
+        border: 2px solid #a7f3d0;
+        border-radius: 12px;
+        padding: 8px 10px;
+        margin: 8px auto 0;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    }
+    /* ===== Helper buttons and boxes ===== */
+    .helper-row { text-align: center; margin: 10px 0 4px; }
+    .hint-btn, .answer-btn, .skip-btn, .steps-btn, .stats-btn {
+        background: #f3eefe;
+        color: #6d28d9;
+        margin: 4px;
+        font-size: 12.5px;
+        padding: 10px 16px;
+    }
+    .hint-btn:hover, .answer-btn:hover, .skip-btn:hover, .steps-btn:hover { background: #e9defc; }
+    .stats-btn { background: #ecfdf5; color: #047857; }
+    .stats-btn:hover { background: #d1fae5; }
+    .hint-box, .answer-box, .steps-box {
+        background: #f7f5ff;
+        border: 2px solid #d8ccf7;
+        border-radius: 14px;
+        padding: 15px;
+        margin: 14px 0;
+        color: #3b3568;
+        font-size: 14px;
+        line-height: 1.55;
+    }
+    .hint-box b, .answer-box b, .steps-box b { color: #6d28d9; }
+    .solution-step { padding: 8px 0 4px; border-top: 1px dashed rgba(0,0,0,0.15); }
+    .solution-step:first-of-type { border-top: none; }
+    .solution-eq {
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+        font-weight: bold;
+        font-size: 15px;
+        margin: 5px 0 4px 18px;
+        color: #1e2a5e;
+    }
+    .fraction-note {
+        background: #eef0fb;
+        border: 2px solid #8b96d8;
+        border-radius: 12px;
+        padding: 10px;
+        margin: 12px 0 4px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #1e2a5e;
+        text-align: center;
+        line-height: 1.5;
+    }
+    .fraction-note strong { font-weight: 800; color: #16214d; }
+    .fraction-note code {
+        background: #dfe3f7;
+        color: #1e2a5e;
+        font-weight: 800;
+        padding: 1px 5px;
+        border-radius: 5px;
+    }
+    /* ===== Stats overlay ===== */
+    .stats-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(20, 27, 61, 0.82);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        padding: 16px;
+    }
+    .stats-panel {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 24px 22px;
+        max-width: 460px;
+        width: 100%;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: 0 24px 60px rgba(8, 12, 40, 0.55);
+    }
+    .stats-panel h2 { color: #1e2a5e; font-size: 19px; text-align: center; margin-top: 0; }
+    .stats-overall { text-align: center; margin-bottom: 16px; }
+    .stats-overall .big { font-size: 38px; font-weight: 800; color: #047857; }
+    .stats-overall .lbl { font-size: 13px; color: #4a5480; font-weight: 700; }
+    .stat-row { margin: 14px 0; }
+    .stat-name { font-size: 13px; font-weight: 800; color: #1e2a5e; margin-bottom: 4px; }
+    .stat-bar-wrap { background: #e6e9f6; border-radius: 999px; height: 14px; overflow: hidden; }
+    .stat-bar { height: 100%; border-radius: 999px; transition: width 0.4s ease; }
+    /* Addendum item 2: three tiers separated by hue AND lightness, always paired
+       with the numeric count so the tier survives greyscale. */
+    .stat-bar.low  { background: linear-gradient(90deg, #2e3d8f, #8b96d8); }
+    .stat-bar.mid  { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+    .stat-bar.full { background: linear-gradient(90deg, #059669, #34d399); }
+    .stat-bar.none { background: #d1d5db; }
+    .stat-num { font-size: 11px; color: #5d6798; margin-top: 3px; text-align: right; }
+    .recommend {
+        background: #f3eefe;
+        border: 2px solid #c4b5fd;
+        border-radius: 12px;
+        padding: 10px;
+        margin-top: 14px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #6d28d9;
+    }
+    .stats-actions { text-align: center; margin-top: 18px; }
+    .close-btn { background: #e6e9f6; color: #2e3d8f; }
+    .close-btn:hover { background: #d9def2; }
+    /* Design item 17: red is not in the palette; navy slate secondary button. */
+    .reset-btn { background: #4a5480; color: #ffffff; margin-left: 8px; }
+    .reset-btn:hover { background: #3c4569; }
+    .reset-btn.armed { background: #1e2a5e; color: #ffffff; }
+    .reset-btn.armed:hover { background: #16214d; }
+    .settings-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 22px;
+        padding-top: 16px;
+        border-top: 1px solid #eef0fb;
+    }
+    .stats-row { text-align: center; margin-top: 12px; }
+    /* ===== Confetti ===== */
+    .confetti { position: fixed; opacity: 0; pointer-events: none; z-index: 9999; }
+    @keyframes confetti-fall {
+        0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(110vh) rotate(720deg); opacity: 1; }
+    }
+    @keyframes confetti-fall-slow {
+        0% { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 1; }
+        100% { transform: translateY(115vh) rotate(1080deg) scale(0.85); opacity: 1; }
+    }
+    .sparkle {
+        position: fixed;
+        width: 20px; height: 20px;
+        background: radial-gradient(circle, #fff 0%, #ffd700 50%, transparent 70%);
+        border-radius: 50%;
+        animation: sparkle 0.5s ease-in-out infinite;
+        pointer-events: none;
+        z-index: 9999;
+    }
+    @keyframes sparkle {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.4; transform: scale(1.6); }
+    }
+    /* Visible keyboard focus on every interactive control */
+    button:focus-visible, input:focus-visible, .mode-btn:focus-visible {
+        outline: 3px solid #1e2a5e;
+        outline-offset: 2px;
+    }
+    .insignia { text-align: center; margin-top: 30px; }
+    .insignia svg { display: block; margin: 0 auto; }
+    .insignia-caption {
+        /* a11y: #6a74a8 at opacity .9 composites to 3.72:1 on white;
+           #5d6798 at full opacity is 5.44:1. */
+        color: #5d6798;
+        font-size: 6.5px;
+        letter-spacing: 1.2px;
+        opacity: 1;
+        font-weight: 800;
+        margin-top: 2px;
+    }
+    .sr-only {
+        position: absolute;
+        width: 1px; height: 1px;
+        padding: 0; margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .confetti, .sparkle { display: none !important; }
+        *, *::before, *::after {
+            animation-duration: 0.001ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.001ms !important;
+        }
+    }
+    @media (max-width: 480px) {
+        .card { padding: 24px 12px 20px; }
+        h1 { font-size: 21px; }
+        .problem-statement { font-size: 18px; padding: 12px 8px; }
+        .mode-btn { padding: 8px 12px; font-size: 11.5px; }
+        .cell-input { width: 44px; height: 42px; font-size: 17px; }
+        .cell { min-height: 52px; padding: 0 2px; }
+        .answer-row { font-size: 17px; gap: 4px; }
+        .answer-row .cell-input { width: 40px; height: 38px; font-size: 16px; }
+        .answer-row .cell-input.exp-input { width: 30px; height: 26px; font-size: 12px; }
+        .answer-term { gap: 3px; }
+    }
+    @media (max-width: 360px) {
+        .cell-input { width: 39px; font-size: 16px; }
+        .cell { padding: 0 1px; }
+    }
+</style>
+</head>
+<body>
+<main class="card" id="game-card">
+    <h1>Synthetic Division</h1>
+
+    <div class="info">
+        <div class="info-item">Problem: <span id="problemNum">1</span></div>
+        <div class="info-item" id="streak-display">Streak: <span id="streak">0</span></div>
+        <div class="info-item" id="acc-display">Accuracy: --</div>
+    </div>
+
+    <div class="mode-btns" role="group" aria-label="Choose a practice category">
+        <button type="button" class="mode-btn active" id="mode-std" aria-pressed="true" onclick="setMode('std')">All Terms Present</button>
+        <button type="button" class="mode-btn" id="mode-miss" aria-pressed="false" onclick="setMode('miss')">Missing Terms</button>
+    </div>
+
+    <div id="main-content"></div>
+
+    <!-- Polite region: announces each new problem and each step in words. The
+         tableau itself is drawn with CSS borders, which say nothing. -->
+    <p class="sr-only" id="announcer" aria-live="polite" aria-atomic="true"></p>
+
+    <!-- role="alert": role="status" carries an implicit polite politeness that
+         some screen readers honour over an explicit assertive, which would delay
+         or drop the correct/incorrect verdict. Matches the rest of the suite. -->
+    <div class="feedback" id="feedback" role="alert" aria-live="assertive" aria-atomic="true"></div>
+    <div id="next-btn-row" style="text-align:center;"></div>
+
+    <div class="helper-row" id="helper-buttons">
+        <button type="button" class="hint-btn" id="hint-toggle" aria-expanded="false" aria-controls="hint" onclick="toggleHint()">Show Hint</button>
+        <button type="button" class="steps-btn" id="steps-toggle" aria-expanded="false" aria-controls="steps-box" onclick="toggleSteps()">Show Worked Steps</button>
+        <button type="button" class="answer-btn" id="answer-toggle" aria-expanded="false" aria-controls="answer-box" onclick="toggleAnswer()">Show Answer</button>
+        <button type="button" class="skip-btn" onclick="skipProblem()">Skip</button>
+    </div>
+
+    <div class="hint-box" id="hint" style="display:none;"></div>
+    <div class="steps-box" id="steps-box" style="display:none;"></div>
+    <div class="answer-box" id="answer-box" style="display:none;"></div>
+
+    <div class="settings-row">
+        <label class="toggle-switch">
+            <input type="checkbox" id="confettiToggle" checked onchange="toggleConfettiSetting()">
+            <span class="toggle-slider"></span>
+        </label>
+        <span class="settings-label">Confetti celebrations</span>
+    </div>
+    <div class="stats-row"><button type="button" class="stats-btn" id="stats-btn" onclick="showStats()">My Stats</button></div>
+
+    <div class="insignia">
+        <svg viewBox="-28 -26 56 64" width="68" aria-hidden="true" focusable="false">
+            <defs>
+                <linearGradient id="pr-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#1e3a5f"/>
+                    <stop offset="100%" stop-color="#0d9488"/>
+                </linearGradient>
+            </defs>
+            <path id="pr-rose" fill="none" stroke="url(#pr-grad)" stroke-width="1.7" stroke-linejoin="round"></path>
+        </svg>
+        <div class="insignia-caption">POLAR ROSE STUDIO</div>
+    </div>
+</main>
+
+<div class="stats-overlay" id="stats-overlay" style="display:none;">
+    <div class="stats-panel" id="stats-panel" role="dialog" aria-modal="true" aria-labelledby="stats-heading" tabindex="-1"></div>
+</div>
+
+<script>
+/* =====================================================================
+   Small utilities
+   ===================================================================== */
+function ri(lo, hi) { return Math.floor(Math.random() * (hi - lo + 1)) + lo; }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function escHtml(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+/* parseFloat/parseInt stop at the first character they cannot read, so "3.7",
+   "3abc" and "3 4" would all pass as 3. Every entry is validated in full before
+   it is converted. Every box in this game holds a signed integer. */
+function parseStrictInt(raw) {
+    raw = String(raw).trim();
+    if (!/^[+-]?\d+$/.test(raw)) return null;
+    var n = parseInt(raw, 10);
+    return isNaN(n) ? null : n;
+}
+/* Spoken form of a signed number: a screen reader says "-3" as "dash 3". */
+function sayNum(n) { return (n < 0 ? 'negative ' + Math.abs(n) : String(n)); }
+function sayList(arr) { return arr.map(sayNum).join(', '); }
+
+/* =====================================================================
+   Polynomial printing
+   coeffs[0] is the leading coefficient; power of coeffs[i] is n-1-i.
+   ===================================================================== */
+function powerHtml(p) {
+    if (p === 0) return '';
+    if (p === 1) return 'x';
+    return 'x<sup>' + p + '</sup>';
+}
+function degreeWord(d) {
+    return ['zero', 'first', 'second', 'third', 'fourth', 'fifth'][d] || (d + 'th');
+}
+function powerSpoken(p) {
+    if (p === 0) return 'the constant term';
+    if (p === 1) return 'x';
+    if (p === 2) return 'x squared';
+    if (p === 3) return 'x cubed';
+    return 'x to the power of ' + p;
+}
+/* The printed polynomial omits any zero term entirely -- that omission is the
+   whole point of the Missing Terms category. */
+function polyHtml(coeffs) {
+    var n = coeffs.length, out = '', first = true, i, c, p, mag, body;
+    for (i = 0; i < n; i++) {
+        c = coeffs[i];
+        if (c === 0) continue;
+        p = n - 1 - i;
+        mag = Math.abs(c);
+        body = powerHtml(p);
+        if (p === 0 || mag !== 1) body = mag + body;
+        if (first) { out += (c < 0 ? '&minus;' : '') + body; first = false; }
+        else { out += (c < 0 ? ' &minus; ' : ' + ') + body; }
+    }
+    return out === '' ? '0' : out;
+}
+function polySpoken(coeffs) {
+    var n = coeffs.length, parts = [], first = true, i, c, p, mag, body;
+    for (i = 0; i < n; i++) {
+        c = coeffs[i];
+        if (c === 0) continue;
+        p = n - 1 - i;
+        mag = Math.abs(c);
+        if (p === 0) body = String(mag);
+        else if (p === 1) body = (mag === 1 ? 'x' : mag + ' x');
+        else {
+            /* "x squared" and "x cubed", not "x to the power of 2" -- these are
+               read aloud far more often than any higher power. */
+            var pw = (p === 2) ? 'x squared' : (p === 3) ? 'x cubed' : 'x to the power of ' + p;
+            body = (mag === 1 ? pw : mag + ' ' + pw);
+        }
+        if (first) { parts.push((c < 0 ? 'negative ' : '') + body); first = false; }
+        else { parts.push((c < 0 ? 'minus ' : 'plus ') + body); }
+    }
+    return parts.length ? parts.join(' ') : 'zero';
+}
+/* The divisor is (x - a), so a positive a prints as "x - a". */
+function divisorHtml(a) { return a < 0 ? 'x + ' + Math.abs(a) : 'x &minus; ' + a; }
+function divisorSpoken(a) { return a < 0 ? 'x plus ' + Math.abs(a) : 'x minus ' + a; }
+
+/* =====================================================================
+   Problem generation
+
+   Leading coefficient is always 1 and the dividend is degree 2 or 3, so the
+   arithmetic stays inside a developmental-algebra student's head and the
+   tableau stays inside a 320px phone.
+   ===================================================================== */
+/* Keep every product and sum mentally manageable. At 60 a cubic with a corner
+   value of 5 was producing steps like 4 x 13 = 52, which is outside the times
+   tables these students have automatic. */
+var MAX_INTERMEDIATE = 40;
+
+function runTableau(coeffs, a) {
+    var n = coeffs.length, products = [null], sums = [coeffs[0]], i;
+    for (i = 1; i < n; i++) {
+        products.push(a * sums[i - 1]);
+        sums.push(coeffs[i] + products[i]);
+    }
+    return { products: products, sums: sums };
+}
+
+function tableauIsGentle(coeffs, a) {
+    var t = runTableau(coeffs, a), i;
+    for (i = 1; i < t.products.length; i++) {
+        if (Math.abs(t.products[i]) > MAX_INTERMEDIATE) return false;
+        if (Math.abs(t.sums[i]) > MAX_INTERMEDIATE) return false;
+    }
+    return true;
+}
+
+/* Which powers are dropped from the printed polynomial.
+
+   Candidates are the interior powers only: never the leading term, and never
+   the constant. A dividend with the constant missing prints as "x^3 - 4x^2 + x",
+   which invites the student to factor an x out instead -- a different lesson,
+   and one that distracts from the placeholder idea. The gap should always sit
+   between two visible terms, where it is easy to miss and the 0 actually
+   matters. */
+function pickZeroSlots(n) {
+    var interior = [], i;
+    for (i = 1; i < n - 1; i++) interior.push(i);
+    if (interior.length === 0) return [];
+    var howMany = (interior.length >= 2 && Math.random() < 0.35) ? 2 : 1;
+    var chosen = [], pool = interior.slice();
+    while (chosen.length < howMany && pool.length > 0) {
+        var k = Math.floor(Math.random() * pool.length);
+        chosen.push(pool[k]);
+        pool.splice(k, 1);
+    }
+    return chosen;
+}
+
+/* Leading coefficient. The first three problems in a category are monic, so the
+   bring-down reads plainly as "copy it down"; after that a small leading
+   coefficient turns up regularly, because a student who has only ever divided
+   monic polynomials comes away thinking the first bottom-row entry is always 1.
+   Nothing above 4: the corner value multiplies it again every column, so a 5 or
+   a 6 compounds into arithmetic these students should not be spending their
+   attention on. Still monic a little under half the time. */
+function pickLeadCoefficient(seen) {
+    if (seen < 3) return 1;
+    return pick([1, 1, 1, 1, 2, 2, 3, 3, 4]);
+}
+
+/* A cubic multiplies the corner value by three successive sums, so a big corner
+   value compounds. Quadratics can afford a wider range. */
+function pickDivisorValue(n, seen) {
+    if (seen < 2) return pick([2, 3, -2]);
+    return (n >= 4) ? pick([-4, -3, -2, -1, 1, 2, 3, 4])
+                    : pick([-5, -4, -3, -2, -1, 1, 2, 3, 4, 5]);
+}
+
+/* Build a dividend that divides exactly, by multiplying a chosen quotient back
+   out by (x - a). Roughly a fifth of problems land on remainder 0 -- the case
+   students meet again in factoring, and the one that makes the whole method
+   look like it is for something. q[i] has power (n-2-i); multiplying by x moves
+   it to index i, and by -a to index i+1. */
+function expandFromQuotient(q, a) {
+    var n = q.length + 1, out = [], i;
+    for (i = 0; i < n; i++) out.push(0);
+    for (i = 0; i < q.length; i++) {
+        out[i] += q[i];
+        out[i + 1] += -a * q[i];
+    }
+    return out;
+}
+
+/* Does this problem make the student supply the powers of x in the answer row?
+
+   The first two in a category print them, so the read-off is purely about the
+   numbers while the student is still learning the table. From the third on they
+   supply the powers themselves, every time.
+
+   This was briefly a weighted mix instead. It is a plain switch on purpose: the
+   powers are the point of the read-off step, so making them occasional meant a
+   student could go several problems without meeting the degree drop at all. */
+var POWERS_INTRO_AFTER = 2;
+function needsPowers(seen) {
+    return seen >= POWERS_INTRO_AFTER;
+}
+
+var stdCount = 0, missCount = 0;
+
+function generateProblem(category) {
+    var n, a, coeffs, zeros, tries = 0, i, ok, q;
+
+    /* Ease in: the first couple of problems in each category are quadratics
+       with a positive divisor value, before cubics and x + a appear. */
+    var seen = (category === 'std') ? stdCount : missCount;
+    if (category === 'std') stdCount++; else missCount++;
+
+    /* Exact division cannot be forced into a chosen missing-term pattern, so it
+       is found by rejection. If it has not landed in 150 tries, drop it and take
+       an ordinary problem rather than spinning. */
+    var wantExact = (Math.random() < 0.22);
+
+    do {
+        tries++;
+        if (tries > 150) wantExact = false;
+
+        n = (seen < 2) ? 3 : (Math.random() < 0.62 ? 4 : 3);
+        if (category === 'miss' && seen < 2) n = 3;
+
+        /* a is the number that goes in the corner box: the zero of the divisor.
+           Both signs from the start (after the first two), because "use the
+           opposite of the constant" is the single most-missed step. */
+        a = pickDivisorValue(n, seen);
+        ok = true;
+
+        if (wantExact) {
+            q = [pickLeadCoefficient(seen)];
+            for (i = 1; i < n - 1; i++) q.push(ri(-5, 5));
+            coeffs = expandFromQuotient(q, a);
+            /* The sums are the quotient itself here, so the tableau is always
+               gentle -- but the printed coefficients can still blow up. */
+            for (i = 1; i < n; i++) if (Math.abs(coeffs[i]) > 14) ok = false;
+        } else {
+            coeffs = [pickLeadCoefficient(seen)];
+            for (i = 1; i < n; i++) coeffs.push(ri(-9, 9));
+            if (category === 'miss') {
+                zeros = pickZeroSlots(n);
+                for (i = 0; i < zeros.length; i++) coeffs[zeros[i]] = 0;
+                /* The constant is never the missing term, so it must not land
+                   on zero by chance either. */
+                if (coeffs[n - 1] === 0) coeffs[n - 1] = pick([-9, -7, -6, -5, -4, -3, -2, 2, 3, 4, 5, 6, 7, 9]);
+            } else {
+                for (i = 1; i < n; i++) if (coeffs[i] === 0) coeffs[i] = pick([-3, -2, 2, 3]);
+            }
+        }
+
+        if (ok) ok = tableauIsGentle(coeffs, a);
+        /* A dividend that still has a zero coefficient in the Standard category
+           would quietly turn it into a Missing Terms problem. */
+        if (category === 'std') {
+            for (i = 1; i < n; i++) if (coeffs[i] === 0) ok = false;
+        } else {
+            /* The exact-division path builds the coefficients by multiplying a
+               quotient back out, so it can land on a zero constant or on no
+               gap at all. Both are rejected here rather than patched. */
+            if (coeffs[n - 1] === 0) ok = false;
+            var zeroCount = 0;
+            for (i = 1; i < n - 1; i++) if (coeffs[i] === 0) zeroCount++;
+            if (zeroCount === 0) ok = false;
+        }
+    } while (!ok && tries < 400);
+
+    if (!ok) { n = 4; a = 2; coeffs = (category === 'miss') ? [1, 0, -3, 5] : [1, -4, 2, 5]; }
+
+    var t = runTableau(coeffs, a);
+    var quotient = t.sums.slice(0, n - 1);
+    var remainder = t.sums[n - 1];
+
+    var missingPowers = [];
+    for (i = 1; i < n; i++) if (coeffs[i] === 0) missingPowers.push(n - 1 - i);
+
+    return {
+        category: category,
+        n: n,
+        a: a,
+        indexInCategory: seen,
+        needPowers: needsPowers(seen),
+        coeffs: coeffs,
+        products: t.products,
+        sums: t.sums,
+        quotient: quotient,
+        remainder: remainder,
+        missingPowers: missingPowers
+    };
+}
+
+/* =====================================================================
+   State
+   ===================================================================== */
+var mode = 'std';                 // 'std' | 'miss'
+var currentProblem = null;
+var stage = 'table';              // 'table' | 'answer' | 'done'
+var tableCursor = 0;              // index into tableOrder() of the live box
+var wrongCount = 0;               // wrong entries in the current problem
+var forfeited = false;            // answer revealed or skipped: no credit
+var attemptCounted = false;       // the problem has been added to the total
+var lastFocusedId = null;
+var streak = 0;
+var bestStreak = 0;
+var problemNum = 0;
+var stepsRevealed = 0;
+var confettiEnabled = true;
+var resetConfirming = false;
+
+var CATS = ['std', 'miss'];
+var CAT_LABELS = { std: 'All Terms Present', miss: 'Missing Terms' };
+var stats = { std: { c: 0, t: 0 }, miss: { c: 0, t: 0 } };
+
+var SAVE_KEY = 'syntheticDivisionGame_v1';
+
+/* --- Persistence hardening -------------------------------------------
+   Anything read back from localStorage is untrusted: another script on the
+   origin, a shared device, or a curious student can edit it. These values are
+   interpolated into the stats panel, so they are coerced to plain non-negative
+   integers on load and escaped again on the way out. */
+function safeCount(v, max) {
+    var n = Number(v);
+    if (!isFinite(n) || n < 0) return 0;
+    n = Math.floor(n);
+    return n > max ? max : n;
+}
+function sanitizeStats(raw) {
+    var src = (raw && typeof raw === 'object') ? raw : {};
+    var out = {}, i, cell, t, c;
+    for (i = 0; i < CATS.length; i++) {
+        cell = (src[CATS[i]] && typeof src[CATS[i]] === 'object') ? src[CATS[i]] : {};
+        t = safeCount(cell.t, 1e6);
+        c = safeCount(cell.c, t);     // correct can never exceed attempts
+        out[CATS[i]] = { c: c, t: t };
+    }
+    return out;
+}
+function saveState() {
+    try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify({
+            stats: stats, bestStreak: bestStreak, problemNum: problemNum,
+            confettiEnabled: confettiEnabled
+        }));
+    } catch (e) { /* storage unavailable -- play without saving */ }
+}
+function loadState() {
+    try {
+        var raw = localStorage.getItem(SAVE_KEY);
+        if (raw) {
+            var d = JSON.parse(raw);
+            stats = sanitizeStats(d && d.stats);
+            bestStreak = safeCount(d && d.bestStreak, 1e6);
+            problemNum = safeCount(d && d.problemNum, 1e6);
+            if (d && typeof d.confettiEnabled === 'boolean') confettiEnabled = d.confettiEnabled;
+        }
+    } catch (e) {
+        stats = sanitizeStats(null);   // corrupt or hostile state -> clean slate
+    }
+    var ct = document.getElementById('confettiToggle');
+    if (ct) ct.checked = confettiEnabled;
+}
+
+/* =====================================================================
+   Announcements
+   ===================================================================== */
+function announce(text) {
+    var el = document.getElementById('announcer');
+    if (!el) return;
+    // Clearing first forces assistive tech to re-announce identical text.
+    el.textContent = '';
+    setTimeout(function () { el.textContent = text; }, 60);
+}
+function setFeedback(text, cls) {
+    var fb = document.getElementById('feedback');
+    if (!fb) return;
+    fb.textContent = text;
+    fb.className = 'feedback' + (cls ? ' ' + cls : '');
+}
+/* A student clears three or four of these on the way through a single problem,
+   so the same phrase every time stops reading as encouragement and starts
+   reading as a machine noise. Varied, but always the same shape: yes, and
+   carry on. */
+function cheer() {
+    return pick(['Right! Keep going!', 'Yes! Keep going.', 'That\'s it -- keep going!',
+        'Nice! Keep going.', 'Got it! Keep going.', 'Exactly right -- keep going!']);
+}
+
+/* =====================================================================
+   Cell builders
+   ===================================================================== */
+function cellInput(id, label, cls) {
+    return '<input type="text" inputmode="decimal" autocomplete="off" autocorrect="off" ' +
+        'autocapitalize="off" spellcheck="false" class="cell-input' + (cls ? ' ' + cls : '') +
+        '" id="' + id + '" aria-label="' + escHtml(label) + '" disabled ' +
+        'onfocus="trackFocus(\'' + id + '\')" oninput="cellTyped(\'' + id + '\')" ' +
+        'onkeydown="cellKey(event, \'' + id + '\')">';
+}
+
+function coeffLabel(i, n) {
+    var p = n - 1 - i;
+    return 'Top row, coefficient of ' + powerSpoken(p) + ', box ' + (i + 1) + ' of ' + n;
+}
+
+/* =====================================================================
+   Rendering
+   ===================================================================== */
+function renderProblem() {
+    var p = currentProblem, n = p.n, i, html = '';
+
+    html += '<div class="problem-statement">';
+    html += '<span class="ps-label">DIVIDE</span>';
+    html += '<span aria-hidden="true">' +
+        '<span class="frac"><span class="frac-num">' + polyHtml(p.coeffs) + '</span>' +
+        '<span class="frac-bar"></span>' +
+        '<span class="frac-den">' + divisorHtml(p.a) + '</span></span></span>';
+    html += '</div>';
+
+    html += '<div class="step-instruction" id="step-instruction"></div>';
+
+    /* The tableau. Column 0 holds the divisor value; columns 1..n hold the
+       coefficients. The vertical rule runs down the right of column 0 through
+       the top two rows, and the horizontal rule runs under the product row
+       across the coefficient columns -- the two meet at one corner. */
+    html += '<div class="tableau-wrap"><div class="tableau" role="group" ' +
+        'aria-label="Synthetic division table" style="grid-template-columns: auto repeat(' + n + ', auto);">';
+
+    // Row 1: divisor value, then the coefficients
+    html += '<div class="cell rule-right">' +
+        cellInput('divBox', 'Corner box: the divisor value, which is the opposite of the constant in ' + divisorSpoken(p.a)) +
+        '</div>';
+    for (i = 0; i < n; i++) {
+        html += '<div class="cell">' + cellInput('c' + i, coeffLabel(i, n)) + '</div>';
+    }
+
+    // Row 2: nothing under the leading coefficient, then the products
+    html += '<div class="cell rule-right"></div>';
+    // Nothing is ever written under the leading coefficient -- textbooks leave
+    // this cell blank, and a placeholder dot here reads as a stray decimal point.
+    html += '<div class="cell"></div>';
+    for (i = 1; i < n; i++) {
+        html += '<div class="cell">' +
+            cellInput('p' + i, 'Middle row, column ' + (i + 1) + ': the product, what you get by multiplying the divisor value by the sum in column ' + i) +
+            '</div>';
+    }
+
+    // Row 3: the bring-down and the sums, under the horizontal rule
+    html += '<div class="cell"></div>';
+    for (i = 0; i < n; i++) {
+        var lbl = (i === 0)
+            ? 'Bottom row, column 1: bring down the leading coefficient'
+            : (i === n - 1
+                ? 'Bottom row, column ' + (i + 1) + ': the last sum, which is the remainder'
+                : 'Bottom row, column ' + (i + 1) + ': the sum of the top row and the middle row in this column');
+        html += '<div class="cell rule-top">' + cellInput('s' + i, lbl) + '</div>';
+    }
+    html += '</div></div>';
+
+    // The "table complete" banner, then the quotient and remainder block
+    html += '<div id="table-done-slot"></div>';
+    html += '<div id="answer-block-slot"></div>';
+
+    html += '<div class="submit-row" id="submit-row" style="display:none;"><button type="button" class="submit-btn" id="submit-btn" onclick="checkCurrent()">Check Answer</button></div>';
+    html += '<div class="key-row">' +
+        '<button type="button" class="key-btn" aria-label="Toggle the plus or minus sign of the box you are in" onclick="toggleSign()"><span aria-hidden="true">&plusmn;</span></button>' +
+        '<span class="key-note">for negatives</span></div>';
+
+    document.getElementById('main-content').innerHTML = html;
+    document.getElementById('answer-box').style.display = 'none';
+    document.getElementById('hint').style.display = 'none';
+    document.getElementById('steps-box').style.display = 'none';
+    document.getElementById('next-btn-row').innerHTML = '';
+    resetHelperButtons();
+    setFeedback('', '');
+
+    enterTableStage();
+}
+
+function resetHelperButtons() {
+    [['hint-toggle', 'Show Hint'], ['steps-toggle', 'Show Worked Steps'], ['answer-toggle', 'Show Answer']]
+        .forEach(function (pairs) {
+            var b = document.getElementById(pairs[0]);
+            if (b) { b.setAttribute('aria-expanded', 'false'); b.textContent = pairs[1]; }
+        });
+    document.getElementById('helper-buttons').style.display = 'block';
+}
+
+function setInstruction(text) {
+    var el = document.getElementById('step-instruction');
+    if (el) el.textContent = text;
+}
+function setSubmitLabel(text) {
+    var b = document.getElementById('submit-btn');
+    if (b) b.textContent = text;
+    var row = document.getElementById('submit-row');
+    if (row) row.style.display = text ? 'block' : 'none';
+}
+function enable(id, on) {
+    var el = document.getElementById(id);
+    if (el) el.disabled = !on;
+}
+function lockOk(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.disabled = true;
+    el.classList.remove('field-error');
+    el.removeAttribute('aria-invalid');
+    el.classList.add('locked-ok');
+}
+function focusFirst(id) {
+    var el = document.getElementById(id);
+    if (el) { el.focus(); lastFocusedId = id; }
+}
+
+/* =====================================================================
+   Stage 1: the setup gate
+   ===================================================================== */
+/* Building the tableau is one continuous stage: the corner box, the coefficient
+   row, and then the arithmetic, one box at a time. Every entry is marked the
+   moment it is finished -- green and move on, or flagged and stay put. Nothing
+   here is a judgement call for the student, it is all execution, so there is
+   nothing to be gained by making them commit a whole row and then hunt for
+   which box went wrong.
+
+   Reading off the quotient at the end is different, and is still committed:
+   see enterAnswerStage. */
+function tableOrder() {
+    var p = currentProblem, ids = ['divBox'], i;
+    for (i = 0; i < p.n; i++) ids.push('c' + i);
+    ids.push('s0');
+    for (i = 1; i < p.n; i++) { ids.push('p' + i); ids.push('s' + i); }
+    return ids;
+}
+function expectedFor(id) {
+    var p = currentProblem;
+    if (id === 'divBox') return p.a;
+    if (id.charAt(0) === 'c') return p.coeffs[parseInt(id.slice(1), 10)];
+    if (id.charAt(0) === 'p') return p.products[parseInt(id.slice(1), 10)];
+    if (id.charAt(0) === 's') {
+        var k = parseInt(id.slice(1), 10);
+        return k === 0 ? p.coeffs[0] : p.sums[k];
+    }
+    return null;
+}
+
+function enterTableStage() {
+    stage = 'table';
+    tableCursor = 0;
+    var p = currentProblem;
+    setSubmitLabel('');
+    announce('New problem. ' + CAT_LABELS[p.category] + '. Divide ' + polySpoken(p.coeffs) +
+        ' by ' + divisorSpoken(p.a) + '. Each box is checked as you finish it. ' +
+        'Start with the corner box: the divisor value.' +
+        (p.category === 'miss' ? ' Remember, if a power is missing it has a coefficient of 0.' : ''));
+    activateTableBox(true);
+}
+
+/* Exactly one box is live at a time. A wrong entry does not advance, so a bad
+   product can never be carried into the next column. */
+function activateTableBox(quiet) {
+    var ids = tableOrder();
+    if (tableCursor >= ids.length) { enterAnswerStage(); return; }
+    var id = ids[tableCursor];
+    enable(id, true);
+    setInstruction(instructionFor(id));
+    if (!quiet) announce(spokenStepFor(id));
+    focusFirst(id);
+}
+
+function instructionFor(id) {
+    var p = currentProblem, k;
+    if (id === 'divBox') return 'Corner box: the value that makes ' + divisorHtml(p.a).replace(/&minus;/g, '-') + ' zero.';
+    if (id.charAt(0) === 'c') {
+        return p.category === 'miss'
+            ? 'Top row: the coefficients. If a power is missing, it has a coefficient of 0.'
+            : 'Top row: the coefficients, in descending order.';
+    }
+    if (id === 's0') return 'Bring down the leading coefficient, ' + p.coeffs[0] + '.';
+    k = parseInt(id.slice(1), 10);
+    if (id.charAt(0) === 'p') return 'Column ' + (k + 1) + ': multiply ' + p.a + ' by ' + p.sums[k - 1] + '.';
+    return 'Column ' + (k + 1) + ': add ' + p.coeffs[k] + ' and ' + p.products[k] + '.';
+}
+function spokenStepFor(id) {
+    var p = currentProblem, k;
+    if (id === 'divBox') return 'Corner box: the divisor value.';
+    if (id.charAt(0) === 'c') {
+        k = parseInt(id.slice(1), 10);
+        return 'Top row, box ' + (k + 1) + ' of ' + p.n + ': the coefficient of ' + powerSpoken(p.n - 1 - k) + '.';
+    }
+    if (id === 's0') return 'Bring down the leading coefficient, ' + sayNum(p.coeffs[0]) + ', into the bottom row.';
+    k = parseInt(id.slice(1), 10);
+    if (id.charAt(0) === 'p') {
+        return 'Column ' + (k + 1) + ', middle row. Multiply ' + sayNum(p.a) + ' by ' + sayNum(p.sums[k - 1]) + '.';
+    }
+    return 'Column ' + (k + 1) + ', bottom row. Add ' + sayNum(p.coeffs[k]) + ' and ' + sayNum(p.products[k]) + '.';
+}
+
+/* The coaching that used to arrive after a whole row was submitted now arrives
+   on the box that earned it. The words are the same: a red box says where, and
+   these say why. */
+function coachingFor(id) {
+    var p = currentProblem, k;
+    if (id === 'divBox') {
+        return 'Not that one -- you are dividing by ' +
+            (p.a < 0 ? 'x + ' + Math.abs(p.a) : 'x - ' + p.a) + ', so the corner box gets the opposite: ' +
+            (p.a < 0 ? 'a negative number.' : 'a positive number.');
+    }
+    if (id.charAt(0) === 'c') {
+        return p.category === 'miss'
+            ? 'Not quite. The top row needs one slot for every power from the highest down to the constant, ' +
+              'and if a power is missing, it has a coefficient of 0.'
+            : 'Not quite -- read the coefficients straight off the dividend, in descending order.';
+    }
+    if (id === 's0') return 'Close -- the first number in the bottom row is just the leading coefficient, copied straight down.';
+    k = parseInt(id.slice(1), 10);
+    if (id.charAt(0) === 'p') return 'Almost -- the middle row is a product: ' + p.a + ' times ' + p.sums[k - 1] + '.';
+    return 'So close -- the bottom row is a sum: add the two numbers above it in this column.';
+}
+
+/* Called when an entry is finished (see cellTyped). Green and move on, or flag
+   it and stay. */
+/* An empty box is not a wrong answer, it is no answer -- so it is never charged.
+
+   It also has a specific cause worth teaching. The suite's own convention is
+   that a coefficient of 1 is never written (`1x` prints as `x`), so a student
+   looking at `x^3 - 4x^2 + 5` and leaving the first box empty is following the
+   rule we taught them. Charging a slip for that is punishing them for being
+   right about notation.
+
+   The wording states the rule in general and never says "this box is a 1".
+   A message that confirmed it would let a student press Enter down the row to
+   find every 1 in the problem for free. */
+var BLANK_NUDGE_TABLE = 'A box cannot be left empty. Remember that a term written with no ' +
+    'number in front of it -- like x^3 -- has a coefficient of 1, and -x^3 has -1.';
+var BLANK_NUDGE_ANSWER = 'Every box needs a number, including the powers. A term with no ' +
+    'number in front has a coefficient of 1, and a plain x has a power of 1.';
+
+function isBlankEntry(raw) {
+    return raw === '' || raw === '-' || raw === '+';
+}
+
+function gradeLiveBox(id) {
+    var expected = expectedFor(id);
+    var raw = readCell(id);
+    if (isBlankEntry(raw)) {
+        markField(id, false);
+        setFeedback(BLANK_NUDGE_TABLE, 'incorrect');   // deliberately NOT charged
+        var blankEl = document.getElementById(id);
+        if (blankEl) blankEl.focus();
+        return;
+    }
+    var v = parseStrictInt(raw);
+    var ids = tableOrder();
+    if (v !== null && v === expected) {
+        markField(id, true);
+        lockOk(id);
+        tableCursor++;
+        // Milestones only: a cheer on every box would be constant noise.
+        /* The whole-table congratulation is the banner drawn by enterAnswerStage,
+           not this line -- down here it would sit under the Check button, below
+           where the student is already looking. */
+        if (tableCursor >= ids.length) setFeedback('', '');
+        else if (id === 'c' + (currentProblem.n - 1)) setFeedback(cheer(), 'correct');
+        else setFeedback('', '');
+        activateTableBox(false);
+    } else {
+        markField(id, false);
+        recordWrongEntry();
+        setFeedback(coachingFor(id), 'incorrect');
+        var el = document.getElementById(id);
+        if (el) el.select();
+    }
+}
+
+/* =====================================================================
+   Stage 3: quotient and remainder
+   ===================================================================== */
+function enterAnswerStage() {
+    var p = currentProblem, n = p.n, i, html = '';
+    stage = 'answer';
+
+    html += '<div class="answer-block">';
+    html += '<div class="answer-caption">NOW READ OFF THE ANSWER</div>';
+    html += '<div class="answer-row' + (p.needPowers ? ' has-powers' : '') + '">';
+    for (i = 0; i < n - 1; i++) {
+        var pw = n - 2 - i;
+        html += '<span class="answer-term">';
+        if (i > 0) html += '<span aria-hidden="true">+</span>';
+        if (p.needPowers) {
+            /* The coefficient box is not told which power it belongs to, so its
+               name has to be positional rather than "the coefficient of x
+               squared" -- naming the power would hand over the answer to the
+               box sitting right next to it. */
+            html += cellInput('q' + i, 'Quotient term ' + (i + 1) + ' of ' + (n - 1) + ': the coefficient');
+            if (pw > 0) {
+                html += '<span aria-hidden="true">x</span>';
+                html += '<span class="exp-slot">' +
+                    cellInput('e' + i, 'Quotient term ' + (i + 1) + ' of ' + (n - 1) + ': the power of x', 'exp-input') +
+                    '</span>';
+            }
+        } else {
+            html += cellInput('q' + i, 'Quotient: the coefficient of ' + powerSpoken(pw));
+            if (pw > 0) html += '<span aria-hidden="true">' + powerHtml(pw) + '</span>';
+        }
+        html += '</span>';
+    }
+    html += '</div>';
+    html += '<div class="answer-sep"></div>';
+    html += '<div class="answer-row"><span aria-hidden="true">remainder</span>' +
+        cellInput('rem', 'The remainder') + '</div>';
+    html += '</div>';
+
+    /* Green, prominent, and sitting exactly where the eye travels next: the
+       table is banked, now read it. The visual copy is aria-hidden because the
+       spoken announcement below already carries the same news in words. */
+    var doneSlot = document.getElementById('table-done-slot');
+    if (doneSlot) {
+        doneSlot.innerHTML = '<div class="table-done" aria-hidden="true">' +
+            pick(['Table completed correctly -- great job!',
+                  'Every entry correct. Great job!',
+                  'That is the whole table, all correct -- nice work!',
+                  'Table complete, and all of it right. Well done!']) +
+            '</div>';
+    }
+    document.getElementById('answer-block-slot').innerHTML = html;
+    for (i = 0; i < n - 1; i++) {
+        enable('q' + i, true);
+        if (p.needPowers && (n - 2 - i) > 0) enable('e' + i, true);
+    }
+    enable('rem', true);
+
+    if (p.needPowers) {
+        setInstruction('The bottom row is the answer. This time you write the powers of x as well -- ' +
+            'work out what power each quotient term should carry.');
+        setSubmitLabel('Check Answer');
+        announce('That is the whole table, great work. Bottom row: ' + sayList(p.sums) +
+            '. Last step: read off the answer, and this time fill in the powers of x as well. ' +
+            'The first ' + (n - 1) + ' numbers are the quotient coefficients and the last number is the remainder. ' +
+            'You decide what power of x belongs on each quotient term.');
+    } else {
+        setInstruction('The bottom row is the answer. The first ' + (n - 1) +
+            ' numbers are the quotient coefficients, one degree lower than you started; the last one is the remainder.');
+        setSubmitLabel('Check Answer');
+        announce('That is the whole table, great work. Bottom row: ' + sayList(p.sums) + '. Last step: read off the answer. ' +
+            'The first ' + (n - 1) + ' numbers are the coefficients of the quotient, starting at ' +
+            powerSpoken(n - 2) + ', and the last number is the remainder.');
+    }
+    focusFirst('q0');
+}
+
+/* =====================================================================
+   Grading
+   ===================================================================== */
+/* The violet ring alone would be colour-only error signalling; aria-invalid
+   gives a screen reader the same information. */
+function markField(id, ok) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('field-error', !ok);
+    if (ok) el.removeAttribute('aria-invalid'); else el.setAttribute('aria-invalid', 'true');
+}
+function readCell(id) {
+    var el = document.getElementById(id);
+    return el ? el.value.trim() : '';
+}
+/* Returns null when every listed box matches, or an array of the ids that do
+   not. An empty box is reported separately so the message can say so. */
+function gradeCells(pairs) {
+    var wrong = [], blank = 0, i, raw, v;
+    for (i = 0; i < pairs.length; i++) {
+        raw = readCell(pairs[i][0]);
+        if (raw === '') { blank++; wrong.push(pairs[i][0]); markField(pairs[i][0], false); continue; }
+        v = parseStrictInt(raw);
+        if (v === null || v !== pairs[i][1]) { wrong.push(pairs[i][0]); markField(pairs[i][0], false); }
+        else markField(pairs[i][0], true);
+    }
+    return { wrong: wrong, blank: blank };
+}
+
+/* A problem is eleven to fifteen boxes. Ending the streak on the first slip
+   means one mis-keyed sign wipes out a run the student earned over five
+   problems, which is not what a wrong digit deserves and is not how anyone
+   marks by hand. Two slips are free; the third is what breaks the run.
+
+   Revealing the answer, opening the worked steps or skipping is a different
+   thing entirely and still forfeits the problem outright. */
+var FREE_MISTAKES = 2;
+
+function countAttemptOnce() {
+    if (attemptCounted) return;
+    attemptCounted = true;
+    stats[currentProblem.category].t++;
+}
+function recordWrongEntry() {
+    wrongCount++;
+    if (wrongCount > FREE_MISTAKES && streak !== 0) {
+        streak = 0;
+        updateDisplay();
+    }
+    saveState();
+}
+function forfeitProblem() {
+    if (forfeited) return;
+    forfeited = true;
+    streak = 0;
+    countAttemptOnce();
+    updateDisplay();
+    saveState();
+}
+function solvedCleanly() {
+    return !forfeited && wrongCount <= FREE_MISTAKES;
+}
+
+/* checkCurrent now serves only the answer stage. Everything before it is graded
+   box by box as it is entered, so there is nothing left to submit. */
+function checkCurrent() {
+    var p = currentProblem, i, pairs, res;
+    if (stage !== 'answer') return;
+
+    if (stage === 'answer') {
+        pairs = [];
+        for (i = 0; i < p.n - 1; i++) {
+            pairs.push(['q' + i, p.quotient[i]]);
+            if (p.needPowers && (p.n - 2 - i) > 0) pairs.push(['e' + i, p.n - 2 - i]);
+        }
+        pairs.push(['rem', p.remainder]);
+        res = gradeCells(pairs);
+        if (res.wrong.length === 0) {
+            for (i = 0; i < p.n - 1; i++) {
+                lockOk('q' + i);
+                if (p.needPowers && (p.n - 2 - i) > 0) lockOk('e' + i);
+            }
+            lockOk('rem');
+            finishProblem();
+        } else if (res.blank > 0 && res.wrong.length === res.blank) {
+            /* Nothing is wrong, boxes are just empty -- most often the ones
+               holding a coefficient of 1 or a power of 1, which convention says
+               you do not write. A nudge, never a deduction. */
+            setFeedback(BLANK_NUDGE_ANSWER, 'incorrect');
+        } else {
+            recordWrongEntry();
+            /* Split the two failures apart. A student who has the numbers right
+               but the powers wrong has made a completely different mistake from
+               one who miscopied the row, and telling them to "copy the bottom
+               row across" when they already did is useless. */
+            var powersWrong = res.wrong.some(function (id) { return id.charAt(0) === 'e'; });
+            var numbersWrong = res.wrong.some(function (id) { return id.charAt(0) !== 'e'; });
+            var amsg;
+            if (powersWrong && !numbersWrong) {
+                amsg = 'The numbers are all right -- now have a look at the powers of x. Dividing by a ' +
+                    'linear factor takes one degree off, so the quotient starts one power lower than the dividend.';
+            } else if (powersWrong) {
+                amsg = 'Almost! Check both the numbers and the powers -- the quotient starts one degree ' +
+                    'lower than the dividend, and the last bottom-row number is the remainder.';
+            } else {
+                amsg = 'Almost! Copy the bottom row straight across: the first ' + (p.n - 1) +
+                    ' numbers are the quotient coefficients and the last one is the remainder.';
+            }
+            setFeedback(amsg, 'incorrect');
+        }
+    }
+}
+
+function finishProblem() {
+    var p = currentProblem;
+    stage = 'done';
+    setInstruction('');
+    var subBtn = document.getElementById('submit-btn');
+    if (subBtn) subBtn.style.display = 'none';
+    var keyRow = document.querySelector('.key-row');
+    if (keyRow) keyRow.style.display = 'none';
+
+    countAttemptOnce();
+    if (solvedCleanly()) {
+        stats[p.category].c++;
+        streak++;
+        if (streak > bestStreak) bestStreak = streak;
+        celebrateStreak(streak);
+        setFeedback(pick(['Correct!', 'Great work!', 'Nailed it!', 'Perfect!',
+            'Clean run -- well done!', 'Excellent!']), 'correct');
+    } else {
+        /* A problem that was missed or revealed still earns no credit and does
+           not restart the streak -- but the game does not say so. The streak
+           chip sitting at 0 is already visible, so narrating the penalty just
+           adds a sting to the moment the student finally got there. */
+        streak = 0;
+        setFeedback(pick(['Nice work getting there!', 'Well done -- you finished it!',
+            'You got it! Nice work.', 'Finished -- well done!']), 'correct');
+    }
+    updateDisplay();
+    saveState();
+
+    /* Match the typographic minus used everywhere else rather than dropping a
+       hyphen into the middle of a line of real notation. */
+    var remHtml = (p.remainder < 0) ? '&minus;' + Math.abs(p.remainder) : String(p.remainder);
+    var recap = 'Answer: ' + polyHtml(p.quotient) + ', remainder ' + remHtml;
+    document.getElementById('main-content').insertAdjacentHTML('beforeend',
+        '<div class="running-row" role="img" aria-label="' +
+        escHtml('Answer: the quotient is ' + polySpoken(p.quotient) + ', with a remainder of ' + sayNum(p.remainder) +
+            (p.remainder === 0 ? '. Because the remainder is zero, ' + divisorSpoken(p.a) + ' is a factor of the dividend.' : '.')) +
+        '"><span aria-hidden="true">' + recap +
+        (p.remainder === 0 ? '<br>Remainder 0, so ' + divisorHtml(p.a) + ' is a factor.' : '') +
+        '</span></div>');
+
+    document.getElementById('next-btn-row').innerHTML =
+        '<button type="button" class="submit-btn next-btn" onclick="nextProblem()">Next Problem <span aria-hidden="true">&rarr;</span></button>';
+    var nb = document.querySelector('.next-btn');
+    if (nb) nb.focus();
+}
+
+function nextProblem() {
+    problemNum++;
+    newProblem();
+    updateDisplay();
+}
+function newProblem() {
+    currentProblem = generateProblem(mode);
+    wrongCount = 0;
+    forfeited = false;
+    attemptCounted = false;
+    stepsRevealed = 0;
+    renderProblem();
+}
+
+/* =====================================================================
+   Keyboard and the plus/minus key
+   ===================================================================== */
+function trackFocus(id) { lastFocusedId = id; }
+
+/* iOS numeric and decimal pads have no minus sign, so without this key a
+   negative entry is literally untypeable -- and almost every box in this game
+   can be negative. It inserts at the front of whatever box has focus. */
+function toggleSign() {
+    cancelAutoAdvance();
+    var el = lastFocusedId ? document.getElementById(lastFocusedId) : null;
+    if (!el || el.disabled) {
+        var live = liveInputs();
+        el = live.length ? live[0] : null;
+    }
+    if (!el) return;
+    /* If auto-advance just moved us out of a box and the new one is still empty,
+       the student almost certainly means "make what I just typed negative" --
+       they typed the digits, then reached for the minus. Without this the sign
+       lands in the next box instead, which is the one way auto-advance could
+       actively make things worse. */
+    if (el.value.trim() === '' && lastAdvancedFrom && (Date.now() - lastAdvancedAt) < 4000) {
+        var prev = document.getElementById(lastAdvancedFrom);
+        if (prev && !prev.disabled && prev.value.trim() !== '') el = prev;
+    }
+    el.value = el.value.charAt(0) === '-' ? el.value.slice(1) : '-' + el.value;
+    el.focus();
+    lastFocusedId = el.id;
+    lastAdvancedFrom = null;
+    // Re-arm, so "3" then minus then a pause still carries on to the next box.
+    cellTyped(el.id);
+}
+
+/* The order a person actually works in, which is NOT the order the boxes sit in
+   the markup. The tableau is built row by row, so the DOM runs p1, p2, p3, then
+   s0, s1, s2, s3 -- but the work goes multiply, add, multiply, add down each
+   column in turn. Arrow keys and auto-advance both follow this list instead. */
+function logicalOrder() {
+    var p = currentProblem, ids = [], i;
+    if (!p) return [];
+    ids.push('divBox');
+    for (i = 0; i < p.n; i++) ids.push('c' + i);
+    ids.push('s0');
+    for (i = 1; i < p.n; i++) { ids.push('p' + i); ids.push('s' + i); }
+    for (i = 0; i < p.n - 1; i++) {
+        ids.push('q' + i);
+        if (p.needPowers && (p.n - 2 - i) > 0) ids.push('e' + i);
+    }
+    ids.push('rem');
+    return ids;
+}
+function liveInputs() {
+    var ids = logicalOrder(), out = [], i, el;
+    for (i = 0; i < ids.length; i++) {
+        el = document.getElementById(ids[i]);
+        if (el && !el.disabled) out.push(el);
+    }
+    return out;
+}
+
+/* =====================================================================
+   Auto-advance
+
+   Moving the cursor on by itself saves a Tab on every single box, which over a
+   table of eleven adds up. The two things it must never do are jump away in the
+   middle of a two-digit number, and steal the box out from under the plus/minus
+   key.
+
+   So it never advances on a bare "-", and for a box that could still be growing
+   it waits a beat rather than moving on the first keystroke. Boxes whose valid
+   answers are a single digit -- the corner box and the power boxes -- can move
+   on immediately, because there is nothing more to type.
+   ===================================================================== */
+var autoAdvance = true;
+var AUTO_ADVANCE_MS = 750;
+var PREFIX_GRACE_MS = 2600;
+var advanceTimer = null;
+var suppressNextAdvance = false;
+var lastAdvancedFrom = null;
+var lastAdvancedAt = 0;
+/* Corner box holds the divisor value (magnitude 1..5) and the power boxes hold
+   0..3, so in both a single digit is a finished entry. */
+var SINGLE_DIGIT_BOX = /^(divBox|e\d+)$/;
+
+function cancelAutoAdvance() {
+    if (advanceTimer) { clearTimeout(advanceTimer); advanceTimer = null; }
+}
+function advanceFrom(id) {
+    var live = liveInputs(), i;
+    for (i = 0; i < live.length; i++) if (live[i].id === id) break;
+    if (i === live.length || i + 1 >= live.length) return;   // last box: stay put
+    lastAdvancedFrom = id;
+    lastAdvancedAt = Date.now();
+    live[i + 1].focus();
+    live[i + 1].select();
+    lastFocusedId = live[i + 1].id;
+}
+/* Deciding an entry is finished is the whole problem here. Get it wrong and a
+   student typing -36 gets marked wrong at "-3" and loses the streak for typing
+   slowly, which would be a far worse bug than the missing Tab it replaces.
+
+   Three things keep that from happening. A lone sign is never an entry. Two
+   digits is always the end, because nothing in this game runs to three. And in
+   the table stage, an entry that is still a prefix of the correct answer means
+   the student is mid-number and on track, so the clock is simply not started --
+   with a long backstop in case they have actually stopped and are just wrong. */
+function isOnTrackPrefix(id, raw) {
+    if (stage !== 'table') return false;
+    var expected = expectedFor(id);
+    if (expected === null || expected === undefined) return false;
+    return String(expected).indexOf(raw) === 0 && raw !== String(expected);
+}
+function finishEntry(id) {
+    if (stage === 'table') gradeLiveBox(id);
+    else advanceFrom(id);
+}
+function cellTyped(id) {
+    cancelAutoAdvance();
+    if (suppressNextAdvance) { suppressNextAdvance = false; return; }
+    var el = document.getElementById(id);
+    if (!el || el.disabled) return;
+    // Typing again clears the last verdict; the box is being answered afresh.
+    if (el.classList.contains('field-error')) markField(id, true);
+    var raw = el.value.trim();
+    if (raw === '' || raw === '-' || raw === '+') return;
+    if (!/^[+-]?\d+$/.test(raw)) return;
+    var digits = raw.replace(/^[+-]/, '');
+
+    if (isOnTrackPrefix(id, raw)) {
+        /* On track but not there yet. Wait a good while before judging, so a
+           student who has genuinely stopped still gets an answer. */
+        advanceTimer = setTimeout(function () {
+            advanceTimer = null;
+            var cur = document.getElementById(id);
+            if (!cur || cur.value.trim() !== raw) return;
+            if (document.activeElement !== cur) return;
+            finishEntry(id);
+        }, PREFIX_GRACE_MS);
+        return;
+    }
+    if (SINGLE_DIGIT_BOX.test(id)) { finishEntry(id); return; }
+    if (digits.length >= 2) { finishEntry(id); return; }
+    advanceTimer = setTimeout(function () {
+        advanceTimer = null;
+        var cur = document.getElementById(id);
+        if (!cur || cur.value.trim() !== raw) return;   // they kept typing
+        if (document.activeElement !== cur) return;     // they moved themselves
+        finishEntry(id);
+    }, AUTO_ADVANCE_MS);
+}
+
+/* Arrow keys move between the boxes that are live right now, in reading order,
+   so the grid is navigable without hunting with Tab. Enter checks. */
+function cellKey(e, id) {
+    /* Editing is not entering: backspacing "12" down to "1" must not then be
+       read as a finished single-digit answer and marched forward. */
+    if (e.key === 'Backspace' || e.key === 'Delete') {
+        cancelAutoAdvance();
+        suppressNextAdvance = true;
+        return;
+    }
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        cancelAutoAdvance();
+        // In the table stage Enter means "I am done with this box", not "submit".
+        if (stage === 'table') finishEntry(id); else checkCurrent();
+        return;
+    }
+    var isPrev = (e.key === 'ArrowLeft' || e.key === 'ArrowUp');
+    var isNext = (e.key === 'ArrowRight' || e.key === 'ArrowDown');
+    if (!isPrev && !isNext) return;
+    cancelAutoAdvance();   // they are steering; do not also move them
+    var live = liveInputs(), i;
+    for (i = 0; i < live.length; i++) if (live[i].id === id) break;
+    if (i === live.length) return;
+    var j = isPrev ? i - 1 : i + 1;
+    if (j < 0 || j >= live.length) return;
+    e.preventDefault();
+    live[j].focus();
+    lastFocusedId = live[j].id;
+}
+
+/* =====================================================================
+   Hint, worked steps, answer, skip
+   ===================================================================== */
+function buildHint() {
+    var p = currentProblem;
+    var h = '';
+    if (stage === 'table' && tableCursor <= currentProblem.n) {
+        h = 'The corner box holds the number that makes the divisor zero. You are dividing by <b>' +
+            divisorHtml(p.a) + '</b>, so use <b>the opposite of the constant you see</b>.';
+        if (p.category === 'miss') {
+            var names = p.missingPowers.map(function (pw) {
+                return pw === 0 ? 'the constant' : (pw === 1 ? 'the x term' : 'the x<sup>' + pw + '</sup> term');
+            });
+            h += '<br><br>Then count the slots: the top row needs <b>' + p.n +
+                '</b> numbers, one for every power from x<sup>' + (p.n - 1) + '</sup> down to the constant. ' +
+                'This dividend does not show ' + names.join(' or ') + ', so ' +
+                (names.length > 1 ? 'those have coefficients of 0' : 'that has a coefficient of 0') + '.';
+        } else {
+            h += '<br><br>The top row is just the coefficients in descending order -- ' + p.n + ' of them.';
+        }
+    } else if (stage === 'table') {
+        h = 'The pattern repeats: <b>bring down, multiply, add</b>. Multiply the corner value by the ' +
+            'number you just wrote in the bottom row, put that product in the middle row of the next column, ' +
+            'then add the two numbers in that column to get the next bottom-row number. Never subtract -- ' +
+            'synthetic division turns the subtraction into addition by using the opposite sign up front.';
+    } else {
+        /* Three plain statements, in the instructor's words. The degrees are
+           filled from the problem in front of the student rather than stated in
+           the abstract, so the sentence is about this division, not about
+           division in general. */
+        h = 'The bottom row represents the coefficients of the quotient. ' +
+            'The last number is the remainder.' +
+            '<br><br>Also remember that since we divided a ' + degreeWord(p.n - 1) +
+            ' degree polynomial by a first degree polynomial, the quotient will be a ' +
+            degreeWord(p.n - 2) + ' degree polynomial.';
+    }
+    return h;
+}
+
+function buildWorkedSteps() {
+    var p = currentProblem, steps = [], i;
+    steps.push(['Write the divisor value in the corner box.',
+        'Dividing by ' + divisorHtml(p.a) + ', so the box gets ' + p.a + '.']);
+    steps.push([(p.missingPowers.length ? 'List the coefficients in descending order -- a missing power has a coefficient of 0.' : 'List the coefficients in descending order.'),
+        p.coeffs.join('&nbsp;&nbsp;')]);
+    steps.push(['Bring down the leading coefficient.', 'Bottom row: ' + p.coeffs[0]]);
+    for (i = 1; i < p.n; i++) {
+        steps.push(['Column ' + (i + 1) + ': multiply, then add.',
+            p.a + ' &times; ' + p.sums[i - 1] + ' = ' + p.products[i] + ', and ' +
+            p.coeffs[i] + ' + ' + p.products[i] + ' = ' + p.sums[i]]);
+    }
+    steps.push(['Read off the answer.',
+        'Quotient ' + polyHtml(p.quotient) + ', remainder ' + p.remainder]);
+    return steps;
+}
+
+function toggleHint() {
+    var box = document.getElementById('hint');
+    var btn = document.getElementById('hint-toggle');
+    if (box.style.display === 'none') {
+        var h = buildHint();
+        box.innerHTML = '<div aria-hidden="true"><b>Hint:</b> ' + h + '</div>' +
+            '<p class="sr-only">Hint. ' + escHtml(spokenFromHtml(h)) + '</p>';
+        box.style.display = 'block';
+        btn.setAttribute('aria-expanded', 'true');
+        btn.textContent = 'Hide Hint';
+    } else {
+        box.style.display = 'none';
+        btn.setAttribute('aria-expanded', 'false');
+        btn.textContent = 'Show Hint';
+    }
+}
+
+/* Addendum item 4: showing the answer or a worked solution charges one attempt,
+   withholds credit and resets the streak. A hint stays free because it gives
+   strategy, not the answer. Tested behaviourally, not by reading the source. */
+function toggleSteps() {
+    var box = document.getElementById('steps-box');
+    var btn = document.getElementById('steps-toggle');
+    if (box.style.display === 'none') {
+        forfeitProblem();
+        stepsRevealed = 1;
+        renderSteps();
+        btn.setAttribute('aria-expanded', 'true');
+        btn.textContent = 'Hide Worked Steps';
+    } else {
+        box.style.display = 'none';
+        btn.setAttribute('aria-expanded', 'false');
+        btn.textContent = 'Show Worked Steps';
+    }
+}
+function nextWorkedStep() { stepsRevealed++; renderSteps(); }
+function renderSteps() {
+    var box = document.getElementById('steps-box');
+    var steps = buildWorkedSteps();
+    var total = steps.length, shown = Math.min(stepsRevealed, total), i, html;
+    html = '<div style="font-weight:800; margin-bottom:8px; color:#6d28d9;">Worked Steps (' + shown + ' of ' + total + ')</div>';
+    for (i = 0; i < shown; i++) {
+        html += '<div class="solution-step"><div><b>' + (i + 1) + '.</b> ' + steps[i][0] + '</div>' +
+            '<div class="solution-eq" role="img" aria-label="' + escHtml(spokenFromHtml(steps[i][1])) + '">' +
+            steps[i][1] + '</div></div>';
+    }
+    if (shown < total) {
+        html += '<div style="text-align:center; margin-top:10px;"><button type="button" class="submit-btn" onclick="nextWorkedStep()">Next Step</button></div>';
+    } else {
+        html += '<div style="text-align:center; margin-top:10px; font-weight:800; color:#047857;">That is the whole method. Try the next one yourself.</div>';
+    }
+    box.innerHTML = html;
+    box.style.display = 'block';
+}
+
+function toggleAnswer() {
+    var box = document.getElementById('answer-box');
+    var btn = document.getElementById('answer-toggle');
+    var p = currentProblem;
+    if (box.style.display === 'none') {
+        forfeitProblem();
+        var visual = 'Corner box ' + p.a + '&nbsp; &middot;&nbsp; Top row ' + p.coeffs.join(', ') +
+            '<br>Bottom row ' + p.sums.join(', ') +
+            '<br>Quotient ' + polyHtml(p.quotient) + ', remainder ' + p.remainder;
+        var spoken = 'Corner box ' + sayNum(p.a) + '. Top row ' + sayList(p.coeffs) +
+            '. Bottom row ' + sayList(p.sums) + '. The quotient is ' + polySpoken(p.quotient) +
+            ' with a remainder of ' + sayNum(p.remainder) + '.';
+        box.innerHTML = '<div aria-hidden="true"><b>Answer:</b><br>' + visual + '</div>' +
+            '<p class="sr-only">Answer. ' + escHtml(spoken) + '</p>';
+        box.style.display = 'block';
+        btn.setAttribute('aria-expanded', 'true');
+        btn.textContent = 'Hide Answer';
+    } else {
+        box.style.display = 'none';
+        btn.setAttribute('aria-expanded', 'false');
+        btn.textContent = 'Show Answer';
+    }
+}
+
+function skipProblem() {
+    forfeitProblem();
+    problemNum++;
+    newProblem();
+    updateDisplay();
+}
+
+/* Turns a fragment of the problem markup into a sentence. The stacked fraction
+   is a flex column and the exponent is a <sup>: both carry their meaning in
+   layout alone, so neither says anything on its own. */
+function spokenFromHtml(html) {
+    var s = String(html);
+    s = s.replace(/<span class="frac">\s*<span class="frac-num">([\s\S]*?)<\/span>\s*<span class="frac-bar"><\/span>\s*<span class="frac-den">([\s\S]*?)<\/span>\s*<\/span>/gi,
+        function (m, num, den) { return ' the fraction ' + spokenFromHtml(num) + ' over ' + spokenFromHtml(den) + ' '; });
+    s = s.replace(/<sup[^>]*>([\s\S]*?)<\/sup>/gi, ' to the power of $1 ');
+    s = s.replace(/<br\s*\/?>/gi, '. ');
+    s = s.replace(/<[^>]+>/g, ' ');
+    s = s.replace(/&minus;/g, ' minus ').replace(/&times;/g, ' times ')
+         .replace(/&middot;/g, ' ').replace(/&plusmn;/g, ' plus or minus ')
+         .replace(/&nbsp;/g, ' ').replace(/&rarr;/g, ' gives ').replace(/&amp;/g, ' and ');
+    s = s.replace(/\(/g, ' open parenthesis ').replace(/\)/g, ' close parenthesis ');
+    s = s.replace(/=/g, ' equals ');
+    s = s.replace(/(^|[\s(])-(\d)/g, '$1negative $2');
+    /* Each <br> becomes a sentence break, so a paragraph gap turns into ".. ."
+       and a screen reader reads the stutter aloud. Collapse any run of stops
+       back to one. */
+    s = s.replace(/(\.\s*){2,}/g, '. ');
+    return s.replace(/\s+/g, ' ').trim();
+}
+
+/* =====================================================================
+   Modes and display
+   ===================================================================== */
+function setMode(m) {
+    mode = m;
+    ['std', 'miss'].forEach(function (k) {
+        var b = document.getElementById('mode-' + k);
+        if (!b) return;
+        var on = (k === m);
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    /* The streak deliberately survives a change of category. A problem here is
+       eleven to fifteen boxes, so a student might only do two or three of one
+       kind before moving on -- zeroing the count on the way would mean they
+       could work steadily all session and never reach the first celebration at
+       3. The streak counts consecutive problems solved, not consecutive
+       problems of one type. */
+    newProblem();
+    updateDisplay();
+}
+function toggleConfettiSetting() {
+    confettiEnabled = document.getElementById('confettiToggle').checked;
+    saveState();
+}
+function updateDisplay() {
+    document.getElementById('problemNum').textContent = problemNum + 1;
+    document.getElementById('streak').textContent = streak;
+    var sd = document.getElementById('streak-display');
+    sd.className = streak >= 4 ? 'info-item streak-hot' : 'info-item';
+    var tc = 0, tt = 0, i;
+    for (i = 0; i < CATS.length; i++) { tc += stats[CATS[i]].c; tt += stats[CATS[i]].t; }
+    var acc = document.getElementById('acc-display');
+    acc.textContent = tt > 0 ? 'Accuracy: ' + Math.round(tc / tt * 100) + '%' : 'Accuracy: --';
+}
+
+/* =====================================================================
+   Stats panel
+   ===================================================================== */
+function showStats() {
+    var clean = sanitizeStats(stats);
+    var tc = 0, tt = 0, i;
+    for (i = 0; i < CATS.length; i++) { tc += clean[CATS[i]].c; tt += clean[CATS[i]].t; }
+    var overall = tt > 0 ? Math.round(tc / tt * 100) : 0;
+
+    var html = '<h2 id="stats-heading">My Stats</h2>';
+    html += '<div class="stats-overall">';
+    if (tt > 0) {
+        html += '<div class="big">' + escHtml(overall) + '%</div>';
+        html += '<div class="lbl">' + escHtml(tc) + ' solved out of ' + escHtml(tt) + ' problems</div>';
+    } else {
+        html += '<div class="big" style="color:#4a5480;" aria-hidden="true">--</div>';
+        html += '<div class="lbl">No problems attempted yet.</div>';
+    }
+    html += '<div class="lbl" style="margin-top:6px;">Best streak: ' + escHtml(bestStreak) + '</div>';
+    html += '</div>';
+
+    for (i = 0; i < CATS.length; i++) {
+        var k = CATS[i], s = clean[k];
+        var pct = s.t > 0 ? Math.round(s.c / s.t * 100) : 0;
+        /* Addendum item 2: three tiers, hue AND lightness, always with the
+           numbers beside them so the tier survives greyscale. */
+        var cls = 'none';
+        if (s.t > 0) cls = (pct >= 80) ? 'full' : (pct >= 55 ? 'mid' : 'low');
+        /* Addendum item 5: a category never attempted reads "not tried yet",
+           never 0/0 -- a zero there looks like failure at something unseen. */
+        var numText = s.t > 0 ? s.c + '/' + s.t + ' (' + pct + '%)' : 'not tried yet';
+        var spokenRow = s.t > 0
+            ? CAT_LABELS[k] + ': ' + s.c + ' solved out of ' + s.t + ', ' + pct + ' percent'
+            : CAT_LABELS[k] + ': not tried yet';
+        html += '<div class="stat-row">';
+        html += '<div class="stat-name" aria-hidden="true">' + escHtml(CAT_LABELS[k]) + '</div>';
+        html += '<div class="stat-bar-wrap" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' +
+            escHtml(s.t > 0 ? pct : 0) + '" aria-label="' + escHtml(spokenRow) + '">' +
+            '<div class="stat-bar ' + cls + '" style="width:' + escHtml(s.t > 0 ? pct : 0) + '%;"></div></div>';
+        html += '<div class="stat-num" aria-hidden="true">' + escHtml(numText) + '</div>';
+        html += '</div>';
+    }
+
+    var rec = buildRecommendation(clean);
+    if (rec) html += '<div class="recommend">' + rec + '</div>';
+
+    html += '<div class="stats-actions">';
+    html += '<button type="button" class="close-btn" onclick="hideStats()">Close</button>';
+    html += '<button type="button" class="reset-btn' + (resetConfirming ? ' armed' : '') + '" id="reset-btn" onclick="resetProgress()">' +
+        (resetConfirming ? 'Tap again to confirm' : 'Reset Progress') + '</button>';
+    html += '</div>';
+
+    var panel = document.getElementById('stats-panel');
+    panel.innerHTML = html;
+    document.getElementById('stats-overlay').style.display = 'flex';
+    panel.focus();
+}
+function buildRecommendation(clean) {
+    var untried = CATS.filter(function (k) { return clean[k].t === 0; });
+    var tried = CATS.filter(function (k) { return clean[k].t > 0; });
+    if (tried.length === 0) return null;
+    /* The row for that category already reads "not tried yet" two lines above,
+       so spelling out that the overall figure is incomplete just says it twice. */
+    if (untried.length > 0) {
+        return '<b>Try this next:</b> ' + escHtml(CAT_LABELS[untried[0]]) + '.';
+    }
+    var weakest = null, weakestPct = 101;
+    CATS.forEach(function (k) {
+        if (clean[k].t < 3) return;
+        var p = clean[k].c / clean[k].t * 100;
+        if (p < weakestPct) { weakestPct = p; weakest = k; }
+    });
+    if (!weakest) return null;
+    if (weakestPct >= 85) return '<b>Strong across both categories!</b> Keep going.';
+    /* Names the category to practise next without labelling the student weak at
+       it -- the percentage beside it already says where they are. */
+    return '<b>Practise next:</b> ' + escHtml(CAT_LABELS[weakest]) + ' (' +
+        Math.round(weakestPct) + '%). Switch to that category for some focused practice.';
+}
+function hideStats() {
+    document.getElementById('stats-overlay').style.display = 'none';
+    disarmReset();
+    var opener = document.getElementById('stats-btn');
+    if (opener) opener.focus();
+}
+/* Two-tap confirm that re-arms after 3.5s, so a stray tap minutes later cannot
+   wipe the record. The label is rewritten in place rather than by re-rendering
+   the panel, so the timer never steals focus. Never a browser confirm(). */
+var RESET_DISARM_MS = 3500;
+var resetDisarmTimer = null;
+function disarmReset() {
+    if (resetDisarmTimer) { clearTimeout(resetDisarmTimer); resetDisarmTimer = null; }
+    if (!resetConfirming) return;
+    resetConfirming = false;
+    var btn = document.getElementById('reset-btn');
+    if (btn) { btn.textContent = 'Reset Progress'; btn.className = 'reset-btn'; }
+}
+function resetProgress() {
+    if (!resetConfirming) {
+        resetConfirming = true;
+        var btn = document.getElementById('reset-btn');
+        if (btn) { btn.textContent = 'Tap again to confirm'; btn.className = 'reset-btn armed'; }
+        announce('Tap Reset Progress again within 3.5 seconds to erase your stats.');
+        if (resetDisarmTimer) clearTimeout(resetDisarmTimer);
+        resetDisarmTimer = setTimeout(disarmReset, RESET_DISARM_MS);
+        return;
+    }
+    disarmReset();
+    stats = { std: { c: 0, t: 0 }, miss: { c: 0, t: 0 } };
+    streak = 0; bestStreak = 0; problemNum = 0;
+    stdCount = 0; missCount = 0;
+    saveState();
+    updateDisplay();
+    showStats();
+}
+document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    var ov = document.getElementById('stats-overlay');
+    if (ov && ov.style.display !== 'none') hideStats();
+});
+
+/* =====================================================================
+   Confetti
+   ===================================================================== */
+function prefersReducedMotion() {
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+/* Confetti schedule: 3, 5, 8, 10, and on for ever -- 13, 15, 18, 20, 23, 25...
+   Every streak that is 3 or 0 past a multiple of five, which is what makes the
+   alternating +2 / +3 rhythm carry on indefinitely instead of stopping at a
+   hand-written last entry. Milestones only, never every problem.
+
+   The tier mapping matches Polynomial Operations, the reference implementation
+   of this schedule: the 3-mark is the small burst, the 5-mark the fuller one,
+   and the round tens the big slow one. Tier 1 uses 50 pieces rather than 40 so
+   a real celebration is never identical to the toggle's preview burst. */
+function confettiTierFor(s) {
+    if (s < 3) return 0;
+    if (s % 10 === 0) return 3;               // 10, 20, 30 -- the big one
+    if (s % 5 === 0) return 2;                // 5, 15, 25
+    if (s % 5 === 3) return 1;                // 3, 8, 13, 18
+    return 0;
+}
+function confettiCountFor(tier) {
+    return tier === 1 ? 50 : tier === 2 ? 100 : 200;
+}
+function celebrateStreak(s) {
+    if (!confettiEnabled || prefersReducedMotion()) return;
+    var tier = confettiTierFor(s);
+    if (!tier) return;
+    createConfetti(confettiCountFor(tier), tier);
+}
+function createConfetti(count, tier) {
+    var host = document.body;
+    /* Eight colours, eight hue families -- the palette chosen for Polynomial
+       Operations and now the suite standard. The previous set put three
+       greens/teals and two violets in eight slots, so at 200 pieces it averaged
+       into one greenish-purple haze and only the yellow read as separate.
+       Violet and mint stay as the brand anchors; the redundant teal and green go.
+
+       The orange and the red here are a DOCUMENTED EXEMPTION from the suite's
+       no-orange, no-red rule, not a relaxation of it. That rule exists because
+       those colours mean error and warning everywhere else -- incorrect feedback
+       is deliberately ink navy so being wrong never reads as an alarm. Confetti
+       never shares the screen with a wrong-answer message, so the exemption does
+       not collide with it. Do not "fix" these back. */
+    var colors = ['#7c3aed', '#a78bfa', '#2e3d8f', '#10b981',
+                  '#ffeb3b', '#fb923c', '#ef4444', '#ec4899'];
+    var isMassive = tier === 3, i, j;
+    for (i = 0; i < count; i++) {
+        var piece = document.createElement('div');
+        piece.className = 'confetti';
+        piece.setAttribute('aria-hidden', 'true');
+        var base;
+        if (tier === 1) base = 7 + Math.random() * 5;
+        else if (tier === 2) base = 10 + Math.random() * 7;
+        else base = 11 + Math.random() * 9;
+        var color = colors[Math.floor(Math.random() * colors.length)];
+        var shape = Math.floor(Math.random() * 4);
+        if (shape === 0) {
+            piece.style.width = base + 'px'; piece.style.height = base + 'px';
+            piece.style.background = color; piece.style.borderRadius = '50%';
+        } else if (shape === 1) {
+            piece.style.width = base + 'px'; piece.style.height = base + 'px';
+            piece.style.background = color; piece.style.borderRadius = '2px';
+        } else if (shape === 2) {
+            piece.style.width = Math.max(4, base * 0.35) + 'px'; piece.style.height = (base * 1.7) + 'px';
+            piece.style.background = color; piece.style.borderRadius = '2px';
+        } else {
+            piece.style.width = '0'; piece.style.height = '0'; piece.style.background = 'transparent';
+            piece.style.borderLeft = (base * 0.6) + 'px solid transparent';
+            piece.style.borderRight = (base * 0.6) + 'px solid transparent';
+            piece.style.borderBottom = base + 'px solid ' + color;
+        }
+        piece.style.left = Math.random() * 100 + '%';
+        piece.style.top = '-20px';
+        var dur;
+        if (tier === 1) dur = 1.6 + Math.random() * 1.0;
+        else if (tier === 2) dur = 2.0 + Math.random() * 1.5;
+        else dur = 2.5 + Math.random() * 2.0;
+        piece.style.animation = (isMassive ? 'confetti-fall-slow' : 'confetti-fall') + ' ' + dur + 's ease-out forwards';
+        piece.style.animationDelay = (Math.random() * (isMassive ? 0.8 : 0.4)) + 's';
+        host.appendChild(piece);
+        setTimeout(function (el) { return function () { if (el.parentNode) el.parentNode.removeChild(el); }; }(piece), isMassive ? 6000 : 4500);
+    }
+    if (isMassive) {
+        for (j = 0; j < 15; j++) {
+            var sp = document.createElement('div');
+            sp.className = 'sparkle';
+            sp.setAttribute('aria-hidden', 'true');
+            sp.style.left = (Math.random() * 90 + 5) + '%';
+            sp.style.top = (Math.random() * 55 + 10) + 'vh';
+            sp.style.animationDelay = (Math.random() * 0.5) + 's';
+            host.appendChild(sp);
+            setTimeout(function (el) { return function () { if (el.parentNode) el.parentNode.removeChild(el); }; }(sp), 3500);
+        }
+    }
+}
+
+/* =====================================================================
+   Boot
+   ===================================================================== */
+/* Polar Rose Studio insignia: r = 2cos(3/2 theta) */
+function drawInsignia() {
+    var el = document.getElementById('pr-rose');
+    if (!el) return;
+    var pts = [], steps = 240, i;
+    for (i = 0; i <= steps; i++) {
+        var t = (i / steps) * 4 * Math.PI;
+        var r = 2 * Math.cos(1.5 * t);
+        pts.push((i === 0 ? 'M' : 'L') + (r * Math.cos(t) * 12).toFixed(2) + ' ' + (r * Math.sin(t) * 12).toFixed(2));
+    }
+    el.setAttribute('d', pts.join(' '));
+}
+
+drawInsignia();
+loadState();
+newProblem();
+updateDisplay();
+</script>
+</body>
+</html>
