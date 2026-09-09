@@ -1,0 +1,2187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'unsafe-inline'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finding the Equation of a Line</title>
+<meta name="theme-color" content="#1b2450">
+<!-- Midnight Scholar / Polar Rose Studio - Finding the Equation of a Line - build v2 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+/* ===== MIDNIGHT SCHOLAR - navy stage, white card, violet + mint accents ===== */
+* { box-sizing: border-box; }
+body {
+    font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+    background:
+        radial-gradient(900px 500px at 85% -10%, rgba(124, 58, 237, 0.28), transparent 60%),
+        radial-gradient(800px 500px at -10% 110%, rgba(16, 185, 129, 0.18), transparent 55%),
+        linear-gradient(160deg, #141b3d 0%, #1b2450 100%);
+    background-color: #1b2450;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px 12px;
+    margin: 0;
+}
+.card {
+    background: #ffffff;
+    border-radius: 22px;
+    box-shadow: 0 24px 60px rgba(8, 12, 40, 0.55);
+    max-width: 700px;
+    width: 100%;
+    padding: 30px 24px 26px;
+    position: relative;
+    overflow: hidden;
+}
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+}
+h1 {
+    text-align: center;
+    color: #1e2a5e;
+    margin: 4px auto 6px;
+    font-size: 25px;
+    letter-spacing: 0.3px;
+    display: table;
+}
+h1::after {
+    content: '';
+    display: block;
+    /* Instructor ruling for this game: the rule runs the FULL width of the
+       title text, not a fixed 130px. The h1 is display:table above, so its box
+       is already shrink-to-fit and 100% lands exactly on the last letter.
+       Deliberate deviation from MIDNIGHT_SCHOLAR_DESIGN_SYSTEM.md, which still
+       specifies 130px for the rest of the suite. Do not "correct" this back. */
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    margin: 8px auto 14px;
+    background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+}
+.sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+.tiles-hint {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #5c6699;
+    margin: 0 0 10px;
+}
+/* five tiles: flex-wrap centres the trailing row of two instead of leaving a
+   hole on the right the way a 3-column grid would */
+.tiles-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin: 14px auto 2px;
+    padding: 0;
+    max-width: 520px;
+}
+.tile {
+    flex: 0 1 calc(33.333% - 6px);
+    background: linear-gradient(135deg, #1e3a5f, #0b7a70);
+    color: #ffffff;
+    border: 3px solid transparent;
+    border-radius: 999px;
+    padding: 6px 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: filter 0.15s, border-color 0.15s;
+    user-select: none;
+    font-family: inherit;
+    font-weight: 800;
+    font-size: 12px;
+    line-height: 1.25;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 56px;
+}
+.tile:hover { filter: brightness(1.12); }
+.tile-input:focus-visible + .tile { outline: 3px solid #ffffff; outline-offset: 3px; }
+.tile-input:checked + .tile {
+    border-color: #10b981;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.25);
+}
+
+/* ===== Level branch: two slanted rules dropping out of the selected tile =====
+   Instructor rulings: the pills sit close up under the categories, and their
+   outline is the dark green from the category gradient - not the mint ring. */
+.branch { position: relative; margin: 0 auto 12px; max-width: 520px; }
+.branch-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 16px;
+    overflow: visible;
+}
+.branch-pills-wrap { padding-top: 16px; display: flex; justify-content: center; }
+.branch-pills { display: flex; gap: 12px; }
+.level-input:focus-visible + .level-pill { outline: 3px solid #7c3aed; outline-offset: 2px; }
+.level-pill {
+    border-radius: 999px;
+    padding: 7px 20px;
+    font-size: 12.5px;
+    font-weight: 800;
+    background: #e6e9f6;
+    color: #4a5480;
+    border: 2px solid transparent;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    transition: filter 0.15s, border-color 0.15s;
+    font-family: inherit;
+}
+.level-pill:hover { filter: brightness(0.97); }
+/* Levels must not look like categories. Tiles are the deep navy-to-teal
+   Favorite gradient with white text; level pills are a light mint with dark
+   green ink, outlined in the gradient's own dark teal. */
+.level-input:checked + .level-pill {
+    background: linear-gradient(135deg, #6ee7b7, #34d399);
+    color: #064e3b;
+    border-color: #0b7a70;
+    box-shadow: 0 0 0 3px rgba(11, 122, 112, 0.22);
+}
+.branch-caption {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #4a5480;
+    margin: 9px 0 0;
+}
+
+.question-text {
+    text-align: center;
+    font-weight: 800;
+    color: #3b3568;
+    margin: 12px 0 10px;
+    font-size: 15px;
+    line-height: 1.5;
+}
+.givens {
+    font-size: 21px;
+    font-weight: bold;
+    text-align: center;
+    margin: 12px auto 18px;
+    font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    color: #1e2a5e;
+    background: #eef0fb;
+    border: 2px solid #c7cdf0;
+    border-radius: 14px;
+    padding: 15px 12px;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-wrap: break-word;
+}
+
+/* ===== Staged steps ===== */
+.steps { display: flex; flex-direction: column; gap: 10px; margin: 0 0 6px; }
+.step {
+    border: 2px solid #c7cdf0;
+    border-radius: 14px;
+    padding: 13px 14px 15px;
+    background: #fbfbff;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+.step.active { border-color: #7c3aed; background: #ffffff; box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12); }
+.step.done { border-color: #34d399; background: #ecfdf5; }
+.step.locked { border-style: dashed; border-color: #ccd2ee; background: #f7f8fd; }
+.step-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.step-tag {
+    font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    font-size: 10px;
+    letter-spacing: 1.2px;
+    font-weight: 700;
+    color: #4a5480;
+    text-transform: uppercase;
+}
+.step.done .step-tag { color: #047857; }
+.step-title { font-size: 14px; font-weight: 800; color: #1e2a5e; }
+.step.locked .step-title { color: #4a5480; }
+.check { width: 15px; height: 15px; flex: 0 0 15px; color: #047857; }
+.step-note { font-size: 11.5px; font-weight: 700; color: #4a5480; margin: 0; }
+.answer-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    font-size: 22px;
+    font-weight: bold;
+    color: #1e2a5e;
+}
+input.slot {
+    width: 96px;
+    height: 50px;
+    border: 3px solid #7c3aed;
+    border-radius: 12px;
+    background: #ffffff;
+    text-align: center;
+    font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    font-size: 21px;
+    font-weight: bold;
+    color: #1e2a5e;
+    padding: 2px 4px;
+}
+input.slot.narrow { width: 88px; }
+input.slot:focus { outline: none; border-color: #10b981; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18); }
+input.slot:disabled { opacity: 1; }
+input.slot.carried {
+    border-color: #c7cdf0;
+    background: #eef0fb;
+    color: #4a5480;
+}
+input.slot.solved { border-color: #34d399; color: #047857; background: #ffffff; }
+input.slot.flagged { border-color: #1e2a5e; }
+.step.locked input.slot { border-color: #ccd2ee; background: #f7f8fd; color: #b3bade; }
+
+.key-row { display: flex; justify-content: center; gap: 8px; margin: 16px 0 0; flex-wrap: wrap; }
+.input-area { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 12px 0 4px; flex-wrap: wrap; }
+button {
+    padding: 12px 22px;
+    font-size: 15px;
+    font-weight: 800;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s, filter 0.2s, transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    font-family: inherit;
+}
+button:active { transform: scale(0.95); }
+button:disabled { opacity: 0.5; cursor: default; }
+button:focus-visible { outline: 3px solid #7c3aed; outline-offset: 2px; }
+.submit-btn {
+    background: linear-gradient(135deg, #2e3d8f, #4b3bbd);
+    color: white;
+    box-shadow: 0 6px 16px rgba(46, 61, 143, 0.35);
+    white-space: nowrap;
+}
+.submit-btn:hover { filter: brightness(1.1); }
+.key-btn { background: #e6e9f6; color: #2e3d8f; padding: 12px 16px; font-size: 15px; border-radius: 12px; }
+.key-btn:hover { background: #d9def2; }
+.feedback {
+    text-align: center;
+    font-size: 19px;
+    font-weight: 800;
+    margin: 16px 0 8px;
+    min-height: 30px;
+    line-height: 1.45;
+}
+.correct { color: #047857; }
+/* House rule: incorrect feedback is ink navy, 18px, weight 700. Never red. */
+.incorrect { color: #1e2a5e; font-size: 18px; font-weight: 700; }
+.victory { color: #7c3aed; animation: pulse 1s infinite; }
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+.info { display: flex; justify-content: center; gap: 8px; margin: 18px 0 0; flex-wrap: wrap; }
+.info-item {
+    font-size: 12px;
+    font-weight: 800;
+    background: #eef0fb;
+    color: #2e3d8f;
+    padding: 6px 14px;
+    border-radius: 999px;
+}
+.hint-btn, .answer-btn, .skip-btn, .solution-btn, .stats-btn, .step-btn {
+    background: #ede7fd;
+    color: #5b21b6;
+    border: 1px solid #8b6fe8;
+    margin: 4px;
+    font-size: 13px;
+    padding: 10px 16px;
+}
+.hint-btn:hover, .answer-btn:hover, .skip-btn:hover, .solution-btn:hover,
+.stats-btn:hover, .step-btn:hover { background: #e0d5fa; }
+/* Next Step is the primary action inside the solution box, so it takes the
+   suite's submit gradient - dark navy into purple, white text - rather than the
+   pale helper-button family. "Another approach" keeps the pale .step-btn look:
+   the required progression should read louder than the optional extra. */
+.next-step-btn {
+    background: linear-gradient(135deg, #2e3d8f, #4b3bbd);
+    color: #ffffff;
+    border: none;
+    margin: 4px;
+    font-size: 13px;
+    font-weight: 800;
+    padding: 11px 20px;
+    box-shadow: 0 4px 12px rgba(46, 61, 143, 0.30);
+}
+.next-step-btn:hover { filter: brightness(1.12); }
+.hint-box, .answer-box {
+    background: #f3effe;
+    border: 2px solid #8b6fe8;
+    border-radius: 14px;
+    padding: 15px;
+    margin: 14px 0;
+    color: #2b2358;
+    font-size: 14px;
+    line-height: 1.6;
+}
+.sol-title { font-weight: 800; margin-bottom: 8px; color: #1e2a5e; }
+.sol-line { margin: 5px 0; }
+.sol-math {
+    font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    font-weight: 700;
+    color: #1e2a5e;
+    margin: 4px 0 10px 14px;
+    display: block;
+    overflow-x: auto;
+}
+.step-more {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 12px 0 2px;
+    flex-wrap: wrap;
+}
+.step-count {
+    font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    font-size: 11px;
+    letter-spacing: 0.6px;
+    font-weight: 700;
+    color: #4a5480;
+}
+.method-divider { margin: 14px 0 10px; border-top: 1px solid #cbb9f5; padding-top: 12px; }
+
+/* ===== Structural fraction (design system spec, not the legacy border-bottom) ===== */
+.frac {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: stretch;
+    vertical-align: middle;
+    font-size: 0.72em;
+    line-height: 1.1;
+    text-align: center;
+    margin: 0 2px;
+}
+.frac-num { padding: 3px 10px; }
+.frac-bar { height: 3px; border-radius: 2px; background: currentColor; }
+.frac-den { padding: 3px 10px; }
+
+/* ===== Settings row ===== */
+.settings-row { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 18px 0 0; }
+.settings-label { font-size: 13px; font-weight: 700; color: #4a5480; }
+.switch {
+    position: relative;
+    flex: 0 0 44px;
+    width: 44px; height: 24px;
+    padding: 0;
+    border-radius: 999px;
+    background: #d5d9e8;
+    /* 1px rim so the track boundary itself clears 3:1 on the white card */
+    border: 1px solid #8a93b8;
+    box-shadow: none;
+    transition: background 0.2s;
+}
+.switch-knob {
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(8, 12, 40, 0.4);
+    transition: transform 0.2s;
+}
+.switch[aria-pressed="true"] { background: #10b981; border-color: #0b7a70; }
+.switch[aria-pressed="true"] .switch-knob { transform: translateX(20px); }
+.reset-btn {
+    display: block;
+    margin: 10px auto 0;
+    background: transparent;
+    color: #5c6699;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 10px;
+    text-decoration: underline;
+}
+.insignia { display: block; margin: 20px auto 4px; width: 62px; opacity: 0.9; }
+.insignia-caption {
+    text-align: center;
+    font-size: 6.5px;
+    letter-spacing: 1.2px;
+    color: #5d6798;
+    opacity: 0.9;
+    margin-top: 2px;
+}
+
+/* ===== Confetti ===== */
+.confetti { position: fixed; opacity: 0; pointer-events: none; z-index: 9999; }
+@keyframes confetti-fall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 1; }
+}
+@keyframes confetti-fall-slow {
+    0% { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 1; }
+    100% { transform: translateY(115vh) rotate(1080deg) scale(0.85); opacity: 1; }
+}
+.sparkle {
+    position: fixed;
+    width: 20px; height: 20px;
+    background: radial-gradient(circle, #fff 0%, #ffeb3b 50%, transparent 70%);
+    border-radius: 50%;
+    animation: sparkle 0.5s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 100;
+}
+@keyframes sparkle {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(1.6); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .confetti, .sparkle { display: none !important; }
+    .victory { animation: none; }
+    * { transition: none !important; }
+}
+@media (max-width: 480px) {
+    .card { padding: 24px 14px 20px; }
+    h1 { font-size: 21px; }
+    .tile { flex: 0 1 calc(50% - 4px); font-size: 11.5px; padding: 6px 10px; height: 52px; }
+    .tiles-grid { gap: 6px; max-width: 100%; }
+    .givens { font-size: 16px; padding: 12px 8px; }
+    .answer-line { font-size: 19px; gap: 6px; }
+    input.slot { width: 78px; height: 46px; font-size: 18px; }
+    input.slot.narrow { width: 72px; }
+}
+</style>
+</head>
+<body>
+<main class="card" id="game-card">
+    <h1>Finding the Equation of a Line</h1>
+
+    <!-- The problem is announced here in words. The visual copy is aria-hidden
+         so it is not read a second time. -->
+    <p class="sr-only" id="problem-live" role="status" aria-live="polite" aria-atomic="true"></p>
+
+    <p class="tiles-hint" id="tiles-hint">Pick a category to practice &mdash; or choose Mixed to review everything</p>
+    <div id="category-tiles" class="tiles-grid" role="radiogroup" aria-labelledby="tiles-hint"></div>
+    <div id="level-branch"></div>
+
+    <div id="main-content"></div>
+
+    <div class="key-row" id="key-row">
+        <button type="button" class="key-btn" onclick="toggleSign()" aria-label="Toggle negative sign on the box you are typing in">+/-</button>
+        <button type="button" class="key-btn" onclick="insertSlash()" aria-label="Insert fraction bar in the box you are typing in">/</button>
+    </div>
+    <div class="input-area" id="submit-area">
+        <button type="button" class="submit-btn" id="submit-btn" onclick="checkAnswer()">Submit</button>
+    </div>
+
+    <div class="feedback" id="feedback" role="alert" aria-live="assertive" aria-atomic="true"></div>
+    <div style="text-align:center;">
+        <button type="button" class="submit-btn" id="next-btn" onclick="generateProblem()" style="display:none;">Next Problem &rarr;</button>
+    </div>
+
+    <div id="helper-buttons" style="text-align: center; margin: 16px 0 4px;">
+        <button type="button" class="hint-btn" id="hint-btn" onclick="toggleHint()" aria-expanded="false" aria-controls="hint">Show Hint</button>
+        <button type="button" class="answer-btn" id="answer-btn" onclick="toggleAnswer()" aria-expanded="false" aria-controls="answer-box">Show Answer</button>
+        <button type="button" class="solution-btn" id="solution-btn" onclick="toggleSolution()" aria-expanded="false" aria-controls="solution-box">Show Solution</button>
+        <button type="button" class="skip-btn" onclick="generateProblem()">Skip</button>
+        <button type="button" class="stats-btn" id="stats-btn" onclick="toggleStatsPanel()" aria-expanded="false" aria-controls="stats-box">Stats</button>
+    </div>
+
+    <div id="hint" style="display: none;"></div>
+    <div id="answer-box" style="display: none;"></div>
+    <div id="solution-box" style="display: none;"></div>
+    <div id="stats-box" style="display: none;"></div>
+
+    <div class="info">
+        <div class="info-item">Streak: <span id="streak">0</span></div>
+        <div class="info-item">Best: <span id="best-streak">0</span></div>
+        <div class="info-item">First-try: <span id="overall-pct">&mdash;</span></div>
+    </div>
+
+    <div class="settings-row">
+        <span class="settings-label" id="confetti-label">Confetti celebrations</span>
+        <button type="button" class="switch" id="confetti-switch" aria-pressed="true"
+                aria-label="Confetti celebrations" onclick="toggleConfettiSetting()"><span class="switch-knob" aria-hidden="true"></span></button>
+    </div>
+
+    <button type="button" class="reset-btn" id="reset-btn" onclick="resetProgress()">Reset Progress</button>
+
+    <svg class="insignia" viewBox="-28 -26 56 64" aria-hidden="true" focusable="false" role="presentation">
+        <defs>
+            <linearGradient id="pr-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1e3a5f"/>
+                <stop offset="100%" stop-color="#0d9488"/>
+            </linearGradient>
+        </defs>
+        <path id="pr-path" fill="none" stroke="url(#pr-grad)" stroke-width="1.7"/>
+    </svg>
+    <div class="insignia-caption">POLAR ROSE STUDIO</div>
+</main>
+
+<script>
+/* =====================================================================
+   Polar rose insignia  r = 2cos(1.5t)
+   ===================================================================== */
+(function () {
+    var d = '', steps = 240;
+    for (var i = 0; i <= steps; i++) {
+        var t = (i / steps) * 4 * Math.PI;
+        var r = 2 * Math.cos(1.5 * t);
+        d += (i === 0 ? 'M ' : 'L ') + (r * Math.cos(t) * 12).toFixed(2)
+            + ' ' + (r * Math.sin(t) * 12).toFixed(2) + ' ';
+    }
+    var el = document.getElementById('pr-path');
+    if (el) el.setAttribute('d', d.trim());
+})();
+
+/* =====================================================================
+   Configuration
+   ===================================================================== */
+var STORAGE_KEY = 'midnightScholar_lineEq_v1';
+var CONFETTI_KEY = 'midnightScholar_lineEq_confetti_v1';
+var CATEGORIES = ['yint', 'point', 'twopoints', 'perp'];
+var TILES = CATEGORIES.concat(['mixed']);
+var CATEGORY_LABELS = {
+    'yint': 'Slope and<br>y-intercept',
+    'point': 'Slope and<br>a point',
+    'twopoints': 'Two<br>points',
+    'perp': 'Parallel and<br>perpendicular',
+    'mixed': 'Mixed<br>review'
+};
+/* plain-text versions for the stats panel and screen-reader labels */
+var CATEGORY_NAMES = {
+    'yint': 'Slope and y-intercept',
+    'point': 'Slope and a point',
+    'twopoints': 'Two points',
+    'perp': 'Parallel and perpendicular',
+    'mixed': 'Mixed review'
+};
+/* Only these two categories split into levels. */
+var LEVELLED = { 'point': true, 'twopoints': true };
+var LEVEL_CAPTION = {
+    1: 'Level 1 &mdash; the slope works out to a whole number',
+    2: 'Level 2 &mdash; the slope works out to a fraction'
+};
+
+function encounterTier(n) {
+    if (n <= 3) return 0;
+    if (n <= 10) return 1;
+    return 2;
+}
+
+/* =====================================================================
+   State
+   ===================================================================== */
+var selectedCategory = 'yint';
+var selectedLevels = { 'point': 1, 'twopoints': 1 };
+var streak = 0;
+var bestStreak = 0;
+var currentProblem = null;
+var lastProblemSignature = '';
+var resetArmed = false;
+var resetTimeoutId = null;
+var categoryStats = {};
+var categoryEncounters = {};
+var overallStats = { c: 0, t: 0 };
+var solutionShown = 0;       /* how many solution steps are revealed */
+var altShown = false;        /* is "Another approach" open on this problem */
+var altPreference = false;   /* session-only: student asked for it once */
+var lastFocusedSlot = null;
+
+/* =====================================================================
+   Small utilities
+   ===================================================================== */
+function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (ch) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+    });
+}
+function gcd(a, b) {
+    a = Math.abs(a); b = Math.abs(b);
+    while (b) { var t = b; b = a % b; a = t; }
+    return a || 1;
+}
+function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function pctText(c, t) {
+    if (!isFinite(c) || !isFinite(t) || t <= 0) return ' - ';
+    return Math.round(c / t * 100) + '%';
+}
+/* Security: every value written into an SVG attribute goes through num(). */
+function num(v) {
+    var n = Number(v);
+    return isFinite(n) ? n : 0;
+}
+
+/* =====================================================================
+   Fractions. Every slope and intercept in the game is one of these.
+   Always reduced, always den > 0, integers stored as den 1.
+   ===================================================================== */
+function F(n, d) {
+    if (d === undefined) d = 1;
+    if (d === 0) return { num: 0, den: 1 };
+    if (d < 0) { n = -n; d = -d; }
+    var g = gcd(n, d);
+    return { num: n / g, den: d / g };
+}
+function fVal(f) { return f.num / f.den; }
+function fAdd(a, b) { return F(a.num * b.den + b.num * a.den, a.den * b.den); }
+function fSub(a, b) { return F(a.num * b.den - b.num * a.den, a.den * b.den); }
+function fMul(a, b) { return F(a.num * b.num, a.den * b.den); }
+function fNeg(a) { return F(-a.num, a.den); }
+function fRecip(a) { return a.num === 0 ? null : F(a.den, a.num); }
+function fNegRecip(a) { return a.num === 0 ? null : F(-a.den, a.num); }
+function fIsZero(a) { return a.num === 0; }
+function fEq(a, b) { return a && b && a.num * b.den === b.num * a.den; }
+function fText(f) {
+    if (!f) return '';
+    if (f.den === 1) return String(f.num);
+    return f.num + '/' + f.den;
+}
+/* Spoken form - never let a stacked fraction read as "3 4" */
+function fSpoken(f) {
+    if (!f) return '';
+    if (f.den === 1) return spokenNum(f.num);
+    return spokenNum(f.num) + ' over ' + f.den;
+}
+function spokenNum(v) {
+    var n = Number(v);
+    if (!isFinite(n)) return 'unknown';
+    return n < 0 ? 'negative ' + Math.abs(n) : String(n);
+}
+/* Structural stacked fraction. The minus is drawn OUTSIDE the bar (correct
+   typography) and hidden from the accessibility tree - a bare ASCII hyphen is
+   skipped or mispronounced. The word "negative" is carried once, in the label. */
+function fHTML(f) {
+    if (!f) return '';
+    if (f.den === 1) return String(f.num);
+    var sign = f.num < 0 ? '<span aria-hidden="true">-</span>' : '';
+    return sign + '<span class="frac" role="img" aria-label="' + esc(fSpoken(f)) + '">'
+        + '<span class="frac-num">' + Math.abs(f.num) + '</span>'
+        + '<span class="frac-bar"></span>'
+        + '<span class="frac-den">' + f.den + '</span></span>';
+}
+/* A fraction built from arbitrary markup (subscripts, expressions). */
+function fHTMLParts(numHTML, denHTML, spoken) {
+    return '<span class="frac" role="img" aria-label="' + esc(spoken) + '">'
+        + '<span class="frac-num">' + numHTML + '</span>'
+        + '<span class="frac-bar"></span>'
+        + '<span class="frac-den">' + denHTML + '</span></span>';
+}
+
+/* ---- rendering a whole equation y = mx + b ---- */
+function slopeTermHTML(m) {
+    if (m.den === 1) {
+        if (m.num === 1) return 'x';
+        if (m.num === -1) return '-x';
+        return m.num + 'x';
+    }
+    var sign = m.num < 0 ? '<span aria-hidden="true">-</span>' : '';
+    return sign + '<span class="frac" role="img" aria-label="' + esc(fSpoken(m)) + '">'
+        + '<span class="frac-num">' + Math.abs(m.num) + '</span>'
+        + '<span class="frac-bar"></span>'
+        + '<span class="frac-den">' + m.den + '</span></span>x';
+}
+function slopeTermText(m) {
+    if (m.den === 1) {
+        if (m.num === 1) return 'x';
+        if (m.num === -1) return '-x';
+        return m.num + 'x';
+    }
+    return '(' + fText(m) + ')x';
+}
+function equationHTML(m, b) {
+    var s = 'y = ' + slopeTermHTML(m);
+    if (!fIsZero(b)) {
+        s += b.num > 0 ? ' + ' + fHTML(b) : ' - ' + fHTML(F(-b.num, b.den));
+    }
+    return s;
+}
+function equationText(m, b) {
+    var s = 'y = ' + slopeTermText(m);
+    if (!fIsZero(b)) {
+        s += b.num > 0 ? ' + ' + fText(b) : ' - ' + fText(F(-b.num, b.den));
+    }
+    return s;
+}
+function equationSpoken(m, b) {
+    var s = 'y equals ' + fSpoken(m) + ' x';
+    if (!fIsZero(b)) {
+        s += b.num > 0 ? ' plus ' + fSpoken(b) : ' minus ' + fSpoken(F(-b.num, b.den));
+    }
+    return s;
+}
+function pointText(x, y) { return '(' + num(x) + ', ' + num(y) + ')'; }
+function pointSpoken(x, y) { return 'x equals ' + spokenNum(x) + ', y equals ' + spokenNum(y); }
+
+/* standard form Ax + By = C */
+function fmtStandard(A, B, C) {
+    var s = (A === 1 ? 'x' : (A === -1 ? '-x' : A + 'x'));
+    if (B !== 0) {
+        if (B > 0) s += ' + ' + (B === 1 ? 'y' : B + 'y');
+        else s += ' - ' + (B === -1 ? 'y' : Math.abs(B) + 'y');
+    }
+    return s + ' = ' + C;
+}
+function standardSpoken(A, B, C) {
+    var t = spokenNum(A) + ' x';
+    if (B !== 0) t += (B > 0 ? ' plus ' : ' minus ') + Math.abs(B) + ' y';
+    return t + ' equals ' + spokenNum(C);
+}
+
+/* =====================================================================
+   Generators
+   Every generator returns { m, b, ... } where m and b are the answer, plus
+   whatever the prompt needs. No generator may produce a zero or undefined
+   slope: the instructor ruled that no answer in this game is ever of the
+   form x = c or y = c, so horizontal and vertical lines are excluded at the
+   source rather than filtered later.
+   ===================================================================== */
+function randomNonZeroInt(lo, hi) {
+    var v = 0;
+    while (v === 0) v = randInt(lo, hi);
+    return v;
+}
+function randomProperFraction() {
+    var p, q;
+    do {
+        p = randInt(1, 5);
+        q = pick([2, 3, 4, 5]);
+    } while (gcd(p, q) !== 1);
+    return F(p * pick([1, -1]), q);
+}
+
+/* --- Category A: slope and y-intercept. Pure form practice. --- */
+function genYint(n) {
+    /* Three whole-number problems to learn where m and b go, then fractions.
+       The FOURTH problem is always a fraction, so the student meets one at a
+       predictable point rather than waiting on a coin flip - the earlier
+       "n > 5 and 40%" rule pushed the first one out to problem 8 or 10, which
+       is far too late. After that they mix in at just under half. No extra
+       computation is added either way; this is fraction typing practice. */
+    var useFraction;
+    if (n < 4) useFraction = false;
+    else if (n === 4) useFraction = true;
+    else useFraction = Math.random() < 0.45;
+    var m = useFraction ? randomProperFraction() : F(randomNonZeroInt(-5, 5));
+    var b = F(randInt(-10, 10));
+    return { m: m, b: b, phrasing: randInt(0, 2) };
+}
+
+/* --- Category B: slope and a point. Single part. --- */
+function genPoint(level, n) {
+    var m, x0, y0;
+    for (var guard = 0; guard < 60; guard++) {
+        if (level === 1) {
+            m = F(randomNonZeroInt(-5, 5));
+            x0 = randInt(-6, 6);
+            y0 = randInt(-8, 8);
+        } else {
+            m = randomProperFraction();
+            /* 70% of the time the x-coordinate is a multiple of the denominator
+               so b lands whole; the rest of the time b is deliberately a
+               fraction, because students need to meet that too. */
+            if (Math.random() < 0.7) {
+                var k = randomNonZeroInt(-2, 2);
+                x0 = k * m.den;
+            } else {
+                x0 = randomNonZeroInt(-6, 6);
+            }
+            y0 = randInt(-8, 8);
+        }
+        var b = fSub(F(y0), fMul(m, F(x0)));
+        if (Math.abs(fVal(b)) <= 14 && Math.abs(b.den) <= 5) {
+            return { m: m, b: b, x0: x0, y0: y0 };
+        }
+    }
+    return { m: F(2), b: F(1), x0: 1, y0: 3 };
+}
+
+/* --- Category C: two points. Two parts. --- */
+function genTwoPoints(level, n) {
+    var m, x1, y1, x2, y2;
+    for (var guard = 0; guard < 60; guard++) {
+        if (level === 1) {
+            m = F(randomNonZeroInt(-5, 5));
+            var run = randInt(1, 4);
+            x1 = randInt(-8, 8 - run);
+            x2 = x1 + run;
+            y1 = randInt(-8, 8);
+            y2 = y1 + m.num * run;
+        } else {
+            m = randomProperFraction();
+            var run2 = m.den * pick([1, 1, 2]);
+            x1 = randInt(-8, 8 - run2);
+            x2 = x1 + run2;
+            y1 = randInt(-8, 8);
+            y2 = y1 + m.num * (run2 / m.den);
+        }
+        var b = fSub(F(y1), fMul(m, F(x1)));
+        if (Math.abs(y2) <= 10 && Math.abs(fVal(b)) <= 14 && b.den <= 5) {
+            return { m: m, b: b, x1: x1, y1: y1, x2: x2, y2: y2 };
+        }
+    }
+    return { m: F(2), b: F(1), x1: 0, y1: 1, x2: 1, y2: 3 };
+}
+
+/* --- Category D: parallel and perpendicular. Three parts. --- */
+function genPerp(n) {
+    var tier = encounterTier(n);
+    var relation = pick(['parallel', 'perpendicular']);
+    for (var guard = 0; guard < 80; guard++) {
+        /* The given line's slope. Never 0 and never undefined: a horizontal
+           given line would make the perpendicular answer vertical, which has
+           no home in the y = mx + b answer row. */
+        var m1;
+        if (tier === 0) m1 = F(randomNonZeroInt(-4, 4));
+        else if (tier === 1) m1 = Math.random() < 0.5 ? F(randomNonZeroInt(-4, 4)) : randomProperFraction();
+        else m1 = Math.random() < 0.25 ? F(randomNonZeroInt(-4, 4)) : randomProperFraction();
+
+        var m2 = relation === 'parallel' ? m1 : fNegRecip(m1);
+        if (!m2 || fIsZero(m2)) continue;
+
+        var x0 = randomNonZeroInt(-6, 6);
+        var y0 = randInt(-8, 8);
+        var b2 = fSub(F(y0), fMul(m2, F(x0)));
+        if (Math.abs(fVal(b2)) > 14 || b2.den > 5) continue;
+
+        /* How the given line is written. Standard form is the harder read:
+           it has to be solved for y before the slope can be seen. */
+        var useStandard = tier === 0 ? false : (tier === 1 ? Math.random() < 0.5 : Math.random() < 0.8);
+        var given;
+        if (useStandard) {
+            var t = pick([1, 1, 2, 3]);
+            var A = -m1.num * t;
+            var B = m1.den * t;
+            if (A === 0 || B === 0) continue;
+            var gx = randInt(-5, 5), gy = randInt(-5, 5);
+            var C = A * gx + B * gy;
+            if (Math.abs(C) > 40) continue;
+            given = { form: 'standard', A: A, B: B, C: C };
+        } else {
+            given = { form: 'slopeint', m: m1, b: F(randInt(-9, 9)) };
+        }
+        return { relation: relation, given: given, m1: m1, m: m2, b: b2, x0: x0, y0: y0 };
+    }
+    return {
+        relation: 'parallel',
+        given: { form: 'slopeint', m: F(2), b: F(1) },
+        m1: F(2), m: F(2), b: F(1), x0: 0, y0: 1
+    };
+}
+
+/* =====================================================================
+   Building a problem: prompt + the ordered list of steps
+   ===================================================================== */
+function makeSlopeStep(id, title, answer, note) {
+    return { id: id, kind: 'slope', title: title, answer: answer, note: note || '',
+             fields: [{ key: 'm', value: '', label: 'Slope' }] };
+}
+function makeEquationStep(id, title, m, b, carry, note) {
+    /* A carried slope must NOT be pre-filled here. This step can still be
+       locked, and pre-filling it printed the slope on screen before the
+       student had found it - in the parallel/perpendicular category that
+       handed away the whole answer to the step above. The value is written in
+       by advanceStep(), at the moment the previous step is actually cleared. */
+    return { id: id, kind: 'equation', title: title, answer: { m: m, b: b },
+             carry: !!carry, note: note || '',
+             fields: [
+                 { key: 'm', value: '', label: 'Slope, the number in front of x', locked: false },
+                 { key: 'b', value: '', label: 'y-intercept, the number at the end' }
+             ] };
+}
+
+function buildProblem(cat, n) {
+    var level = LEVELLED[cat] ? selectedLevels[cat] : 0;
+    var p = { category: cat, level: level, encounter: n, steps: [], current: 0,
+              booked: false, credited: false, perfect: true, locked: false };
+
+    if (cat === 'yint') {
+        var d = genYint(n);
+        p.data = d;
+        p.subtype = 'yint';
+        p.steps = [makeEquationStep('eq', 'Write the equation', d.m, d.b, false)];
+    } else if (cat === 'point') {
+        var d2 = genPoint(level, n);
+        p.data = d2;
+        p.subtype = 'point-l' + level;
+        p.steps = [makeEquationStep('eq', 'Write the equation', d2.m, d2.b, false,
+            'Substitute the point into y = mx + b and solve for b.')];
+    } else if (cat === 'twopoints') {
+        var d3 = genTwoPoints(level, n);
+        p.data = d3;
+        p.subtype = 'twopoints-l' + level;
+        p.steps = [
+            makeSlopeStep('slope', 'Find the slope', d3.m),
+            makeEquationStep('eq', 'Write the equation', d3.m, d3.b, true,
+                'The slope carries over from Step 1. Substitute one of the points and solve for b.')
+        ];
+    } else {
+        var d4 = genPerp(n);
+        p.data = d4;
+        p.subtype = 'perp-' + d4.relation;
+        p.steps = [
+            makeSlopeStep('given', 'Slope of the given line', d4.m1,
+                d4.given.form === 'standard' ? 'Solve the given equation for y first.' : ''),
+            makeSlopeStep('new', 'Slope of the ' + d4.relation + ' line', d4.m,
+                d4.relation === 'parallel'
+                    ? 'Parallel lines have the same slope.'
+                    : 'Perpendicular slopes are opposite reciprocals.'),
+            makeEquationStep('eq', 'Write the equation', d4.m, d4.b, true,
+                'The slope carries over from Step 2. Substitute the point and solve for b.')
+        ];
+    }
+    return p;
+}
+
+/* =====================================================================
+   Prompt rendering
+   ===================================================================== */
+function promptQuestion(p) {
+    if (p.category === 'yint') return 'Write the equation of the line described below.';
+    if (p.category === 'point') return 'Write the equation of the line with the given slope through the given point.';
+    if (p.category === 'twopoints') return 'Write the equation of the line through these two points.';
+    return 'Write the equation of the line ' + p.data.relation
+        + ' to the given line through the given point.';
+}
+function promptGivensHTML(p) {
+    var d = p.data;
+    if (p.category === 'yint') {
+        var mPart = 'slope m = ' + fHTML(d.m);
+        if (d.phrasing === 0) return mPart + '&nbsp;&nbsp;&nbsp;&nbsp;y-intercept b = ' + fHTML(d.b);
+        if (d.phrasing === 1) return mPart + '&nbsp;&nbsp;&nbsp;&nbsp;crosses the y-axis at ' + fHTML(d.b);
+        return mPart + '&nbsp;&nbsp;&nbsp;&nbsp;y-intercept (0, ' + fHTML(d.b) + ')';
+    }
+    if (p.category === 'point') {
+        return 'm = ' + fHTML(d.m) + '&nbsp;&nbsp;&nbsp;&nbsp;through ' + pointText(d.x0, d.y0);
+    }
+    if (p.category === 'twopoints') {
+        return pointText(d.x1, d.y1) + '&nbsp; and &nbsp;' + pointText(d.x2, d.y2);
+    }
+    return givenLineHTML(d.given) + '&nbsp;&nbsp;&nbsp;&nbsp;through ' + pointText(d.x0, d.y0);
+}
+function givenLineHTML(g) {
+    if (g.form === 'standard') return fmtStandard(g.A, g.B, g.C);
+    return equationHTML(g.m, g.b);
+}
+function givenLineText(g) {
+    if (g.form === 'standard') return fmtStandard(g.A, g.B, g.C);
+    return equationText(g.m, g.b);
+}
+function givenLineSpoken(g) {
+    if (g.form === 'standard') return standardSpoken(g.A, g.B, g.C);
+    return equationSpoken(g.m, g.b);
+}
+function promptSpeech(p) {
+    var d = p.data;
+    if (p.category === 'yint') {
+        var w = d.phrasing === 1 ? 'crossing the y-axis at ' : 'and y-intercept ';
+        return 'Write the equation of the line with slope ' + fSpoken(d.m) + ' ' + w + fSpoken(d.b) + '.';
+    }
+    if (p.category === 'point') {
+        return 'Write the equation of the line with slope ' + fSpoken(d.m)
+            + ' through the point ' + pointSpoken(d.x0, d.y0) + '.';
+    }
+    if (p.category === 'twopoints') {
+        return 'Write the equation of the line through the points ' + pointSpoken(d.x1, d.y1)
+            + ', and ' + pointSpoken(d.x2, d.y2) + '.';
+    }
+    return 'Write the equation of the line ' + d.relation + ' to the line '
+        + givenLineSpoken(d.given) + ', through the point ' + pointSpoken(d.x0, d.y0) + '.';
+}
+
+/* =====================================================================
+   Rendering the problem and its steps
+   ===================================================================== */
+var CHECK_SVG = '<svg class="check" viewBox="0 0 16 16" aria-hidden="true" focusable="false">'
+    + '<path d="M2.5 8.5 L6.2 12.2 L13.5 4" fill="none" stroke="currentColor" stroke-width="2.6"'
+    + ' stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function stepState(p, i) {
+    if (i < p.current) return 'done';
+    if (i === p.current && !p.locked) return 'active';
+    if (i === p.current && p.locked) return 'done';
+    return 'locked';
+}
+function fieldId(stepIndex, key) { return 'f-' + stepIndex + '-' + key; }
+
+function renderProblem(p) {
+    var html = '<div class="question-text" aria-hidden="true">' + promptQuestion(p) + '</div>';
+    html += '<div class="givens" aria-hidden="true">' + promptGivensHTML(p) + '</div>';
+    html += '<div class="steps">';
+
+    p.steps.forEach(function (st, i) {
+        var state = stepState(p, i);
+        var multi = p.steps.length > 1;
+        var tag = multi
+            ? (state === 'done' ? 'Step ' + (i + 1) : 'Step ' + (i + 1) + ' of ' + p.steps.length)
+            : 'The equation';
+        html += '<div class="step ' + state + '">';
+        html += '<div class="step-head">';
+        if (state === 'done') html += CHECK_SVG;
+        html += '<span class="step-tag">' + esc(tag) + '</span>';
+        if (multi) html += '<span class="step-title">' + esc(st.title) + '</span>';
+        html += '</div>';
+
+        if (st.kind === 'slope') {
+            html += '<div class="answer-line"><span aria-hidden="true">m =</span>'
+                + slotHTML(p, i, st, st.fields[0], state) + '</div>';
+        } else {
+            html += '<div class="answer-line"><span aria-hidden="true">y =</span>'
+                + slotHTML(p, i, st, st.fields[0], state, 'narrow')
+                + '<span aria-hidden="true">x&nbsp; +</span>'
+                + slotHTML(p, i, st, st.fields[1], state, 'narrow') + '</div>';
+        }
+        if (state === 'locked') {
+            html += '<p class="step-note">Opens once the step above is correct.</p>';
+        } else if (state === 'active' && st.note) {
+            html += '<p class="step-note">' + esc(st.note) + '</p>';
+        }
+        html += '</div>';
+    });
+    html += '</div>';
+    document.getElementById('main-content').innerHTML = html;
+}
+
+function slotHTML(p, stepIndex, st, field, state, extraClass) {
+    var id = fieldId(stepIndex, field.key);
+    var cls = 'slot' + (extraClass ? ' ' + extraClass : '');
+    var disabled = (state !== 'active') || field.locked;
+    if (field.locked) cls += ' carried';
+    if (state === 'done' && !field.locked) cls += ' solved';
+    if (field.flagged) cls += ' flagged';
+    var stepLabel = p.steps.length > 1 ? 'Step ' + (stepIndex + 1) + ', ' : '';
+    /* Hard guard: a step the student has not reached yet NEVER shows a value,
+       whatever is sitting in state. A locked step is a preview of the shape of
+       the work, not of the answer. */
+    var shown = (state === 'locked') ? '' : field.value;
+    return '<label class="sr-only" for="' + id + '">' + esc(stepLabel + field.label) + '</label>'
+        + '<input type="text" class="' + cls + '" id="' + id + '"'
+        + ' inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"'
+        + ' value="' + esc(shown) + '"'
+        + (disabled ? ' disabled' : '')
+        + ' onfocus="rememberSlot(this.id)"'
+        + ' oninput="storeField(' + stepIndex + ', \'' + field.key + '\', this.value)"'
+        + ' onkeypress="if(event.key===\'Enter\'){checkAnswer();}">';
+}
+function rememberSlot(id) { lastFocusedSlot = id; }
+function storeField(stepIndex, key, value) {
+    var st = currentProblem.steps[stepIndex];
+    for (var i = 0; i < st.fields.length; i++) {
+        if (st.fields[i].key === key) { st.fields[i].value = value; st.fields[i].flagged = false; }
+    }
+}
+function focusActiveStep() {
+    if (!currentProblem || currentProblem.locked) return;
+    var st = currentProblem.steps[currentProblem.current];
+    for (var i = 0; i < st.fields.length; i++) {
+        if (!st.fields[i].locked) {
+            var el = document.getElementById(fieldId(currentProblem.current, st.fields[i].key));
+            if (el && !el.disabled) { el.focus(); lastFocusedSlot = el.id; return; }
+        }
+    }
+}
+function announce(text) {
+    var el = document.getElementById('problem-live');
+    if (el) el.textContent = text;
+}
+function stepSpeech(p, i) {
+    var st = p.steps[i];
+    if (p.steps.length === 1) {
+        return 'Enter the slope and the y-intercept.';
+    }
+    return 'Step ' + (i + 1) + ' of ' + p.steps.length + ': ' + st.title + '.'
+        + (st.note ? ' ' + st.note : '');
+}
+function announceProblem(p) {
+    announce('New problem. ' + promptSpeech(p) + ' ' + stepSpeech(p, 0));
+}
+
+/* =====================================================================
+   Answer parsing
+   ===================================================================== */
+function parseNumber(str) {
+    if (str == null) return null;
+    var s = String(str).trim().toLowerCase().replace(/\s+/g, '');
+    if (s === '') return null;
+    var neg = false;
+    if (s.charAt(0) === '+') s = s.slice(1);
+    if (s.charAt(0) === '-') { neg = true; s = s.slice(1); }
+    /* A sign is allowed on the denominator too: 3/-4 is a correct equivalent
+       form and must not be rejected as unreadable. */
+    if (!/^\d*\.?\d+(\/[+-]?\d*\.?\d+)?$/.test(s)) return null;
+    var nv, dv;
+    if (s.indexOf('/') !== -1) {
+        var parts = s.split('/');
+        if (parts.length !== 2) return null;
+        nv = parseFloat(parts[0]); dv = parseFloat(parts[1]);
+    } else {
+        nv = parseFloat(s); dv = 1;
+    }
+    if (!isFinite(nv) || !isFinite(dv)) return null;
+    if (dv === 0) return { dividedByZero: true };
+    if (neg) nv = -nv;
+    return { num: nv, den: dv, value: nv / dv };
+}
+function sameValue(parsed, f) {
+    if (!parsed || parsed.dividedByZero || !f) return false;
+    return Math.abs(parsed.value - fVal(f)) < 1e-9;
+}
+
+/* =====================================================================
+   Diagnosis - a wrong answer must say WHERE the mistake is
+   ===================================================================== */
+function diagnoseSlopeStep(p, stepIndex, parsed) {
+    var st = p.steps[stepIndex];
+    var correct = st.answer;
+    var v = parsed.value;
+    var d = p.data;
+
+    if (p.category === 'perp' && st.id === 'new') {
+        var m1 = d.m1;
+        if (d.relation === 'perpendicular') {
+            if (Math.abs(v - fVal(m1)) < 1e-9) {
+                return ' That is the slope of the given line. A perpendicular line needs the opposite reciprocal - flip it over and change the sign.';
+            }
+            var r = fRecip(m1);
+            if (r && Math.abs(v - fVal(r)) < 1e-9) {
+                return ' You flipped it over, but the sign has to change too. Perpendicular slopes are OPPOSITE reciprocals.';
+            }
+            if (Math.abs(v + fVal(m1)) < 1e-9) {
+                return ' You changed the sign, but it also has to be flipped over. Perpendicular slopes are opposite RECIPROCALS.';
+            }
+        } else {
+            var nr = fNegRecip(m1);
+            if (nr && Math.abs(v - fVal(nr)) < 1e-9) {
+                return ' That is the perpendicular slope. Parallel lines have the SAME slope - no flipping and no sign change.';
+            }
+            if (Math.abs(v + fVal(m1)) < 1e-9) {
+                return ' Parallel lines have the same slope, sign included. Nothing needs to change.';
+            }
+        }
+        return ' Look back at the slope you found in Step 1, then apply the rule for '
+            + d.relation + ' lines.';
+    }
+
+    if (p.category === 'perp' && st.id === 'given') {
+        if (d.given.form === 'standard') {
+            var flipped = fRecip(correct);
+            if (flipped && Math.abs(v - fVal(flipped)) < 1e-9) {
+                return ' That fraction is upside down. After solving for y, the slope is the number multiplying x.';
+            }
+            if (Math.abs(v + fVal(correct)) < 1e-9) {
+                return ' The size is right but the sign is wrong. Watch the sign when you move the x-term across, and again when you divide.';
+            }
+            return ' Solve the equation for y first: move the x-term to the other side, then divide every term by the number in front of y.';
+        }
+        return ' This equation is already in y = mx + b form. The slope is the number multiplying x.';
+    }
+
+    /* Two-points slope step */
+    var cv = fVal(correct);
+    if (Math.abs(v + cv) < 1e-9) {
+        return ' The size is right but the sign is wrong. Subtract the y-values and the x-values in the SAME order.';
+    }
+    var rec = fRecip(correct);
+    if (rec && Math.abs(v - fVal(rec)) < 1e-9) {
+        return ' That is run over rise. Slope is rise over run - the change in y goes on top.';
+    }
+    var nrec = fNegRecip(correct);
+    if (nrec && Math.abs(v - fVal(nrec)) < 1e-9) {
+        return ' The x and y values got swapped. The change in y goes on top, the change in x on the bottom.';
+    }
+    if (Math.abs(v) < 1e-9) {
+        return ' A slope of 0 means a perfectly flat line, and these two points are at different heights.';
+    }
+    return ' Subtract the y-values for the top and the x-values for the bottom, keeping the points in the same order.';
+}
+
+function diagnoseEquationStep(p, stepIndex, pm, pb) {
+    var st = p.steps[stepIndex];
+    var cm = st.answer.m, cb = st.answer.b;
+    var d = p.data;
+    var mOK = st.fields[0].locked || sameValue(pm, cm);
+    var bOK = sameValue(pb, cb);
+
+    if (!mOK && bOK) {
+        if (pm && Math.abs(pm.value - fVal(cb)) < 1e-9) {
+            return ' The two numbers are swapped. The slope goes in front of x; the y-intercept goes at the end.';
+        }
+        if (pm && Math.abs(pm.value + fVal(cm)) < 1e-9) {
+            return ' Check the sign of the slope.';
+        }
+        return ' The y-intercept is right. The slope is the number that multiplies x - check it against what you were given.';
+    }
+
+    if (mOK && !bOK && pb) {
+        /* The single most common error in this topic. */
+        var py = (p.category === 'point') ? d.y0 : (p.category === 'twopoints' ? d.y1 : d.y0);
+        var py2 = (p.category === 'twopoints') ? d.y2 : null;
+        if (Math.abs(pb.value - py) < 1e-9 || (py2 !== null && Math.abs(pb.value - py2) < 1e-9)) {
+            return ' ' + pb.num / pb.den + ' is the y-value of the point you started from, not the y-intercept. Substitute the point into y = mx + b and solve for b.';
+        }
+        if (Math.abs(pb.value + fVal(cb)) < 1e-9) {
+            return ' Close - the size is right but the sign is wrong. Check the sign when you move the term across to get b by itself.';
+        }
+        var px = (p.category === 'point') ? d.x0 : (p.category === 'twopoints' ? d.x1 : d.x0);
+        if (Math.abs(pb.value - px) < 1e-9) {
+            return ' That is the x-value of the point. Substitute BOTH coordinates into y = mx + b, then solve for b.';
+        }
+        /* substituting the wrong coordinate order */
+        var swapped = fSub(F(px), fMul(cm, F(py)));
+        if (Math.abs(pb.value - fVal(swapped)) < 1e-9) {
+            return ' The coordinates went in the wrong way round. In (x, y) the first number is x and the second is y.';
+        }
+        return ' Substitute the point into y = mx + b, then solve for b. Work out m times x first, then subtract it from y.';
+    }
+
+    if (!mOK && !bOK) {
+        return ' Both boxes need another look. Start with the slope, then substitute the point to find b.';
+    }
+    return ' Check your work and try again.';
+}
+
+/* =====================================================================
+   Scoring
+   Each problem counts ONCE. The attempt is booked at the first submission or
+   the first reveal; the credit is awarded only if every step was cleared on
+   its first try. Retries are unlimited and never add to the denominator.
+   ===================================================================== */
+function ensureStats(cat) {
+    if (!categoryStats[cat]) categoryStats[cat] = { c: 0, t: 0 };
+    return categoryStats[cat];
+}
+function bookAttempt() {
+    if (!currentProblem || currentProblem.booked) return;
+    currentProblem.booked = true;
+    var s = ensureStats(currentProblem.category);
+    s.t++; overallStats.t++;
+    saveState();
+}
+function spoilProblem() {
+    if (!currentProblem) return;
+    currentProblem.perfect = false;
+    streak = 0;
+    updateDisplay();
+}
+
+var PRAISE_FIRST = ['Correct!', 'Nice work!', 'Exactly right!', 'Well done!', 'You got it!', 'Perfect!'];
+var PRAISE_RETRY = ['That\'s it!', 'Got it!', 'There you go!', 'Yes - nice recovery!'];
+/* Design system addendum item 16: a correction opens by acknowledging the
+   attempt and then coaches. It never leads with the fault, and it never
+   narrates the penalty - the streak chip already shows that. */
+var ACKNOWLEDGE = ['Good start.', 'Good thinking.', 'Good effort.', 'Let\'s take another look.'];
+
+/* Design system addendum item 11: milestones at streak 3, 5, 8, 10, and on for
+   ever - 13, 15, 18, 20... Two celebrations per five correct answers.
+   Generated from the rule, never a hand-written list that runs out. */
+function confettiTierFor(s) {
+    if (s < 3) return 0;
+    if (s % 10 === 0) return 3;
+    if (s % 5 === 0) return 2;
+    if (s % 5 === 3) return 1;
+    return 0;
+}
+
+function completeProblem() {
+    var p = currentProblem;
+    p.locked = true;
+    bookAttempt();
+    var feedback = document.getElementById('feedback');
+    var eq = equationHTML(p.steps[p.steps.length - 1].answer.m, p.steps[p.steps.length - 1].answer.b);
+    var tail = ' &nbsp;' + eq;
+
+    if (p.perfect && !p.credited) {
+        p.credited = true;
+        var s = ensureStats(p.category);
+        s.c++; overallStats.c++;
+        streak++;
+        if (streak > bestStreak) bestStreak = streak;
+        var tier = confettiTierFor(streak);
+        if (tier === 3) {
+            feedback.className = 'feedback correct victory';
+            feedback.innerHTML = streak + ' IN A ROW!' + tail;
+            createConfetti(200, 3);
+        } else if (tier === 2) {
+            feedback.className = 'feedback correct victory';
+            feedback.innerHTML = streak + ' in a row!' + tail;
+            createConfetti(100, 2);
+        } else if (tier === 1) {
+            feedback.className = 'feedback correct victory';
+            feedback.innerHTML = streak + ' in a row!' + tail;
+            createConfetti(50, 1);
+        } else {
+            feedback.className = 'feedback correct';
+            feedback.innerHTML = pick(PRAISE_FIRST) + tail;
+        }
+    } else {
+        feedback.className = 'feedback correct';
+        feedback.innerHTML = pick(PRAISE_RETRY) + tail;
+    }
+    document.getElementById('key-row').style.display = 'none';
+    document.getElementById('submit-area').style.display = 'none';
+    document.getElementById('next-btn').style.display = 'inline-block';
+    announce('Correct. The equation is '
+        + equationSpoken(p.steps[p.steps.length - 1].answer.m, p.steps[p.steps.length - 1].answer.b)
+        + '. Press Next Problem to continue.');
+    updateDisplay();
+    saveState();
+}
+
+/* =====================================================================
+   Submitting
+   ===================================================================== */
+function checkAnswer() {
+    var p = currentProblem;
+    if (!p || p.locked) return;
+    var i = p.current;
+    var st = p.steps[i];
+    var feedback = document.getElementById('feedback');
+
+    if (st.kind === 'slope') {
+        var raw = st.fields[0].value;
+        /* An empty submit must SAY so. Returning silently left a screen-reader
+           user with no feedback at all - the equation step below already
+           announces the same situation. */
+        if (String(raw).trim() === '') {
+            feedback.className = 'feedback incorrect';
+            feedback.textContent = 'Fill in the box before submitting.';
+            return;
+        }
+        var parsed = parseNumber(raw);
+        if (!parsed) {
+            feedback.className = 'feedback incorrect';
+            feedback.textContent = 'Enter a number or a fraction like 2/3.';
+            return;
+        }
+        if (parsed.dividedByZero) {
+            feedback.className = 'feedback incorrect';
+            feedback.textContent = 'A fraction cannot have 0 on the bottom. Check the denominator.';
+            return;
+        }
+        if (sameValue(parsed, st.answer)) {
+            advanceStep(i);
+        } else {
+            bookAttempt();
+            spoilProblem();
+            st.fields[0].flagged = true;
+            feedback.className = 'feedback incorrect';
+            feedback.textContent = pick(ACKNOWLEDGE) + diagnoseSlopeStep(p, i, parsed);
+            renderProblem(p);
+            focusActiveStep();
+        }
+        return;
+    }
+
+    /* equation step */
+    var mField = st.fields[0], bField = st.fields[1];
+    var mRaw = mField.locked ? fText(st.answer.m) : mField.value;
+    var bRaw = bField.value;
+    if (String(mRaw).trim() === '' || String(bRaw).trim() === '') {
+        feedback.className = 'feedback incorrect';
+        feedback.textContent = 'Fill in both boxes before submitting.';
+        return;
+    }
+    var pm = parseNumber(mRaw), pb = parseNumber(bRaw);
+    if (!pm || !pb) {
+        feedback.className = 'feedback incorrect';
+        feedback.textContent = 'Enter numbers or fractions like 2/3 in both boxes.';
+        return;
+    }
+    if (pm.dividedByZero || pb.dividedByZero) {
+        feedback.className = 'feedback incorrect';
+        feedback.textContent = 'A fraction cannot have 0 on the bottom. Check the denominator.';
+        return;
+    }
+    var mOK = mField.locked || sameValue(pm, st.answer.m);
+    var bOK = sameValue(pb, st.answer.b);
+    if (mOK && bOK) {
+        advanceStep(i);
+    } else {
+        bookAttempt();
+        spoilProblem();
+        if (!mOK) mField.flagged = true;
+        if (!bOK) bField.flagged = true;
+        feedback.className = 'feedback incorrect';
+        feedback.textContent = pick(ACKNOWLEDGE) + diagnoseEquationStep(p, i, pm, pb);
+        renderProblem(p);
+        focusActiveStep();
+    }
+}
+
+function advanceStep(i) {
+    var p = currentProblem;
+    var st = p.steps[i];
+    /* lock in the correct value so the completed step shows the student's own
+       answer, tidied to canonical form */
+    if (st.kind === 'slope') {
+        st.fields[0].value = fText(st.answer);
+        st.fields[0].flagged = false;
+    } else {
+        st.fields[0].value = fText(st.answer.m);
+        st.fields[1].value = fText(st.answer.b);
+        st.fields[0].flagged = false;
+        st.fields[1].flagged = false;
+    }
+    if (i === p.steps.length - 1) {
+        p.current = i + 1;
+        renderProblem(p);
+        completeProblem();
+        return;
+    }
+    /* carry the slope forward into the next step if that step expects it */
+    var next = p.steps[i + 1];
+    if (next.carry) {
+        next.fields[0].value = fText(next.answer.m);
+        next.fields[0].locked = true;
+    }
+    p.current = i + 1;
+    var feedback = document.getElementById('feedback');
+    feedback.className = 'feedback correct';
+    feedback.textContent = 'Step ' + (i + 1) + ' is correct.';
+    renderProblem(p);
+    announce('Step ' + (i + 1) + ' correct. ' + stepSpeech(p, i + 1));
+    focusActiveStep();
+    if (document.getElementById('hint').style.display !== 'none') {
+        renderHint();
+    }
+}
+
+/* =====================================================================
+   Hint / Answer / Solution
+   ===================================================================== */
+function getHintText(p) {
+    var st = p.steps[p.current] || p.steps[p.steps.length - 1];
+    if (st.kind === 'slope') {
+        if (p.category === 'perp' && st.id === 'given') {
+            return p.data.given.form === 'standard'
+                ? 'Solve the given equation for y. Move the x-term to the other side, then divide every term by the number in front of y. Once it looks like y = mx + b, the number in front of x is the slope.'
+                : 'This equation is already in y = mx + b form. The slope is the number in front of x.';
+        }
+        if (p.category === 'perp' && st.id === 'new') {
+            return p.data.relation === 'parallel'
+                ? 'Parallel lines never meet, which means they rise at exactly the same rate. Use the same slope you just found.'
+                : 'Perpendicular slopes are opposite reciprocals: flip the fraction over, then change the sign. A slope of 2 becomes -1/2.';
+        }
+        return 'Use the slope formula. The change in y goes on top, the change in x goes on the bottom. Subtract the coordinates in the same order both times.';
+    }
+    /* equation step */
+    if (p.category === 'yint') {
+        return 'In y = mx + b, m is the slope and b is the y-intercept. Both numbers were given to you - put each one where it belongs.';
+    }
+    return 'Start from y = mx + b. Put the slope in for m, then substitute the point\'s x and y. That leaves only b unknown, so solve for it.';
+}
+function setExpanded(btnId, isOpen) {
+    var b = document.getElementById(btnId);
+    if (b) b.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+}
+function renderHint() {
+    var hint = document.getElementById('hint');
+    hint.className = 'hint-box';
+    hint.innerHTML = '<strong>Hint:</strong><br>' + esc(getHintText(currentProblem));
+}
+function toggleHint() {
+    var hint = document.getElementById('hint');
+    if (hint.style.display === 'none') {
+        renderHint();
+        hint.style.display = 'block';
+        setExpanded('hint-btn', true);
+    } else {
+        hint.style.display = 'none';
+        setExpanded('hint-btn', false);
+    }
+}
+/* Revealing costs exactly what a wrong first attempt costs: the problem is
+   booked as attempted, it can no longer earn the correct tally, and the streak
+   ends. Show Hint stays free - every hint here is strategy, never the answer. */
+function recordReveal() {
+    if (!currentProblem || currentProblem.locked) return;
+    bookAttempt();
+    spoilProblem();
+    saveState();
+}
+function toggleAnswer() {
+    var box = document.getElementById('answer-box');
+    if (box.style.display === 'none') {
+        recordReveal();
+        var last = currentProblem.steps[currentProblem.steps.length - 1];
+        box.className = 'answer-box';
+        box.innerHTML = '<strong>Answer:</strong> ' + equationHTML(last.answer.m, last.answer.b);
+        box.style.display = 'block';
+        setExpanded('answer-btn', true);
+    } else {
+        box.style.display = 'none';
+        setExpanded('answer-btn', false);
+    }
+}
+
+/* ---------------------------------------------------------------------
+   Solutions. Design system: one line per click ("Next Step"), instruction on
+   its own line, resulting equation on the next line, indented and monospace.
+   Point-slope leads; "Another approach" unlocks only after the last step.
+   --------------------------------------------------------------------- */
+function solutionSteps(p) {
+    var d = p.data, out = [];
+    var mm, bb;
+
+    if (p.category === 'yint') {
+        out.push({
+            t: 'Both numbers are already given. Name them.',
+            m: 'slope m = ' + fHTML(d.m) + '<br>y-intercept b = ' + fHTML(d.b)
+        });
+        out.push({
+            t: 'Put the slope in front of x and the y-intercept at the end.',
+            m: equationHTML(d.m, d.b)
+        });
+        return out;
+    }
+
+    if (p.category === 'point') {
+        out.push({
+            t: 'Start from y = mx + b and put in the slope you were given.',
+            m: 'y = ' + slopeTermHTML(d.m) + ' + b'
+        });
+        out.push({
+            t: 'Substitute the point ' + pointText(d.x0, d.y0) + ' for x and y.',
+            m: d.y0 + ' = ' + fHTML(d.m) + '(' + d.x0 + ') + b'
+        });
+        var prod = fMul(d.m, F(d.x0));
+        out.push({
+            t: 'Work out the multiplication, then solve for b.',
+            m: d.y0 + ' = ' + fHTML(prod) + ' + b<br>b = ' + d.y0 + ' - ' + fHTML(prod)
+                + ' = ' + fHTML(d.b)
+        });
+        out.push({
+            t: 'Write the equation with that slope and that y-intercept.',
+            m: equationHTML(d.m, d.b)
+        });
+        return out;
+    }
+
+    if (p.category === 'twopoints') {
+        var rise = d.y2 - d.y1, run = d.x2 - d.x1;
+        out.push({
+            t: 'Find the slope.',
+            m: 'm = ' + fHTMLParts('y<sub>2</sub> - y<sub>1</sub>', 'x<sub>2</sub> - x<sub>1</sub>',
+                    'y sub 2 minus y sub 1, over x sub 2 minus x sub 1')
+                + ' = ' + fHTMLParts('(' + d.y2 + ') - (' + d.y1 + ')', '(' + d.x2 + ') - (' + d.x1 + ')',
+                    spokenNum(d.y2) + ' minus ' + spokenNum(d.y1) + ', over '
+                    + spokenNum(d.x2) + ' minus ' + spokenNum(d.x1))
+                + ' = ' + fHTMLParts(String(rise), String(run), spokenNum(rise) + ' over ' + spokenNum(run))
+                + ' = ' + fHTML(d.m)
+        });
+        out.push({
+            t: 'Put the slope and one of the points into point-slope form.',
+            m: 'y - y<sub>1</sub> = m(x - x<sub>1</sub>)<br>y - (' + d.y1 + ') = '
+                + fHTML(d.m) + '(x - (' + d.x1 + '))'
+        });
+        out.push({
+            t: 'Simplify and solve for y.',
+            m: pointSlopeWorkHTML(d.m, d.x1, d.y1, d.b)
+        });
+        return out;
+    }
+
+    /* perpendicular / parallel */
+    if (d.given.form === 'standard') {
+        var A = d.given.A, B = d.given.B, C = d.given.C;
+        var moveWord = (A > 0 ? 'Subtract ' + termStr(A, 'x') + ' from' : 'Add ' + termStr(-A, 'x') + ' to')
+            + ' both sides';
+        var rhs = termStr(-A, 'x') + (C !== 0 ? (C > 0 ? ' + ' + C : ' - ' + Math.abs(C)) : '');
+        var interc = F(C, B);
+        var interPart = fIsZero(interc) ? ''
+            : (interc.num > 0 ? ' + ' + fHTML(interc) : ' - ' + fHTML(F(-interc.num, interc.den)));
+        out.push({
+            t: 'Solve the given equation for y. ' + moveWord + ', then divide every term by ' + B + '.',
+            m: fmtStandard(A, B, C) + '<br>' + termStr(B, 'y') + ' = ' + rhs
+                + '<br>y = ' + slopeTermHTML(d.m1) + interPart
+        });
+        out.push({
+            t: 'The number in front of x is the slope of the given line.',
+            m: 'm = ' + fHTML(d.m1)
+        });
+    } else {
+        out.push({
+            t: 'The given line is already in y = mx + b form, so read its slope straight off.',
+            m: givenLineHTML(d.given) + '<br>m = ' + fHTML(d.m1)
+        });
+    }
+    if (d.relation === 'parallel') {
+        out.push({
+            t: 'Parallel lines have the same slope, so the new line has that slope too.',
+            m: 'm = ' + fHTML(d.m)
+        });
+    } else {
+        out.push({
+            t: 'Perpendicular slopes are opposite reciprocals: flip the fraction over and change the sign.',
+            m: 'm = ' + fHTML(d.m1) + ' &nbsp;becomes&nbsp; ' + fHTML(d.m)
+        });
+    }
+    out.push({
+        t: 'Put that slope and the point ' + pointText(d.x0, d.y0) + ' into point-slope form.',
+        m: 'y - y<sub>1</sub> = m(x - x<sub>1</sub>)<br>y - (' + d.y0 + ') = '
+            + fHTML(d.m) + '(x - (' + d.x0 + '))'
+    });
+    out.push({
+        t: 'Simplify and solve for y.',
+        m: pointSlopeWorkHTML(d.m, d.x0, d.y0, d.b)
+    });
+    return out;
+}
+function termStr(coef, v) {
+    if (coef === 1) return v;
+    if (coef === -1) return '-' + v;
+    return coef + v;
+}
+/* y - y1 = m(x - x1)  ->  y = mx + b, written out */
+function pointSlopeWorkHTML(m, x1, y1, b) {
+    var inner = x1 === 0 ? 'x' : (x1 > 0 ? 'x - ' + x1 : 'x + ' + Math.abs(x1));
+    var mx1 = fMul(m, F(x1));
+    var lhs = y1 === 0 ? 'y' : (y1 > 0 ? 'y - ' + y1 : 'y + ' + Math.abs(y1));
+    var expanded = slopeTermHTML(m);
+    var negMx1 = fNeg(mx1);
+    if (!fIsZero(negMx1)) {
+        expanded += negMx1.num > 0 ? ' + ' + fHTML(negMx1) : ' - ' + fHTML(F(-negMx1.num, negMx1.den));
+    }
+    return lhs + ' = ' + fHTML(m) + '(' + inner + ')<br>'
+        + lhs + ' = ' + expanded + '<br>'
+        + equationHTML(m, b);
+}
+/* The second method, revealed as one block after the walkthrough is finished. */
+function altSolutionHTML(p) {
+    var d = p.data;
+    var m = p.steps[p.steps.length - 1].answer.m;
+    var b = p.steps[p.steps.length - 1].answer.b;
+    var x0 = (p.category === 'twopoints') ? d.x1 : d.x0;
+    var y0 = (p.category === 'twopoints') ? d.y1 : d.y0;
+    var prod = fMul(m, F(x0));
+    var html = '<div class="method-divider">';
+    html += '<div class="sol-line"><b>Another approach &mdash; substitute and solve for b.</b></div>';
+    html += '<div class="sol-line">Start from y = mx + b with m = ' + fHTML(m)
+        + ', and put the point ' + pointText(x0, y0) + ' in for x and y:</div>';
+    html += '<span class="sol-math">' + y0 + ' = ' + fHTML(m) + '(' + x0 + ') + b<br>'
+        + y0 + ' = ' + fHTML(prod) + ' + b<br>b = ' + fHTML(b) + '</span>';
+    html += '<div class="sol-line">Then write the equation with that m and that b:</div>';
+    html += '<span class="sol-math">' + equationHTML(m, b) + '</span>';
+    html += '</div>';
+    return html;
+}
+function hasAltMethod(p) {
+    return p.category === 'twopoints' || p.category === 'perp';
+}
+function renderSolution() {
+    var p = currentProblem;
+    var all = solutionSteps(p);
+    var total = all.length;
+    if (solutionShown < 1) solutionShown = 1;
+    if (solutionShown > total) solutionShown = total;
+    var html = '<div class="sol-title">Solution</div>';
+    for (var i = 0; i < solutionShown; i++) {
+        html += '<div class="sol-line"><b>Step ' + (i + 1) + '.</b> ' + all[i].t + '</div>';
+        html += '<span class="sol-math">' + all[i].m + '</span>';
+    }
+    html += '<div class="step-more">';
+    if (solutionShown < total) {
+        html += '<button type="button" class="next-step-btn" onclick="nextSolutionStep()"'
+            + ' aria-label="Show the next solution step. Step ' + (solutionShown + 1)
+            + ' of ' + total + '">Next Step</button>'
+            + '<span class="step-count">Step ' + solutionShown + ' of ' + total + '</span>';
+    } else if (hasAltMethod(p)) {
+        html += '<button type="button" class="step-btn' + (altShown ? '' : '') + '"'
+            + ' id="alt-btn" onclick="toggleAlt()" aria-expanded="' + (altShown ? 'true' : 'false')
+            + '" aria-controls="alt-block">Another approach</button>';
+    } else {
+        html += '<span class="step-count">Step ' + total + ' of ' + total + ' - that is the whole solution</span>';
+    }
+    html += '</div>';
+    if (altShown && hasAltMethod(p)) {
+        html += '<div id="alt-block">' + altSolutionHTML(p) + '</div>';
+    }
+    var box = document.getElementById('solution-box');
+    box.className = 'answer-box';
+    box.innerHTML = html;
+}
+function nextSolutionStep() {
+    var total = solutionSteps(currentProblem).length;
+    if (solutionShown < total) solutionShown++;
+    renderSolution();
+    var all = solutionSteps(currentProblem);
+    announce('Step ' + solutionShown + '. ' + stripTags(all[solutionShown - 1].t)
+        + (solutionShown === total ? ' That is the last step.' : ''));
+    var btn = document.querySelector('#solution-box .next-step-btn, #solution-box .step-btn');
+    if (btn) btn.focus();
+    /* If the student has already asked for the second method once this
+       session, bring it out automatically when the walkthrough finishes. */
+    if (solutionShown === total && altPreference && hasAltMethod(currentProblem) && !altShown) {
+        altShown = true;
+        renderSolution();
+    }
+}
+function toggleAlt() {
+    altShown = !altShown;
+    if (altShown) altPreference = true;
+    renderSolution();
+    var btn = document.getElementById('alt-btn');
+    if (btn) btn.focus();
+    if (altShown) announce('Another approach: substitute the point into y = mx + b and solve for b.');
+}
+function stripTags(s) { return String(s).replace(/<[^>]*>/g, ''); }
+function toggleSolution() {
+    var box = document.getElementById('solution-box');
+    if (box.style.display === 'none') {
+        /* The walkthrough ends on the answer, so opening it is a reveal. */
+        recordReveal();
+        solutionShown = 1;
+        altShown = false;
+        renderSolution();
+        box.style.display = 'block';
+        setExpanded('solution-btn', true);
+    } else {
+        box.style.display = 'none';
+        setExpanded('solution-btn', false);
+    }
+}
+
+/* =====================================================================
+   Stats
+   ===================================================================== */
+function statLine(s) {
+    if (!s || !s.t) return 'not tried yet';
+    return s.c + ' of ' + s.t + ' (' + pctText(s.c, s.t) + ')';
+}
+function buildStatsHTML() {
+    var html = '<div style="font-weight:800;margin-bottom:8px;">First-try accuracy: '
+        + statLine(overallStats) + '</div>';
+    html += '<div style="margin-bottom:8px;">Best streak: ' + bestStreak + '</div>';
+    CATEGORIES.forEach(function (cat) {
+        html += '<div>' + esc(CATEGORY_NAMES[cat]) + ': ' + statLine(categoryStats[cat]) + '</div>';
+    });
+    html += '<div style="margin-top:10px;font-size:12px;color:#565f8c;">Counted once per problem, on your first try at each step. Retries and hints never count against you.</div>';
+    return html;
+}
+function toggleStatsPanel() {
+    var box = document.getElementById('stats-box');
+    if (box.style.display === 'none') {
+        box.className = 'answer-box';
+        box.innerHTML = buildStatsHTML();
+        box.style.display = 'block';
+        setExpanded('stats-btn', true);
+    } else {
+        box.style.display = 'none';
+        setExpanded('stats-btn', false);
+    }
+}
+
+/* =====================================================================
+   Category tiles and the level branch
+   ===================================================================== */
+function renderCategoryTiles() {
+    var html = '';
+    TILES.forEach(function (cat) {
+        var sel = (selectedCategory === cat);
+        var id = 'cat-' + cat;
+        html += '<input type="radio" name="lineeq-category" class="tile-input sr-only" id="' + id + '"'
+            + (sel ? ' checked' : '')
+            + ' onchange="selectCategory(\'' + cat + '\')">'
+            + '<label class="tile" data-key="' + cat + '" for="' + id + '">'
+            + CATEGORY_LABELS[cat]
+            + '<span class="sr-only">' + esc(CATEGORY_NAMES[cat]) + '</span></label>';
+    });
+    document.getElementById('category-tiles').innerHTML = html;
+}
+function renderLevelBranch() {
+    var host = document.getElementById('level-branch');
+    if (!LEVELLED[selectedCategory]) { host.innerHTML = ''; return; }
+    var lv = selectedLevels[selectedCategory];
+    var html = '<div class="branch" id="branch">'
+        + '<svg class="branch-svg" id="branch-svg" aria-hidden="true" focusable="false" preserveAspectRatio="none"></svg>'
+        + '<div class="branch-pills-wrap"><div class="branch-pills" id="branch-pills"'
+        + ' role="radiogroup" aria-label="Difficulty level">';
+    [1, 2].forEach(function (n) {
+        var id = 'lv-' + n;
+        html += '<input type="radio" name="lineeq-level" class="level-input sr-only" id="' + id + '"'
+            + (lv === n ? ' checked' : '')
+            + ' onchange="selectLevel(' + n + ')">'
+            + '<label class="level-pill" data-lv="' + n + '" for="' + id + '">Level ' + n
+            + '<span class="sr-only">, ' + (n === 1 ? 'whole-number slopes' : 'fraction slopes') + '</span></label>';
+    });
+    html += '</div></div><p class="branch-caption">' + LEVEL_CAPTION[lv] + '</p></div>';
+    host.innerHTML = html;
+    drawBranch();
+}
+/* The branch is measured, not hard-coded: the two rules always leave the bottom
+   of whichever tile is selected, wherever that tile sits in the wrapped row.
+   The rule leading to the chosen level is mint; the other stays pale. */
+function drawBranch() {
+    var br = document.getElementById('branch');
+    if (!br) return;
+    var tile = document.querySelector('.tile[data-key="' + selectedCategory + '"]');
+    var pills = document.getElementById('branch-pills');
+    var svg = document.getElementById('branch-svg');
+    if (!tile || !pills || !svg) return;
+
+    var brRect = br.getBoundingClientRect();
+    if (!brRect.width) return;
+    var tRect = tile.getBoundingClientRect();
+    var tileCx = tRect.left + tRect.width / 2 - brRect.left;
+
+    pills.style.transform = 'none';
+    var pRect = pills.getBoundingClientRect();
+    var half = pRect.width / 2;
+    var target = Math.max(half + 2, Math.min(brRect.width - half - 2, tileCx));
+    pills.style.transform = 'translateX(' + (target - brRect.width / 2) + 'px)';
+
+    var forkY = 5, footY = 16;
+    var out = '<line x1="' + num(tileCx) + '" y1="0" x2="' + num(tileCx) + '" y2="' + forkY
+        + '" stroke="#c7cdf0" stroke-width="2" stroke-linecap="round"/>';
+    Array.prototype.forEach.call(pills.querySelectorAll('.level-pill'), function (lab) {
+        var r = lab.getBoundingClientRect();
+        var cx = r.left + r.width / 2 - brRect.left;
+        var input = document.getElementById(lab.getAttribute('for'));
+        var on = input && input.checked;
+        out += '<line x1="' + num(tileCx) + '" y1="' + forkY + '" x2="' + num(cx) + '" y2="' + footY
+            + '" stroke="' + (on ? '#0b7a70' : '#c7cdf0') + '"'
+            + ' stroke-width="' + (on ? 2.6 : 2) + '" stroke-linecap="round"/>';
+    });
+    out += '<circle cx="' + num(tileCx) + '" cy="1.5" r="2.6" fill="#c7cdf0"/>';
+    svg.setAttribute('viewBox', '0 0 ' + num(brRect.width) + ' ' + footY);
+    svg.innerHTML = out;
+}
+function selectCategory(cat) {
+    if (TILES.indexOf(cat) === -1) return;
+    if (selectedCategory === cat) return;
+    selectedCategory = cat;
+    renderCategoryTiles();
+    renderLevelBranch();
+    saveState();
+    generateProblem();
+}
+function selectLevel(n) {
+    if (n !== 1 && n !== 2) return;
+    if (!LEVELLED[selectedCategory]) return;
+    if (selectedLevels[selectedCategory] === n) return;
+    selectedLevels[selectedCategory] = n;
+    renderLevelBranch();
+    saveState();
+    generateProblem();
+}
+function activePool() {
+    return selectedCategory === 'mixed' ? CATEGORIES : [selectedCategory];
+}
+
+/* =====================================================================
+   Problem selection
+   ===================================================================== */
+function pickWeightedCategory(pool) {
+    var weights = pool.map(function (cat) {
+        var s = categoryStats[cat];
+        if (!s || s.t < 3) return 1.0;
+        return Math.max(0.2, 1 - (s.c / s.t));
+    });
+    var total = weights.reduce(function (a, b) { return a + b; }, 0);
+    var r = Math.random() * total;
+    for (var i = 0; i < pool.length; i++) {
+        r -= weights[i];
+        if (r <= 0) return pool[i];
+    }
+    return pool[pool.length - 1];
+}
+function problemSignature(p) {
+    if (!p) return '';
+    var d = p.data;
+    if (p.category === 'yint') return 'yint|' + fText(d.m) + '|' + fText(d.b) + '|' + d.phrasing;
+    if (p.category === 'point') return 'point|' + fText(d.m) + '|' + d.x0 + ',' + d.y0;
+    if (p.category === 'twopoints') return 'two|' + d.x1 + ',' + d.y1 + ',' + d.x2 + ',' + d.y2;
+    return 'perp|' + d.relation + '|' + givenLineText(d.given) + '|' + d.x0 + ',' + d.y0;
+}
+function generateProblem() {
+    document.getElementById('hint').style.display = 'none';
+    document.getElementById('answer-box').style.display = 'none';
+    document.getElementById('solution-box').style.display = 'none';
+    setExpanded('hint-btn', false);
+    setExpanded('answer-btn', false);
+    setExpanded('solution-btn', false);
+    document.getElementById('feedback').textContent = '';
+    document.getElementById('feedback').className = 'feedback';
+    document.getElementById('next-btn').style.display = 'none';
+    document.getElementById('key-row').style.display = '';
+    document.getElementById('submit-area').style.display = '';
+    solutionShown = 0;
+    altShown = false;
+    lastFocusedSlot = null;
+
+    var cat = pickWeightedCategory(activePool());
+    categoryEncounters[cat] = (categoryEncounters[cat] || 0) + 1;
+    /* Anti-repeat: never serve the identical problem twice running. Bounded to
+       12 attempts so a narrow generator can never spin forever. */
+    var candidate = null, tries = 0;
+    do {
+        candidate = buildProblem(cat, categoryEncounters[cat]);
+        tries++;
+    } while (tries < 12 && lastProblemSignature && problemSignature(candidate) === lastProblemSignature);
+    lastProblemSignature = problemSignature(candidate);
+    currentProblem = candidate;
+    renderProblem(currentProblem);
+    announceProblem(currentProblem);
+    updateDisplay();
+    saveState();
+}
+
+/* =====================================================================
+   Display
+   ===================================================================== */
+function updateDisplay() {
+    document.getElementById('streak').textContent = streak;
+    document.getElementById('best-streak').textContent = bestStreak;
+    document.getElementById('overall-pct').textContent = pctText(overallStats.c, overallStats.t);
+}
+
+/* =====================================================================
+   Input helpers - act on the box the student is typing in
+   ===================================================================== */
+function activeSlot() {
+    var el = lastFocusedSlot ? document.getElementById(lastFocusedSlot) : null;
+    if (el && !el.disabled) return el;
+    if (!currentProblem || currentProblem.locked) return null;
+    var st = currentProblem.steps[currentProblem.current];
+    if (!st) return null;
+    for (var i = 0; i < st.fields.length; i++) {
+        if (st.fields[i].locked) continue;
+        var cand = document.getElementById(fieldId(currentProblem.current, st.fields[i].key));
+        if (cand && !cand.disabled) return cand;
+    }
+    return null;
+}
+function slotKeyOf(el) { return el.id.split('-')[2]; }
+function toggleSign() {
+    var el = activeSlot();
+    if (!el) return;
+    el.value = el.value.charAt(0) === '-' ? el.value.slice(1) : '-' + el.value;
+    storeField(currentProblem.current, slotKeyOf(el), el.value);
+    el.focus();
+}
+function insertSlash() {
+    var el = activeSlot();
+    if (!el) return;
+    if (el.value.indexOf('/') === -1) el.value = el.value + '/';
+    storeField(currentProblem.current, slotKeyOf(el), el.value);
+    el.focus();
+}
+
+/* =====================================================================
+   Confetti (8-colour Midnight Scholar palette, no orange, no red)
+   ===================================================================== */
+function createConfetti(count, tier) {
+    if (!confettiEnabled) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var host = document.body;
+    /* Design system addendum item 17. Eight colours in EIGHT hue families:
+       violet, light violet, royal, mint, yellow, orange, red, pink. The older
+       set put three greens/teals and two violets into eight slots, so at 200
+       pieces it averaged into one greenish-purple haze.
+       The orange and the red are a DOCUMENTED EXEMPTION from the suite's
+       no-orange/no-red rule, not a relaxation of it: those colours mean error
+       and warning everywhere else (incorrect feedback is deliberately ink navy
+       so being wrong never reads as an alarm), and confetti never shares the
+       screen with a wrong-answer message. Do not "fix" this back. */
+    var colors = ['#7c3aed', '#a78bfa', '#2e3d8f', '#10b981',
+                  '#ffeb3b', '#fb923c', '#ef4444', '#ec4899'];
+    var isMassive = tier === 3;
+    for (var i = 0; i < count; i++) {
+        var piece = document.createElement('div');
+        piece.className = 'confetti';
+        piece.setAttribute('aria-hidden', 'true');
+        var base;
+        if (tier === 1) base = 7 + Math.random() * 5;
+        else if (tier === 2) base = 10 + Math.random() * 7;
+        else base = 11 + Math.random() * 9;
+        var color = colors[Math.floor(Math.random() * colors.length)];
+        var shape = Math.floor(Math.random() * 4);
+        if (shape === 0) {
+            piece.style.width = base + 'px'; piece.style.height = base + 'px';
+            piece.style.background = color; piece.style.borderRadius = '50%';
+        } else if (shape === 1) {
+            piece.style.width = base + 'px'; piece.style.height = base + 'px';
+            piece.style.background = color; piece.style.borderRadius = '2px';
+        } else if (shape === 2) {
+            piece.style.width = Math.max(4, base * 0.35) + 'px'; piece.style.height = (base * 1.7) + 'px';
+            piece.style.background = color; piece.style.borderRadius = '2px';
+        } else {
+            piece.style.width = '0'; piece.style.height = '0'; piece.style.background = 'transparent';
+            piece.style.borderLeft = (base * 0.6) + 'px solid transparent';
+            piece.style.borderRight = (base * 0.6) + 'px solid transparent';
+            piece.style.borderBottom = base + 'px solid ' + color;
+        }
+        piece.style.left = Math.random() * 100 + '%';
+        piece.style.top = '-20px';
+        var dur;
+        if (tier === 1) dur = 1.3 + Math.random() * 0.8;
+        else if (tier === 2) dur = 1.6 + Math.random() * 1.2;
+        else dur = 2.0 + Math.random() * 1.6;
+        piece.style.animation = (isMassive ? 'confetti-fall-slow' : 'confetti-fall') + ' ' + dur + 's ease-out forwards';
+        piece.style.animationDelay = (Math.random() * (isMassive ? 0.8 : 0.4)) + 's';
+        host.appendChild(piece);
+        setTimeout((function (el) { return function () { if (el.parentNode) el.parentNode.removeChild(el); }; })(piece), isMassive ? 6000 : 4500);
+    }
+    if (isMassive) {
+        for (var j = 0; j < 15; j++) {
+            var sp = document.createElement('div');
+            sp.className = 'sparkle';
+            sp.setAttribute('aria-hidden', 'true');
+            sp.style.left = (Math.random() * 90 + 5) + '%';
+            sp.style.top = (Math.random() * 55 + 10) + 'vh';
+            sp.style.animationDelay = (Math.random() * 0.5) + 's';
+            host.appendChild(sp);
+            setTimeout((function (el) { return function () { if (el.parentNode) el.parentNode.removeChild(el); }; })(sp), 3500);
+        }
+    }
+}
+
+/* Confetti setting - its own key so clearing progress does not silently turn
+   the animation back on. */
+var confettiEnabled = true;
+function loadConfettiSetting() {
+    try {
+        var v = localStorage.getItem(CONFETTI_KEY);
+        if (v === '0') confettiEnabled = false;
+        else if (v === '1') confettiEnabled = true;
+    } catch (e) {}
+}
+function syncConfettiSwitch() {
+    var btn = document.getElementById('confetti-switch');
+    if (btn) btn.setAttribute('aria-pressed', confettiEnabled ? 'true' : 'false');
+}
+function toggleConfettiSetting() {
+    confettiEnabled = !confettiEnabled;
+    try { localStorage.setItem(CONFETTI_KEY, confettiEnabled ? '1' : '0'); } catch (e) {}
+    syncConfettiSwitch();
+}
+
+/* =====================================================================
+   Persistence - values sanitised on load, never trusted raw
+   ===================================================================== */
+function safeCount(v) {
+    var n = Number(v);
+    if (!isFinite(n) || n < 0) return 0;
+    return Math.floor(n);
+}
+function sanitizeStatBucket(obj) {
+    var out = {};
+    if (!obj || typeof obj !== 'object') return out;
+    CATEGORIES.forEach(function (cat) {
+        var s = obj[cat];
+        if (s && typeof s === 'object') {
+            var c = safeCount(s.c), t = safeCount(s.t);
+            if (c > t) c = t;
+            out[cat] = { c: c, t: t };
+        }
+    });
+    return out;
+}
+function sanitizeEncounters(obj) {
+    var out = {};
+    if (!obj || typeof obj !== 'object') return out;
+    CATEGORIES.forEach(function (cat) {
+        if (Object.prototype.hasOwnProperty.call(obj, cat)) out[cat] = safeCount(obj[cat]);
+    });
+    return out;
+}
+function sanitizeLevels(obj) {
+    var out = { 'point': 1, 'twopoints': 1 };
+    if (!obj || typeof obj !== 'object') return out;
+    ['point', 'twopoints'].forEach(function (k) {
+        var v = Number(obj[k]);
+        if (v === 1 || v === 2) out[k] = v;
+    });
+    return out;
+}
+function saveState() {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            selectedCategory: selectedCategory,
+            selectedLevels: selectedLevels,
+            categoryStats: categoryStats,
+            categoryEncounters: categoryEncounters,
+            bestStreak: bestStreak,
+            overallStats: overallStats
+        }));
+    } catch (e) {}
+}
+function loadState() {
+    try {
+        var raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        var s = JSON.parse(raw);
+        if (typeof s.selectedCategory === 'string' && TILES.indexOf(s.selectedCategory) !== -1) {
+            selectedCategory = s.selectedCategory;
+        }
+        selectedLevels = sanitizeLevels(s.selectedLevels);
+        categoryStats = sanitizeStatBucket(s.categoryStats);
+        categoryEncounters = sanitizeEncounters(s.categoryEncounters);
+        bestStreak = safeCount(s.bestStreak);
+        var oc = s.overallStats && typeof s.overallStats === 'object' ? s.overallStats : {};
+        var c = safeCount(oc.c), t = safeCount(oc.t);
+        if (c > t) c = t;
+        overallStats = { c: c, t: t };
+    } catch (e) {}
+}
+function resetProgress() {
+    var btn = document.getElementById('reset-btn');
+    if (!resetArmed) {
+        resetArmed = true;
+        btn.textContent = 'Tap again to confirm reset';
+        if (resetTimeoutId) clearTimeout(resetTimeoutId);
+        resetTimeoutId = setTimeout(function () {
+            resetArmed = false;
+            btn.textContent = 'Reset Progress';
+        }, 3500);
+        return;
+    }
+    if (resetTimeoutId) { clearTimeout(resetTimeoutId); resetTimeoutId = null; }
+    resetArmed = false;
+    categoryStats = {};
+    categoryEncounters = {};
+    bestStreak = 0;
+    overallStats = { c: 0, t: 0 };
+    selectedCategory = 'yint';
+    selectedLevels = { 'point': 1, 'twopoints': 1 };
+    streak = 0;
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    btn.textContent = 'Reset Progress';
+    renderCategoryTiles();
+    renderLevelBranch();
+    generateProblem();
+    updateDisplay();
+}
+
+/* =====================================================================
+   Boot
+   ===================================================================== */
+loadState();
+loadConfettiSetting();
+syncConfettiSwitch();
+renderCategoryTiles();
+renderLevelBranch();
+generateProblem();
+updateDisplay();
+window.addEventListener('resize', drawBranch);
+if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () { drawBranch(); });
+}
+setInterval(saveState, 5000);
+</script>
+</body>
+</html>
