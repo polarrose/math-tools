@@ -1,0 +1,2563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!-- Defence in depth: the page is entirely self-contained apart from the Google
+     Fonts stylesheet, so nothing else is allowed to load or run. Inline scripts
+     and styles stay permitted because this game is built from inline handlers. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data:; base-uri 'none'; form-action 'none'">
+<title>Polynomial Operations</title>
+<meta name="theme-color" content="#1b2450">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+    /* ===== MIDNIGHT SCHOLAR - navy stage, white card, violet + mint accents ===== */
+    * { box-sizing: border-box; }
+    /* The font stack IS the offline fallback: if the Google Fonts stylesheet is
+       blocked or the device is offline, Segoe UI / system-ui / Arial carry the
+       page unchanged. Never remove the tail of this stack. */
+    body {
+        font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+        background:
+            radial-gradient(900px 500px at 85% -10%, rgba(124, 58, 237, 0.28), transparent 60%),
+            radial-gradient(800px 500px at -10% 110%, rgba(16, 185, 129, 0.18), transparent 55%),
+            linear-gradient(160deg, #141b3d 0%, #1b2450 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 16px 12px;
+        margin: 0;
+    }
+    .card {
+        background: #ffffff;
+        border-radius: 22px;
+        box-shadow: 0 24px 60px rgba(8, 12, 40, 0.55);
+        max-width: 700px;
+        width: 100%;
+        padding: 30px 24px 26px;
+        position: relative;
+        overflow: hidden;
+    }
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+    }
+    /* The heading box shrinks to its text so the rule below can match it. */
+    h1 {
+        text-align: center;
+        color: #1e2a5e;
+        margin: 4px auto 6px;
+        font-size: 24px;
+        letter-spacing: 0.3px;
+        width: fit-content;
+        max-width: 100%;
+    }
+    /* The gradient rule is exactly as wide as the title text. */
+    h1::after {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 4px;
+        border-radius: 2px;
+        margin: 8px auto 14px;
+        background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+    }
+    .info {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+    .info-item {
+        font-size: 12px;
+        font-weight: 800;
+        background: #eef0fb;
+        color: #2e3d8f;
+        padding: 6px 14px;
+        border-radius: 999px;
+    }
+    .info-item.streak-hot {
+        background: linear-gradient(135deg, #0b7a70, #2e3d8f);
+        color: white;
+    }
+    .mode-btns {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+    }
+    .mode-btn {
+        background: #e6e9f6;
+        color: #4a5480;
+        border: none;
+        border-radius: 999px;
+        padding: 9px 14px;
+        font-size: 12.5px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.15s;
+        -webkit-tap-highlight-color: transparent;
+        font-family: inherit;
+    }
+    .mode-btn:hover { background: #d9def2; }
+    /* No pill carries a permanent gradient: a pill looks selected only when it
+       IS selected. One shared active state for every mode pill, "Mixed"
+       included. */
+    .mode-btn.active {
+        background: #0b7a70 !important;
+        color: white !important;
+        box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.25), 0 6px 14px rgba(11, 122, 112, 0.35);
+    }
+    /* Second-row level pills (Level 1 / Level 2), shown only for modes that
+       have sub-modes. Taken from the Radical Expressions build. */
+    .sub-mode-btns {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+    }
+    .sub-mode-btn {
+        background: #e6e9f6;
+        color: #4a5480;
+        border: none;
+        border-radius: 999px;
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.15s;
+        -webkit-tap-highlight-color: transparent;
+        font-family: inherit;
+    }
+    .sub-mode-btn:hover { background: #d9def2; }
+    .sub-mode-btn.active {
+        background: linear-gradient(135deg, #1e3a5f, #0b7a70) !important;
+        color: white !important;
+        box-shadow: 0 6px 14px rgba(13, 148, 136, 0.35);
+    }
+    .problem {
+        font-size: 22px;
+        font-weight: 800;
+        text-align: center;
+        margin: 18px auto;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+        color: #1e2a5e;
+        background: #eef0fb;
+        border: 2px solid #c7cdf0;
+        border-radius: 14px;
+        padding: 26px 14px;
+        max-width: 100%;
+        overflow-wrap: break-word;
+        letter-spacing: 0.5px;
+        line-height: 1.9;
+    }
+    .problem sup { font-size: 0.62em; }
+    .exp-slot { display: inline-block; margin: 0 1px; }
+    /* Structural stacked fraction (design system). One component for every
+       fraction in the game. align-items: stretch is what makes the bar run the
+       full width of the wider of the two rows, like a printed vinculum. */
+    .frac {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+        vertical-align: middle;
+        margin: 0 8px;
+        line-height: 1.3;
+    }
+    .frac .frac-num, .frac .frac-den {
+        padding: 3px 10px;
+        white-space: nowrap;
+    }
+    .frac .frac-bar {
+        width: 100%;
+        height: 3px;
+        background: #1e2a5e;
+        border-radius: 2px;
+        margin: 1px 0;
+    }
+    /* A stacked fraction is an atomic inline box, so a line can break right
+       after it and leave the following punctuation stranded. */
+    .nobreak { white-space: nowrap; }
+    /* Same component inside a superscript, scaled for the exponent slot. */
+    .frac.frac-exp {
+        margin: 0 1px;
+        line-height: 1.15;
+    }
+    .frac.frac-exp .frac-num, .frac.frac-exp .frac-den { padding: 0 4px; }
+    .frac.frac-exp .frac-bar { height: 2px; margin: 1px 0; }
+    .big-paren {
+        display: inline-block;
+        font-size: 2.3em;
+        font-weight: 300;
+        transform: scaleY(1.6);
+        vertical-align: middle;
+        color: #1e2a5e;
+        line-height: 1;
+        padding: 0 1px;
+    }
+    .blank-input {
+        width: 56px;
+        font-size: 17px;
+        font-weight: 800;
+        text-align: center;
+        padding: 6px 4px;
+        border: 3px solid #7c3aed;
+        border-radius: 10px;
+        color: #1e2a5e;
+        background: #ffffff;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+        margin: 0 2px;
+    }
+    .blank-input:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18);
+    }
+    .exp-input { width: 40px; font-size: 14px; padding: 4px 2px; vertical-align: super; }
+    .frac-input { width: 64px; }
+    .sign-btn {
+        background: #e6e9f6;
+        color: #2e3d8f;
+        padding: 6px 10px;
+        font-size: 13px;
+        border-radius: 8px;
+        margin-left: 2px;
+        border: none;
+        font-weight: 800;
+        cursor: pointer;
+        vertical-align: baseline;
+        font-family: inherit;
+    }
+    .sign-btn:hover { background: #d9def2; }
+    .instructions {
+        text-align: center;
+        color: #5d6798;
+        font-size: 14px;
+        margin: 6px 0 12px;
+    }
+    .input-area {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin: 18px 0;
+        flex-wrap: wrap;
+    }
+    button {
+        padding: 12px 22px;
+        font-size: 15px;
+        font-weight: 800;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.15s;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        font-family: inherit;
+    }
+    button:active { transform: scale(0.95); }
+    .submit-btn {
+        background: linear-gradient(135deg, #2e3d8f, #4b3bbd);
+        color: white;
+        box-shadow: 0 6px 16px rgba(46, 61, 143, 0.35);
+    }
+    .submit-btn:hover { filter: brightness(1.1); }
+    .feedback {
+        text-align: center;
+        font-size: 21px;
+        font-weight: 800;
+        margin: 12px 0 8px;
+        min-height: 32px;
+    }
+    .feedback:not(:empty) {
+        padding: 8px 14px;
+        border-radius: 10px;
+    }
+    .feedback.correct { background: #ecfdf5; border: 2px solid #34d399; }
+    .feedback.incorrect { background: #f3eefe; border: 2px solid #c4b5fd; }
+    .correct { color: #047857; }
+    .incorrect { color: #1e2a5e; font-size: 18px; font-weight: 700; }
+    .helper-row {
+        text-align: center;
+        margin: 14px 0 4px;
+    }
+    .hint-btn, .answer-btn, .skip-btn, .explain-btn, .stats-btn {
+        background: #f3eefe;
+        color: #6d28d9;
+        margin: 4px;
+        font-size: 13px;
+        padding: 10px 16px;
+    }
+    .hint-btn:hover, .answer-btn:hover, .skip-btn:hover, .explain-btn:hover, .stats-btn:hover {
+        background: #e9defc;
+    }
+    .stats-btn {
+        background: #ecfdf5;
+        color: #047857;
+    }
+    .stats-btn:hover { background: #d1fae5; }
+    .hint-box, .answer-box, .explain-box {
+        background: #f7f5ff;
+        border: 2px solid #d8ccf7;
+        border-radius: 14px;
+        padding: 15px;
+        margin: 14px 0;
+        color: #3b3568;
+        font-size: 15px;
+        line-height: 1.55;
+    }
+    .hint-box b, .answer-box b, .explain-box b { color: #6d28d9; }
+    .explain-box .rewrite {
+        text-align: center;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+        font-size: 19px;
+        font-weight: 800;
+        color: #1e2a5e;
+        margin: 10px 0;
+    }
+    /* Settings row (bottom) */
+    .toggle-row {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        padding: 8px 10px;
+        -webkit-tap-highlight-color: transparent;
+        background: none;
+        border: none;
+        font-family: inherit;
+    }
+    .toggle-label { font-size: 13px; font-weight: 800; color: #4a5480; }
+    .toggle-track {
+        width: 44px; height: 24px;
+        border-radius: 999px;
+        background: #d5d9e8;
+        /* WCAG 1.4.11: the track alone is 1.41:1 on white off and 2.54:1 on,
+           so the control's own boundary was effectively invisible. A hairline
+           rim carries the edge -- #8a93b8 is 3.02:1, #0b7a70 is 5.21:1. */
+        border: 1px solid #8a93b8;
+        box-sizing: border-box;
+        position: relative;
+        display: inline-block;
+        transition: background 0.2s, border-color 0.2s;
+    }
+    .toggle-track.on { background: #10b981; border-color: #0b7a70; }
+    .toggle-knob {
+        position: absolute;
+        /* offsets are from the track's padding box, which the 1px rim inset by 1 */
+        top: 2px; left: 2px;
+        width: 18px; height: 18px;
+        border-radius: 50%;
+        background: white;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+        transition: left 0.2s;
+    }
+    .toggle-track.on .toggle-knob { left: 22px; }
+    /* Stats view */
+    .stats-view {
+        background: #eef0fb;
+        border: 2px solid #c7cdf0;
+        border-radius: 14px;
+        padding: 20px 18px;
+    }
+    .stats-view h2 {
+        text-align: center;
+        color: #1e2a5e;
+        margin: 0 0 10px;
+        font-size: 22px;
+    }
+    .stats-overall {
+        text-align: center;
+        margin-bottom: 18px;
+    }
+    .stats-overall .big {
+        font-size: 42px;
+        font-weight: 800;
+        color: #059669;
+    }
+    .stats-overall .lbl {
+        font-size: 13px;
+        color: #4a5480;
+        font-weight: 700;
+    }
+    .stat-row {
+        background: #ffffff;
+        border-radius: 10px;
+        padding: 12px 14px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .stat-name {
+        font-weight: 800;
+        color: #2e3d8f;
+        font-size: 13.5px;
+        min-width: 100px;
+    }
+    .stat-bar-wrap {
+        flex: 1;
+        height: 14px;
+        background: #eef0fb;
+        border-radius: 7px;
+        overflow: hidden;
+        position: relative;
+    }
+    .stat-bar {
+        height: 100%;
+        border-radius: 7px;
+        transition: width 0.4s ease;
+    }
+    /* Three-tier progress ramp: low navy, mid violet, good green. */
+    .stat-bar.low  { background: linear-gradient(90deg, #2e3d8f, #8b96d8); }
+    .stat-bar.mid  { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+    .stat-bar.good { background: linear-gradient(90deg, #059669, #34d399); }
+    .stat-bar.none { background: #d1d5db; }
+    .stat-num {
+        font-size: 12.5px;
+        color: #4a5480;
+        font-weight: 700;
+        min-width: 92px;
+        text-align: right;
+        font-family: 'Consolas', monospace;
+    }
+    .recommend {
+        background: #f3eefe;
+        border-left: 4px solid #7c3aed;
+        border-radius: 0 10px 10px 0;
+        padding: 12px 14px;
+        margin-top: 10px;
+        font-size: 14px;
+        color: #5b21b6;
+    }
+    .stats-actions {
+        text-align: center;
+        margin-top: 16px;
+    }
+    .reset-btn {
+        background: #4a5480;
+        color: white;
+        font-size: 13px;
+        padding: 10px 18px;
+    }
+    .reset-btn:hover { background: #3c4569; }
+    /* Confetti */
+    .confetti {
+        position: fixed;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 9999;
+    }
+    @keyframes confetti-fall {
+        0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(110vh) rotate(720deg); opacity: 1; }
+    }
+    @keyframes confetti-fall-slow {
+        0% { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 1; }
+        100% { transform: translateY(115vh) rotate(1080deg) scale(0.85); opacity: 1; }
+    }
+    /* Visible keyboard focus on every interactive control */
+    button:focus-visible,
+    input:focus-visible,
+    .mode-btn:focus-visible,
+    .sub-mode-btn:focus-visible,
+    .toggle-row:focus-visible {
+        outline: 3px solid #1e2a5e;
+        outline-offset: 2px;
+    }
+    /* Visually hidden but available to screen readers */
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+    .insignia {
+        text-align: center;
+        margin-top: 22px;
+        opacity: 0.9;
+    }
+    .insignia-caption {
+        font-size: 6.5px;
+        letter-spacing: 1.2px;
+        color: #5d6798;
+        font-weight: 800;
+        margin-top: 2px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: 0.001ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.001ms !important;
+        }
+        .confetti { display: none !important; }
+    }
+    @media (max-width: 480px) {
+        .card { padding: 24px 14px 20px; }
+        h1 { font-size: 19px; }
+        .problem { font-size: 19px; padding: 20px 8px; }
+        .mode-btn { padding: 7px 10px; font-size: 11px; }
+        .sub-mode-btn { padding: 8px 12px; font-size: 12px; }
+        .blank-input { width: 46px; font-size: 15px; }
+        .exp-input { width: 34px; font-size: 12px; }
+        .frac { margin: 0 4px; }
+        .frac .frac-num, .frac .frac-den { padding: 3px 6px; }
+        .frac.frac-exp .frac-num, .frac.frac-exp .frac-den { padding: 0 3px; }
+        .stat-name { min-width: 84px; font-size: 12px; }
+        .stat-num { min-width: 78px; font-size: 11px; }
+    }
+
+    /* ---- Two-stage subtraction ------------------------------------
+       The sign key is a real button, sized like a blank so the rewritten
+       line reads as one expression rather than a row of controls. It is
+       violet while unset and mint once the student has chosen, which is
+       the same "you have answered this" signal the blanks give. */
+    .sign-toggle {
+        background: #ffffff;
+        color: #7c3aed;
+        border: 3px solid #7c3aed;
+        border-radius: 10px;
+        padding: 5px 10px;
+        min-width: 44px;
+        font-size: 17px;
+        font-weight: 800;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+        margin: 0 3px 0 8px;
+        vertical-align: middle;
+        cursor: pointer;
+        box-shadow: none;
+    }
+    .sign-toggle.set { border-color: #10b981; color: #1e2a5e; }
+    .sign-toggle:hover { background: #f3eefe; }
+    .sign-locked {
+        color: #047857;
+        font-weight: 800;
+        margin: 0 3px 0 0;
+    }
+    /* A sign key and the term it governs are ONE unit and never come apart.
+       The row they sit on is its own row, so it has the full width to itself
+       and stays on one line even with four terms on a narrow phone. */
+    .sign-pair { white-space: nowrap; display: inline-block; margin: 0 7px; }
+    .sign-row { margin-top: 4px; }
+    /* Next Problem is the only control on a graded problem, so it gets the
+       mint end of the gradient -- forward motion, not a submit. */
+    .next-btn { background: linear-gradient(135deg, #0b7a70, #047857); }
+    .stage-tag {
+        font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+        color: #4a5480;
+        letter-spacing: 0;
+        line-height: 1.5;
+        margin: 18px auto 10px;
+        max-width: 34em;
+        border-top: 1px solid #c7cdf0;
+        padding-top: 14px;
+    }
+    .stage-line { margin: 10px 0; }
+    /* ---- Exponent blanks sit where a power belongs -----------------
+       An exponent blank is a 26px box, not a glyph, so the browser's
+       `vertical-align: super` offset -- 8px against a 38px-tall coefficient
+       box -- left it reading as a second factor standing beside the x rather
+       than a power above it. Raised to about the cap height of the base,
+       which is where a printed superscript sits.
+
+       The raise is a LENGTH rather than a keyword on purpose: a length grows
+       the line box to contain it, so a raised exponent can never overlap the
+       row above, which `position: relative; top` would have allowed. The em
+       resolves against the problem's own font size, so it scales with the
+       480px breakpoint without a second rule. */
+    .exp-slot { vertical-align: 0.75em; }
+    .exp-input { vertical-align: baseline; }
+    /* ---- Explanation line breaking ---------------------------------
+       An explanation is read on a phone, where a centred monospace line
+       breaks at the first space that does not fit -- which put "(x" at the
+       end of one row and "+ 7)" at the start of the next. Each factor and
+       each product is now an atomic unit, so a line can only break BETWEEN
+       them, and every label ("Answer:") sits on its own row so the maths
+       under it gets the full width. */
+    .explain-box .nobreak,
+    .explain-box .fp { white-space: nowrap; display: inline-block; }
+    .explain-box .foil-row .fp { margin: 0; }
+    /* One term -- coefficient box, variable, exponent box -- never breaks
+       across a line. Without this the exponent, an inline-block, could wrap
+       away and sit a whole row below the x it belongs to. Wrapping happens
+       between terms instead. */
+    .term-nb { white-space: nowrap; display: inline-block; }
+    /* The shared minus key. Outlined violet like the sign keys, so the two
+       controls that change a sign look related and neither competes with the
+       filled submit button beside it. */
+    .sign-key {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1px;
+        background: #ffffff;
+        color: #7c3aed;
+        border: 3px solid #7c3aed;
+        border-radius: 12px;
+        min-width: 74px;
+        min-height: 48px;
+        padding: 6px 12px;
+        cursor: pointer;
+        box-shadow: none;
+        font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+    }
+    .sign-key:hover { background: #f3eefe; }
+    .sk-glyph {
+        font-size: 19px;
+        font-weight: 800;
+        line-height: 1;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    }
+    .sk-word {
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        line-height: 1;
+    }
+    @media (max-width: 480px) {
+        /* 34px still clears the WCAG 2.2 AA target size of 24px comfortably,
+           and it is what lets four sign pairs share one row at 390px. */
+        .sign-toggle { font-size: 15px; min-width: 34px; padding: 4px 6px; margin: 0 3px 0 0; }
+        .sign-pair { margin: 0 4px; }
+        .stage-tag { font-size: 13px; }
+        .sign-key { min-width: 66px; min-height: 44px; padding: 5px 9px; }
+        /* the explanation's maths was the one thing with no mobile size */
+        .explain-box .rewrite { font-size: 16px; margin: 8px 0; }
+        .hint-box, .answer-box, .explain-box { font-size: 14px; padding: 13px; }
+    }
+</style>
+</head>
+<body>
+<main class="card" id="game-card">
+    <h1>Polynomial Operations</h1>
+    <div class="info">
+        <div class="info-item">Problem: <span id="problemNum">1</span></div>
+        <div class="info-item" id="streak-display">Streak: <span id="streak">0</span></div>
+        <div class="info-item" id="acc-display">Accuracy: --</div>
+    </div>
+
+    <!-- Four pills, no second row: this game has no level buttons. Each
+         category ramps on its own from the number of problems served. -->
+    <div class="mode-btns" id="main-mode-btns" role="group" aria-label="Choose a practice category">
+        <button type="button" class="mode-btn active" data-mode="addsub" aria-pressed="true" onclick="setMode('addsub')">Add &amp; Subtract</button>
+        <button type="button" class="mode-btn" data-mode="multiply" aria-pressed="false" onclick="setMode('multiply')">Multiply</button>
+        <button type="button" class="mode-btn" data-mode="special" aria-pressed="false" onclick="setMode('special')">Special Products</button>
+        <button type="button" class="mode-btn" data-mode="mix" aria-pressed="false" onclick="setMode('mix')">Mixed</button>
+    </div>
+    <!-- Second-row level pills. Filled by renderSubModeButtons(); hidden when
+         the current mode has no sub-modes. -->
+    <div class="sub-mode-btns" id="sub-mode-btns" style="display:none;" role="group" aria-label="Choose a level"></div>
+
+    <!-- The problem, the inline answer blanks and the stats panel all render here. -->
+    <div id="main-content"></div>
+
+    <!-- Spoken form of the current problem; the visual copy above is aria-hidden -->
+    <p class="sr-only" id="problem-spoken" aria-live="polite" aria-atomic="true"></p>
+
+    <!-- role="alert" (not "status"): role=status carries an implicit polite
+         politeness that some screen readers honour over an explicit
+         aria-live="assertive", which would have delayed or dropped the
+         correct/incorrect verdict. Matches the rest of the suite. -->
+    <div class="feedback" id="feedback" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+    <div id="input-content"></div>
+
+    <div class="helper-row" id="helper-buttons">
+        <button type="button" class="hint-btn" id="hint-toggle" aria-expanded="false" aria-controls="hint" onclick="toggleHint()">Show Hint</button>
+        <button type="button" class="explain-btn" id="explain-toggle" aria-expanded="false" aria-controls="explain" onclick="toggleExplanation()">Show Explanation</button>
+        <button type="button" class="answer-btn" id="answer-toggle" aria-expanded="false" aria-controls="answer-box" onclick="toggleAnswer()">Show Answer</button>
+        <button type="button" class="skip-btn" onclick="skipProblem()">Skip</button>
+    </div>
+    <div id="hint" style="display:none;"></div>
+    <div id="explain" style="display:none;"></div>
+    <div id="answer-box" style="display:none;"></div>
+
+    <div style="text-align: center; margin-top: 18px; border-top: 1px solid #e6e9f6; padding-top: 14px;">
+        <button type="button" class="stats-btn" onclick="showStats()">My Stats</button>
+        <button class="toggle-row" type="button" id="confetti-toggle" role="switch" aria-checked="true" aria-label="Confetti celebrations" onclick="toggleConfetti()">
+            <span class="toggle-label">Confetti</span>
+            <span class="toggle-track" id="confetti-track" aria-hidden="true"><span class="toggle-knob"></span></span>
+        </button>
+    </div>
+
+    <!-- Polar Rose Studio insignia. Purely decorative and fully aria-hidden;
+         the path is drawn by drawInsignia() at boot. -->
+    <div class="insignia" aria-hidden="true">
+        <svg width="90" height="103" viewBox="-28 -26 56 64" role="presentation" focusable="false">
+            <defs>
+                <linearGradient id="pr-grad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#1e3a5f"></stop>
+                    <stop offset="100%" stop-color="#0d9488"></stop>
+                </linearGradient>
+            </defs>
+            <path id="pr-path" fill="none" stroke="url(#pr-grad)" stroke-width="1.7"></path>
+        </svg>
+        <div class="insignia-caption">POLAR ROSE STUDIO</div>
+    </div>
+</main>
+
+<script>
+/* =====================================================================
+   State
+   ===================================================================== */
+var mode = 'addsub';
+var currentProblem = null;
+var streak = 0;
+var bestStreak = 0;
+var problemNum = 0;
+var missRecorded = false;
+
+/* =====================================================================
+   Polynomial Operations -- category list
+   =====================================================================
+   CATS is the ordered list of tracked category keys. "mix" is a MODE, never
+   a CATS entry: a Mixed problem is routed to one of these three and scored
+   in that bucket, so the stats panel always reads as three real topics. */
+var CATS = ['addsub', 'multiply', 'special'];
+var CAT_LABELS = {
+    addsub: 'Add & Subtract',
+    multiply: 'Multiply',
+    special: 'Special Products'
+};
+var CAT_SHORT = {
+    addsub: 'Add & Subtract',
+    multiply: 'Multiply',
+    special: 'Special Products'
+};
+var CAT_SPOKEN = {
+    addsub: 'adding and subtracting polynomials',
+    multiply: 'multiplying polynomials',
+    special: 'special products'
+};
+
+/* ---- The difficulty ramp --------------------------------------------
+   There are no level buttons. Each category ramps on its own, driven by how
+   many problems of that category have been SERVED (from any mode, including
+   Mixed). The counter is persisted, never demotes, and is only cleared by
+   Reset Stats -- the same shape as the fractional-exponent warm-up ladder in
+   Exponent Rules, generalised to every category.
+
+     addsub    k 0-2   addition, degree 2, every term present
+               k 3-5   subtraction enters (two-stage sign entry)
+               k 6+    both operations, degree 2 or 3, gaps allowed
+     multiply  k 0-1   monomial x binomial -- exactly two, then move on
+               k 2-4   FOIL with a leading coefficient of 1
+               k 5+    FOIL with coefficients
+               k 7, 11, then every 6th   binomial x trinomial
+     special   k 0-5   leading coefficient 1, one variable
+               k 6+    leading coefficients other than 1 mix in
+               k 11+   two-variable patterns mix in
+
+   Mixed is deliberately UNGATED: it draws a random point on each ramp so a
+   student who wants to jump straight in and mix everything can. */
+var served = {};
+function blankServed() {
+    var o = {}, i;
+    for (i = 0; i < CATS.length; i++) o[CATS[i]] = 0;
+    return o;
+}
+served = blankServed();
+
+/* The spread Mixed draws from. Deliberately not the full open range: it is
+   weighted toward the early tiers so Mixed still shows plenty of the simple
+   cases, while a binomial x trinomial (k = 7 or 11) stays occasional. */
+var MIX_SPREAD = 15;
+
+/* stats is built from CATS so a new category never needs a second edit. */
+var stats = {};
+function blankStats() {
+    var o = {}, i;
+    for (i = 0; i < CATS.length; i++) o[CATS[i]] = { c: 0, t: 0 };
+    return o;
+}
+stats = blankStats();
+
+var SAVE_KEY = 'polynomial-ops-stats-v1';
+var confettiOn = true;
+
+/* =====================================================================
+   Utilities
+   ===================================================================== */
+function ri(lo, hi) { return Math.floor(Math.random() * (hi - lo + 1)) + lo; }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function ordinal(n) {
+    var j = n % 10, k = n % 100;
+    if (j === 1 && k !== 11) return n + 'st';
+    if (j === 2 && k !== 12) return n + 'nd';
+    if (j === 3 && k !== 13) return n + 'rd';
+    return n + 'th';
+}
+
+/* Inline blank-input builders. Every blank is a text input (never number:
+   spinners and locale decimal handling break the strict parsers below). */
+function blankInline(id) {
+    return '<input type="text" inputmode="numeric" autocomplete="off" autocorrect="off" spellcheck="false" class="blank-input" id="' + id + '" onkeypress="if(event.key===\'Enter\')checkAnswer()">';
+}
+function blankSignedInline(id) {
+    /* Just the box. The +/- key is shared and lives in the answer row -- see
+       renderInputArea(). signKeyFor() is kept for any future game that wants
+       a key per blank. */
+    return '<input type="text" inputmode="numeric" data-signed="1" autocomplete="off" autocorrect="off" spellcheck="false" class="blank-input" id="' + id + '" onkeypress="if(event.key===\'Enter\')checkAnswer()">';
+}
+function expSlot(id) {
+    return '<span class="exp-slot"><input type="text" inputmode="numeric" autocomplete="off" autocorrect="off" spellcheck="false" class="blank-input exp-input" id="' + id + '" onkeypress="if(event.key===\'Enter\')checkAnswer()"></span>';
+}
+function expSlotSigned(id) {
+    return '<span class="exp-slot"><input type="text" inputmode="numeric" autocomplete="off" autocorrect="off" spellcheck="false" class="blank-input exp-input" id="' + id + '" onkeypress="if(event.key===\'Enter\')checkAnswer()"></span>'
+         + signKeyFor(id);
+}
+function blankFrac(id) {
+    return '<span class="exp-slot"><input type="text" inputmode="text" autocomplete="off" autocorrect="off" spellcheck="false" class="blank-input exp-input frac-input" id="' + id + '" placeholder="?/?" onkeypress="if(event.key===\'Enter\')checkAnswer()"></span>';
+}
+function fracHtml(numHtml, denHtml, cls) {
+    return '<span class="frac' + (cls ? ' ' + cls : '') + '"><span class="frac-num">' + numHtml +
+        '</span><span class="frac-bar"></span><span class="frac-den">' + denHtml + '</span></span>';
+}
+/* A fractional exponent, stacked rather than written with a slash. */
+function fracExpHtml(numHtml, denHtml) {
+    return fracHtml(numHtml, denHtml, 'frac-exp');
+}
+function bigParenWrap(innerHtml) {
+    return '<span class="big-paren">(</span>' + innerHtml + '<span class="big-paren">)</span>';
+}
+
+/* ---- On-screen +/- key ------------------------------------------------
+   The markup for the key that sits beside a signed blank. It is a real
+   <button> with its own aria-label, so it is never inside an aria-hidden
+   wrapper and is announced properly when it takes focus. */
+function signKeyFor(id) {
+    return '<button type="button" class="sign-btn" aria-label="Insert a negative sign in this answer" onclick="toggleSignFor(\'' + id + '\')">&plusmn;</button>';
+}
+/* Insert text AT THE CARET, not at the end. Appending was wrong: a student who
+   went back to fix the front of "34" and pressed the key got "34-" instead of
+   "-34". selectionStart/End also means a selected run is replaced, exactly like
+   typing. Falls back to append only when the browser gives no selection. */
+function insertAtCaret(el, text) {
+    if (!el) return;
+    var v = el.value;
+    var s = (typeof el.selectionStart === 'number') ? el.selectionStart : v.length;
+    var e = (typeof el.selectionEnd === 'number') ? el.selectionEnd : v.length;
+    el.value = v.slice(0, s) + text + v.slice(e);
+    var caret = s + text.length;
+    el.focus();
+    try { el.setSelectionRange(caret, caret); } catch (err) { /* not supported -- caret stays at the end */ }
+}
+/* The +/- key toggles a leading minus when there already is one, and otherwise
+   inserts "-" at the caret. Focus always returns to the blank. */
+function toggleSignFor(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    if (el.value.charAt(0) === '-') {
+        var caret = (typeof el.selectionStart === 'number') ? Math.max(0, el.selectionStart - 1) : el.value.length - 1;
+        el.value = el.value.slice(1);
+        el.focus();
+        try { el.setSelectionRange(caret, caret); } catch (err) { /* ignore */ }
+        return;
+    }
+    insertAtCaret(el, '-');
+}
+
+/* =====================================================================
+   Live-region announcements
+   ===================================================================== */
+/* Polite region: the spoken form of whatever is on screen. Cleared first and
+   reassigned on a tick so repeated identical text is still announced. */
+function announce(msg) {
+    var el = document.getElementById('problem-spoken');
+    if (!el) return;
+    el.textContent = '';
+    setTimeout(function () { el.textContent = msg; }, 60);
+}
+/* The feedback div is itself role="alert" aria-live="assertive", so writing to
+   it IS the announcement -- never write to it with innerHTML containing markup
+   a screen reader would read as symbols. */
+function setFeedback(text, cls) {
+    var fb = document.getElementById('feedback');
+    if (!fb) return;
+    fb.textContent = text;
+    fb.className = cls || 'feedback';
+}
+
+/* =====================================================================
+   Decorative-math masking
+   ===================================================================== */
+/* Hide superscripts, fraction scaffolding and stretched parentheses from the
+   accessibility tree so the expression is not read as raw markup alongside the
+   spoken sentence. Anything containing a focusable control is left alone --
+   aria-hidden over a focusable element is itself a WCAG failure. */
+var FOCUSABLE_SEL = 'input, button, a[href], [tabindex]';
+function hideDecorativeMath(root) {
+    if (!root) return;
+    var els = root.querySelectorAll('*'), i, el;
+    for (i = 0; i < els.length; i++) {
+        el = els[i];
+        if (el.tagName === 'INPUT' || el.tagName === 'BUTTON') continue;
+        if (el.querySelector(FOCUSABLE_SEL)) continue;
+        el.setAttribute('aria-hidden', 'true');
+    }
+    /* The containers that hold a focusable control cannot be hidden wholesale,
+       but they still carry loose math text ("x", "=", a base digit) that would
+       otherwise be read a second time alongside the spoken sentence. Wrap those
+       bare text runs in aria-hidden spans -- inline and unstyled, so nothing
+       moves visually, and no focusable element is ever hidden. */
+    maskLooseText(root);
+    els = root.querySelectorAll('*');
+    for (i = 0; i < els.length; i++) {
+        el = els[i];
+        if (el.tagName === 'INPUT' || el.tagName === 'BUTTON') continue;
+        if (el.getAttribute('aria-hidden') === 'true') continue;
+        maskLooseText(el);
+    }
+}
+function maskLooseText(el) {
+    var nodes = [], i;
+    for (i = 0; i < el.childNodes.length; i++) nodes.push(el.childNodes[i]);
+    for (i = 0; i < nodes.length; i++) {
+        var n = nodes[i];
+        if (n.nodeType !== 3) continue;
+        if (!n.textContent.replace(/\s+/g, '')) continue;
+        var span = document.createElement('span');
+        span.setAttribute('aria-hidden', 'true');
+        span.textContent = n.textContent;
+        el.replaceChild(span, n);
+    }
+}
+
+function hideHelperBox(boxId, btnId, label) {
+    var box = document.getElementById(boxId);
+    if (box) box.style.display = 'none';
+    var btn = document.getElementById(btnId);
+    if (btn) { btn.setAttribute('aria-expanded', 'false'); btn.textContent = label; }
+}
+
+/* =====================================================================
+   Strict numeric parsing
+   ===================================================================== */
+/* parseFloat/parseInt stop at the first character they cannot read, so "3.7",
+   "3abc" and "3 4" all used to pass as 3. Every entry is validated in full
+   before it is converted. */
+function parseStrictInt(raw) {
+    if (!/^[+-]?\d+$/.test(String(raw == null ? '' : raw).trim())) return null;
+    var n = parseInt(String(raw).trim(), 10);
+    return isNaN(n) ? null : n;
+}
+function parseFracOrFloat(raw) {
+    raw = String(raw == null ? '' : raw).replace(/\s+/g, '');
+    if (/^-?\d+\/\d+$/.test(raw)) {
+        var parts = raw.split('/');
+        var num = parseFloat(parts[0]), den = parseFloat(parts[1]);
+        if (den === 0) return null;
+        return num / den;
+    }
+    if (!/^[+-]?(\d+\.?\d*|\.\d+)$/.test(raw)) return null;
+    var f = parseFloat(raw);
+    return isNaN(f) ? null : f;
+}
+function blankCorrect(kind, raw, expected) {
+    if (kind === 'int' || kind === 'signedint') {
+        var n = parseStrictInt(raw);
+        if (n === null) return false;
+        return n === expected;
+    }
+    if (kind === 'fracOrInt') {
+        var v = parseFracOrFloat(raw);
+        if (v === null) return false;
+        return Math.abs(v - expected) < 1e-9;
+    }
+    return false;
+}
+
+/* =====================================================================
+   Pending-advance handling
+   ===================================================================== */
+/* The 1100ms "advance to the next problem" delay used to run unconditionally.
+   Switching mode, pressing Skip or opening My Stats inside that window left the
+   old timer armed, so it fired afterwards and replaced whatever the student was
+   now looking at. Every path that puts something else on screen cancels the
+   pending advance first. */
+/* The 1100ms auto-advance is gone: a correct answer now shows a Next Problem
+   button and the student moves on when ready. Nothing schedules a render any
+   more, so there is no advance timer left to go stale. */
+
+/* =====================================================================
+   Polynomial algebra -- representation and rendering
+   =====================================================================
+   A single-variable polynomial is a plain array of coefficients indexed by
+   degree: [c0, c1, c2, ...]. Every generator below builds its answer with
+   these three functions rather than by writing the answer out by hand, so
+   the stated answer and the printed expression can never drift apart. */
+
+function polyAdd(a, b) {
+    var n = Math.max(a.length, b.length), out = [], i;
+    for (i = 0; i < n; i++) out.push((a[i] || 0) + (b[i] || 0));
+    return out;
+}
+function polySub(a, b) {
+    var n = Math.max(a.length, b.length), out = [], i;
+    for (i = 0; i < n; i++) out.push((a[i] || 0) - (b[i] || 0));
+    return out;
+}
+function polyMul(a, b) {
+    var out = [], i, j;
+    for (i = 0; i < a.length + b.length - 1; i++) out.push(0);
+    for (i = 0; i < a.length; i++) {
+        for (j = 0; j < b.length; j++) out[i + j] += a[i] * b[j];
+    }
+    return out;
+}
+function polyDegree(p) {
+    var d;
+    for (d = p.length - 1; d >= 0; d--) if (p[d] !== 0) return d;
+    return 0;
+}
+function nonzeroCount(p) {
+    var n = 0, i;
+    for (i = 0; i < p.length; i++) if (p[i] !== 0) n++;
+    return n;
+}
+
+/* ---- Rendering ------------------------------------------------------
+   Coefficient 1 is never printed (1x -> x, -1x -> -x) and a zero term is
+   dropped, exactly as a student is expected to write it. */
+function monoHtml(absC, d, v) {
+    if (d === 0) return String(absC);
+    var coef = (absC === 1) ? '' : String(absC);
+    if (d === 1) return coef + v;
+    return coef + v + '<sup>' + d + '</sup>';
+}
+function polyHtml(coeffs, v) {
+    var out = '', started = false, d, c;
+    for (d = coeffs.length - 1; d >= 0; d--) {
+        c = coeffs[d];
+        if (c === 0) continue;
+        if (!started) { if (c < 0) out += '&minus;'; }
+        else { out += (c < 0 ? ' &minus; ' : ' + '); }
+        out += monoHtml(Math.abs(c), d, v);
+        started = true;
+    }
+    return started ? out : '0';
+}
+/* A bare signed number, with the minus as an entity rather than a glyph. */
+function numHtml(n) {
+    return (n < 0 ? '&minus;' + Math.abs(n) : String(n));
+}
+/* The same, parenthesised when negative, for a worked arithmetic line:
+   7 - (-7) = 14 reads correctly; 7 - -7 = 14 does not. */
+function numParenHtml(n) {
+    return (n < 0 ? '(&minus;' + Math.abs(n) + ')' : String(n));
+}
+/* Two-variable special-product answers only ever have the three shapes
+   x^2, xy and y^2, so they get their own small renderer rather than a
+   general multivariate one. */
+function poly2Html(c2, c1, c0, v1, v2) {
+    var parts = [
+        { c: c2, m: v1 + '<sup>2</sup>' },
+        { c: c1, m: v1 + v2 },
+        { c: c0, m: v2 + '<sup>2</sup>' }
+    ];
+    var out = '', started = false, i, p, a;
+    for (i = 0; i < parts.length; i++) {
+        p = parts[i];
+        if (p.c === 0) continue;
+        if (!started) { if (p.c < 0) out += '&minus;'; }
+        else { out += (p.c < 0 ? ' &minus; ' : ' + '); }
+        a = Math.abs(p.c);
+        out += (a === 1 ? '' : String(a)) + p.m;
+        started = true;
+    }
+    return started ? out : '0';
+}
+/* "ax + b" as it appears inside a product. */
+function linHtml(a, b, v) {
+    return polyHtml([b, a], v);
+}
+
+/* ---- Spoken names for a blank --------------------------------------- */
+function degName(d, v) {
+    if (d === 0) return 'the constant term';
+    if (d === 1) return 'the coefficient of ' + v;
+    if (d === 2) return 'the coefficient of ' + v + ' squared';
+    if (d === 3) return 'the coefficient of ' + v + ' cubed';
+    return 'the coefficient of ' + v + ' to the power of ' + d;
+}
+function degTagHtml(d, v) {
+    if (d === 0) return 'constant';
+    if (d === 1) return v;
+    return v + '<sup>' + d + '</sup>';
+}
+
+/* An unsigned integer blank for an exponent, and the signed coefficient
+   blank plus its +/- key, are both taken from the shell so every game in the
+   suite builds an input the same way. */
+
+/* =====================================================================
+   The answer skeleton
+   =====================================================================
+   Every blank the student fills is a signed integer, and the skeleton always
+   prints EVERY power from the degree down to the constant -- including the
+   ones whose coefficient turns out to be zero.
+
+   This is deliberate and it is the single most important pedagogical
+   decision in the file. If (x + 7)(x - 7) were given a two-blank skeleton,
+   the shape of the problem would announce that the middle term cancels
+   before the student had done any thinking. With three blanks they type the
+   0 themselves, and the identical skeleton serves a square and a difference
+   of squares, so nothing can be inferred from the layout. */
+function buildSkeleton(coeffs, deg, v, blanks, answers, idp) {
+    var html = '', d, id, key, term;
+    for (d = deg; d >= 0; d--) {
+        id = idp + d;
+        key = 'c' + d;
+        if (d < deg) html += ' + ';
+        term = blankSignedInline(id);
+        if (d === 1) term += v;
+        else if (d >= 2) term += v + '<sup>' + d + '</sup>';
+        html += nbTerm(term);
+        blanks.push({ id: id, key: key, kind: 'signedint', label: degName(d, v) });
+        answers[key] = coeffs[d] || 0;
+    }
+    return html;
+}
+/* The two-variable skeleton: x^2, xy, y^2. Same three-blank principle. */
+function buildSkeleton2(c2, c1, c0, v1, v2, blanks, answers) {
+    var rows = [
+        { id: 'b2', key: 'c2', val: c2, m: v1 + '<sup>2</sup>', name: 'the coefficient of ' + v1 + ' squared' },
+        { id: 'b1', key: 'c1', val: c1, m: v1 + v2, name: 'the coefficient of ' + v1 + ' ' + v2 },
+        { id: 'b0', key: 'c0', val: c0, m: v2 + '<sup>2</sup>', name: 'the coefficient of ' + v2 + ' squared' }
+    ];
+    var html = '', i;
+    for (i = 0; i < rows.length; i++) {
+        if (i > 0) html += ' + ';
+        html += nbTerm(blankSignedInline(rows[i].id) + rows[i].m);
+        blanks.push({ id: rows[i].id, key: rows[i].key, kind: 'signedint', label: rows[i].name });
+        answers[rows[i].key] = rows[i].val;
+    }
+    return html;
+}
+
+/* A term is one unbreakable unit. An exponent blank is an inline-block, so
+   without this the line could break between the x and its exponent and leave
+   the power stranded on the next row, a whole line below the base it belongs
+   to. Wrapping now happens BETWEEN terms, never inside one. */
+function nbTerm(inner) {
+    return '<span class="term-nb">' + inner + '</span>';
+}
+
+/* The answer always gets its own line. On a long problem the old inline
+   "= [blanks]" wrapped in the middle of the skeleton and stranded the equals
+   sign a line away from the boxes it belongs to. This also makes every
+   category read the same way as stage 2 of a subtraction problem. */
+function problemHtml(opener, skel) {
+    return opener + '<div class="stage-line">= ' + skel + '</div>';
+}
+
+/* =====================================================================
+   Sign-toggle keys (the two-stage subtraction stage 1)
+   =====================================================================
+   Distributing the negative across every term is the step students skip, so
+   it is graded rather than hinted. Each key starts UNSET: cycling ? -> + ->
+   - means a student cannot score by leaving it alone, and an unset key is
+   treated like an empty blank (the problem simply is not graded yet), never
+   as a wrong answer. */
+function signToggleHtml(id, termName) {
+    return '<button type="button" class="sign-toggle" id="' + id + '" data-sign="?" ' +
+        'aria-label="Sign of the ' + termName + ' term, not set yet" ' +
+        'onclick="cycleSign(\'' + id + '\')">?</button>';
+}
+function cycleSign(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var cur = el.getAttribute('data-sign');
+    var next = (cur === '+') ? '-' : '+';
+    el.setAttribute('data-sign', next);
+    el.innerHTML = (next === '+') ? '+' : '&minus;';
+    el.classList.add('set');
+    var name = el.getAttribute('data-term') || 'this';
+    el.setAttribute('aria-label', 'Sign of the ' + name + ' term, currently ' +
+        (next === '+' ? 'plus' : 'minus'));
+}
+
+/* =====================================================================
+   Category 1 -- Add & Subtract
+   ===================================================================== */
+function randCoef(allowZero) {
+    if (allowZero && Math.random() < 0.34) return 0;
+    var m = ri(1, 9);
+    return Math.random() < 0.5 ? -m : m;
+}
+
+function buildAddSub(k) {
+    var op, deg, gaps;
+    if (k < 3) { op = '+'; deg = 2; gaps = false; }
+    else if (k < 6) { op = '-'; deg = 2; gaps = false; }
+    else {
+        op = (Math.random() < 0.45) ? '+' : '-';
+        deg = (Math.random() < 0.5) ? 2 : 3;
+        gaps = (Math.random() < 0.55);
+    }
+
+    var P, Q, ans, guard = 0, d;
+    while (true) {
+        P = []; Q = [];
+        for (d = 0; d <= deg; d++) {
+            P.push(d === deg ? randCoef(false) : randCoef(gaps));
+            Q.push(d === deg ? randCoef(false) : randCoef(gaps));
+        }
+        ans = (op === '+') ? polyAdd(P, Q) : polySub(P, Q);
+        guard++;
+        /* Reject a degenerate draw: an answer that collapses to one term
+           teaches nothing, and the second polynomial needs at least two terms
+           for the sign stage to be worth doing. */
+        if (nonzeroCount(ans) >= 2 && nonzeroCount(Q) >= 2 && nonzeroCount(P) >= 2) break;
+        if (guard > 60) break;
+    }
+
+    var blanks = [], answers = {};
+    var skel = buildSkeleton(ans, deg, 'x', blanks, answers, 'b');
+    var opener = '(' + polyHtml(P, 'x') + ') ' + (op === '+' ? '+' : '&minus;') +
+        ' (' + polyHtml(Q, 'x') + ')';
+
+    var p = {
+        category: 'addsub',
+        trackCategory: 'addsub',
+        subtype: (op === '+' ? 'add' : 'sub'),
+        blanks: blanks,
+        answers: answers,
+        skeleton: skel,
+        opener: opener,
+        P: P, Q: Q, op: op, deg: deg,
+        answerLine: polyHtml(ans, 'x'),
+        stage: (op === '+') ? 0 : 1
+    };
+
+    if (op === '+') {
+        p.html = problemHtml(opener, skel);
+        p.instruction = 'Add the polynomials, then fill in every blank.';
+        p.hint = 'Line up like terms and add their coefficients. A power that is missing from one polynomial has a coefficient of 0 &mdash; it does not disappear.';
+    } else {
+        /* Stage 1: the second polynomial reappears term by term, each behind
+           an unset sign key. */
+        p.signTerms = [];
+        for (d = deg; d >= 0; d--) {
+            if (Q[d] === 0) continue;
+            p.signTerms.push({
+                deg: d,
+                abs: Math.abs(Q[d]),
+                correct: (Q[d] > 0 ? '-' : '+'),
+                name: spokenTerm(Math.abs(Q[d]), d, 'x')
+            });
+        }
+        p.html = renderSubStage1(p);
+        /* No instruction line above the problem. It duplicated the stage tag
+           sitting a few lines below it, and the stage tag is the one attached
+           to the step it describes. The reasoning still lives in the hint. */
+        p.instruction = '';
+        p.hint = 'A minus sign in front of parentheses is multiplication by &minus;1, so EVERY term inside changes sign &mdash; not just the first one.';
+    }
+
+    p.explanation = explainAddSub(P, Q, op, deg, ans);
+    return p;
+}
+
+/* The words for one term, used in the sign key's accessible name and in the
+   "check the sign on ..." message. */
+function spokenTerm(absC, d, v) {
+    var coef = (absC === 1 && d > 0) ? '' : String(absC);
+    if (d === 0) return coef;
+    if (d === 1) return coef + ' ' + v;
+    if (d === 2) return coef + ' ' + v + ' squared';
+    if (d === 3) return coef + ' ' + v + ' cubed';
+    return coef + ' ' + v + ' to the power of ' + d;
+}
+
+/* The first polynomial gets its own row and the sign keys get theirs.
+   Running them together let the row overflow and orphan a single key onto
+   the next line, where it is easy to miss -- and a missed sign key is the
+   one thing this whole stage exists to make the student look at. Two
+   deliberate rows also always look the same, however many terms there are. */
+function renderSubStage1(p) {
+    var html = p.opener;
+    html += '<div class="stage-tag">First distribute the negative sign.</div>';
+    html += '<div class="stage-line">' + polyHtml(p.P, 'x') + '</div>';
+    html += '<div class="stage-line sign-row">';
+    var i, t;
+    for (i = 0; i < p.signTerms.length; i++) {
+        t = p.signTerms[i];
+        html += '<span class="sign-pair">' + signToggleHtml('sg' + i, t.name) +
+            monoHtml(t.abs, t.deg, 'x') + '</span>';
+    }
+    html += '</div>';
+    return html;
+}
+/* Stage 2 keeps the corrected line on screen -- the student combines while
+   looking at the expression they just rewrote, which is the whole point of
+   splitting the problem in two. */
+function renderSubStage2(p) {
+    var html = p.opener;
+    html += '<div class="stage-tag">Now combine like terms.</div>';
+    html += '<div class="stage-line">' + polyHtml(p.P, 'x') + '</div>';
+    html += '<div class="stage-line sign-row">';
+    var i, t;
+    for (i = 0; i < p.signTerms.length; i++) {
+        t = p.signTerms[i];
+        html += '<span class="sign-pair"><span class="sign-locked">' +
+            (t.correct === '+' ? '+' : '&minus;') + '</span>' +
+            monoHtml(t.abs, t.deg, 'x') + '</span>';
+    }
+    html += '</div>';
+    html += '<div class="stage-line">= ' + p.skeleton + '</div>';
+    return html;
+}
+
+function explainAddSub(P, Q, op, deg, ans) {
+    var html = '';
+    if (op === '-') {
+        html += '<b>Step 1 &mdash; drop the parentheses.</b> Every sign inside the second set flips:';
+        var flipped = [], d;
+        for (d = 0; d <= deg; d++) flipped.push(-(Q[d] || 0));
+        html += '<div class="rewrite">' + polyHtml(P, 'x') + ' ' +
+            (flipped[polyDegree(flipped)] < 0 ? '' : '+ ') + polyHtml(flipped, 'x') + '</div>';
+        html += '<b>Step 2 &mdash; combine like terms.</b>';
+    } else {
+        html += '<b>Combine like terms.</b> Work one power at a time:';
+    }
+    var d2;
+    for (d2 = deg; d2 >= 0; d2--) {
+        var a = P[d2] || 0, b = Q[d2] || 0;
+        var r = (op === '+') ? a + b : a - b;
+        html += '<div class="rewrite">' + degTagHtml(d2, 'x') + ': &nbsp;' + numHtml(a) + ' ' +
+            (op === '+' ? '+' : '&minus;') + ' ' + numParenHtml(b) + ' = ' + numHtml(r) + '</div>';
+    }
+    html += '<div class="rewrite"><b>Answer: ' + polyHtml(ans, 'x') + '</b></div>';
+    return html;
+}
+
+/* =====================================================================
+   Category 2 -- Multiply
+   ===================================================================== */
+function buildMultiply(k) {
+    if (k < 2) return buildMono();
+    if (k === 7 || k === 11 || (k > 11 && (k - 11) % 6 === 0)) return buildBinTri();
+    return buildFoil(k);
+}
+
+/* Monomial x binomial. The exponents are blanks, not printed: adding the
+   exponents is half of what this category teaches, so printing them would
+   hand over the answer. The monomial is kept at degree 2 or more so that no
+   product ever lands on x^1 -- a skeleton reading "x to the blank" with the
+   answer 1 invites writing x^1, which is not how anyone writes it. */
+function buildMono() {
+    var a = randCoef(false);
+    var m = ri(2, 3);
+    var form = (Math.random() < 0.55) ? 'A' : 'B';
+    var inner = [];
+    var n, pdeg;
+    if (form === 'A') {
+        n = ri(1, 2);
+        inner = [];
+        for (var i = 0; i <= n; i++) inner.push(0);
+        inner[n] = randCoef(false);
+        inner[0] = randCoef(false);
+    } else {
+        n = ri(2, 3);
+        pdeg = ri(1, n - 1);
+        inner = [];
+        for (var j = 0; j <= n; j++) inner.push(0);
+        inner[n] = randCoef(false);
+        inner[pdeg] = randCoef(false);
+    }
+    var mono = [];
+    for (var q = 0; q < m; q++) mono.push(0);
+    mono.push(a);
+
+    var prod = polyMul(mono, inner);
+
+    /* The two surviving terms, high degree first. */
+    var terms = [];
+    for (var d = prod.length - 1; d >= 0; d--) if (prod[d] !== 0) terms.push({ deg: d, coef: prod[d] });
+
+    var blanks = [], answers = {}, html = '';
+    for (var t = 0; t < terms.length; t++) {
+        if (t > 0) html += ' + ';
+        var kid = 'k' + t, eid = 'e' + t;
+        html += nbTerm(blankSignedInline(kid) + 'x' + expSlot(eid));
+        blanks.push({ id: kid, key: 'k' + t, kind: 'signedint', label: 'the coefficient of the ' + ordinal(t + 1) + ' term' });
+        blanks.push({ id: eid, key: 'e' + t, kind: 'int', label: 'the exponent on the ' + ordinal(t + 1) + ' term' });
+        answers['k' + t] = terms[t].coef;
+        answers['e' + t] = terms[t].deg;
+    }
+
+    var opener = monoSignedHtml(a, m, 'x') + '(' + polyHtml(inner, 'x') + ')';
+    var p = {
+        category: 'multiply', trackCategory: 'multiply', subtype: 'mono',
+        blanks: blanks, answers: answers, skeleton: html,
+        opener: opener, stage: 0,
+        html: problemHtml(opener, html),
+        instruction: 'Distribute the monomial. Fill in each coefficient and each exponent.',
+        hint: 'Multiply the coefficients, then ADD the exponents on the x&rsquo;s. A bare x counts as x to the first power.',
+        answerLine: polyHtml(prod, 'x')
+    };
+    p.explanation = '<b>Distribute:</b> multiply the outside term by each term inside.' +
+        explainMonoLines(a, m, inner) +
+        '<div class="rewrite"><b>Answer: ' + polyHtml(prod, 'x') + '</b></div>';
+    return p;
+}
+/* A signed monomial as it opens an expression: -3x^2, not - 3x^2. */
+function monoSignedHtml(c, d, v) {
+    return (c < 0 ? '&minus;' : '') + monoHtml(Math.abs(c), d, v);
+}
+function explainMonoLines(a, m, inner) {
+    var out = '', d;
+    for (d = inner.length - 1; d >= 0; d--) {
+        if (inner[d] === 0) continue;
+        out += '<div class="rewrite">(' + monoSignedHtml(a, m, 'x') + ')(' + monoSignedHtml(inner[d], d, 'x') + ') = ' +
+            monoSignedHtml(a * inner[d], m + d, 'x') + '</div>';
+    }
+    return out;
+}
+
+/* Binomial x binomial. Leading coefficients stay at 1 until the ramp has
+   established the method, then they enter. */
+function buildFoil(k) {
+    var useCoef = (k >= 5) && (Math.random() < 0.7);
+    var a, b, c, d, guard = 0;
+    while (true) {
+        a = useCoef ? ri(2, 5) : 1;
+        c = useCoef ? ri(2, 5) : 1;
+        b = randCoef(false);
+        d = randCoef(false);
+        guard++;
+        /* If this happens to BE a special product, it belongs in the other
+           category -- the hint and the explanation would be the wrong ones. */
+        if (!(a === c && Math.abs(b) === Math.abs(d))) break;
+        if (guard > 40) break;
+    }
+    var f1 = [b, a], f2 = [d, c];
+    var prod = polyMul(f1, f2);
+
+    var blanks = [], answers = {};
+    var skel = buildSkeleton(prod, 2, 'x', blanks, answers, 'b');
+    var opener = '(' + linHtml(a, b, 'x') + ')(' + linHtml(c, d, 'x') + ')';
+
+    return {
+        category: 'multiply', trackCategory: 'multiply', subtype: 'foil',
+        blanks: blanks, answers: answers, skeleton: skel, opener: opener, stage: 0,
+        html: problemHtml(opener, skel),
+        instruction: 'Multiply the two binomials, then fill in every blank.',
+        hint: 'First, Outer, Inner, Last. The Outer and Inner products are like terms &mdash; add them together to get the middle coefficient.',
+        answerLine: polyHtml(prod, 'x'),
+        explanation: '<b>FOIL:</b>' +
+            '<div class="rewrite">First: &nbsp;(' + monoSignedHtml(a, 1, 'x') + ')(' + monoSignedHtml(c, 1, 'x') + ') = ' + monoSignedHtml(a * c, 2, 'x') + '</div>' +
+            '<div class="rewrite">Outer: &nbsp;(' + monoSignedHtml(a, 1, 'x') + ')(' + numParenHtml(d) + ') = ' + monoSignedHtml(a * d, 1, 'x') + '</div>' +
+            '<div class="rewrite">Inner: &nbsp;(' + numParenHtml(b) + ')(' + monoSignedHtml(c, 1, 'x') + ') = ' + monoSignedHtml(b * c, 1, 'x') + '</div>' +
+            '<div class="rewrite">Last: &nbsp;(' + numParenHtml(b) + ')(' + numParenHtml(d) + ') = ' + numHtml(b * d) + '</div>' +
+            '<div class="rewrite">Middle terms: ' + numHtml(a * d) + ' + ' + numParenHtml(b * c) + ' = ' + numHtml(a * d + b * c) + '</div>' +
+            '<div class="rewrite"><b>Answer: ' + polyHtml(prod, 'x') + '</b></div>'
+    };
+}
+
+/* Binomial x trinomial -- the long one. It is not a category of its own: it
+   arrives inside Multiply on the 8th and 12th problems and occasionally
+   after that, so a student who keeps practising meets it a few times without
+   ever being made to grind it. */
+function buildBinTri() {
+    var b, a2, c, d, tri, bin, prod, guard = 0;
+    while (true) {
+        b = randCoef(false);
+        a2 = (Math.random() < 0.75) ? 1 : 2;
+        c = randCoef(false);
+        d = randCoef(false);
+        bin = [b, 1];
+        tri = [d, c, a2];
+        prod = polyMul(bin, tri);
+        guard++;
+        if (nonzeroCount(prod) >= 3) break;
+        if (guard > 40) break;
+    }
+    var blanks = [], answers = {};
+    var skel = buildSkeleton(prod, 3, 'x', blanks, answers, 'b');
+    var opener = '(' + linHtml(1, b, 'x') + ')(' + polyHtml(tri, 'x') + ')';
+
+    return {
+        category: 'multiply', trackCategory: 'multiply', subtype: 'bintri',
+        blanks: blanks, answers: answers, skeleton: skel, opener: opener, stage: 0,
+        html: problemHtml(opener, skel),
+        instruction: 'Multiply the binomial by the trinomial, then fill in every blank.',
+        hint: 'FOIL is not enough here. Multiply EVERY term of the binomial by EVERY term of the trinomial &mdash; six products &mdash; then collect like terms.',
+        answerLine: polyHtml(prod, 'x'),
+        explanation: '<b>Distribute twice.</b>' +
+            '<div class="rewrite">x(' + polyHtml(tri, 'x') + ') = ' + polyHtml(polyMul([0, 1], tri), 'x') + '</div>' +
+            '<div class="rewrite">' + numParenHtml(b) + '(' + polyHtml(tri, 'x') + ') = ' + polyHtml(polyMul([b], tri), 'x') + '</div>' +
+            '<div class="rewrite">Add those two results and collect like terms.</div>' +
+            '<div class="rewrite"><b>Answer: ' + polyHtml(prod, 'x') + '</b></div>'
+    };
+}
+
+/* =====================================================================
+   Category 3 -- Special Products
+   ===================================================================== */
+var VAR_PAIRS = [['x', 'y'], ['a', 'b'], ['m', 'n']];
+
+function buildSpecial(k) {
+    var twoVar = (k >= 11) && (Math.random() < 0.35);
+    var useCoef = (k >= 6) && (Math.random() < 0.55);
+    var type = pick(['sq_sum', 'sq_diff', 'diff_sq']);
+    return twoVar ? buildSpecial2(type, useCoef) : buildSpecial1(type, useCoef, k);
+}
+
+/* One monomial in up to two variables, for the worked FOIL lines. */
+function mono2Html(c, e1, e2, v1, v2) {
+    if (c === 0) return '0';
+    var s = (c < 0 ? '&minus;' : '');
+    var a = Math.abs(c), body = '';
+    if (e1 > 0) body += v1 + (e1 > 1 ? '<sup>' + e1 + '</sup>' : '');
+    if (e2 > 0) body += v2 + (e2 > 1 ? '<sup>' + e2 + '</sup>' : '');
+    if (body === '') return s + a;
+    return s + (a === 1 ? '' : String(a)) + body;
+}
+/* One printed factor of a special product: "3x + 2", or "3a - b". */
+function foilFactor(f, b) {
+    return mono2Html(f.a, 1, 0, f.v1, f.v2) +
+        (b < 0 ? ' &minus; ' : ' + ') +
+        mono2Html(Math.abs(b), 0, f.bE2, f.v1, f.v2);
+}
+/* A negative term needs parentheses when it follows a plus sign. */
+function parenNeg(html) {
+    return (html.indexOf('&minus;') === 0) ? '(' + html + ')' : html;
+}
+
+/* =====================================================================
+   Special products: the long way first, the shortcut second
+   =====================================================================
+   IRA's ruling, 2026-09-01, from teaching experience: leading with the
+   pattern produces a specific and very common wreck -- a student who has
+   only ever seen "(A + B)^2 = A^2 + 2AB + B^2" writes (3x + 2)^2 as
+   9x^2 + 4, because the shortcut was memorised before the multiplication
+   it abbreviates was ever secure.
+
+   So both the hint and the explanation now open on FOIL, worked in full,
+   and only then say there is a faster pattern. The shortcut is still
+   taught -- it is just taught second, as a shortcut for something the
+   student can already do, which is the only way a shortcut is safe. */
+
+function specialHint(f, type) {
+    if (type === 'sq_sum' || type === 'sq_diff') {
+        return 'Do not reach for a pattern yet. (' + foilFactor(f, f.b1) + ')<sup>2</sup> means (' +
+            foilFactor(f, f.b1) + ')(' + foilFactor(f, f.b2) + ') &mdash; write out the two factors and FOIL them. ' +
+            'That way is never wrong. There is a faster pattern in the explanation, but it is worth learning second.';
+    }
+    return 'FOIL it like any other pair of binomials, and watch the two middle products closely. ' +
+        'There is a shortcut in the explanation, but the long way is the one that never catches you out.';
+}
+
+/* A centred math line inside an explanation. */
+function rewriteLine(inner, extraClass) {
+    return '<div class="rewrite' + (extraClass ? ' ' + extraClass : '') + '">' + inner + '</div>';
+}
+/* An atomic unit that must never be broken across a line. Without these a
+   narrow phone split "(x + 7)" at one of its spaces and left the "+ 7)" on
+   the next row, which is unreadable. */
+function nb(inner) {
+    return '<span class="nobreak">' + inner + '</span>';
+}
+/* The four products on ONE row. The First/Outer/Inner/Last labels are gone:
+   by the time a student reaches Special Products they know what FOIL does,
+   and four labelled lines pushed the answer off the bottom of a phone. */
+function foilRow(f) {
+    var prods = [
+        { c: f.a * f.a, e1: 2, e2: 0 },
+        { c: f.a * f.b2, e1: 1, e2: f.bE2 },
+        { c: f.b1 * f.a, e1: 1, e2: f.bE2 },
+        { c: f.b1 * f.b2, e1: 0, e2: 2 * f.bE2 }
+    ];
+    var out = '', i, p;
+    for (i = 0; i < prods.length; i++) {
+        p = prods[i];
+        if (i > 0) out += (p.c < 0 ? ' &minus; ' : ' + ');
+        out += '<span class="fp">' +
+            mono2Html(i === 0 ? p.c : Math.abs(p.c), p.e1, p.e2, f.v1, f.v2) + '</span>';
+    }
+    return out;
+}
+
+function specialExplain(f, type, ansHtml) {
+    var squared = (type === 'sq_sum' || type === 'sq_diff');
+    var A = mono2Html(f.a, 1, 0, f.v1, f.v2);
+    var outer = f.a * f.b2, inner = f.b1 * f.a, mid = outer + inner;
+    var oHtml = mono2Html(outer, 1, f.bE2, f.v1, f.v2);
+    var iHtml = mono2Html(inner, 1, f.bE2, f.v1, f.v2);
+    var step = 1, html = '';
+
+    if (squared) {
+        html += '<b>Step ' + (step++) + ' &mdash; two identical factors:</b>';
+        html += rewriteLine(
+            nb('(' + foilFactor(f, f.b1) + ')<sup>2</sup>') + ' = ' +
+            nb('(' + foilFactor(f, f.b1) + ')') + nb('(' + foilFactor(f, f.b2) + ')'));
+    }
+    html += '<b>Step ' + (step++) + ' &mdash; FOIL, all four products:</b>';
+    html += rewriteLine(foilRow(f), 'foil-row');
+    html += '<b>Step ' + (step++) + ' &mdash; combine the middle two:</b>';
+    html += rewriteLine(nb(oHtml) + ' + ' + nb(parenNeg(iHtml)) + ' = ' +
+        nb(mono2Html(mid, 1, f.bE2, f.v1, f.v2)));
+    if (mid === 0) {
+        html += 'They are opposites, so they cancel &mdash; but the blank for the middle term still has to be filled in.';
+    }
+    html += '<b>Answer:</b>';
+    html += rewriteLine(ansHtml);
+
+    /* Only now, the shortcut. */
+    html += '<b>There is also a shortcut,</b> worth using once the above feels automatic:';
+    if (type === 'sq_sum') {
+        html += rewriteLine(nb('(A + B)<sup>2</sup>') + ' = ' + nb('A<sup>2</sup> + 2AB + B<sup>2</sup>'));
+    } else if (type === 'sq_diff') {
+        html += rewriteLine(nb('(A &minus; B)<sup>2</sup>') + ' = ' + nb('A<sup>2</sup> &minus; 2AB + B<sup>2</sup>'));
+    } else {
+        html += rewriteLine(nb('(A + B)(A &minus; B)') + ' = ' + nb('A<sup>2</sup> &minus; B<sup>2</sup>'));
+    }
+    html += rewriteLine(nb('A = ' + A) + ',&nbsp; ' + nb('B = ' + mono2Html(Math.abs(f.b1), 0, f.bE2, f.v1, f.v2)));
+    return html;
+}
+
+function buildSpecial1(type, useCoef, k) {
+    var a = useCoef ? ri(2, 6) : 1;
+    var b = useCoef ? ri(2, 9) : ri(2, 12);
+    var b1, b2, prod, opener;
+
+    if (type === 'sq_sum') {
+        b1 = b; b2 = b;
+        opener = '(' + linHtml(a, b1, 'x') + ')<sup>2</sup>';
+    } else if (type === 'sq_diff') {
+        b1 = -b; b2 = -b;
+        opener = '(' + linHtml(a, b1, 'x') + ')<sup>2</sup>';
+    } else {
+        /* The printed order is random, so the worked FOIL has to follow it --
+           a solution whose Outer and Inner are the other way round from the
+           expression on screen is worse than no solution. */
+        if (Math.random() < 0.5) { b1 = b; b2 = -b; } else { b1 = -b; b2 = b; }
+        opener = '(' + linHtml(a, b1, 'x') + ')(' + linHtml(a, b2, 'x') + ')';
+    }
+    prod = polyMul([b1, a], [b2, a]);
+
+    var foil = { a: a, b1: b1, b2: b2, v1: 'x', v2: null, bE2: 0 };
+    var blanks = [], answers = {};
+    var skel = buildSkeleton(prod, 2, 'x', blanks, answers, 'b');
+
+    return {
+        category: 'special', trackCategory: 'special', subtype: type,
+        blanks: blanks, answers: answers, skeleton: skel, opener: opener, stage: 0,
+        html: problemHtml(opener, skel),
+        instruction: 'Multiply it out, then fill in every blank.',
+        hint: specialHint(foil, type),
+        answerLine: polyHtml(prod, 'x'),
+        explanation: specialExplain(foil, type, polyHtml(prod, 'x'))
+    };
+}
+
+function buildSpecial2(type, useCoef) {
+    var pair = pick(VAR_PAIRS);
+    var v1 = pair[0], v2 = pair[1];
+    var a = (Math.random() < 0.45) ? 1 : ri(2, 4);
+    var b = (Math.random() < 0.45) ? 1 : ri(2, 4);
+    var b1, b2, opener;
+
+    if (type === 'sq_sum') { b1 = b; b2 = b; }
+    else if (type === 'sq_diff') { b1 = -b; b2 = -b; }
+    else if (Math.random() < 0.5) { b1 = b; b2 = -b; }
+    else { b1 = -b; b2 = b; }
+
+    var foil = { a: a, b1: b1, b2: b2, v1: v1, v2: v2, bE2: 1 };
+
+    /* Derived from b1 and b2 rather than written out per type, so the stated
+       answer cannot drift from the expression that is printed. */
+    var c2 = a * a;
+    var c1 = a * b2 + b1 * a;
+    var c0 = b1 * b2;
+
+    if (type === 'sq_sum' || type === 'sq_diff') {
+        opener = '(' + foilFactor(foil, b1) + ')<sup>2</sup>';
+    } else {
+        opener = '(' + foilFactor(foil, b1) + ')(' + foilFactor(foil, b2) + ')';
+    }
+
+    var blanks = [], answers = {};
+    var skel = buildSkeleton2(c2, c1, c0, v1, v2, blanks, answers);
+    var ansHtml = poly2Html(c2, c1, c0, v1, v2);
+
+    return {
+        category: 'special', trackCategory: 'special', subtype: type + '_2var',
+        blanks: blanks, answers: answers, skeleton: skel, opener: opener, stage: 0,
+        html: problemHtml(opener, skel),
+        instruction: 'Two variables, same method. Multiply it out, then fill in every blank.',
+        hint: specialHint(foil, type),
+        answerLine: ansHtml,
+        explanation: specialExplain(foil, type, ansHtml)
+    };
+}
+
+/* =====================================================================
+   Category routing
+   ===================================================================== */
+/* Weights each category by how much trouble it is giving the student, the
+   same shape Exponent Rules uses. A category with fewer than 3 attempts
+   counts as untried and gets full weight, and the 0.2 floor keeps every
+   category reachable however good the student gets. */
+function pickAdaptiveCategory() {
+    var weights = [], total = 0, i, s, w;
+    for (i = 0; i < CATS.length; i++) {
+        s = stats[CATS[i]];
+        w = (!s || s.t < 3) ? 1.0 : Math.max(0.2, 1 - (s.c / s.t));
+        weights.push(w);
+        total += w;
+    }
+    var r = Math.random() * total;
+    for (i = 0; i < CATS.length; i++) {
+        r -= weights[i];
+        if (r <= 0) return CATS[i];
+    }
+    return CATS[CATS.length - 1];
+}
+
+function buildForCategory(cat, k) {
+    if (cat === 'addsub') return buildAddSub(k);
+    if (cat === 'multiply') return buildMultiply(k);
+    return buildSpecial(k);
+}
+
+/* =====================================================================
+   Problem lifecycle
+   ===================================================================== */
+function generateProblem() {
+    var cat, k;
+    if (mode === 'mix') {
+        cat = pickAdaptiveCategory();
+        /* Ungated on purpose: Mixed draws a random point on the ramp so a
+           student who wants to jump in and mix everything can, without first
+           grinding the early tier of each category. */
+        k = ri(0, MIX_SPREAD);
+    } else {
+        cat = mode;
+        k = served[cat] || 0;
+    }
+    currentProblem = buildForCategory(cat, k);
+    missRecorded = false;
+    lastSignedBlank = null;   /* ids repeat between problems; never carry one over */
+    served[cat] = (served[cat] || 0) + 1;
+    saveState();
+    renderProblem();
+}
+
+function renderProblem() {
+    var p = currentProblem;
+    if (!p) return;
+    cancelFocus();
+    var mc = document.getElementById('main-content');
+    mc.innerHTML = (p.instruction ? '<p class="instructions">' + p.instruction + '</p>' : '') +
+        '<div class="problem" id="problem-visual">' + p.html + '</div>';
+    var vis = document.getElementById('problem-visual');
+    hideDecorativeMath(vis);
+    labelBlanks(p);
+    labelSignKeys(p);
+
+    renderInputArea();
+
+    setFeedback('', 'feedback');
+    hideHelperBox('hint', 'hint-toggle', 'Show Hint');
+    hideHelperBox('explain', 'explain-toggle', 'Show Explanation');
+    hideHelperBox('answer-box', 'answer-toggle', 'Show Answer');
+    document.getElementById('helper-buttons').style.display = 'block';
+
+    announce(spokenProblem(p));
+    scheduleFocus();
+}
+
+/* =====================================================================
+   The shared +/- key
+   =====================================================================
+   Every answer box in this game takes a signed integer, so a key per box put
+   four of them inside one expression and wedged each one between a
+   coefficient and its variable -- the expression stopped reading as maths.
+   There is now ONE key, below the problem, and it types into whichever box
+   was last touched. The maths line is left alone.
+
+   The soft keyboard matters here too: the boxes are inputmode="numeric", so a
+   phone raises the number pad, and this key supplies the minus the number pad
+   does not have. That is the whole reason it exists. */
+var lastSignedBlank = null;
+
+function signedBlankLabel(id) {
+    if (!currentProblem) return null;
+    for (var i = 0; i < currentProblem.blanks.length; i++) {
+        if (currentProblem.blanks[i].id === id) return currentProblem.blanks[i].label;
+    }
+    return null;
+}
+function firstSignedBlankId() {
+    if (!currentProblem) return null;
+    for (var i = 0; i < currentProblem.blanks.length; i++) {
+        var b = currentProblem.blanks[i];
+        if (b.kind === 'signedint' && document.getElementById(b.id)) return b.id;
+    }
+    return null;
+}
+function updateSignKeyLabel(id) {
+    var key = document.getElementById('sign-key');
+    if (!key) return;
+    var lab = id ? signedBlankLabel(id) : null;
+    key.setAttribute('aria-label', lab
+        ? 'Insert a negative sign in ' + lab
+        : 'Insert a negative sign in the answer box you are typing in');
+}
+/* Remembering the box is done with one delegated listener rather than an
+   onfocus attribute on every input, so a box added later (stage 2 of a
+   subtraction problem) is covered without re-wiring anything. */
+document.addEventListener('focusin', function (e) {
+    var el = e.target;
+    if (!el || !el.id || !el.className) return;
+    if (String(el.className).indexOf('blank-input') === -1) return;
+    if (el.getAttribute('data-signed') !== '1') return;
+    lastSignedBlank = el.id;
+    updateSignKeyLabel(el.id);
+});
+
+function applySharedSign() {
+    var id = lastSignedBlank;
+    if (!id || !document.getElementById(id)) id = firstSignedBlankId();
+    if (!id) return;
+    var el = document.getElementById(id);
+    var had = el.value.charAt(0) === '-';
+    toggleSignFor(id);            /* toggles or inserts at the caret, and refocuses */
+    lastSignedBlank = id;
+    updateSignKeyLabel(id);
+    var lab = signedBlankLabel(id) || 'the answer box';
+    announce((had ? 'Minus removed from ' : 'Minus added to ') + lab + '.');
+}
+
+/* Stage 1 of a subtraction problem has sign KEYS and no answer boxes, so the
+   shared minus key would have nothing to act on. It is not rendered there. */
+function renderInputArea() {
+    var p = currentProblem;
+    /* A graded problem shows one control: Next Problem. The student reads the
+       answer, the hint or the explanation at their own pace and moves on when
+       they are ready -- which is the whole reason the 1100ms auto-advance is
+       gone. It suited a fast arithmetic drill; it does not suit a problem
+       with four blanks and a worked solution. */
+    if (p && p.done) {
+        document.getElementById('input-content').innerHTML =
+            '<div class="input-area">' +
+            '<button type="button" class="submit-btn next-btn" id="next-btn" ' +
+            'onclick="nextProblem()">Next Problem &rarr;</button></div>';
+        return;
+    }
+    var hasSigned = !!firstSignedBlankId();
+    var html = '<div class="input-area">';
+    if (hasSigned) {
+        html += '<button type="button" class="sign-key" id="sign-key" ' +
+            'aria-label="Insert a negative sign in the answer box you are typing in" ' +
+            'onclick="applySharedSign()">' +
+            '<span class="sk-glyph" aria-hidden="true">&plusmn;</span>' +
+            '<span class="sk-word" aria-hidden="true">negative</span></button>';
+    }
+    html += '<button type="button" class="submit-btn" onclick="checkAnswer()">Check Answer</button>';
+    html += '</div>';
+    document.getElementById('input-content').innerHTML = html;
+    if (hasSigned) updateSignKeyLabel(lastSignedBlank);
+}
+
+/* Every blank gets a real accessible name. Without this a screen reader
+   announces four identical "edit text" fields and the student has no way to
+   tell which coefficient goes where. The +/- key beside a blank is renamed
+   to match, so two keys in the same expression are never confusable. */
+function labelBlanks(p) {
+    var n = p.blanks.length, i, b, el, lab;
+    for (i = 0; i < n; i++) {
+        b = p.blanks[i];
+        el = document.getElementById(b.id);
+        if (!el) continue;
+        lab = b.label;
+        if (n > 1) lab += ', blank ' + (i + 1) + ' of ' + n;
+        if (b.kind === 'signedint') lab += '. Use the plus or minus button for a negative';
+        el.setAttribute('aria-label', lab);
+    }
+}
+function labelSignKeys(p) {
+    if (!p.signTerms || p.stage !== 1) return;
+    var i, el;
+    for (i = 0; i < p.signTerms.length; i++) {
+        el = document.getElementById('sg' + i);
+        if (el) el.setAttribute('data-term', p.signTerms[i].name);
+    }
+}
+/* Cancelled the same way the advance timer is. A focus call left armed from
+   a previous problem would land on the new one, and on a phone that means the
+   caret and the soft keyboard jump without the student touching anything. */
+var focusTimer = null;
+function cancelFocus() {
+    if (focusTimer !== null) { clearTimeout(focusTimer); focusTimer = null; }
+}
+function scheduleFocus() {
+    cancelFocus();
+    focusTimer = setTimeout(function () { focusTimer = null; focusFirstField(); }, 100);
+}
+function focusFirstField() {
+    var p = currentProblem;
+    if (!p) return;
+    /* NEVER steal focus. A student who taps a box within the 100ms after a
+       problem renders was being dragged back to the first one -- and since
+       the +/- key follows the last box touched, the minus then went into the
+       wrong box too. If anything already has focus, leave it alone. */
+    var ae = document.activeElement;
+    if (ae && ae !== document.body && ae !== document.documentElement) return;
+    var el = null;
+    if (p.stage === 1 && p.signTerms && p.signTerms.length) el = document.getElementById('sg0');
+    else if (p.blanks.length) el = document.getElementById(p.blanks[0].id);
+    if (el) { try { el.focus(); } catch (e) { /* focus can fail in a hidden tab */ } }
+}
+function spokenProblem(p) {
+    /* A problem with no instruction line still carries its guidance -- the
+       stage tag is inside p.html and spokenFromHtml reads it out. */
+    var lead = p.instruction ? spokenFromHtml(p.instruction) + ' ' : '';
+    return lead + spokenFromHtml(p.html);
+}
+
+/* =====================================================================
+   Grading
+   ===================================================================== */
+function checkAnswer() {
+    if (!currentProblem) return;
+    /* Enter in a blank after the problem is graded means "next", not "grade it
+       again" -- so a keyboard user never has to reach for the button. */
+    if (currentProblem.done) { nextProblem(); return; }
+    if (currentProblem.stage === 1) { checkSigns(); return; }
+    gradeBlanks();
+}
+
+function nextProblem() {
+    problemNum++;
+    generateProblem();
+    updateDisplay();
+}
+
+/* Stage 1 of a subtraction problem. An unset key is treated exactly like an
+   empty blank -- the problem is simply not graded yet -- so a student is
+   never marked wrong for a term they have not answered. */
+function checkSigns() {
+    var p = currentProblem, i, el, v, unset = 0, firstWrong = -1;
+    for (i = 0; i < p.signTerms.length; i++) {
+        el = document.getElementById('sg' + i);
+        v = el ? el.getAttribute('data-sign') : '?';
+        if (v === '?') { unset++; continue; }
+        if (firstWrong === -1 && v !== p.signTerms[i].correct) firstWrong = i;
+    }
+    if (unset > 0) {
+        setFeedback('Set a sign for every term first.', 'feedback');
+        return;
+    }
+    if (firstWrong !== -1) {
+        recordMiss();
+        setFeedback('Not quite. Check the sign on the ' + p.signTerms[firstWrong].name + ' term.', 'feedback incorrect');
+        return;
+    }
+    advanceToStage2('Signs are right. Now combine the like terms.');
+}
+
+function advanceToStage2(msg) {
+    var p = currentProblem;
+    p.stage = 2;
+    var vis = document.getElementById('problem-visual');
+    if (!vis) return;
+    var html = renderSubStage2(p);
+    vis.innerHTML = html;
+    hideDecorativeMath(vis);
+    labelBlanks(p);
+    renderInputArea();     /* stage 2 has answer boxes, so the minus key returns */
+    if (msg) {
+        setFeedback(msg, 'feedback correct');
+        announce(msg + ' ' + spokenFromHtml(html));
+    }
+    scheduleFocus();
+}
+
+function gradeBlanks() {
+    var p = currentProblem, i, b, el, raw, wrong = [], empty = 0, signOnly = 0;
+    for (i = 0; i < p.blanks.length; i++) {
+        b = p.blanks[i];
+        el = document.getElementById(b.id);
+        raw = el ? String(el.value).trim() : '';
+        if (raw === '') { empty++; continue; }
+        /* A box holding nothing but a sign is an UNFINISHED entry, not a wrong
+           answer. It is the most natural slip in the game: -x^2 really does
+           mean -1x^2, so a student who has been taught to write the minus and
+           no number types exactly that. Marking it wrong would cost an attempt
+           and a streak for correct notation habits. It is nudged instead. */
+        if (raw === '+' || raw === '-') { signOnly++; continue; }
+        if (!blankCorrect(b.kind, raw, p.answers[b.key])) wrong.push(b);
+    }
+    /* Never coerce an empty box to 0: the student has not answered, and
+       grading it would hand out a free correct on any zero coefficient. */
+    if (signOnly > 0) {
+        /* Teaches the rule without stating this problem's answer -- saying
+           "the coefficient is -1" would be a hint, and wrong whenever the
+           box actually wanted -7. */
+        setFeedback('A sign on its own is not a number yet. Writing ' +
+            '-x is shorthand for -1x, so if you mean negative one, type -1.', 'feedback');
+        return;
+    }
+    if (empty > 0) {
+        setFeedback(empty === 1 ? 'One blank is still empty.' : 'Fill in every blank first.', 'feedback');
+        return;
+    }
+
+    if (wrong.length === 0) {
+        if (!missRecorded) {
+            missRecorded = true;
+            stats[p.trackCategory].t++;
+            stats[p.trackCategory].c++;
+            streak++;
+            if (streak > bestStreak) bestStreak = streak;
+            celebrateStreak(streak);
+        } else {
+            /* Already charged for a wrong try or a reveal on this problem:
+               the attempt is booked, no credit is given, and the streak stays
+               at zero. */
+            streak = 0;
+        }
+        p.done = true;
+        setFeedback('Correct!', 'feedback correct');
+        announce('Correct. ' + spokenFromHtml(p.answerLine));
+        updateDisplay();
+        saveState();
+        renderInputArea();      /* Check Answer becomes Next Problem */
+        return;
+    }
+
+    recordMiss();
+    if (wrong.length === 1) {
+        setFeedback('Not quite. Check ' + wrong[0].label + '.', 'feedback incorrect');
+    } else {
+        setFeedback('Not quite. ' + wrong.length + ' of the ' + p.blanks.length +
+            ' boxes are not right yet.', 'feedback incorrect');
+    }
+    updateDisplay();
+    saveState();
+}
+
+/* A wrong answer costs the same as a reveal: one attempt, no credit, streak
+   back to zero. Booked once per problem, on whichever path gets there first,
+   so a student cannot pay twice or slip through without paying at all. */
+function recordMiss() {
+    if (missRecorded || !currentProblem) return;
+    missRecorded = true;
+    if (stats[currentProblem.trackCategory]) stats[currentProblem.trackCategory].t++;
+    streak = 0;
+    updateDisplay();
+    saveState();
+}
+
+/* =====================================================================
+   Helper boxes
+   ===================================================================== */
+function toggleHint() {
+    if (!currentProblem) return;
+    toggleHelperBox('hint', 'hint-toggle', 'Show Hint', 'Hide Hint', 'hint-box',
+        '<b>Hint:</b> ' + currentProblem.hint);
+}
+function toggleExplanation() {
+    if (!currentProblem) return;
+    toggleHelperBox('explain', 'explain-toggle', 'Show Explanation', 'Hide Explanation', 'explain-box',
+        currentProblem.explanation);
+}
+/* Show Answer charges an attempt and ends the streak. On a subtraction
+   problem still in stage 1 it also unlocks stage 2 with the correct signs
+   filled in -- otherwise revealing the answer would leave the student unable
+   to reach the boxes the answer is about. */
+function toggleAnswer() {
+    if (!currentProblem) return;
+    var box = document.getElementById('answer-box');
+    if (box && box.style.display === 'none') {
+        recordReveal();
+        if (currentProblem.stage === 1) {
+            var p = currentProblem, i, el;
+            for (i = 0; i < p.signTerms.length; i++) {
+                el = document.getElementById('sg' + i);
+                if (el) el.setAttribute('data-sign', p.signTerms[i].correct);
+            }
+            advanceToStage2(null);
+        }
+    }
+    toggleHelperBox('answer-box', 'answer-toggle', 'Show Answer', 'Hide Answer', 'answer-box',
+        '<b>Answer:</b> ' + currentProblem.answerLine);
+}
+
+/* No level pills in this game: every category ramps on its own from the
+   number of problems served. The row stays in the markup, hidden, so the
+   component is available if a future category ever needs it. */
+function renderSubModeButtons() {
+    var c = document.getElementById('sub-mode-btns');
+    if (!c) return;
+    c.style.display = 'none';
+    c.innerHTML = '';
+}
+
+/* =====================================================================
+   Spoken math
+   =====================================================================
+   The rendered markup is the single source of truth: everything a student
+   can see -- the problem, a hint, an explanation, the revealed answer -- is
+   turned into words by this one function, so no panel can go mute the way
+   the hint and answer boxes did across the rest of the suite.
+
+   Order matters. The sign keys carry meaning and become "sign blank"; the
+   +/- keys carry none and are stripped whole, because tag-stripping alone
+   left their glyph in the sentence and every signed blank was announced as
+   "...equals x blank plus or minus". */
+function spokenFromHtml(html) {
+    var s = String(html == null ? '' : html);
+
+    /* Block structure first, so sentences do not run together. */
+    s = s.replace(/<div class="stage-tag">([\s\S]*?)<\/div>/g, '. $1 . ');
+    s = s.replace(/<div class="rewrite[^"]*">/g, '. ');
+    s = s.replace(/<div class="stage-line">/g, '. ');
+
+    /* The student's own sign choices. */
+    s = s.replace(/<button[^>]*class="[^"]*sign-toggle[^"]*"[^>]*>[\s\S]*?<\/button>/g, ' sign blank ');
+    s = s.replace(/<span class="sign-locked">([\s\S]*?)<\/span>/g, ' $1 ');
+
+    /* Every other button is a control, not part of the expression. */
+    s = s.replace(/<button[\s\S]*?<\/button>/g, ' ');
+
+    /* Inputs are the blanks the student fills. */
+    s = s.replace(/<input[^>]*>/g, ' blank ');
+
+    /* A stacked fraction carries its meaning in layout, so it must be said. */
+    s = s.replace(/<span class="frac[^"]*"><span class="frac-num">([\s\S]*?)<\/span><span class="frac-bar"><\/span><span class="frac-den">([\s\S]*?)<\/span><\/span>/g,
+        function (m, n, d) { return ' the fraction ' + spokenFromHtml(n) + ' over ' + spokenFromHtml(d) + ' '; });
+
+    /* An exponent slot holds a blank; a <sup> holds a printed exponent. */
+    s = s.replace(/<span class="exp-slot">([\s\S]*?)<\/span>/g, ' to the power of $1 ');
+    s = s.replace(/<sup>([\s\S]*?)<\/sup>/g, ' to the power of $1 ');
+
+    s = s.replace(/<[^>]+>/g, ' ');
+
+    s = s.replace(/&minus;/g, ' minus ')
+        .replace(/&times;/g, ' times ')
+        .replace(/&plusmn;/g, ' ')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&mdash;/g, ' , ')
+        .replace(/&ne;/g, ' is not equal to ')
+        .replace(/&rsquo;/g, "'")
+        .replace(/&amp;/g, ' and ')
+        .replace(/&lt;/g, ' ')
+        .replace(/&gt;/g, ' ')
+        .replace(/&quot;/g, ' ')
+        .replace(/&#39;/g, "'");
+
+    s = s.replace(/=/g, ' equals ');
+    s = s.replace(/\(/g, ' open parenthesis ').replace(/\)/g, ' close parenthesis ');
+
+    /* A minus that opens an expression is a negative, not a subtraction. */
+    s = s.replace(/(^|open parenthesis|equals|:|\.)(\s*)minus\s+/g, '$1$2negative ');
+
+    s = s.replace(/\s+/g, ' ').trim();
+    return s;
+}
+
+/* Shared disclosure plumbing -- keep, it is not game-specific. */
+function toggleHelperBox(boxId, btnId, showLabel, hideLabel, cls, htmlContent) {
+    var box = document.getElementById(boxId);
+    var btn = document.getElementById(btnId);
+    if (!box) return;
+    if (box.style.display === 'none') {
+        box.className = cls;
+        // Visual copy is aria-hidden; a spoken sibling carries the same content in words
+        box.innerHTML = '<div aria-hidden="true">' + htmlContent + '</div>' +
+            '<p class="sr-only">' + escapeHtml(spokenFromHtml(htmlContent)) + '</p>';
+        box.style.display = 'block';
+        if (btn) { btn.setAttribute('aria-expanded', 'true'); btn.textContent = hideLabel; }
+    } else {
+        box.style.display = 'none';
+        if (btn) { btn.setAttribute('aria-expanded', 'false'); btn.textContent = showLabel; }
+    }
+}
+
+/* Revealing the answer records the problem as attempted, exactly like a wrong
+   try, and ends the streak. Without this a student could reveal, type it back
+   and take clean first-try credit, which quietly inflated every accuracy
+   figure. Hint and Explanation stay free, matching the rest of the suite. */
+function recordReveal() {
+    if (missRecorded || !currentProblem) return;
+    missRecorded = true;
+    if (stats[currentProblem.trackCategory]) stats[currentProblem.trackCategory].t++;
+    streak = 0;
+    updateDisplay();
+    saveState();
+}
+
+/* =====================================================================
+   Skip, mode, display
+   ===================================================================== */
+function skipProblem() {
+    problemNum++;
+    generateProblem();
+    updateDisplay();
+}
+
+/* Reads data-mode off each pill rather than an index-ordered array, so adding
+   or reordering pills never desynchronises the active state. */
+function setMode(m) {
+    mode = m;
+    var btns = document.querySelectorAll('#main-mode-btns .mode-btn');
+    for (var i = 0; i < btns.length; i++) {
+        var on = btns[i].getAttribute('data-mode') === m;
+        btns[i].classList.toggle('active', on);
+        btns[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    renderSubModeButtons();
+    /* The streak deliberately SURVIVES a category switch. Mixed already lets
+       a streak span all three categories, so resetting it here punished
+       exactly the student who was exploring by hand. */
+    generateProblem();
+    updateDisplay();
+}
+
+function updateDisplay() {
+    document.getElementById('problemNum').textContent = problemNum + 1;
+    document.getElementById('streak').textContent = streak;
+    var sd = document.getElementById('streak-display');
+    sd.className = streak >= 5 ? 'info-item streak-hot' : 'info-item';
+    var totalC = 0, totalT = 0;
+    CATS.forEach(function (c) { if (stats[c]) { totalC += stats[c].c; totalT += stats[c].t; } });
+    var accEl = document.getElementById('acc-display');
+    if (totalT > 0) accEl.textContent = 'Accuracy: ' + Math.round(totalC / totalT * 100) + '%';
+    else accEl.textContent = 'Accuracy: --';
+}
+
+/* =====================================================================
+   Persistence hardening
+   ===================================================================== */
+/* Anything read back from localStorage is untrusted: another script on the
+   origin, a shared device, or a curious student can edit it. Stats values
+   flow into innerHTML in the stats panel, so they are coerced to plain
+   non-negative integers on load and escaped on the way out. */
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function safeCount(v, max) {
+    var n = Number(v);
+    if (!isFinite(n) || n < 0) return 0;
+    n = Math.floor(n);
+    return n > max ? max : n;
+}
+
+function saveState() {
+    try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify({
+            stats: stats, served: served, bestStreak: bestStreak,
+            problemNum: problemNum, confettiOn: confettiOn
+        }));
+    } catch (e) { /* storage unavailable -- play without saving */ }
+}
+function loadState() {
+    try {
+        var raw = localStorage.getItem(SAVE_KEY);
+        if (!raw) return;
+        var st = JSON.parse(raw);
+        if (st && typeof st === 'object' && st.stats && typeof st.stats === 'object') {
+            CATS.forEach(function (c) {
+                var s = st.stats[c];
+                if (!s || typeof s !== 'object') return;
+                var t = safeCount(s.t, 1e6);
+                var correct = safeCount(s.c, t);   // correct can never exceed attempts
+                stats[c] = { c: correct, t: t };
+            });
+        }
+        /* The ramp counters are user-writable like everything else in
+           storage, so they are clamped the same way. A poisoned value can
+           only ever move a student further along a ramp, never past a
+           category that does not exist. */
+        if (st && st.served && typeof st.served === 'object') {
+            CATS.forEach(function (c) {
+                served[c] = safeCount(st.served[c], 1e6);
+            });
+        }
+        if (st) {
+            bestStreak = safeCount(st.bestStreak, 1e6);
+            problemNum = safeCount(st.problemNum, 1e6);
+            confettiOn = st.confettiOn !== false;
+        }
+    } catch (e) { /* corrupt or unreadable -- start fresh rather than fail */ }
+}
+
+/* =====================================================================
+   Stats view
+   ===================================================================== */
+function showStats() {
+    var totalC = 0, totalT = 0;
+    CATS.forEach(function (c) { if (stats[c]) { totalC += stats[c].c; totalT += stats[c].t; } });
+    var overallPct = totalT > 0 ? Math.round((totalC / totalT) * 100) : 0;
+
+    var html = '<div class="stats-view">';
+    html += '<h2 id="stats-heading" tabindex="-1">My Stats</h2>';
+    html += '<div class="stats-overall">';
+    if (totalT > 0) {
+        html += '<div class="big">' + escapeHtml(overallPct) + '%</div>';
+        html += '<div class="lbl">' + escapeHtml(totalC) + ' correct on first try out of ' + escapeHtml(totalT) + ' problems</div>';
+    } else {
+        html += '<div class="big" style="color:#4a5480;" aria-hidden="true">--</div>';
+        html += '<div class="lbl">No problems attempted yet.</div>';
+    }
+    html += '<div class="lbl" style="margin-top:6px;">Best streak: ' + escapeHtml(bestStreak) + '</div>';
+    html += '</div>';
+
+    CATS.forEach(function (c) {
+        var s = stats[c] || { c: 0, t: 0 };
+        var pct = s.t > 0 ? Math.round((s.c / s.t) * 100) : 0;
+        var barCls = 'none';
+        if (s.t > 0) {
+            if (pct >= 80) barCls = 'good';
+            else if (pct >= 60) barCls = 'mid';
+            else barCls = 'low';
+        }
+        var w = s.t > 0 ? pct : 0;
+        var name = CAT_LABELS[c] || c;
+        var spokenRow = s.t > 0
+            ? name + ': ' + s.c + ' correct out of ' + s.t + ', ' + pct + ' percent'
+            : name + ': not tried yet';
+        html += '<div class="stat-row">';
+        html += '<div class="stat-name" aria-hidden="true">' + escapeHtml(name) + '</div>';
+        html += '<div class="stat-bar-wrap" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' +
+                escapeHtml(w) + '" aria-label="' + escapeHtml(spokenRow) + '">' +
+                '<div class="stat-bar ' + barCls + '" style="width:' + escapeHtml(w) + '%;"></div></div>';
+        html += '<div class="stat-num" aria-hidden="true">' +
+                (s.t > 0 ? escapeHtml(s.c) + '/' + escapeHtml(s.t) + ' (' + escapeHtml(pct) + '%)' : 'not tried yet') +
+                '</div>';
+        html += '</div>';
+    });
+
+    var recommend = buildRecommendation();
+    if (recommend) html += '<div class="recommend">' + recommend + '</div>';
+
+    html += '<div class="stats-actions">';
+    html += '<button type="button" class="submit-btn" onclick="hideStats()">Back to Practice</button>';
+    html += '<button type="button" class="reset-btn" onclick="confirmReset()" style="margin-left:8px;">Reset Stats</button>';
+    html += '</div>';
+    html += '</div>';
+
+    document.getElementById('main-content').innerHTML = html;
+    document.getElementById('input-content').innerHTML = '';
+    setFeedback('', 'feedback');
+    document.getElementById('problem-spoken').textContent = '';
+    document.getElementById('helper-buttons').style.display = 'none';
+    hideHelperBox('hint', 'hint-toggle', 'Show Hint');
+    hideHelperBox('explain', 'explain-toggle', 'Show Explanation');
+    hideHelperBox('answer-box', 'answer-toggle', 'Show Answer');
+    var h = document.getElementById('stats-heading');
+    if (h) h.focus();
+}
+
+/* ==== GAME-SPECIFIC wording, generic shape: keep the "untried first" rule. ==== */
+function buildRecommendation() {
+    var totalT = 0;
+    CATS.forEach(function (c) { if (stats[c]) totalT += stats[c].t; });
+    if (totalT === 0) return null;
+
+    var untried = CATS.filter(function (c) { return !stats[c] || stats[c].t === 0; });
+    if (untried.length > 0) {
+        var names = untried.map(function (c) { return CAT_LABELS[c] || c; });
+        var list = names.length > 1 ? (names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1]) : names[0];
+        return '<b>Try these next:</b> you haven&rsquo;t attempted ' + escapeHtml(list) + ' yet, so it&rsquo;s too soon to call this a strong overall score. Give them a shot!';
+    }
+
+    var weakest = null, weakestPct = 101;
+    CATS.forEach(function (c) {
+        var s = stats[c];
+        var p = s.c / s.t * 100;
+        if (p < weakestPct) { weakestPct = p; weakest = c; }
+    });
+    if (weakestPct >= 85) {
+        return '<b>Great work overall!</b> You are strong across every category. Try the Mixed mode to keep sharp.';
+    }
+    return '<b>Focus area:</b> ' + escapeHtml(CAT_LABELS[weakest] || weakest) + ' is your weakest (' +
+        escapeHtml(Math.round(weakestPct)) + '%). Try the ' + escapeHtml(CAT_SHORT[weakest] || weakest) +
+        ' mode for focused practice.';
+}
+
+function hideStats() { generateProblem(); updateDisplay(); }
+
+/* Two-tap reset: the first tap arms the button and relabels it, the second
+   inside 3.5s performs the reset. No confirm() dialog -- it is blocked in some
+   embedded webviews and reads badly to a screen reader. */
+var resetArmed = false;
+var resetTimer = null;
+function confirmReset() {
+    if (!resetArmed) {
+        resetArmed = true;
+        var btns = document.querySelectorAll('.reset-btn');
+        for (var i = 0; i < btns.length; i++) btns[i].textContent = 'Tap again to confirm';
+        resetTimer = setTimeout(function () {
+            resetArmed = false;
+            var b2 = document.querySelectorAll('.reset-btn');
+            for (var j = 0; j < b2.length; j++) b2[j].textContent = 'Reset Stats';
+        }, 3500);
+        return;
+    }
+    clearTimeout(resetTimer);
+    resetArmed = false;
+    stats = blankStats();
+    served = blankServed();
+    streak = 0;
+    bestStreak = 0;
+    problemNum = 0;
+    saveState();
+    updateDisplay();
+    showStats();
+}
+
+/* =====================================================================
+   Confetti
+   ===================================================================== */
+function prefersReducedMotion() {
+    try {
+        return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    } catch (e) { return false; }
+}
+function toggleConfetti() {
+    confettiOn = !confettiOn;
+    syncConfettiButton();
+    saveState();
+    announce('Confetti ' + (confettiOn ? 'on' : 'off') + '.');
+    if (confettiOn) createConfetti(40, 1);
+}
+/* Milestones: every 5 in a row is a tier-2 burst, every 10 a tier-3 burst.
+   Called only from the correct-answer path, and only for a clean first try. */
+function celebrateStreak(s) {
+    if (s <= 0) return;
+    if (!confettiOn || prefersReducedMotion()) return;
+    /* 3, 5, 8, 10, 13, 15, 18, 20, ... -- every multiple of 5, and every
+       3 past one. Two celebrations per five, escalating in size. */
+    var m = s % 5;
+    if (m === 0) {
+        if (s % 10 === 0) createConfetti(200, 3);   /* 10, 20, 30 - the big one */
+        else createConfetti(100, 2);                /* 5, 15, 25 */
+    } else if (m === 3) {
+        createConfetti(50, 1);                      /* 3, 8, 13, 18 */
+    }
+}
+
+function createConfetti(count, tier) {
+    if (prefersReducedMotion()) return;
+    var host = document.body;
+    // Midnight Scholar 8-colour confetti palette (the only place yellow is allowed)
+    /* Confetti is the one documented exemption from the suite's no-orange,
+       no-red rule (IRA, 2026-09-01). That rule exists because those colours
+       mean error and warning everywhere else -- incorrect feedback is ink
+       navy, never red -- and confetti never shares the screen with feedback
+       about a wrong answer, so the exemption does not collide with it. */
+    var colors = ['#7c3aed', '#a78bfa', '#2e3d8f', '#10b981', '#ffeb3b', '#fb923c', '#ef4444', '#ec4899'];
+    var isMassive = tier === 3;
+    for (var i = 0; i < count; i++) {
+        var piece = document.createElement('div');
+        piece.className = 'confetti';
+        piece.setAttribute('aria-hidden', 'true');
+        var base;
+        if (tier === 1) base = 7 + Math.random() * 5;
+        else if (tier === 2) base = 10 + Math.random() * 7;
+        else base = 11 + Math.random() * 9;
+        var color = colors[Math.floor(Math.random() * colors.length)];
+        var shape = Math.floor(Math.random() * 4);
+        if (shape === 0) {
+            piece.style.width = base + 'px';
+            piece.style.height = base + 'px';
+            piece.style.background = color;
+            piece.style.borderRadius = '50%';
+        } else if (shape === 1) {
+            piece.style.width = base + 'px';
+            piece.style.height = base + 'px';
+            piece.style.background = color;
+            piece.style.borderRadius = '2px';
+        } else if (shape === 2) {
+            piece.style.width = Math.max(4, base * 0.35) + 'px';
+            piece.style.height = (base * 1.7) + 'px';
+            piece.style.background = color;
+            piece.style.borderRadius = '2px';
+        } else {
+            piece.style.width = '0';
+            piece.style.height = '0';
+            piece.style.background = 'transparent';
+            piece.style.borderLeft = (base * 0.6) + 'px solid transparent';
+            piece.style.borderRight = (base * 0.6) + 'px solid transparent';
+            piece.style.borderBottom = base + 'px solid ' + color;
+        }
+        piece.style.left = Math.random() * 100 + '%';
+        piece.style.top = '-20px';
+        var dur;
+        if (tier === 1) dur = 1.6 + Math.random() * 1.0;
+        else if (tier === 2) dur = 2.0 + Math.random() * 1.5;
+        else dur = 2.5 + Math.random() * 2.0;
+        piece.style.animation = (isMassive ? 'confetti-fall-slow' : 'confetti-fall') + ' ' + dur + 's ease-out forwards';
+        piece.style.animationDelay = (Math.random() * (isMassive ? 0.8 : 0.4)) + 's';
+        host.appendChild(piece);
+        setTimeout(function (el) {
+            return function () { if (el.parentNode) el.parentNode.removeChild(el); };
+        }(piece), isMassive ? 6000 : 4500);
+    }
+}
+
+/* =====================================================================
+   Boot
+   ===================================================================== */
+/* Polar Rose Studio insignia: r = 2cos(3/2 theta) */
+function drawInsignia() {
+    var el = document.getElementById('pr-path');
+    if (!el) return;
+    var d = '', steps = 240, maxT = 4 * Math.PI;
+    for (var i = 0; i <= steps; i++) {
+        var t = (i / steps) * maxT;
+        var r = 2 * Math.cos(1.5 * t);
+        var x = (r * Math.cos(t) * 12).toFixed(2);
+        var y = (r * Math.sin(t) * 12).toFixed(2);
+        d += (i === 0 ? 'M' : 'L') + x + ' ' + y + ' ';
+    }
+    el.setAttribute('d', d.trim());
+}
+
+/* The saved preference is read before the button is painted, so the switch's
+   ARIA state and its visual state are set from the SAME value at boot. Without
+   this the markup's hard-coded aria-checked="true" lied whenever confetti had
+   been turned off in an earlier session. */
+function syncConfettiButton() {
+    var btn = document.getElementById('confetti-toggle');
+    var track = document.getElementById('confetti-track');
+    if (btn) btn.setAttribute('aria-checked', confettiOn ? 'true' : 'false');
+    if (track) track.classList.toggle('on', confettiOn);
+}
+
+loadState();
+drawInsignia();
+syncConfettiButton();
+renderSubModeButtons();
+generateProblem();
+updateDisplay();
+</script>
+</body>
+</html>
