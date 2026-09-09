@@ -2,7 +2,7 @@
 Math games, tutorials and visualizations
 # Math Tools
 
-This repository contains 14 browser-based practice games for intermediate algebra, from arithmetic
+This repository contains 15 browser-based practice games for intermediate algebra, from arithmetic
 review through functions. No download is needed; no need to create an account. Students can use a phone or a computer and just play the games to develop proficiency in the topics listed below.
 
 Additional games and a separate suite of calculus visualizations/games is being planned for the next few months.
@@ -31,6 +31,7 @@ To see all the games, just visit:
 | [Domain, Range & Functions](domain-range-functions/) | Interval notation, reading graphs, evaluating f(x), the vertical line test |
 | [Synthetic Division](synthetic-division/) | Dividing by x - a: setting up the table, working each column, and reading off the quotient and remainder |
 | [Polynomial Operations](polynomial-operations/) | Adding, subtracting, multiplying, and the special product patterns |
+| [Finding the Equation of a Line](equation-of-a-line/) | Writing a line's equation from slope and y-intercept, slope and a point, two points, or a parallel or perpendicular condition |
 
 Each game keeps progress on the student's own device, tracks accuracy per topic,
 and points them toward whichever category they are weakest in.
