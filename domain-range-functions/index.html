@@ -111,26 +111,31 @@
         margin-bottom: 10px;
         flex-wrap: wrap;
     }
+    /* IRA, 2026-09-10: every category carries the Favorite gradient; the
+       selected one is marked by the bright mint border and ring, matching
+       Finding the Equation of a Line. Both gradient stops pass AA with white
+       text (#1e3a5f 11.6:1, #0b7a70 5.21:1). The 3px border is present in
+       both states - transparent when unselected - so selecting a category
+       never changes its size and the row cannot reflow. */
     .mode-btn {
-        background: #e6e9f6;
-        color: #4a5480;
-        border: none;
+        background: linear-gradient(135deg, #1e3a5f, #0b7a70);
+        color: #ffffff;
+        border: 3px solid transparent;
         border-radius: 999px;
         padding: 9px 16px;
         font-size: 13px;
         font-weight: 800;
         cursor: pointer;
-        transition: background 0.15s, box-shadow 0.15s, color 0.15s;
+        transition: filter 0.15s, border-color 0.15s, box-shadow 0.15s;
         -webkit-tap-highlight-color: transparent;
         font-family: inherit;
     }
-    .mode-btn:hover { background: #d9def2; }
+    .mode-btn:hover { filter: brightness(1.12); }
     .mode-btn.active {
-        /* Accessible navy-to-teal per design system; both gradient stops pass AA
-           with white text (#1e3a5f 11.6:1, #0b7a70 5.21:1). */
         background: linear-gradient(135deg, #1e3a5f, #0b7a70) !important;
-        color: white !important;
-        box-shadow: 0 0 0 4px rgba(11, 122, 112, 0.22), 0 6px 14px rgba(30, 58, 95, 0.35);
+        color: #ffffff !important;
+        border-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.25), 0 6px 14px rgba(30, 58, 95, 0.35);
     }
     button {
         padding: 12px 22px;
@@ -233,27 +238,59 @@
         padding: 9px 20px;
         font-size: 13px;
     }
+    /* IRA, 2026-09-10: 13px -> 16px. This line is the whole reply to a checked
+       answer and it was the smallest text on the card. The slot reserves room
+       for the taller line so nothing below it jumps when the message appears. */
     .field-feedback {
         text-align: center;
-        font-size: 13px;
+        font-size: 16px;
         font-weight: 700;
-        min-height: 18px;
+        min-height: 23px;
         margin-top: 6px;
     }
-    /* CONTRAST: #059669 on white is 3.77:1; at 13px/700 the requirement is
-       4.5:1. #047857 is 5.55:1. (.feedback .correct below is 19px/800, where
-       3:1 applies, so it may stay #059669.) */
-    .field-feedback.correct { color: #047857; }
+    /* CONTRAST: #059669 on white is 3.77:1; at 17px/800 the requirement is
+       still 4.5:1 (the 3:1 relaxation starts at 18.66px bold). #047857 is
+       5.55:1. (.feedback .correct below is 19px/800, where 3:1 applies, so it
+       may stay #059669.) */
+    .field-feedback.correct { font-size: 17px; font-weight: 800; color: #047857; }
     .field-feedback.incorrect { color: #3b3568; font-weight: 600; }
+    /* Notation coaching, not a wrong answer. Violet marks it as a hint rather
+       than a miss - #6d28d9 is 7.44:1 on white, and the wording carries the
+       meaning too, so nothing here depends on colour alone. */
+    .field-feedback.nudge { color: #6d28d9; font-weight: 700; }
+    /* "Domain" and "Range" are the two words that say which answer goes in
+       which box, so they carry more weight than a form label usually does. */
     .field-label {
         display: block;
         font-weight: 800;
         color: #1e2a5e;
-        font-size: 14px;
-        margin-bottom: 5px;
+        font-size: 19px;
+        letter-spacing: 0.3px;
+        margin-bottom: 7px;
         text-align: center;
     }
-    .interval-input {
+    /* D-4. The type selector `input[type="text"] { width: 140px }` further down
+       outranks a bare class selector, so this box silently rendered at 140px -
+       120px of usable space for a placeholder needing 131px, which clipped the
+       one example telling a student what an interval answer looks like.
+       Qualifying the class with the same element+attribute restores the
+       intended full-width box without an !important. */
+    /* IRA, 2026-09-10: the infinity sign sat noticeably smaller than the digits
+       beside it. A character inside an <input> cannot be styled on its own, so
+       the size is corrected in the font layer: this face claims ONLY U+221E and
+       draws it 40% larger, leaving every other character untouched. The src is
+       a chain of local monospace faces so the lifted glyph still matches the
+       box. If none resolve, or the browser predates size-adjust (Safari 16 and
+       earlier), the rule is skipped and the box renders exactly as before -
+       nothing depends on it. */
+    @font-face {
+        font-family: 'InfinityLift';
+        src: local('Menlo'), local('Consolas'), local('SF Mono'),
+             local('DejaVu Sans Mono'), local('Liberation Mono');
+        unicode-range: U+221E;
+        size-adjust: 140%;
+    }
+    input[type="text"].interval-input {
         width: 100%;
         box-sizing: border-box;
         font-size: 17px;
@@ -264,7 +301,7 @@
         color: #1e2a5e;
         background: #ffffff;
         text-align: center;
-        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+        font-family: 'InfinityLift', 'Consolas', 'SF Mono', 'Menlo', monospace;
     }
     .interval-input:focus {
         outline: none;
@@ -288,6 +325,11 @@
         margin-top: 8px;
         flex-wrap: wrap;
     }
+    /* IRA, 2026-09-10: the notation strip stays on EVERY device. It was briefly
+       hidden on laptops and Ira asked for it back, in full - the infinity keys
+       cannot be typed at all on a physical keyboard, and the strip is where a
+       student learns which bracket means what. Do not gate it on pointer type
+       or screen width again. */
     .toolbar-btn {
         background: #e6e9f6;
         color: #2e3d8f;
@@ -499,6 +541,7 @@
         h1 { font-size: 19px; }
         .mode-btn { padding: 8px 11px; font-size: 11.5px; }
         input[type="text"] { width: 110px; font-size: 19px; }
+        .field-label { font-size: 17px; }
         .interval-input { font-size: 15px; padding: 9px 8px; }
         .toolbar-btn { padding: 5px 10px; font-size: 13px; }
         .equation { font-size: 19px; padding: 12px 8px; }
@@ -586,8 +629,16 @@ function evalQuadStd(a, b, c, x) { return a * x * x + b * x + c; }
    practised (and never wrong). The weighting keeps closed endpoints the
    commonest case; the do/while still forbids arrow-on-both-sides, so a
    restricted domain always has at least one real endpoint to read. */
+/* IRA, 2026-09-10: no open (hollow) endpoints in the problems. Every finite
+   endpoint is a filled dot and therefore included, so answers use square
+   brackets on finite sides and a parenthesis only next to infinity.
+   The 'open' machinery below is intact and still honoured everywhere - the
+   marker renderer, the spoken description, getValidIntegerXsBox and both range
+   functions all still handle an excluded endpoint correctly. Only the
+   GENERATOR stops producing them, so putting 'open' back in this array is all
+   that is needed to restore them. */
 function pickEndpointTypes(allowArrow) {
-    var types = allowArrow ? ['closed', 'closed', 'open', 'arrow'] : ['closed', 'closed', 'open'];
+    var types = allowArrow ? ['closed', 'closed', 'arrow'] : ['closed'];
     var left, right;
     do {
         left = pick(types);
@@ -701,6 +752,32 @@ function parseNumTok(tok) {
     if (tok === '-\u221e') return -Infinity;
     if (tok === '\u221e' || tok === '+\u221e') return Infinity;
     return parseFloat(tok);
+}
+
+/* IRA, 2026-09-10: an interval written back to front - "[5, -3]", or with an
+   infinity on the wrong side - is rejected by parseAnswer's `lower > upper`
+   guard and used to land in the generic format message, which does not say
+   what is actually wrong. Ordering is a specific, teachable slip, so it earns
+   its own sentence. This detector re-reads the same three shapes parseAnswer
+   understands and reports only the reversal. It costs the student nothing: the
+   format branch in checkIntervalField never spent an attempt to begin with. */
+function isReversedOrder(raw) {
+    var s = normalizeAnswerText(raw);
+    var m = s.match(new RegExp('^([\\[\\(])\\s*([-+]?\u221e|' + NUM_RE + ')\\s*,\\s*([-+]?\u221e|' + NUM_RE + ')\\s*([\\]\\)])$'));
+    if (!m) {
+        m = s.match(new RegExp('^([-+]?\u221e|' + NUM_RE + ')\\s*(?:\u2264|<)\\s*[a-z]\\s*(?:\u2264|<)\\s*([-+]?\u221e|' + NUM_RE + ')$'));
+        if (m) m = [m[0], '[', m[1], m[2], ']'];
+    }
+    if (!m) {
+        /* The ">= x >=" shape reads high-to-low by design, so its tokens are
+           already in the order upper, lower - compare them the other way. */
+        m = s.match(new RegExp('^([-+]?\u221e|' + NUM_RE + ')\\s*(?:\u2265|>)\\s*[a-z]\\s*(?:\u2265|>)\\s*([-+]?\u221e|' + NUM_RE + ')$'));
+        if (m) m = [m[0], '[', m[2], m[1], ']'];
+    }
+    if (!m) return false;
+    var lo = parseNumTok(m[2]), hi = parseNumTok(m[3]);
+    if (isNaN(lo) || isNaN(hi)) return false;
+    return lo > hi;
 }
 
 function parseAnswer(raw) {
@@ -1667,7 +1744,7 @@ function describeIsFunctionGraph(problem) {
 function buildIntervalInputRow(key, label, varLetter) {
     var html = '<div class="answer-row">';
     html += '<label class="field-label" for="' + key + '-input">' + label + ':</label>';
-    html += '<input type="text" id="' + key + '-input" class="interval-input" inputmode="decimal" placeholder="e.g. [-3, 5)" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" onkeydown="if(event.key===\'Enter\'){checkIntervalField(\'' + key + '\');}">';
+    html += '<input type="text" id="' + key + '-input" class="interval-input" inputmode="decimal" placeholder="e.g. [-3, 5] or (-inf, 4]" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" onkeydown="if(event.key===\'Enter\'){checkIntervalField(\'' + key + '\');}">';
     /* A bare "(" or "," is not a usable accessible name -- most screen readers
        announce punctuation-only buttons as "button" and nothing else. Each key
        now carries a spoken name AND says what it means for the interval. */
@@ -1846,9 +1923,8 @@ function getHintHtml() {
         return '<strong>Hint:</strong><br>Domain = all the x-values the graph covers.<br>' +
                'Range = all the y-values the graph covers.<br>' +
                'A <strong>filled</strong> dot means that endpoint IS included \u2014 use a square bracket, like [3.<br>' +
-               'A <strong>hollow</strong> dot means that endpoint is NOT included \u2014 use a parenthesis, like (3.<br>' +
                'An arrow means the graph keeps going forever that way \u2014 always a parenthesis next to \u221e.<br>' +
-               'Write your answer in interval notation, like <strong>[-3, 5)</strong> or <strong>(-\u221e, 4]</strong>.';
+               'Write your answer in interval notation, like <strong>[-3, 5]</strong> or <strong>(-\u221e, 4]</strong>.';
     } else if (currentMode === 'read-graph') {
         if (currentProblem.isEval) {
             return '<strong>Hint:</strong><br>Find x = ' + currentProblem.askX + ' on the x-axis, trace straight up or down to the graph, then read the y-value at that point.';
@@ -2081,16 +2157,44 @@ function checkIntervalField(which) {
     var raw = document.getElementById(which + '-input').value;
     if (!raw.trim()) { setFieldFeedback(which, 'Please enter the ' + which + '.', 'incorrect'); return; }
     var parsed = parseAnswer(raw);
-    if (!parsed) { setFieldFeedback(which, 'Please use interval notation, e.g., [2, \u221e) or (-3, 5].', 'incorrect'); return; }
+    if (!parsed) {
+        if (isReversedOrder(raw)) {
+            setFieldFeedback(which,
+                'Check the order - an interval always runs left to right along the number line, so the smaller quantity goes on the left. Swap the two and check again.',
+                'nudge');
+            return;
+        }
+        setFieldFeedback(which, 'Please use proper interval notation, e.g., [2, \u221e) or (-3, 5].', 'incorrect');
+        return;
+    }
 
     var target = getFieldTargetBounds(which);
     var ok = boundsEqual(parsed, target);
+
+    /* Notation coaching. In interval notation the bracket IS part of the
+       answer, so a wrong one cannot be accepted - but the student who writes
+       [1, inf] has understood the domain perfectly and slipped on a
+       convention. That is a different mistake from not knowing the answer, so
+       it costs nothing: no attempt is spent, the streak survives, the field
+       stays open, and they are told exactly which character to change.
+       Only fires when everything ELSE is already right, so it can never
+       become a free retry on a genuinely wrong answer. */
+    if (ok && hasWrongBracketNearInfinity(raw)) {
+        setFieldFeedback(which,
+            'So close - just the bracket. Infinity is never actually reached, so it always takes a parenthesis, never a square bracket. Change that one character and check again.',
+            'nudge');
+        return;
+    }
+    if (!ok && valuesMatchButBracketWrong(parsed, target)) {
+        setFieldFeedback(which,
+            'So close - your numbers are exactly right. A filled dot means that endpoint IS included, so that side needs a square bracket [ ] rather than a parenthesis. Change it and check again.',
+            'nudge');
+        return;
+    }
+
     if (ok) {
         setFieldResolved(which);
-        var note = hasWrongBracketNearInfinity(raw)
-            ? ' <span style="color:#3b3568;font-weight:600;">(Small note: infinity is never actually reached, so always use a parenthesis next to \u221e, not a bracket.)</span>'
-            : '';
-        setFieldFeedback(which, 'Correct! ' + toIntervalStr(target) + note +
+        setFieldFeedback(which, 'Correct! ' + toIntervalStr(target) +
             (missRecorded ? ' <span style="color:#3b3568;font-weight:600;">(The answer was shown, so this one is not counted.)</span>' : ''), 'correct');
         disableIntervalField(which);
         if (!missRecorded) {
@@ -2100,17 +2204,14 @@ function checkIntervalField(which) {
         }
         maybeAdvanceAfterBothFieldsResolved();
     } else {
-        var bracketHint = valuesMatchButBracketWrong(parsed, target);
+        /* A bracket-only slip never reaches here - it is caught above and
+           coached for free. Anything that gets this far has wrong numbers. */
         decrementFieldChances(which);
         if (getChancesLeft(which) > 0) {
-            var msg = bracketHint
-                ? 'Your number is right \u2014 check whether that endpoint should use [ ] (included) or ( ) (not included).'
-                : 'Not quite \u2014 try again!';
-            setFieldFeedback(which, msg, 'incorrect');
+            setFieldFeedback(which, 'Not quite \u2014 try again!', 'incorrect');
         } else {
             setFieldResolved(which);
-            var revealMsg = (bracketHint ? 'So close \u2014 just the bracket type was off. ' : '') + label + ': ' + toIntervalStr(target);
-            setFieldFeedback(which, revealMsg, 'incorrect');
+            setFieldFeedback(which, label + ': ' + toIntervalStr(target), 'incorrect');
             disableIntervalField(which);
             streak = 0;
             if (!missRecorded) recordStat('domain-range', currentProblem.subtype, false);
