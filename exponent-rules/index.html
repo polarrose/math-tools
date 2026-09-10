@@ -129,7 +129,11 @@
         letter-spacing: 0.5px;
         line-height: 1.9;
     }
-    .problem sup { font-size: 0.62em; }
+    /* The browser default for <sup> is a modest lift that reads as "slightly
+       raised" rather than "this is an exponent". Setting an explicit length
+       raises the box's baseline a fixed fraction of the base's font size, so
+       the exponent sits clear of the x-height at every problem size. */
+    .problem sup { font-size: 0.60em; vertical-align: 0.95em; }
     .exp-slot { display: inline-block; margin: 0 1px; }
     /* Structural stacked fraction (design system). One component for every
        fraction in the game -- the division and negative-exponent problems that
@@ -163,6 +167,12 @@
     .frac.frac-exp {
         margin: 0 1px;
         line-height: 1.15;
+        /* MUST override .frac's vertical-align: middle. Centred on the base, a
+           stacked fraction beside a number is how a MIXED NUMBER is set, so
+           "81" next to a centred one-half reads as eighty-one and a half
+           instead of 81 to the one-half power. Lifting it clear of the base's
+           x-height is what makes it read as an exponent. */
+        vertical-align: 1.05em;
     }
     .frac.frac-exp .frac-num, .frac.frac-exp .frac-den { padding: 0 4px; }
     .frac.frac-exp .frac-bar { height: 2px; margin: 1px 0; }
@@ -230,7 +240,12 @@
         border-color: #10b981;
         box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18);
     }
-    .exp-input { width: 40px; font-size: 14px; padding: 4px 2px; vertical-align: super; }
+    /* vertical-align: super lifts by the font's own superscript offset, which is
+       calculated for a glyph, not for a bordered 30px-tall input. The box hung
+       low enough to read as sitting ON the baseline rather than above it, so a
+       student saw "x [box]" instead of "x to the [box]". An explicit length
+       lifts the whole control clear of the base. */
+    .exp-input { width: 40px; font-size: 14px; padding: 4px 2px; vertical-align: 1.05em; }
     .frac-input { width: 64px; }
     .sign-btn {
         background: #e6e9f6;
@@ -613,14 +628,19 @@ function blankInline(id) {
     return '<input type="text" inputmode="numeric" autocomplete="off" autocorrect="off" spellcheck="false" class="blank-input" id="' + id + '" onkeypress="if(event.key===\'Enter\')checkAnswer()">';
 }
 function blankSignedInline(id) {
-    return '<input type="text" inputmode="text" autocomplete="off" autocorrect="off" spellcheck="false" class="blank-input" id="' + id + '" onkeypress="if(event.key===\'Enter\')checkAnswer()">'
+    /* F-1: numeric, not text. This box is graded by parseStrictInt (digits and
+       an optional sign, nothing else), so the letter keyboard is wrong for it.
+       The on-screen +/- key exists precisely because a numeric pad has no
+       minus, so the number pad is what should come up. */
+    return '<input type="text" inputmode="numeric" autocomplete="off" autocorrect="off" spellcheck="false" class="blank-input" id="' + id + '" onkeypress="if(event.key===\'Enter\')checkAnswer()">'
          + '<button type="button" class="sign-btn" aria-label="Toggle negative sign for this answer" onclick="toggleSignFor(\'' + id + '\')">&plusmn;</button>';
 }
 function expSlot(id) {
     return '<span class="exp-slot"><input type="text" inputmode="numeric" autocomplete="off" autocorrect="off" spellcheck="false" class="blank-input exp-input" id="' + id + '" onkeypress="if(event.key===\'Enter\')checkAnswer()"></span>';
 }
 function expSlotSigned(id) {
-    return '<span class="exp-slot"><input type="text" inputmode="text" autocomplete="off" autocorrect="off" spellcheck="false" class="blank-input exp-input" id="' + id + '" onkeypress="if(event.key===\'Enter\')checkAnswer()"></span>'
+    /* F-1: numeric, not text - same reasoning as blankSignedInline above. */
+    return '<span class="exp-slot"><input type="text" inputmode="numeric" autocomplete="off" autocorrect="off" spellcheck="false" class="blank-input exp-input" id="' + id + '" onkeypress="if(event.key===\'Enter\')checkAnswer()"></span>'
          + '<button type="button" class="sign-btn" aria-label="Toggle negative sign for this answer" onclick="toggleSignFor(\'' + id + '\')">&plusmn;</button>';
 }
 function blankFrac(id) {
