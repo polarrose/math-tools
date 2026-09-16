@@ -680,9 +680,22 @@ input.box-error, input.coef-input.box-error {
     * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
     .victory { animation: none !important; }
 }
+/* ===== Polar Rose Studio insignia (design system section 1) ===== */
+.insignia { display: block; margin: 20px auto 4px; width: 90px; opacity: 0.9; }
+.insignia-caption {
+    text-align: center;
+    font-size: 6.5px;
+    letter-spacing: 1.2px;
+    /* #6a74a8 is 4.49:1 on white and fails AA; #5d6798 is 5.12:1. */
+    color: #5d6798;
+    opacity: 0.9;
+    margin-top: 2px;
+}
+
 @media (max-width: 480px) {
     .card { padding: 22px 12px 18px; }
     h1 { font-size: 20px; }
+    .insignia { width: 62px; }
     .equation { font-size: 17px; padding: 10px 8px; }
     .method-btn { padding: 8px 12px; font-size: 12px; }
     .level-btn { padding: 7px 10px; font-size: 11px; }
@@ -741,9 +754,38 @@ input.box-error, input.coef-input.box-error {
         <button type="button" class="switch" id="confetti-switch" aria-pressed="true"
                 aria-label="Confetti celebrations" onclick="toggleConfettiSetting()"><span class="switch-knob" aria-hidden="true"></span></button>
     </div>
+
+    <!-- Polar Rose Studio insignia. Decorative: aria-hidden and focusable="false"
+         so it is drawn for the eye and never announced or tabbed to. -->
+    <svg class="insignia" viewBox="-28 -26 56 64" aria-hidden="true" focusable="false" role="presentation">
+        <defs>
+            <linearGradient id="pr-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1e3a5f"/>
+                <stop offset="100%" stop-color="#0d9488"/>
+            </linearGradient>
+        </defs>
+        <path id="pr-path" fill="none" stroke="url(#pr-grad)" stroke-width="1.7"/>
+    </svg>
+    <div class="insignia-caption" aria-hidden="true">POLAR ROSE STUDIO</div>
 </main>
 
 <script>
+/* =====================================================================
+   Polar rose insignia:  r = 2cos(3t/2), t from 0 to 4pi, 240 steps,
+   scaled by 12 to suit the viewBox. Drawn once at load.
+   ===================================================================== */
+(function () {
+    var d = '', steps = 240;
+    for (var i = 0; i <= steps; i++) {
+        var t = (i / steps) * 4 * Math.PI;
+        var r = 2 * Math.cos(1.5 * t);
+        d += (i === 0 ? 'M ' : 'L ') + (r * Math.cos(t) * 12).toFixed(2)
+            + ' ' + (r * Math.sin(t) * 12).toFixed(2) + ' ';
+    }
+    var el = document.getElementById('pr-path');
+    if (el) el.setAttribute('d', d.trim());
+})();
+
 /* =====================================================================
    Utilities
    ===================================================================== */
