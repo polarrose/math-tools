@@ -99,7 +99,12 @@ h1::after {
     color: #1e2a5e;
     font-weight: bold;
 }
-.coef-input.locked-correct { border-color: #10b981; background: #ecfdf5; color: #047857; } /* a11y: #059669 on #ecfdf5 is 3.58:1 at 18px */
+.coef-input.locked-correct { border-color: #047857; background: #ecfdf5; color: #047857; }
+/* a11y: the locked-correct border was mint #10b981 -- 2.54:1 on the white card
+   and 2.23:1 on the #eef0fb grid panel, under the 3:1 WCAG 1.4.11 minimum for a
+   meaningful UI indicator. #047857 is 5.33:1 and 4.70:1 on those two backdrops
+   and is already the locked state's text colour, so the state reads as one
+   piece. The mint fill behind it is unchanged. */
 .story-box {
     background: #e8f8f0;
     border: 2px solid #8fd9b6;
@@ -116,6 +121,21 @@ h1::after {
     color: #4a5480;
     font-style: italic;
     margin: 2px 0 10px;
+}
+.order-note {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #5b21b6;
+    margin: 0 0 8px;
+}
+.your-equations-label {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 800;
+    color: #2e3d8f;
+    margin: 12px 0 -4px;
+    letter-spacing: 0.3px;
 }
 .input-area {
     display: flex;
@@ -139,15 +159,23 @@ input[type="number"], input[type="text"] {
     color: #1e2a5e;
     background: #ffffff;
 }
-input[type="number"]:focus, input[type="text"]:focus {
+/* Focus indicator (WCAG 1.4.11 / 2.4.11).
+   This used to swap the violet border (#7c3aed, 5.16:1 against the white card)
+   for mint #10b981, which is only 2.54:1 -- so taking focus actually LOWERED
+   the contrast of the control's edge, and the 0.18-alpha ring was too faint to
+   make up for it. Deep teal #0b7a70 is the substitute this suite already uses
+   where mint fails: 5.12:1 on white and 4.52:1 on the #eef0fb panels the
+   guided grid sits on. The ring is opaque enough to be seen on both. */
+input[type="number"]:focus, input[type="text"]:focus,
+.coef-input:focus, .eq-grid .box-input:focus {
     outline: none;
-    border-color: #10b981;
-    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18);
+    border-color: #0b7a70;
+    box-shadow: 0 0 0 4px rgba(11, 122, 112, 0.45);
 }
 input.locked-correct {
-    border-color: #10b981;
+    border-color: #047857; /* a11y: see .coef-input.locked-correct */
     background: #ecfdf5;
-    color: #047857; /* a11y: matches .coef-input.locked-correct */
+    color: #047857;
 }
 button {
     padding: 12px 22px;
@@ -156,9 +184,23 @@ button {
     border: none;
     border-radius: 12px;
     cursor: pointer;
-    transition: all 0.2s;
+    /* Never `transition: all` on a focusable control -- it animates the focus
+       outline too, which makes the ring fade in late or not paint at all. */
+    transition: background 0.2s, filter 0.2s, transform 0.2s, opacity 0.2s;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
+}
+/* An explicit, palette-safe focus ring for every button. #0b7a70 clears 3:1
+   against the white card, the mint chips and the navy buttons alike, and the
+   white inner line keeps it visible where the button itself is dark. */
+button:focus-visible {
+    outline: 3px solid #0b7a70;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.9);
+}
+.switch:focus-visible {
+    outline: 3px solid #0b7a70;
+    outline-offset: 3px;
 }
 button:active { transform: scale(0.95); }
 button:disabled { opacity: 0.5; cursor: default; }
@@ -183,33 +225,61 @@ button:disabled { opacity: 0.5; cursor: default; }
     margin-bottom: 12px;
     flex-wrap: wrap;
 }
+/* All three category buttons carry the same teal gradient; the selected one is
+   marked by a perimeter, not by a different fill.
+   ONE gradient now runs through every control a student presses to move around
+   the game -- the three categories, the selected level, and the Check buttons:
+   navy #2e3d8f into teal #0b7a70. White clears 9.63:1 at the navy end and
+   5.21:1 at the teal end, so the label holds up across the whole ramp.
+   The selected button is marked by a soft mint rim on its own edge rather than
+   by a bright halo or a dark outline. A transparent rim of the same
+   width on the unselected buttons keeps all three exactly the same size, so
+   nothing shifts when the selection moves. */
 .method-btn {
-    background: #e6e9f6;
-    color: #2e3d8f;
+    background: linear-gradient(135deg, #2e3d8f, #0b7a70);
+    color: #ffffff;
+    border: 3px solid transparent;
     border-radius: 999px;
-    padding: 10px 18px;
+    padding: 9px 17px;
     font-size: 14px;
     font-weight: 800;
+    box-shadow: 0 4px 10px rgba(10, 107, 97, 0.28);
 }
-.method-btn:hover { background: #d9def2; }
+.method-btn:hover { filter: brightness(1.08); }
+/* Deliberately quiet. The spreading halo is gone; what marks the selection is
+   a soft mint rim on the button's own edge, with only a whisper of a ring
+   outside it. #9ad9c4 is muted enough not to glare but still clears 3.25:1
+   against the teal end of the fill and 6.01:1 against the navy end, so the
+   indicator carries its own contrast rather than leaning on the shadow. */
 .method-btn.active {
-    background: linear-gradient(135deg, #2e3d8f, #4b3bbd) !important;
-    color: white !important;
-    box-shadow: 0 6px 14px rgba(46, 61, 143, 0.35);
+    border-color: #9ad9c4;
+    box-shadow:
+        0 0 0 2px rgba(154, 217, 196, 0.30),
+        0 4px 12px rgba(20, 27, 61, 0.25);
 }
+/* Levels follow the categories exactly: a quiet neutral pill when not chosen,
+   the same teal fill and the same green glow when chosen. They used to be a
+   THIRD green (#047857) alongside the teal buttons and the mint status chips,
+   which is most of why the header read as busy. */
 .level-btn {
-    background: #e6e9f6;
-    color: #4a5480;
+    background: #eef0fb;
+    color: #2e3d8f;
+    border: 3px solid transparent;
     border-radius: 999px;
-    padding: 9px 14px;
+    padding: 6px 13px;
     font-size: 12.5px;
 }
-.level-btn:hover { background: #d9def2; }
+.level-btn:hover { background: #dfe4f7; }
+/* Same treatment as a selected category, at a smaller radius. Two glows of
+   equal weight stacked one above the other competed with each other; the level
+   row is secondary, so its halo is tighter and dimmer. Neither pulses -- a
+   permanently animating element in the header is exactly the kind of noise
+   this pass is removing. */
 .level-btn.active {
-    /* a11y: white on #10b981 is 2.54:1; #047857 is 5.48:1 (mint ring kept) */
-    background: #047857 !important;
-    color: white !important;
-    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.25), 0 6px 14px rgba(16, 185, 129, 0.35);
+    background: linear-gradient(135deg, #2e3d8f, #0b7a70);
+    color: #ffffff;
+    border-color: #9ad9c4;
+    box-shadow: 0 2px 8px rgba(20, 27, 61, 0.22);
 }
 .feedback {
     text-align: center;
@@ -251,11 +321,14 @@ button:disabled { opacity: 0.5; cursor: default; }
     margin-bottom: 14px;
     flex-wrap: wrap;
 }
+/* Neutral, not mint. Mint now means one thing only in this game -- an answer
+   confirmed correct -- so a permanently-green "Problem: 1" chip was spending
+   the success colour on a counter. #2e3d8f on #eef0fb is 8.10:1. */
 .info-item {
     font-size: 11.5px;
     font-weight: 800;
-    background: #d4f5e6;
-    color: #047857 !important;
+    background: #eef0fb;
+    color: #2e3d8f !important;
     padding: 6px 12px;
     border-radius: 999px;
 }
@@ -277,14 +350,24 @@ button:disabled { opacity: 0.5; cursor: default; }
 .hint-btn:hover, .answer-btn:hover, .skip-btn:hover, .solution-btn:hover, .stats-btn:hover {
     background: #e9defc;
 }
+/* The muted indigo #3b3568 measured 10:1 but read as washed out next to the
+   ink navy used everywhere else. Same box, the suite's own text colour, and a
+   size that matches the rest of the card. */
 .hint-box, .answer-box, .solution-box {
     background: #f7f5ff;
-    border: 2px solid #d8ccf7;
+    border: 2px solid #c3b2f0;
     border-radius: 14px;
     padding: 15px;
     margin: 14px 0;
-    color: #3b3568;
-    font-size: 14px;
+    color: #1e2a5e;
+    font-size: 15px;
+    line-height: 1.5;
+}
+.reveal-val {
+    font-size: 19px;
+    font-weight: 800;
+    color: #2e3d8f;
+    font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
 }
 .progress-cups {
     display: flex;
@@ -306,12 +389,12 @@ button:disabled { opacity: 0.5; cursor: default; }
     margin: 0 auto;
 }
 .cup-fill { position: absolute; bottom: 0; left: 0; right: 0; transition: height 0.5s ease; }
-/* Design item 18: the "done, but with errors" cup was orange. The three
-   states now run royal navy (still filling) -> violet (done with errors) ->
-   mint (done clean), so they stay three distinct hues with no orange, and
-   the "(n X)" count under the cup still labels the error case in words. */
+/* Two states only, since the cup now reports progress rather than accuracy:
+   royal navy while it is filling, mint once the pattern is complete. The old
+   violet "done, but with errors" fill is retired -- the .half rule is kept so
+   any saved markup referring to it still renders sensibly. */
 .cup-fill.full { background: linear-gradient(to top, #059669, #34d399); }
-.cup-fill.half { background: linear-gradient(to top, #7c3aed, #a78bfa); }
+.cup-fill.half { background: linear-gradient(to top, #059669, #34d399); }
 .cup-fill.partial { background: linear-gradient(to top, #2e3d8f, #8b96d8); }
 .cup-stats { font-size: 9px; color: #5d6798; margin-top: 2px; } /* a11y: #6a74a8 is 4.49:1 on white */
 .scaffold-container {
@@ -321,7 +404,7 @@ button:disabled { opacity: 0.5; cursor: default; }
     padding: 16px 14px;
     margin: 14px 0;
 }
-.step-title { font-size: 15px; font-weight: 800; color: #047857; margin-bottom: 6px; }
+.step-title { font-size: 15px; font-weight: 800; color: #2e3d8f; margin-bottom: 6px; }
 .stack-add {
     font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
     font-size: 17px;
@@ -346,16 +429,20 @@ button:disabled { opacity: 0.5; cursor: default; }
     border-top: 2px solid #2e3d8f;
     margin: 4px 0 2px;
 }
-.step-question { font-size: 14.5px; color: #3b3568; margin: 8px 0; }
+.step-question { font-size: 15.5px; color: #1e2a5e; margin: 8px 0; line-height: 1.5; }
 .completed-steps {
     background: #ecfdf5;
     border: 2px solid #34d399;
     border-radius: 14px;
-    padding: 10px 12px;
+    padding: 12px 14px;
     margin: 12px 0;
-    font-size: 13px;
+    /* The running record of what has been established so far is the thing a
+       student re-reads most while working the next step, so it is set at
+       reading size rather than as fine print. */
+    font-size: 15.5px;
+    color: #14532d;
 }
-.completed-steps .row { padding: 4px 0; border-top: 1px dashed rgba(0,0,0,0.12); }
+.completed-steps .row { padding: 6px 0; border-top: 1px dashed rgba(0,0,0,0.18); line-height: 1.45; }
 .completed-steps .row:first-child { border-top: none; }
 .step-hint {
     background: #f3eefe;
@@ -363,8 +450,8 @@ button:disabled { opacity: 0.5; cursor: default; }
     border-radius: 0 10px 10px 0;
     padding: 10px 14px;
     margin: 10px 0;
-    font-size: 13.5px;
-    color: #5b21b6;
+    font-size: 15px;
+    color: #4c1d95;
 }
 .stats-panel { font-size: 14px; color: #1e2a5e; }
 .stat-row { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
@@ -390,6 +477,125 @@ button:disabled { opacity: 0.5; cursor: default; }
     font-size: 13px;
     color: #2e3d8f;
 }
+/* ===== Per-variable check controls (independent x / y checking) ===== */
+/* Navy into teal: the same family as the category pills, one step deeper, so a
+   Check reads as the primary action of the panel it sits in.
+   White on #2e3d8f is 9.63:1 and on #0b7a70 is 5.21:1. */
+.check-one-btn {
+    background: linear-gradient(135deg, #2e3d8f, #0b7a70);
+    color: #ffffff;
+    padding: 7px 20px;
+    font-size: 13px;
+    border-radius: 10px;
+    margin-top: 2px;
+    box-shadow: 0 4px 12px rgba(46, 61, 143, 0.3);
+}
+.check-one-btn:hover { filter: brightness(1.1); }
+.var-status {
+    font-size: 12px;
+    font-weight: 800;
+    min-height: 16px;
+    text-align: center;
+    color: #4a5480;
+}
+input[readonly] { cursor: default; }
+.var-status.ok { color: #047857; }   /* 5.48:1 on white */
+.var-status.no { color: #5b21b6; }   /* 8.79:1 on white */
+
+/* A box the student filled in incorrectly. Red and orange are both out of the
+   palette, so a wrong box is marked in deep violet - border, tint and a short
+   shake - and never by colour alone: every check also writes a count and the
+   offending term into the assertive feedback line, and sets aria-invalid. */
+/* Option D2: the violet border stays as the outer edge, a thin rose line is
+   drawn just inside it, and the number itself stays purple. Rose #be185d is
+   6.04:1 against the white field, so the inner perimeter is a real boundary
+   rather than a tint; the digits at #5b21b6 are 8.98:1. No red, no orange. */
+input.box-error, input.coef-input.box-error {
+    border-color: #7c3aed !important;
+    background: #ffffff !important;
+    color: #5b21b6 !important;
+    box-shadow: inset 0 0 0 3px #be185d;
+    animation: box-shake 0.3s ease-in-out;
+}
+@keyframes box-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+
+/* ===== Guided step: rewrite-the-equation and sum-the-columns grids ===== */
+.eq-grid {
+    font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    font-size: 17px;
+    font-weight: bold;
+    color: #1e2a5e;
+    background: #eef0fb;
+    border: 2px solid #c7cdf0;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin: 12px auto;
+    display: grid;
+    grid-template-columns: auto auto auto auto auto auto;
+    gap: 6px 6px;
+    align-items: center;
+    width: fit-content;
+    max-width: 100%;
+}
+/* display:contents lets a row be one element for assistive tech while its six
+   cells stay direct participants in the parent grid's column tracks. */
+.eq-grid .grid-row { display: contents; }
+.eq-grid .op { text-align: left; min-width: 14px; }
+/* The joining sign between the x-column and the y-column. Left-aligned it sat
+   hard against the right-aligned x-terms and a long way from the y-terms; it
+   is centred in a column of its own so the sign reads as being BETWEEN the two
+   terms it joins. */
+.eq-grid .op-mid { text-align: center; min-width: 30px; padding: 0 8px; }
+.eq-grid .term { text-align: right; white-space: nowrap; }
+.eq-grid .eqs { text-align: center; }
+.eq-grid .stack-line {
+    grid-column: 1 / -1;
+    border-top: 2px solid #2e3d8f;
+    margin: 4px 0 2px;
+}
+.eq-grid .box-input {
+    width: 56px;
+    font-size: 16px;
+    padding: 6px 2px;
+    text-align: center;
+    border: 3px solid #7c3aed;
+    border-radius: 9px;
+    color: #1e2a5e;
+    font-weight: bold;
+    background: #ffffff;
+}
+.eq-grid .box-input.locked-correct {
+    border-color: #047857; /* a11y: see .coef-input.locked-correct */
+    background: #ecfdf5;
+    color: #047857;
+}
+.eq-grid .var-tag { font-size: 16px; padding-left: 2px; }
+/* Teal is the navigation colour; inside the working area the banner uses the
+   same navy-on-periwinkle as every other piece of instruction, so it reads as
+   part of the problem rather than as another button. */
+.goal-banner {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 800;
+    color: #1e2a5e;
+    background: #eef0fb;
+    border: 2px solid #8b96d8;
+    border-radius: 999px;
+    padding: 7px 16px;
+    margin: 12px auto 4px;
+    width: fit-content;
+    max-width: 100%;
+}
+@media (max-width: 480px) {
+    .eq-grid { font-size: 15px; padding: 10px 8px; gap: 5px 3px; }
+    .eq-grid .box-input { width: 46px; font-size: 14px; }
+    .eq-grid .op-mid { min-width: 20px; padding: 0 4px; }
+}
+
 /* ===== Confetti ===== */
 .confetti { position: fixed; opacity: 0; pointer-events: none; z-index: 9999; }
 @keyframes confetti-fall {
@@ -481,6 +687,13 @@ button:disabled { opacity: 0.5; cursor: default; }
     .method-btn { padding: 8px 12px; font-size: 12px; }
     .level-btn { padding: 7px 10px; font-size: 11px; }
     input[type="number"], input[type="text"] { width: 84px; font-size: 21px; }
+    /* IRA, 2026-09-16: on a phone these two were 26px and 29px tall - legal
+       (the WCAG 2.2 floor is 24) but fiddly for a thumb, and the sign toggle
+       sits right beside the answer box where a mis-tap is easy. Raised to the
+       44px target the rest of the suite uses. Phone only: nothing moves on a
+       laptop, where a pointer is precise and the row is already comfortable. */
+    .sign-btn { min-height: 44px; min-width: 48px; padding: 5px 16px; }
+    .check-one-btn { min-height: 44px; padding: 7px 22px; font-size: 14px; }
 }
 </style>
 </head>
@@ -542,6 +755,8 @@ function lcm(a, b) { a = Math.abs(a); b = Math.abs(b); return (a * b) / gcd(a, b
 function cleanNum(n) { return Math.round(n * 1e6) / 1e6; }
 function signed(n) { return (n >= 0 ? '+ ' : '- ') + Math.abs(n); }
 function spellMult(n) { return n < 0 ? 'negative ' + Math.abs(n) : String(n); }
+/* "+1" / "-1" -- used where the point being made is the SIGN of a coefficient. */
+function withSign(n) { return (n >= 0 ? '+' : '') + n; }
 var ORDINAL_WORDS = { 1: 'first', 2: 'second' };
 
 /* Strict numeric parsing. parseFloat() alone accepted "3abc", "5x", "1e3",
@@ -563,6 +778,17 @@ function parseNum(str) {
     return parseFloat(str);
 }
 function isClose(a, b) { return Math.abs(a - b) < 0.001; }
+/* The single most common near-miss: the right magnitude with the wrong sign.
+   Worth naming, because "try again" sends a student back to redo arithmetic
+   they already got right. */
+function isSignSlip(val, target) {
+    return !isNaN(val) && target !== 0 && isClose(val, -target);
+}
+var SIGN_NUDGE = ' Careful \u2014 check your signs.';
+/* Option F2. Guided mode hides Show Answer and Show Solution, so the pointer
+   names only the help that is actually on screen. */
+var HELP_POINTER = ' \u2014 or use the buttons below for a hint or the solution.';
+var HELP_POINTER_GUIDED = ' \u2014 or use Show Hint below.';
 
 /* Format a x + b y = d as a display string. Assumes a, b nonzero. */
 function fmtEq(a, b, vX, vY, d) {
@@ -600,6 +826,21 @@ function fmtCoefVar(coef, varName) {
     if (coef === 1) return varName;
     if (coef === -1) return '-' + varName;
     return coef + varName;
+}
+/* Strips the markup out of a question and turns the handful of entities the
+   questions use back into characters, so the screen-reader announcement never
+   says "ampersand m dash semicolon". */
+var ENTITY_MAP = {
+    '&mdash;': ',', '&ndash;': '-', '&minus;': 'minus ', '&plusmn;': 'plus or minus ',
+    '&times;': ' times ', '&divide;': ' divided by ', '&nbsp;': ' ',
+    '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'"
+};
+function plainText(html) {
+    var out = String(html).replace(/<[^>]+>/g, ' ');
+    Object.keys(ENTITY_MAP).forEach(function (k) {
+        out = out.split(k).join(ENTITY_MAP[k]);
+    });
+    return out.replace(/\s+/g, ' ').trim();
 }
 function escHtml(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -668,6 +909,24 @@ function otherCoefL1() {
     if (Math.random() < 0.15) return pick([1, -1]);
     return pick([2, 3, 4, 5, 6]) * pick([1, -1]);
 }
+/* Guaranteed "already opposites": the eliminated variable's coefficients are
+   exactly +1 and -1, so no multiplying is possible or needed and the student
+   goes straight to adding. genElim1_ below draws BOTH signs at random, so it
+   lands on this case only about half the time -- which is why the opening
+   problems of a session used to wander between "just add" and "multiply by
+   negative one" instead of teaching one idea first. */
+function genElimOpposites_() {
+    var x = nz(-9, 9), y = nz(-9, 9);
+    var elimVar = Math.random() < 0.5 ? 'x' : 'y';
+    var c1 = pick([1, -1]), c2 = -c1;
+    var other1 = otherCoefL1(), other2 = otherCoefL1();
+    var a1, b1, a2, b2;
+    if (elimVar === 'x') { a1 = c1; b1 = other1; a2 = c2; b2 = other2; }
+    else { a1 = other1; b1 = c1; a2 = other2; b2 = c2; }
+    var d1 = a1 * x + b1 * y, d2 = a2 * x + b2 * y;
+    if (a1 * b2 - a2 * b1 === 0) return null;
+    return { method: 'elim', level: 1, elimVar: elimVar, x: x, y: y, a1: a1, b1: b1, d1: d1, a2: a2, b2: b2, d2: d2 };
+}
 function genElim1_() {
     var x = nz(-9, 9), y = nz(-9, 9);
     var elimVar = Math.random() < 0.5 ? 'x' : 'y';
@@ -701,11 +960,14 @@ function genElim2_() {
     return { method: 'elim', level: 2, elimVar: elimVar, x: x, y: y, a1: a1, b1: b1, d1: d1, a2: a2, b2: b2, d2: d2, mult: f };
 }
 var elimCombinedCount = 0;
+/* Level 1's ramp. The first TWO problems are guaranteed already-opposites so
+   the student meets "the terms cancel, just add" cleanly; from the third on,
+   multiplying one equation enters the mix and then takes over. */
 function genElimCombined_() {
     elimCombinedCount++;
+    if (elimCombinedCount <= 2) return genElimOpposites_();
     var useEasy;
-    if (elimCombinedCount <= 3) useEasy = true;
-    else if (elimCombinedCount <= 6) useEasy = Math.random() < 0.5;
+    if (elimCombinedCount <= 5) useEasy = Math.random() < 0.5;
     else useEasy = Math.random() < 0.35;
     return useEasy ? genElim1_() : genElim2_();
 }
@@ -747,28 +1009,28 @@ function genWithRetry(fn) {
 var SKINS_COUNTVALUE = [
     { name: 'show', xLabel: 'Adult tickets', yLabel: 'Student tickets',
       xRange: [15, 60], yRange: [10, 50], priceXOptions: [12, 15, 18], priceYOptions: [7, 8, 9],
-      story: function (total, val, px, py) { return total + ' people attended the community theater show, bringing in $' + val + ' total. Adult tickets cost $' + px + ' each and student tickets (with a student discount) cost $' + py + ' each.'; },
-      defs: 'x = number of adult tickets sold, y = number of student tickets sold' },
+      story: function (total, val, px, py) { return total + ' people attended the community theater show, bringing in $' + val + ' total. Adult tickets cost $' + px + ' each and student tickets (with a student discount) cost $' + py + ' each. How many of each kind of ticket were sold?'; },
+      defs: 'Let x = the number of adult tickets sold, and y = the number of student tickets sold.' },
     { name: 'concession', xLabel: 'Hot dogs', yLabel: 'Sodas',
       xRange: [10, 40], yRange: [10, 40], priceXOptions: [4, 5], priceYOptions: [2, 3],
-      story: function (total, val, px, py) { return 'A concession stand sold ' + total + ' items (hot dogs and sodas combined) for a total of $' + val + '. Hot dogs cost $' + px + ' each and sodas cost $' + py + ' each.'; },
-      defs: 'x = number of hot dogs sold, y = number of sodas sold' },
+      story: function (total, val, px, py) { return 'A concession stand sold ' + total + ' items (hot dogs and sodas combined) for a total of $' + val + '. Hot dogs cost $' + px + ' each and sodas cost $' + py + ' each. How many of each were sold?'; },
+      defs: 'Let x = the number of hot dogs sold, and y = the number of sodas sold.' },
     { name: 'parking', xLabel: 'Cars', yLabel: 'Motorcycles',
       xRange: [20, 70], yRange: [5, 25], priceXOptions: [10, 12, 15], priceYOptions: [5, 6, 7],
-      story: function (total, val, px, py) { return 'A parking garage had ' + total + ' vehicles park today, collecting $' + val + ' in fees. Cars pay $' + px + ' and motorcycles pay $' + py + '.'; },
-      defs: 'x = number of cars parked, y = number of motorcycles parked' },
+      story: function (total, val, px, py) { return 'A parking garage had ' + total + ' vehicles park today, collecting $' + val + ' in fees. Cars pay $' + px + ' and motorcycles pay $' + py + '. How many cars and how many motorcycles parked?'; },
+      defs: 'Let x = the number of cars parked, and y = the number of motorcycles parked.' },
     { name: 'market', xLabel: 'Pounds of apples', yLabel: 'Pounds of oranges',
       xRange: [8, 40], yRange: [8, 40], priceXOptions: [2, 3], priceYOptions: [3, 4],
-      story: function (total, val, px, py) { return 'A farmers market sold ' + total + ' pounds of apples and oranges combined for $' + val + '. Apples cost $' + px + '/lb and oranges cost $' + py + '/lb.'; },
-      defs: 'x = pounds of apples sold, y = pounds of oranges sold' },
+      story: function (total, val, px, py) { return 'A farmers market sold ' + total + ' pounds of apples and oranges combined for $' + val + '. Apples cost $' + px + '/lb and oranges cost $' + py + '/lb. How many pounds of each were sold?'; },
+      defs: 'Let x = the number of pounds of apples sold, and y = the number of pounds of oranges sold.' },
     { name: 'museum', xLabel: 'Adult admissions', yLabel: 'Senior admissions',
       xRange: [15, 50], yRange: [10, 40], priceXOptions: [14, 16, 18], priceYOptions: [9, 10, 11],
-      story: function (total, val, px, py) { return 'A museum sold ' + total + ' tickets in one day for $' + val + ' total. Adult admission is $' + px + ' and senior admission is $' + py + '.'; },
-      defs: 'x = number of adult admissions, y = number of senior admissions' },
+      story: function (total, val, px, py) { return 'A museum sold ' + total + ' tickets in one day for $' + val + ' total. Adult admission is $' + px + ' and senior admission is $' + py + '. How many of each kind of admission were sold?'; },
+      defs: 'Let x = the number of adult admissions sold, and y = the number of senior admissions sold.' },
     { name: 'raffle', xLabel: 'Single tickets', yLabel: 'Bundles of 5',
       xRange: [20, 80], yRange: [10, 40], priceXOptions: [2, 3], priceYOptions: [8, 10],
-      story: function (total, val, px, py) { return 'A school fundraiser had ' + total + ' raffle purchases (singles and 5-ticket bundles combined), bringing in $' + val + '. A single ticket costs $' + px + ' and a bundle of 5 tickets costs $' + py + '.'; },
-      defs: 'x = number of single tickets sold, y = number of 5-ticket bundles sold' }
+      story: function (total, val, px, py) { return 'A school fundraiser had ' + total + ' raffle purchases (singles and 5-ticket bundles combined), bringing in $' + val + '. A single ticket costs $' + px + ' and a bundle of 5 tickets costs $' + py + '. How many of each were purchased?'; },
+      defs: 'Let x = the number of single tickets sold, and y = the number of 5-ticket bundles sold.' }
 ];
 
 function genAppCountValue_() {
@@ -794,8 +1056,8 @@ function genAppRectangle_() {
     var P = 2 * l + 2 * w;
     var M = l + k * w;
     return { method: 'app', appType: 'rectangle', x: l, y: w,
-        story: "A rectangle's perimeter is " + P + ' inches. Its length plus ' + k + ' times its width is ' + M + ' inches.',
-        defs: 'L = the length, W = the width',
+        story: "A rectangle's perimeter is " + P + ' inches. Its length plus ' + k + ' times its width is ' + M + ' inches. Find the length and the width of the rectangle.',
+        defs: 'Let L = the length of the rectangle in inches, and W = the width of the rectangle in inches.',
         xLabel: 'Length', yLabel: 'Width', varX: 'L', varY: 'W',
         a1: 2, b1: 2, d1: P, a2: 1, b2: k, d2: M };
 }
@@ -809,8 +1071,8 @@ function genAppInvestment_() {
     var interest = Math.round((r1 * x + r2 * y) * 100) / 100;
     var r1pct = Math.round(r1 * 100), r2pct = Math.round(r2 * 100);
     return { method: 'app', appType: 'investment', x: x, y: y,
-        story: 'Sam invested a total of $' + total + ' in two accounts. One account earned ' + r1pct + '% annual interest and the other earned ' + r2pct + '% annual interest. Together the accounts earned $' + interest + ' in interest after one year.',
-        defs: 'x = amount invested at ' + r1pct + '%, y = amount invested at ' + r2pct + '%',
+        story: 'Sam invested a total of $' + total + ' in two accounts. One account earned ' + r1pct + '% annual interest and the other earned ' + r2pct + '% annual interest. Together the accounts earned $' + interest + ' in interest after one year. How much was invested in each account?',
+        defs: 'Let x = the amount invested at ' + r1pct + '%, and y = the amount invested at ' + r2pct + '%.',
         xLabel: 'Invested at ' + r1pct + '%', yLabel: 'Invested at ' + r2pct + '%',
         a1: 1, b1: 1, d1: total, a2: r1, b2: r2, d2: interest };
 }
@@ -827,13 +1089,89 @@ function genAppCoins_() {
     var totalCount = x + y;
     var totalValue = Math.round((c1.value * x + c2.value * y) * 100) / 100;
     return { method: 'app', appType: 'coins', x: x, y: y,
-        story: 'A jar contains ' + totalCount + ' coins, only ' + c1.label.toLowerCase() + ' and ' + c2.label.toLowerCase() + ', worth $' + totalValue.toFixed(2) + ' in total.',
-        defs: 'x = number of ' + c1.label.toLowerCase() + ', y = number of ' + c2.label.toLowerCase(),
+        story: 'A jar contains ' + totalCount + ' coins, only ' + c1.label.toLowerCase() + ' and ' + c2.label.toLowerCase() +
+            ', worth $' + totalValue.toFixed(2) + ' in total. How many ' + c1.label.toLowerCase() + ' and how many ' +
+            c2.label.toLowerCase() + ' are in the jar?',
+        defs: 'Let x = the number of ' + c1.label.toLowerCase() + ', and y = the number of ' + c2.label.toLowerCase() + '.',
         xLabel: c1.label, yLabel: c2.label,
         a1: 1, b1: 1, d1: totalCount, a2: c1.value, b2: c2.value, d2: totalValue };
 }
-var APP_GENERATORS = [genAppCountValue_, genAppCountValue_, genAppRectangle_, genAppRectangle_, genAppInvestment_, genAppCoins_, genAppCoins_];
-function genApp_() { return genWithRetry(pick(APP_GENERATORS)); }
+/* Investment pacing is deliberately left as it was: if Applications gains
+   category buttons, a student will choose investment problems directly and a
+   holdback rule would fight that. Revisit once categories are settled. */
+/* Applications is split into categories so a student can stay on ONE kind of
+   problem until it is comfortable -- the repetition is where the confidence
+   comes from -- and then take Mixed, which is the old behaviour.
+   In Mixed, investment problems stay rare: they are the hardest of the four,
+   and a student who wants them can now simply choose them. */
+var APP_CATEGORIES = [
+    { key: 'rectangle',  label: 'Rectangles',      gen: genAppRectangle_ },
+    { key: 'money',      label: 'Tickets & Sales', gen: genAppCountValue_ },
+    { key: 'coins',      label: 'Coins',           gen: genAppCoins_ },
+    { key: 'investment', label: 'Investment',      gen: genAppInvestment_ },
+    { key: 'mixed',      label: 'Mixed',           gen: null }
+];
+var appCategory = 'rectangle';   /* matches APP_CATEGORIES[0] */
+function appCategoryIndex() {
+    for (var i = 0; i < APP_CATEGORIES.length; i++) if (APP_CATEGORIES[i].key === appCategory) return i;
+    return 0;
+}
+
+/* ---- Mixed: shuffled decks rather than independent random draws ----
+   Drawing each problem independently at 25% a type reliably produces runs, and
+   three investment problems back to back is exactly the discouraging stretch
+   this game is built to avoid. It also produces droughts, where a type simply
+   does not appear for a dozen problems.
+   Instead Mixed deals from a shuffled deck and only reshuffles when the deck
+   runs out, so every deck contains a known mix in an unpredictable order:
+     opening deck   2 rectangle, 2 tickets, 2 coins          (investment absent)
+     every deck after   the same six, plus 1 investment
+   Investment therefore cannot appear before problem 7, and settles at one in
+   seven after that -- often enough to stay familiar, rare enough not to
+   dominate. A student who wants more can simply pick the Investment category. */
+var MIXED_GEN_BY_KEY = {
+    rectangle: genAppRectangle_, money: genAppCountValue_,
+    coins: genAppCoins_, investment: genAppInvestment_
+};
+var mixedQueue = [];
+var mixedDecksDealt = 0;
+var mixedLastDealt = null;
+function shuffleInPlace(a) {
+    for (var i = a.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+}
+function resetMixedQueue() { mixedQueue = []; mixedDecksDealt = 0; mixedLastDealt = null; }
+function refillMixedQueue() {
+    var deck = ['rectangle', 'rectangle', 'money', 'money', 'coins', 'coins'];
+    if (mixedDecksDealt > 0) deck.push('investment');
+    mixedDecksDealt++;
+    shuffleInPlace(deck);
+    /* Within a deck a type appears at most twice, but a deck ENDING on two of a
+       type and the next deck OPENING on the same two gives four in a row. If
+       the fresh deck starts on the type just dealt, swap that card deeper in,
+       which caps any run at two. */
+    if (deck[0] === mixedLastDealt) {
+        for (var i = 1; i < deck.length; i++) {
+            if (deck[i] !== mixedLastDealt) {
+                var t = deck[0]; deck[0] = deck[i]; deck[i] = t;
+                break;
+            }
+        }
+    }
+    mixedQueue = deck;
+}
+function genMixed_() {
+    if (!mixedQueue.length) refillMixedQueue();
+    mixedLastDealt = mixedQueue.shift();
+    return genWithRetry(MIXED_GEN_BY_KEY[mixedLastDealt]);
+}
+function genApp_() {
+    if (appCategory === 'mixed') return genMixed_();
+    return genWithRetry(APP_CATEGORIES[appCategoryIndex()].gen);
+}
 
 /* =====================================================================
    LEVEL 0 GUIDED SCAFFOLD BUILDERS
@@ -956,14 +1294,15 @@ var scaffoldStepIndex = 0;
 var problemToken = 0;
 var streak = 0, problemCount = 0;
 var timer = 0, timerInterval = null, isTimerRunning = false;
-var lifelines = 2;
 var xLocked = false, yLocked = false;
-var missRecorded = false;
 var solutionRevealed = 0;
-/* Cross-cutting ruling A: set by chargeReveal() for the life of the current
-   problem, so a revealed-then-correct answer leaves the streak at 0 instead
-   of restarting it at 1. Kept separate from missRecorded so the existing
-   credit-withholding logic is untouched. */
+/* Cross-cutting ruling A, and since 2026-09-16 the ONLY thing that withholds
+   credit: set by chargeReveal() for the life of the current problem, so a
+   revealed-then-correct answer leaves the streak at 0 instead of restarting it
+   at 1, and is not booked as a success. Wrong tries do not touch it.
+   (Two companion flags, `lifelines` and `missRecorded`, were removed the same
+   day: neither was read by any grading path, and a chances counter nothing
+   spends reads as a rule that does not exist.) */
 var revealUsed = false;
 
 var typeProgress = {
@@ -984,10 +1323,20 @@ var LEVEL_LABELS = {
     elim: ['Level 0 (Guided)', 'Level 1', 'Level 2']
 };
 
+/* IRA, 2026-09-16: a shallow copy with one field overridden. Object.assign was
+   the only ES6 call in an otherwise ES5 file; this keeps the whole suite in one
+   dialect. */
+function copyWith(src, key, value) {
+    var out = {}, k;
+    for (k in src) { if (Object.prototype.hasOwnProperty.call(src, k)) out[k] = src[k]; }
+    out[key] = value;
+    return out;
+}
+
 /* Generic Cramer's-rule solver -- used for the Applications "Show Solution" (works for any system) */
 function buildAppScaffold(p) {
-    var pX = Object.assign({}, p, { elimVar: 'x' });
-    var pY = Object.assign({}, p, { elimVar: 'y' });
+    var pX = copyWith(p, 'elimVar', 'x');
+    var pY = copyWith(p, 'elimVar', 'y');
     var sX = buildElimScaffold(pX);
     var sY = buildElimScaffold(pY);
     return sX.steps.length <= sY.steps.length ? sX : sY;
@@ -1130,8 +1479,14 @@ function buildElimScaffold(p) {
 
     var curC1 = c1, curOc1 = oc1, curD1 = p.d1;
     var curC2 = c2, curOc2 = oc2, curD2 = p.d2;
-    var intro = 'Let\'s eliminate ' + dElim + '. ';
-    var solutionIntro = 'Let\'s eliminate ' + dElim + ', since it appears in both equations. ';
+    /* Reworded: "since it appears in both equations" said nothing useful --
+       every variable appears in both equations. When no multiplying is needed
+       the line now says WHY, which is the fact the student is meant to notice. */
+    var noMultiply = (mult1 === 1 && mult2 === 1);
+    var opposites = 'The ' + dElim + '-coefficients are already opposites (' +
+        withSign(c1) + ' and ' + withSign(c2) + '), so we do not need to multiply either equation by anything. We just add them. ';
+    var intro = 'Let\'s eliminate ' + dElim + '. ' + (noMultiply ? opposites : '');
+    var solutionIntro = 'Let\'s eliminate ' + dElim + '. ' + (noMultiply ? opposites : '');
 
     if (mult1 !== 1) {
         var newOc1 = cleanNum(oc1 * mult1), newD1 = cleanNum(p.d1 * mult1), newC1 = cleanNum(c1 * mult1);
@@ -1167,11 +1522,14 @@ function buildElimScaffold(p) {
     var stackedHtml = buildStackAddHtml(abFinal1.a, abFinal1.b, curD1, abFinal2.a, abFinal2.b, curD2, dvX, dvY);
     var sumOtherCoef = cleanNum(curOc1 + curOc2);
     var sumD = cleanNum(curD1 + curD2);
+    var addLead = noMultiply
+        ? 'Add the two equations'
+        : 'The ' + dElim + '-coefficients (' + curC1 + ' and ' + curC2 + ') are now opposites, so add the two equations';
     steps.push({
         label: 'Add the two equations',
-        solutionLabel: solutionIntro + 'The ' + dElim + '-coefficients (' + curC1 + ' and ' + curC2 + ') are now opposites, so add the two equations',
+        solutionLabel: solutionIntro + addLead,
         solutionDetail: stackedHtml,
-        question: intro + 'The ' + dElim + '-coefficients (' + curC1 + ' and ' + curC2 + ') are now opposites, so add the two equations, one under the other:' + stackedHtml + 'The ' + dElim + '-terms cancel. What is the coefficient of ' + dOther + ' in the sum?',
+        question: intro + addLead + ', one under the other:' + stackedHtml + 'The ' + dElim + '-terms cancel. What is the coefficient of ' + dOther + ' in the sum?',
         correctAnswer: sumOtherCoef,
         hint: '(' + curOc1 + ') + (' + curOc2 + ') = ' + sumOtherCoef,
         resultEquation: fmtCoefVar(sumOtherCoef, dOther) + ' = ' + sumD
@@ -1195,12 +1553,233 @@ function buildElimScaffold(p) {
 }
 
 /* =====================================================================
+   LEVEL 0 GUIDED SCAFFOLD (elimination)
+
+   Rebuilt so the student makes the decisions a person actually makes when
+   eliminating, in the order they make them:
+
+     1. Which multiplier turns the second equation's coefficients into the
+        opposite of the first's?          (they choose the number)
+     2. Write the multiplied equation(s). (they fill every coefficient)
+     3. Add the columns.                  (they give the x sum, the y sum and
+                                           the right-hand sum -- entering 0 for
+                                           the column that cancels)
+     4. Divide to get the first variable.
+     5. Substitute back for the second.
+
+   The old version asked only for "the new coefficient of y" at each stage,
+   which skipped the decision entirely and never showed the two equations
+   stacked with a line under them.
+
+   Three shapes, driven by how the coefficients relate:
+     A  already opposites  -> no multiplying, straight to the sum
+     B  one divides the other -> multiply the SECOND equation only
+     C  neither divides the other -> multiply both, first multiplier given
+   In shape B the rows are swapped when necessary so the equation needing the
+   multiplier is always the second one the student sees.
+   ===================================================================== */
+function buildGuidedSteps(p) {
+    var dvX = 'x', dvY = 'y';
+    var elimVar = p.elimVar, otherVar = elimVar === 'x' ? 'y' : 'x';
+    var r1 = { a: p.a1, b: p.b1, d: p.d1 };
+    var r2 = { a: p.a2, b: p.b2, d: p.d2 };
+    function cOf(r) { return elimVar === 'x' ? r.a : r.b; }
+
+    var c1 = cOf(r1), c2 = cOf(r2);
+    var m1 = 1, m2 = 1;
+    if (c1 % c2 === 0) { m2 = -c1 / c2; }
+    else if (c2 % c1 === 0) { m1 = -c2 / c1; }
+    else { var L = lcm(c1, c2); m1 = L / Math.abs(c1); m2 = -(c1 * m1) / c2; }
+
+    /* Shape B with the multiplier on the FIRST row: swap the rows so the
+       student is always asked about "the second equation". */
+    if (m1 !== 1 && m2 === 1) {
+        var tr = r1; r1 = r2; r2 = tr;
+        c1 = cOf(r1); c2 = cOf(r2);
+        m1 = 1; m2 = -c1 / c2;
+    }
+
+    var s1 = { a: cleanNum(r1.a * m1), b: cleanNum(r1.b * m1), d: cleanNum(r1.d * m1) };
+    var s2 = { a: cleanNum(r2.a * m2), b: cleanNum(r2.b * m2), d: cleanNum(r2.d * m2) };
+    var sumA = cleanNum(s1.a + s2.a), sumB = cleanNum(s1.b + s2.b), sumD = cleanNum(s1.d + s2.d);
+    var otherCoefSum = otherVar === 'x' ? sumA : sumB;
+    var otherVal = otherVar === 'x' ? p.x : p.y;
+    var elimVal = elimVar === 'x' ? p.x : p.y;
+
+    var eq1Str = fmtEq(r1.a, r1.b, dvX, dvY, r1.d);
+    var eq2Str = fmtEq(r2.a, r2.b, dvX, dvY, r2.d);
+    var steps = [];
+    var shape = (m1 === 1 && m2 === 1) ? 'A' : (m1 === 1 ? 'B' : 'C');
+
+    if (shape === 'A') {
+        steps.push({
+            kind: 'note',
+            label: 'Eliminate ' + elimVar,
+            question: 'Let\'s get rid of the ' + elimVar + ' variable. The coefficients of the ' + elimVar + '-terms are ' +
+                withSign(c1) + ' and ' + withSign(c2) +
+                ' &mdash; already opposites, so neither equation has to be multiplied by anything. We can add them exactly as they are.',
+            resultEquation: 'Get rid of ' + elimVar + ': the coefficients ' + withSign(c1) + ' and ' + withSign(c2) + ' are already opposites'
+        });
+    } else if (shape === 'B') {
+        steps.push({
+            kind: 'number',
+            label: 'Get rid of ' + elimVar,
+            question: 'Let\'s get rid of the ' + elimVar + ' variable. The ' + elimVar + '-coefficient is ' + c1 +
+                ' in the first equation and ' + c2 + ' in the second. What should we multiply the <b>second equation</b> by, in order for the coefficients of the ' +
+                elimVar + '-terms to be opposites?',
+            correctAnswer: m2,
+            hint: c2 + ' \u00d7 (' + m2 + ') = ' + cleanNum(c2 * m2) + ', which is the opposite of ' + c1 + '.',
+            resultEquation: 'To get rid of ' + elimVar + ': multiply the second equation by ' + m2
+        });
+        steps.push({
+            kind: 'grid',
+            label: 'Rewrite the second equation',
+            question: 'Now rewrite the second equation with every term multiplied by ' + m2 +
+                '. The first equation is unchanged.',
+            hint: 'Multiply every term of the second equation by ' + m2 +
+                ' &mdash; the ' + dvX + '-term, the ' + dvY + '-term and the number on the right.',
+            rows: [
+                { type: 'static', op: '', a: r1.a, b: r1.b, d: r1.d },
+                { type: 'input', op: '', key: 'r2', a: s2.a, b: s2.b, d: s2.d,
+                  rowName: 'the second equation after multiplying each term by ' + m2,
+                  rowShort: 'the second equation' }
+            ],
+            resultEquation: fmtEq(s2.a, s2.b, dvX, dvY, s2.d)
+        });
+    } else {
+        steps.push({
+            kind: 'number',
+            label: 'Get rid of ' + elimVar,
+            question: 'Let\'s get rid of the ' + elimVar + ' variable. The ' + elimVar + '-coefficients are ' + c1 + ' and ' + c2 +
+                ', and neither one divides the other. So we multiply <b>each</b> equation by an appropriate constant, to give ' + elimVar +
+                ' opposite coefficients. We will multiply the first equation by ' +
+                m1 + '. What should we multiply the <b>second equation</b> by, in order for the coefficients of the ' +
+                elimVar + '-terms to be opposites?',
+            correctAnswer: m2,
+            hint: c1 + ' \u00d7 ' + m1 + ' = ' + cleanNum(c1 * m1) + ', so the second equation needs ' + c2 +
+                ' \u00d7 (' + m2 + ') = ' + cleanNum(c2 * m2) + '.',
+            resultEquation: 'To get rid of ' + elimVar + ': multiply the first equation by ' + m1 + ' and the second by ' + m2
+        });
+        steps.push({
+            kind: 'grid',
+            label: 'Rewrite both equations',
+            question: 'Now rewrite both equations: the first multiplied by ' + m1 + ', the second multiplied by ' + m2 + '.',
+            hint: 'Multiply every term of each equation, including the number on the right. First equation \u00d7 ' +
+                m1 + ', second equation \u00d7 ' + m2 + '.',
+            rows: [
+                { type: 'input', op: '', key: 'r1', a: s1.a, b: s1.b, d: s1.d,
+                  rowName: 'the first equation after multiplying each term by ' + m1,
+                  rowShort: 'the first equation' },
+                { type: 'input', op: '', key: 'r2', a: s2.a, b: s2.b, d: s2.d,
+                  rowName: 'the second equation after multiplying each term by ' + m2,
+                  rowShort: 'the second equation' }
+            ],
+            resultEquation: fmtEq(s1.a, s1.b, dvX, dvY, s1.d) + '   and   ' + fmtEq(s2.a, s2.b, dvX, dvY, s2.d)
+        });
+    }
+
+    steps.push({
+        kind: 'grid',
+        label: 'Add the columns',
+        question: 'Add the two equations, column by column. The ' + elimVar +
+            '-terms are now opposites, so that column adds to zero &mdash; enter 0 for it. That is how the ' +
+            elimVar + ' variable disappears.',
+        sumLine: true,
+        hint: 'Work straight down each column: add the two ' + dvX + '-coefficients, then the two ' + dvY +
+            '-coefficients, then the two numbers on the right.',
+        rows: [
+            { type: 'static', op: '', a: s1.a, b: s1.b, d: s1.d },
+            { type: 'static', op: '+', a: s2.a, b: s2.b, d: s2.d },
+            { type: 'input', op: '', key: 'sum', a: sumA, b: sumB, d: sumD,
+              rowName: 'the sum of the two equations', rowShort: 'the sum' }
+        ],
+        resultEquation: fmtCoefVar(otherCoefSum, otherVar) + ' = ' + sumD
+    });
+    steps.push({
+        kind: 'number',
+        label: 'Solve for ' + otherVar,
+        question: 'The ' + elimVar + '-terms cancelled, leaving ' + fmtCoefVar(otherCoefSum, otherVar) + ' = ' + sumD +
+            '. Divide both sides by ' + otherCoefSum + '. What is ' + otherVar + '?',
+        correctAnswer: otherVal,
+        hint: sumD + ' \u00f7 ' + otherCoefSum + ' = ' + otherVal,
+        resultEquation: otherVar + ' = ' + otherVal
+    });
+    steps.push({
+        kind: 'number',
+        label: 'Substitute back',
+        question: 'Substitute ' + otherVar + ' = ' + otherVal + ' into the first equation, ' + eq1Str +
+            ', and solve for ' + elimVar + '. What is ' + elimVar + '?',
+        correctAnswer: elimVal,
+        hint: eq1Str + ' with ' + otherVar + ' = ' + otherVal + ' gives ' + c1 + elimVar + ' = ' + r1.d + ' ' +
+            signed(cleanNum(-(otherVar === 'x' ? r1.a : r1.b) * otherVal)) + ', so ' + elimVar + ' = ' + elimVal,
+        resultEquation: elimVar + ' = ' + elimVal
+    });
+
+    /* The goal is stated ONCE in step 1 but has to stay true for the whole
+       problem, so it is also pinned above every step. A student landing on
+       step 3 must still be able to see which variable they are getting rid of
+       and why they multiplied anything. */
+    return { eq1: eq1Str, eq2: eq2Str, steps: steps, x: p.x, y: p.y, shape: shape,
+             goal: 'Goal: get rid of the ' + elimVar + ' variable' };
+}
+
+/* Renders one guided grid step: static equation rows, optional sum line, and
+   input rows whose every coefficient is a box the student fills in. Six
+   columns keep the x-terms, the joining sign, the y-terms, the equals signs
+   and the constants in straight vertical lines. */
+function buildGuidedGridHtml(step) {
+    var html = '<div class="eq-grid">';
+    step.rows.forEach(function (row) {
+        if (row.type === 'input' && step.sumLine) html += '<div class="stack-line" aria-hidden="true"></div>';
+        /* Each row is wrapped so it can carry its own accessible name. The
+           wrapper uses display:contents, so the six columns still line up in
+           one grid while the row exists as a single thing in the
+           accessibility tree. A static row is spoken as one equation
+           (role="img"); an input row is a named group, so a student hears
+           which equation they are filling in before reaching its boxes. */
+        if (row.type === 'static') {
+            var spoken = (row.op === '+' ? 'plus, ' : '') + speakEquation(fmtEq(row.a, row.b, 'x', 'y', row.d));
+            html += '<div class="grid-row" role="img" aria-label="' + escHtml(spoken) + '">';
+            html += '<div class="op">' + escHtml(row.op || '') + '</div>';
+            html += '<div class="term">' + escHtml(fmtCoefVar(row.a, 'x')) + '</div>';
+            html += '<div class="op op-mid">' + (row.b < 0 ? '&minus;' : '+') + '</div>';
+            html += '<div class="term">' + escHtml(fmtCoefVar(Math.abs(row.b), 'y')) + '</div>';
+            html += '<div class="eqs">=</div>';
+            html += '<div class="term">' + escHtml(row.d) + '</div>';
+            html += '</div>';
+        } else {
+            html += '<div class="grid-row" role="group" aria-label="' + escHtml(row.rowName) + '">';
+            html += '<div class="op">' + escHtml(row.op || '') + '</div>';
+            html += '<div class="term">' + gridBoxHtml(row.key, 'a', row.rowName, 'coefficient of x') + '<span class="var-tag" aria-hidden="true">x</span></div>';
+            html += '<div class="op op-mid" aria-hidden="true">+</div>';
+            html += '<div class="term">' + gridBoxHtml(row.key, 'b', row.rowName, 'coefficient of y') + '<span class="var-tag" aria-hidden="true">y</span></div>';
+            html += '<div class="eqs" aria-hidden="true">=</div>';
+            html += '<div class="term">' + gridBoxHtml(row.key, 'd', row.rowName, 'number on the right-hand side') + '</div>';
+            html += '</div>';
+        }
+    });
+    html += '</div>';
+    return html;
+}
+function gridBoxHtml(key, part, rowName, partName) {
+    var id = 'gb-' + key + '-' + part;
+    /* The enclosing row is an aria group carrying the full row name, so the box
+       itself only needs to say which term it is. */
+    return '<input type="text" inputmode="decimal" class="box-input" id="' + id +
+        '" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="' +
+        escHtml(partName) + '">';
+}
+
+/* =====================================================================
    CATEGORY / LEVEL SWITCHING
    ===================================================================== */
 var appWarmupRemaining = 0;
 var appPhase = 'eq'; // 'eq' (write the equations) -> 'solve' (find x and y)
 var eqLocked = {};
-var eqMissRecorded = false;
+/* Which of the two orderings the student's rows were matched against in part 1
+   (1 = as generated, 2 = swapped). Pinned on the first successful match and
+   reused when part 2 redisplays the equations. */
+var eqOrder = null;
 function setCategory(cat) {
     category = cat;
     document.querySelectorAll('.method-btn').forEach(function (btn, idx) {
@@ -1212,9 +1791,12 @@ function setCategory(cat) {
     level = 0;
     streak = 0;
     stopTimer();
-    renderLevelButtons();
+    /* Set the Applications category BEFORE the row is drawn. Drawing first left
+       the highlight on whatever category was selected last time, so the button
+       marked as chosen was not the one actually generating problems. */
     if (cat === 'elim') resetTypeProgress(cat);
-    if (cat === 'app') appWarmupRemaining = 4;
+    if (cat === 'app') { appCategory = APP_CATEGORIES[0].key; resetMixedQueue(); }
+    renderLevelButtons();
     generateProblem();
     updateDisplay();
 }
@@ -1237,14 +1819,39 @@ function resetTypeProgress(cat) {
 }
 function renderLevelButtons() {
     var container = document.getElementById('level-btns');
+    if (category === 'app') {
+        container.style.display = 'flex';
+        container.setAttribute('aria-label', 'Word problem type');
+        var ahtml = '';
+        APP_CATEGORIES.forEach(function (c) {
+            var on = c.key === appCategory;
+            ahtml += '<button class="level-btn' + (on ? ' active' : '') + '" aria-pressed="' + (on ? 'true' : 'false') +
+                '" onclick="setAppCategory(\'' + c.key + '\')">' + escHtml(c.label) + '</button>';
+        });
+        container.innerHTML = ahtml;
+        return;
+    }
     if (category !== 'elim') { container.innerHTML = ''; container.style.display = 'none'; return; }
     container.style.display = 'flex';
+    container.setAttribute('aria-label', 'Difficulty level');
     var labels = LEVEL_LABELS[category];
     var html = '';
     for (var i = 0; i < labels.length; i++) {
         html += '<button class="level-btn' + (i === level ? ' active' : '') + '" aria-pressed="' + (i === level ? 'true' : 'false') + '" onclick="setLevel(' + i + ')">' + labels[i] + '</button>';
     }
     container.innerHTML = html;
+}
+function setAppCategory(key) {
+    appCategory = key;
+    streak = 0;
+    stopTimer();
+    /* The old four-problem rectangle warm-up is retired: Applications now opens
+       on Rectangles anyway, and inside Mixed the opening deck does the same job
+       without handing a student four of one type in a row. */
+    resetMixedQueue();
+    renderLevelButtons();
+    generateProblem();
+    updateDisplay();
 }
 
 /* =====================================================================
@@ -1253,8 +1860,11 @@ function renderLevelButtons() {
 var GEN_MAP = {
     elim: { 1: genElimCombined_, 2: genElim3_ }
 };
+/* Level 0's three patterns, in teaching order. Pattern 1 is now the guaranteed
+   already-opposites generator, so the two problems a student owes that cup are
+   both genuinely "just add" -- matching the cup's own label. */
 var GUIDED_GEN_MAP = {
-    elim: { 1: genElim1_, 2: genElim2_, 3: genElim3_ }
+    elim: { 1: genElimOpposites_, 2: genElim2_, 3: genElim3_ }
 };
 function pickLevel0Type(cat) {
     var tp = typeProgress[cat];
@@ -1271,7 +1881,7 @@ function pickLevel0Type(cat) {
 }
 function generateProblem() {
     problemToken++;
-    xLocked = false; yLocked = false; lifelines = 2; missRecorded = false;
+    xLocked = false; yLocked = false;
     scaffoldStepIndex = 0; solutionRevealed = 0; revealUsed = false;
     document.getElementById('hint').style.display = 'none';
     document.getElementById('answer-box').style.display = 'none';
@@ -1280,12 +1890,11 @@ function generateProblem() {
     document.getElementById('helper-buttons').style.display = 'block';
 
     if (category === 'app') {
-        currentProblem = appWarmupRemaining > 0 ? genWithRetry(genAppRectangle_) : genApp_();
-        if (appWarmupRemaining > 0) appWarmupRemaining--;
+        currentProblem = genApp_();
         currentScaffold = null;
         appPhase = 'eq';
         eqLocked = { a1: false, b1: false, c1: false, a2: false, b2: false, c2: false };
-        eqMissRecorded = false;
+        eqOrder = null;
         appContextShown[currentProblem.appType] = (appContextShown[currentProblem.appType] || 0) + 1;
         renderApp();
     } else if (category === 'sub') {
@@ -1298,7 +1907,7 @@ function generateProblem() {
         typeProgress[category][t].shown++;
         var p = genWithRetry(GUIDED_GEN_MAP[category][t]);
         currentProblem = p;
-        currentScaffold = buildElimScaffold(p);
+        currentScaffold = buildGuidedSteps(p);
         renderGuided();
     } else {
         var p2 = genWithRetry(GEN_MAP[category][level]);
@@ -1308,33 +1917,28 @@ function generateProblem() {
     }
     document.getElementById('feedback').textContent = '';
 }
-/* A reveal (Show Answer / Show Solution, and the guided step hint, which prints
-   the step's answer) or a Skip must cost the same as a wrong answer: one
-   attempt against this problem's category and the end of the streak. Without
-   this a student could reveal, type the answer back, and score a clean 1/1. */
+/* IRA, 2026-09-16 - the credit rule, one place, for every mode:
+   a problem is recorded EXACTLY ONCE, at the moment it is finished.
+   Wrong tries cost nothing anywhere - not in practice, not on a guided step,
+   not in the equation half of a word problem. Neither does a hint, guided mode
+   included. These systems are hard and the point is to keep the student
+   working. Only Show Answer and Show Solution withhold the credit, and they do
+   it by setting revealUsed, which the completion handlers read; a student who
+   reveals and types the answer back is booked as an attempt without credit, so
+   the old 1/1 loophole stays shut. Nothing books a stat in here: booking on the
+   reveal AND again on completion counted one problem twice. */
 function chargeReveal() {
-    if (category === 'app' && appPhase === 'eq') {
-        if (!eqMissRecorded) { eqMissRecorded = true; recordStat('app', currentProblem.appType, false); }
-    } else if (isGuidedMode()) {
-        missRecorded = true;
-    } else {
-        if (!missRecorded) {
-            missRecorded = true;
-            var sk = currentStatKey();
-            recordStat(sk.cat, sk.key, false);
-        }
-    }
-    /* Ruling A: the reveal ends the streak here AND is remembered for the rest
-       of the problem, so finishing it correctly cannot restart the streak.
-       The guided Hint prints the step's answer and routes through here too,
-       so it gets exactly the same treatment. */
     revealUsed = true;
     streak = 0;
     stopTimer();
     updateDisplay();
 }
+/* IRA, 2026-09-16: Skip follows the same rule as every other game in the suite
+   - it simply moves on. No stat, no broken streak. A problem the student never
+   attempted is not a problem they got wrong, and a free Skip is what lets them
+   step past a question they are not ready for without it counting against them.
+   (This build had briefly charged a skip like a reveal.) */
 function skipProblem() {
-    chargeReveal();
     problemCount++;
     generateProblem();
     updateDisplay();
@@ -1343,9 +1947,21 @@ function skipProblem() {
 /* =====================================================================
    RENDERING
    ===================================================================== */
+/* An equation the student can SEE and a screen reader can RE-READ.
+   These boxes used to be aria-hidden, with the equations reaching a screen
+   reader only through the one-shot announcement. That meant a student using a
+   screen reader could never go back and check the problem they were solving --
+   which also defeated keeping the equations on screen through part 2 of an
+   application. role="img" plus the authored spoken form (the same pattern the
+   solution box already used) makes them browsable without letting a screen
+   reader read raw "-3x" as "dash 3 x". */
+function spokenEquationBox(eqStr, extraStyle) {
+    return '<div class="equation" role="img" aria-label="' + escHtml(speakEquation(eqStr)) + '"' +
+        (extraStyle ? ' style="' + extraStyle + '"' : '') + '>' + eqStr + '</div>';
+}
 function eqBoxesHtml(eq1, eq2) {
     return '<div class="solve-instruction">Solve for x and y in the following system of equations:</div>' +
-        '<div class="eq-pair" aria-hidden="true"><div class="equation">' + eq1 + '</div><div class="equation">' + eq2 + '</div></div>';
+        '<div class="eq-pair">' + spokenEquationBox(eq1) + spokenEquationBox(eq2) + '</div>';
 }
 function isGuidedMode() { return category === 'elim' && level === 0; }
 function renderProgressCups() {
@@ -1356,10 +1972,18 @@ function renderProgressCups() {
     [1, 2, 3].forEach(function (t) {
         var prog = tp[t];
         var pct = Math.min(100, (prog.completed / prog.required) * 100);
-        var cls = prog.completed >= prog.required ? (prog.errors === 0 ? 'full' : 'half') : 'partial';
+        /* The cup measures PROGRESS, not accuracy. It used to fill mint only
+           for a flawless run and violet otherwise, and print a running "(3 X)"
+           tally underneath -- a permanent scoreboard of mistakes in the one
+           mode that is meant to be free of them. A student who worked through
+           every pattern and understood it now finishes with three full cups,
+           whatever they got wrong on the way there. First-try rates are still
+           recorded and are still visible under View Stats for anyone who
+           wants the number. */
+        var cls = prog.completed >= prog.required ? 'full' : 'partial';
         html += '<div class="cup-container"><div class="cup-label">' + labels[t] + '</div>' +
             '<div class="cup"><div class="cup-fill ' + cls + '" style="height:' + pct + '%"></div></div>' +
-            '<div class="cup-stats">' + prog.completed + '/' + prog.required + (prog.errors > 0 ? ' (' + prog.errors + ' X)' : '') + '</div></div>';
+            '<div class="cup-stats">' + prog.completed + '/' + prog.required + '</div></div>';
     });
     html += '</div>';
     return html;
@@ -1383,6 +2007,7 @@ function renderGuided() {
     document.querySelector('.solution-btn').style.display = 'none';
     var s = currentScaffold;
     var html = eqBoxesHtml(s.eq1, s.eq2);
+    if (s.goal) html += '<div class="goal-banner">' + escHtml(s.goal) + '</div>';
     if (scaffoldStepIndex > 0) {
         html += '<div class="completed-steps">';
         for (var i = 0; i < scaffoldStepIndex; i++) {
@@ -1394,9 +2019,14 @@ function renderGuided() {
     html += '<div class="scaffold-container">';
     html += '<div class="step-title">Step ' + (scaffoldStepIndex + 1) + ' of ' + s.steps.length + '</div>';
     html += '<div class="step-question" id="step-question-text">' + step.question + '</div>';
-    if (step.informational) {
-        html += '<div class="equation" style="font-size:18px;margin:10px 0;">' + step.resultEquation + '</div>';
+    if (step.kind === 'note' || step.informational) {
+        if (step.informational && step.resultEquation) {
+            html += '<div class="equation" style="font-size:18px;margin:10px 0;">' + step.resultEquation + '</div>';
+        }
         html += '<div style="text-align:center;"><button class="submit-btn" onclick="continueGuidedStep()">Continue</button></div>';
+    } else if (step.kind === 'grid') {
+        html += buildGuidedGridHtml(step);
+        html += '<div style="text-align:center;"><button class="submit-btn" onclick="checkGuidedGrid()">Check</button></div>';
     } else {
         html += '<div class="input-area"><div class="var-input-row">' +
             '<label class="sr-only" for="step-answer">Your answer for this step</label>' +
@@ -1409,10 +2039,20 @@ function renderGuided() {
     var inp = document.getElementById('step-answer');
     if (inp) {
         inp.focus();
-        inp.onkeydown = function (e) { if (e.key === 'Enter') checkGuidedStep(); };
+        /* preventDefault for the same reason as wireDualInputs: the final step
+           builds the Solved panel and focuses its button, and an un-cancelled
+           Enter would press it instantly. */
+        inp.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); checkGuidedStep(); } };
     }
-    var plain = step.question.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-    announceProblem('Step ' + (scaffoldStepIndex + 1) + ' of ' + s.steps.length + '. ' + plain);
+    if (step.kind === 'grid') {
+        var boxes = gridBoxesFor(step);
+        boxes.forEach(function (b) {
+            var el = document.getElementById(b.id);
+            if (el) el.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); checkGuidedGrid(); } };
+        });
+        if (boxes.length && document.getElementById(boxes[0].id)) document.getElementById(boxes[0].id).focus();
+    }
+    announceProblem('Step ' + (scaffoldStepIndex + 1) + ' of ' + s.steps.length + '. ' + plainText(step.question));
 }
 /* Guided pattern types 1-3 map onto the two practice levels that actually
    generate them: level 1 mixes the "opposites" and "multiply one" generators,
@@ -1423,12 +2063,10 @@ function guidedStatBucket(t) { return t >= 3 ? 2 : 1; }
 function showGuidedProblemComplete() {
     var t = currentProblem.level;
     typeProgress[category][t].completed++;
-    // A problem solved only after wrong step attempts (or after a hint that
-    // printed the step's answer) is not a first-try success.
-    recordStat(category, guidedStatBucket(t), !missRecorded);
-    // Ruling A: a revealing Hint (chargeReveal) or a wrong step both leave
-    // this problem outside the streak.
-    if (missRecorded || revealUsed) streak = 0; else streak++;
+    /* Wrong steps along the way cost nothing. Only Skip (or a reveal, which
+       guided mode does not offer) withholds the credit. */
+    recordStat(category, guidedStatBucket(t), !revealUsed);
+    if (revealUsed) streak = 0; else streak++;
     celebrateStreak(streak);
     document.getElementById('progress-display').innerHTML = renderProgressCups();
     var s = currentScaffold;
@@ -1439,12 +2077,113 @@ function showGuidedProblemComplete() {
     }
     html += '</div>';
     html += '<div style="text-align:center;margin-top:14px;"><div class="feedback correct" style="margin-bottom:8px;">Solved! x = ' + currentProblem.x + ', y = ' + currentProblem.y + '</div>' +
-        '<button class="submit-btn" onclick="problemCount++; generateProblem(); updateDisplay();">Next Problem</button></div>';
+        '<button class="submit-btn">Next Problem</button></div>';
     document.getElementById('main-content').innerHTML = html;
     document.getElementById('helper-buttons').style.display = 'none';
     setFeedback('Solved. x = ' + currentProblem.x + ', y = ' + currentProblem.y + '. Choose Next Problem to continue.', 'correct');
-    var nb = document.querySelector('#main-content .submit-btn');
-    if (nb) nb.focus();
+    armAdvanceButton(document.querySelector('#main-content .submit-btn'), advanceToNextProblem);
+    updateDisplay();
+}
+/* Every input box belonging to a guided grid step, in reading order, paired
+   with the value it is meant to hold and a spoken name for the feedback line. */
+function gridBoxesFor(step) {
+    var out = [];
+    step.rows.forEach(function (row) {
+        if (row.type !== 'input') return;
+        out.push({ id: 'gb-' + row.key + '-a', answer: row.a, rowKey: row.key, part: 'the x-term' });
+        out.push({ id: 'gb-' + row.key + '-b', answer: row.b, rowKey: row.key, part: 'the y-term' });
+        out.push({ id: 'gb-' + row.key + '-d', answer: row.d, rowKey: row.key, part: 'the right-hand side' });
+    });
+    return out;
+}
+function gridRowByKey(step, key) {
+    for (var i = 0; i < step.rows.length; i++) if (step.rows[i].key === key) return step.rows[i];
+    return null;
+}
+/* Names the wrong boxes the way a teacher would. Repeating the full row name
+   once per box produced sentences like "the x-term, the second equation after
+   multiplying by -3: the y-term and the second equation after multiplying by
+   -3: the right-hand side" -- unreadable. Wrong boxes are grouped by their
+   row: a row that is wrong throughout is named once and nothing else, and only
+   a partly-wrong row lists the terms at fault. */
+function gridWrongPhrase(step, wrongBoxes) {
+    var byRow = {}, order = [];
+    wrongBoxes.forEach(function (b) {
+        if (!byRow[b.rowKey]) { byRow[b.rowKey] = []; order.push(b.rowKey); }
+        byRow[b.rowKey].push(b.part);
+    });
+    return listPhrase(order.map(function (k) {
+        var row = gridRowByKey(step, k), parts = byRow[k];
+        if (!row) return listPhrase(parts);
+        if (parts.length >= 3) return row.rowName;
+        return listPhrase(parts) + ' of ' + (row.rowShort || row.rowName);
+    }));
+}
+function listPhrase(items) {
+    if (items.length === 1) return items[0];
+    if (items.length === 2) return items[0] + ' and ' + items[1];
+    return items.slice(0, -1).join(', ') + ' and ' + items[items.length - 1];
+}
+/* Grades a rewrite-the-equation or add-the-columns step box by box. Correct
+   boxes lock mint and stay locked; wrong ones are flagged in deep violet AND
+   named in the assertive feedback line, so the message never depends on colour
+   alone. Boxes already locked are not re-graded. */
+function checkGuidedGrid() {
+    var step = currentScaffold.steps[scaffoldStepIndex];
+    var boxes = gridBoxesFor(step);
+    var open = boxes.filter(function (b) {
+        var el = document.getElementById(b.id);
+        return el && !isLocked(el);
+    });
+    var firstEmpty = null;
+    open.forEach(function (b) {
+        var el = document.getElementById(b.id);
+        if (el.value.trim() === '' && !firstEmpty) firstEmpty = el;
+    });
+    if (firstEmpty) {
+        setFeedback('Fill in every box before checking. Use 0 if a term is not there.', 'partial');
+        firstEmpty.focus();
+        return;
+    }
+    var wrongBoxes = [], correctCount = 0, firstWrong = null, signSlip = false;
+    boxes.forEach(function (b) {
+        var el = document.getElementById(b.id);
+        if (!el) return;
+        if (isLocked(el)) { correctCount++; return; }
+        var v = parseNum(el.value);
+        if (!isNaN(v) && isClose(v, b.answer)) {
+            lockInput(el, b.answer);
+            correctCount++;
+        } else {
+            el.classList.remove('box-error');
+            void el.offsetWidth;   /* restart the shake */
+            el.classList.add('box-error');
+            el.setAttribute('aria-invalid', 'true');
+            wrongBoxes.push(b);
+            if (isSignSlip(v, b.answer)) signSlip = true;
+            if (!firstWrong) firstWrong = el;
+        }
+    });
+    if (correctCount === boxes.length) {
+        setFeedback('That is right.', 'correct');
+        scaffoldStepIndex++;
+        if (scaffoldStepIndex >= currentScaffold.steps.length) {
+            showGuidedProblemComplete();
+        } else {
+            var tok = problemToken;
+            setTimeout(function () {
+                if (tok !== problemToken || !currentScaffold || scaffoldStepIndex >= currentScaffold.steps.length) return;
+                renderGuided();
+                document.getElementById('feedback').textContent = '';
+            }, 1000);
+        }
+        updateDisplay();
+        return;
+    }
+    typeProgress[category][currentProblem.level].errors++;
+    setFeedback(correctCount + ' of ' + boxes.length + ' correct. Take another look at ' +
+        gridWrongPhrase(step, wrongBoxes) + '.' + (signSlip ? SIGN_NUDGE : ''), 'incorrect');
+    if (firstWrong) { firstWrong.focus(); firstWrong.select(); }
     updateDisplay();
 }
 function continueGuidedStep() {
@@ -1456,12 +2195,18 @@ function continueGuidedStep() {
         renderGuided();
     }
 }
+/* Each variable now carries its OWN Check button, so a student can settle x
+   before touching y. Nothing here is graded against the other box. */
 function varInputHtml(idPrefix, label, noSign) {
     var inputId = idPrefix + '-input';
     return '<div class="var-group">' +
         '<label class="var-label" for="' + inputId + '">' + escHtml(label) + '</label>' +
-        '<div class="var-input-row"><input type="text" inputmode="decimal" id="' + inputId + '" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">' +
-        (noSign ? '' : '<button class="sign-btn" aria-label="Toggle positive or negative sign for ' + escHtml(label) + '" onclick="toggleSignOf(\'' + inputId + '\')">&plusmn;</button>') + '</div></div>';
+        '<div class="var-input-row"><input type="text" inputmode="decimal" id="' + inputId +
+        '" aria-describedby="' + idPrefix + '-status" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">' +
+        (noSign ? '' : '<button class="sign-btn" aria-label="Toggle positive or negative sign for ' + escHtml(label) + '" onclick="toggleSignOf(\'' + inputId + '\')">&plusmn;</button>') + '</div>' +
+        '<button class="check-one-btn" id="' + idPrefix + '-check" aria-label="Check the value entered for ' + escHtml(label) + '" onclick="checkOneVar(\'' + idPrefix + '\')">Check</button>' +
+        '<div class="var-status" id="' + idPrefix + '-status"></div>' +
+        '</div>';
 }
 /* Converts an equation string like "-3x + 5y = 12" into words a screen reader
    speaks correctly, e.g. "negative 3 x plus 5 y equals 12". */
@@ -1513,11 +2258,10 @@ function renderPractice() {
         eq2 = fmtEq(p.a2, p.b2, 'x', 'y', p.d2);
     }
     var html = eqBoxesHtml(eq1, eq2);
-    html += '<div class="input-area">' + varInputHtml('x', 'x') + varInputHtml('y', 'y') +
-        '<button class="submit-btn" onclick="checkDualAnswer()" id="submit-btn" style="align-self:center;">Submit</button></div>';
+    html += '<div class="input-area">' + varInputHtml('x', 'x') + varInputHtml('y', 'y') + '</div>';
     document.getElementById('main-content').innerHTML = html;
     wireDualInputs();
-    announceProblem('New problem. Solve for x and y. Equation 1: ' + speakEquation(eq1) +
+    announceProblem('New problem. Solve for x and y. Check each value on its own. Equation 1: ' + speakEquation(eq1) +
         '. Equation 2: ' + speakEquation(eq2) + '.');
 }
 function renderApp() {
@@ -1532,18 +2276,30 @@ function renderAppEquations() {
     document.querySelector('.solution-btn').style.display = 'inline-block';
     var p = currentProblem;
     var dvX = p.varX || 'x', dvY = p.varY || 'y';
-    var showDefs = (appContextShown[p.appType] || 0) <= 2;
     var html = '<div class="story-box">' + escHtml(p.story) + '</div>';
-    if (showDefs) html += '<div class="defs-line">' + escHtml(p.defs) + '</div>';
+    /* The variable definitions used to fade out after a type's third showing.
+       They are now permanent: a student who has never met this skin before
+       must not be left guessing what the letters stand for. */
+    html += '<div class="defs-line">' + escHtml(p.defs) + '</div>';
     html += '<div class="solve-instruction">Part 1: Write the two equations for this situation.</div>';
+    html += '<div class="order-note">Either equation can go on either row.</div>';
     html += eqWriteRowHtml(1, dvX, dvY);
     html += eqWriteRowHtml(2, dvX, dvY);
     html += '<div style="text-align:center;margin-top:10px;"><button class="submit-btn" onclick="checkAppEquations()">Check Equations</button></div>';
     document.getElementById('main-content').innerHTML = html;
+    /* IRA, 2026-09-16: Enter submits here too. Every other box in the game
+       checks on Enter; these six did nothing, so a student typing straight
+       through part 1 hit a dead key and had to reach for the mouse.
+       preventDefault for the same reason as everywhere else - see
+       armAdvanceButton. */
+    EQ_FIELDS.forEach(function (f) {
+        var el = document.getElementById(EQ_IDS[f]);
+        if (el) el.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); checkAppEquations(); } };
+    });
     var first = document.getElementById('eq1-a');
     if (first) first.focus();
     announceProblem('New word problem, part 1 of 2. ' + p.story + ' ' + p.defs +
-        '. Write the two equations by filling in each coefficient and constant.');
+        '. Write the two equations by filling in each coefficient and constant. The two equations may be entered in either order.');
 }
 function eqWriteRowHtml(n, dvX, dvY) {
     return '<div class="eq-write-label" id="eq' + n + '-heading">Equation ' + n + '</div>' +
@@ -1560,77 +2316,137 @@ function renderAppSolve() {
     document.querySelector('.answer-btn').style.display = 'inline-block';
     document.querySelector('.solution-btn').style.display = 'inline-block';
     var p = currentProblem;
-    var showDefs = (appContextShown[p.appType] || 0) <= 2;
+    var dvX = p.varX || 'x', dvY = p.varY || 'y';
     var html = '<div class="story-box">' + escHtml(p.story) + '</div>';
-    if (showDefs) html += '<div class="defs-line">' + escHtml(p.defs) + '</div>';
-    html += '<div class="solve-instruction">Part 2: Solve the system for ' + (p.varX || 'x') + ' and ' + (p.varY || 'y') + '.</div>';
-    html += '<div class="input-area">' + varInputHtml('x', p.xLabel, true) + varInputHtml('y', p.yLabel, true) +
-        '<button class="submit-btn" onclick="checkDualAnswer()" id="submit-btn" style="align-self:center;">Submit</button></div>';
+    html += '<div class="defs-line">' + escHtml(p.defs) + '</div>';
+    /* The equations the student just built used to vanish the moment part 2
+       began, leaving them to solve a system they could no longer see. They now
+       stay on screen for the whole of part 2, in the row order the student
+       entered them. */
+    var e1 = fmtEq(p.a1, p.b1, dvX, dvY, p.d1), e2 = fmtEq(p.a2, p.b2, dvX, dvY, p.d2);
+    var rows = (eqOrder === 2) ? [e2, e1] : [e1, e2];
+    html += '<div class="your-equations-label">Your equations</div>';
+    html += '<div class="eq-pair">' + spokenEquationBox(rows[0]) + spokenEquationBox(rows[1]) + '</div>';
+    html += '<div class="solve-instruction">Part 2: Solve the system for ' + escHtml(dvX) + ' and ' + escHtml(dvY) + '.</div>';
+    html += '<div class="input-area">' + varInputHtml('x', p.xLabel, true) + varInputHtml('y', p.yLabel, true) + '</div>';
     document.getElementById('main-content').innerHTML = html;
     wireDualInputs();
-    announceProblem('Part 2 of 2. Now solve the system. Equation 1: ' +
-        speakEquation(fmtEq(p.a1, p.b1, p.varX || 'x', p.varY || 'y', p.d1)) + '. Equation 2: ' +
-        speakEquation(fmtEq(p.a2, p.b2, p.varX || 'x', p.varY || 'y', p.d2)) + '.');
+    announceProblem('Part 2 of 2. Now solve the system, checking each value on its own. Equation 1: ' +
+        speakEquation(rows[0]) + '. Equation 2: ' + speakEquation(rows[1]) + '.');
 }
 function wireDualInputs() {
     var xi = document.getElementById('x-input'), yi = document.getElementById('y-input');
     xi.focus();
-    function handler(e) { if (e.key === 'Enter') checkDualAnswer(); }
-    xi.onkeydown = handler; yi.onkeydown = handler;
+    /* preventDefault stops the browser carrying this same Enter onward. Without
+       it, checking the LAST variable builds the Next Problem button and focuses
+       it while the key is still travelling, the button swallows the press, and
+       the student is thrown into a fresh problem before the "Correct!" line can
+       be seen or announced. See armAdvanceButton. */
+    xi.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); checkOneVar('x'); } };
+    yi.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); checkOneVar('y'); } };
+}
+var EQ_FIELDS = ['a1', 'b1', 'c1', 'a2', 'b2', 'c2'];
+var EQ_IDS = { a1: 'eq1-a', b1: 'eq1-b', c1: 'eq1-c', a2: 'eq2-a', b2: 'eq2-b', c2: 'eq2-c' };
+var EQ_NAMES = {
+    a1: 'equation 1, the x-coefficient', b1: 'equation 1, the y-coefficient', c1: 'equation 1, the right-hand side',
+    a2: 'equation 2, the x-coefficient', b2: 'equation 2, the y-coefficient', c2: 'equation 2, the right-hand side'
+};
+/* A system is a SET of equations -- which one a student writes on the top row
+   carries no mathematical meaning. The old grader compared row 1 against p's
+   first equation only, so a student who wrote the perfectly correct pair in
+   the other order scored 0 of 6. Both orderings are now tried and the better
+   fit is used; once any box locks, that ordering is pinned so the feedback
+   cannot flip underneath the student mid-problem. */
+function appTargetsFor(order) {
+    var p = currentProblem;
+    return order === 2
+        ? { a1: p.a2, b1: p.b2, c1: p.d2, a2: p.a1, b2: p.b1, c2: p.d1 }
+        : { a1: p.a1, b1: p.b1, c1: p.d1, a2: p.a2, b2: p.b2, c2: p.d2 };
+}
+function appOrderScore(order) {
+    var t = appTargetsFor(order), hits = 0;
+    EQ_FIELDS.forEach(function (f) {
+        var el = document.getElementById(EQ_IDS[f]);
+        if (!el) return;
+        var v = parseNum(el.value);
+        if (!isNaN(v) && isClose(v, t[f])) hits++;
+    });
+    return hits;
 }
 function checkAppEquations() {
-    var p = currentProblem;
-    var feedback = document.getElementById('feedback');
-    var targets = { a1: p.a1, b1: p.b1, c1: p.d1, a2: p.a2, b2: p.b2, c2: p.d2 };
-    var fields = ['a1', 'b1', 'c1', 'a2', 'b2', 'c2'];
-    var ids = { a1: 'eq1-a', b1: 'eq1-b', c1: 'eq1-c', a2: 'eq2-a', b2: 'eq2-b', c2: 'eq2-c' };
-    var allCorrect = true;
-    var anyNewCorrect = false;
-    var blank = false;
+    var fields = EQ_FIELDS, ids = EQ_IDS;
+    var firstEmpty = null;
     fields.forEach(function (f) {
         var el = document.getElementById(ids[f]);
-        if (eqLocked[f]) return;
-        if (el.value.trim() === '') { blank = true; return; }
-        var val = parseNum(el.value);
-        if (isClose(val, targets[f])) {
-            eqLocked[f] = true;
-            el.classList.add('locked-correct');
-            el.disabled = true;
-            el.value = targets[f];
-            anyNewCorrect = true;
-        } else {
-            allCorrect = false;
-        }
+        if (!el || eqLocked[f]) return;
+        if (el.value.trim() === '' && !firstEmpty) firstEmpty = el;
     });
-    if (blank && !fields.every(function (f) { return eqLocked[f]; })) {
-        feedback.textContent = 'Fill in all six blanks (use 0 if a term is missing).';
-        feedback.className = 'feedback partial';
+    if (firstEmpty) {
+        setFeedback('Fill in all six blanks before checking. Use 0 if a term is missing.', 'partial');
+        firstEmpty.focus();
         return;
     }
-    allCorrect = fields.every(function (f) { return eqLocked[f]; });
-    if (allCorrect) {
-        if (!eqMissRecorded) recordStat('app', currentProblem.appType, true);
+    if (eqOrder === null) eqOrder = appOrderScore(2) > appOrderScore(1) ? 2 : 1;
+    var targets = appTargetsFor(eqOrder);
+
+    var wrongNames = [], correctCount = 0, firstWrong = null, appSignSlip = false;
+    fields.forEach(function (f) {
+        var el = document.getElementById(ids[f]);
+        if (!el) return;
+        if (eqLocked[f]) { correctCount++; return; }
+        var val = parseNum(el.value);
+        if (!isNaN(val) && isClose(val, targets[f])) {
+            eqLocked[f] = true;
+            lockInput(el, targets[f]);
+            correctCount++;
+        } else {
+            el.classList.remove('box-error');
+            void el.offsetWidth;
+            el.classList.add('box-error');
+            el.setAttribute('aria-invalid', 'true');
+            wrongNames.push(EQ_NAMES[f]);
+            if (isSignSlip(val, targets[f])) appSignSlip = true;
+            if (!firstWrong) firstWrong = el;
+        }
+    });
+    if (correctCount === fields.length) {
+        /* No stat here. A word problem is ONE problem: it is booked once, when
+           the system is finally solved in part 2. Booking part 1 as well made a
+           single word problem cost two entries in the cup, and a slip while
+           writing the equations then read as 1 of 2 even though the student
+           went on to solve it. */
         /* Design item 7: this fired a burst on part 1 of every single word
            problem. Milestones only - the streak burst after part 2 covers it. */
-        feedback.textContent = 'Both equations are correct! Now solve the system.';
-        feedback.className = 'feedback correct';
+        setFeedback('Both equations are correct. Now solve the system.', 'correct');
         var appTok = problemToken;
         setTimeout(function () {
             if (appTok !== problemToken || category !== 'app') return;
             appPhase = 'solve';
+            /* The reveal boxes live outside #main-content, so they survive the
+               redraw. A hint opened during part 1 was staying on screen through
+               part 2 still showing part 1's advice -- telling a student how to
+               write equations they had already written. Each part gets its own
+               help. */
+            closeRevealBoxes();
             renderApp();
             document.getElementById('feedback').textContent = '';
         }, 1100);
     } else {
-        if (!eqMissRecorded) { eqMissRecorded = true; recordStat('app', currentProblem.appType, false); }
-        var numRight = fields.filter(function (f) { return eqLocked[f]; }).length;
-        feedback.textContent = numRight + ' of 6 correct so far -- fix the rest.';
-        feedback.className = 'feedback incorrect';
+        /* A wrong equation costs nothing but another try. */
+        setFeedback(correctCount + ' of 6 correct. Take another look at ' + listPhrase(wrongNames) + '.' +
+            (appSignSlip ? SIGN_NUDGE : ''), 'incorrect');
+        if (firstWrong) { firstWrong.focus(); firstWrong.select(); }
     }
+}
+function closeRevealBoxes() {
+    ['hint', 'answer-box', 'solution-box'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
 }
 function toggleSignOf(id) {
     var el = document.getElementById(id);
-    if (!el || el.disabled) return;
+    if (!el || isLocked(el)) return;
     el.value = el.value.charAt(0) === '-' ? el.value.slice(1) : '-' + el.value;
     el.focus();
 }
@@ -1660,9 +2476,11 @@ function checkGuidedStep() {
         }
     } else {
         typeProgress[category][currentProblem.level].errors++;
-        missRecorded = true;   // a wrong step costs this problem its first-try credit
+        /* A wrong step no longer costs the problem its credit - it only breaks
+           the streak, which starts again from this problem's completion. */
         streak = 0;
-        feedback.textContent = 'Not quite -- try again.';
+        feedback.textContent = 'That is not correct. Try again' + HELP_POINTER_GUIDED +
+            (isSignSlip(val, step.correctAnswer) ? SIGN_NUDGE : '');
         feedback.className = 'feedback incorrect';
         input.select();
     }
@@ -1682,75 +2500,128 @@ function recordStat(cat, subKey, isFirstTry) {
 function currentStatKey() {
     if (category === 'app') return { cat: 'app', key: currentProblem.appType };
     if (category === 'sub') return { cat: 'sub', key: null };
+    /* Guided is level 0, and stats.elim has no bucket 0 - a stat written there
+       is silently discarded by recordStat. Guided work belongs to the practice
+       level that teaches the same pattern, which is what guidedStatBucket maps. */
+    if (isGuidedMode()) return { cat: category, key: guidedStatBucket(currentProblem ? currentProblem.level : 1) };
     return { cat: category, key: level };
 }
-function checkDualAnswer() {
-    var xi = document.getElementById('x-input'), yi = document.getElementById('y-input');
-    var feedback = document.getElementById('feedback');
-    var correctX = currentProblem.x, correctY = currentProblem.y;
+/* Checks ONE variable, on its own, against its own target.
+   Deliberately gentle: a wrong value costs nothing at all -- no stat miss, no
+   broken streak, no spent chance, no forced reveal. Solving a system is a
+   chain, so a slip on the first variable guarantees the second is wrong too;
+   punishing that twice teaches nothing. Only chargeReveal() (Show Answer,
+   Show Solution, Skip) withholds credit. The problem is judged once, when the
+   second variable finally locks. */
+/* A box holding a confirmed-correct value is locked with readOnly rather than
+   disabled. A disabled input drops out of the tab order and most screen
+   readers skip it, so a student using one could never go back and hear the
+   answers they had already established -- exactly the values they need when
+   substituting back. readOnly keeps it focusable and readable while still
+   refusing edits. */
+function lockInput(el, value) {
+    if (!el) return;
+    el.value = value;
+    el.readOnly = true;
+    el.setAttribute('aria-readonly', 'true');
+    el.classList.remove('box-error');
+    el.removeAttribute('aria-invalid');
+    el.classList.add('locked-correct');
+}
+function isLocked(el) { return !!el && (el.readOnly || el.disabled); }
+function varTarget(which) {
+    return which === 'x' ? currentProblem.x : currentProblem.y;
+}
+function varSpokenName(which) {
+    var p = currentProblem;
+    if (category === 'app') return which === 'x' ? p.xLabel : p.yLabel;
+    return which;
+}
+function checkOneVar(which) {
+    var input = document.getElementById(which + '-input');
+    if (!input || isLocked(input)) return;
+    var status = document.getElementById(which + '-status');
+    var target = varTarget(which);
+    var name = varSpokenName(which);
+    var raw = input.value.trim();
 
-    if ((!xLocked && xi.value.trim() === '') || (!yLocked && yi.value.trim() === '')) {
-        feedback.textContent = 'Enter a value for both.';
-        feedback.className = 'feedback partial';
+    if (raw === '') {
+        input.classList.remove('box-error');
+        input.removeAttribute('aria-invalid');
+        if (status) { status.textContent = ''; status.className = 'var-status'; }
+        setFeedback('Enter a value for ' + name + ' first.', 'partial');
+        input.focus();
         return;
     }
-    var xVal = xLocked ? correctX : parseNum(xi.value);
-    var yVal = yLocked ? correctY : parseNum(yi.value);
-    var xOk = xLocked || isClose(xVal, correctX);
-    var yOk = yLocked || isClose(yVal, correctY);
-    var sk = currentStatKey();
-
-    if (xOk && yOk) {
-        if (!missRecorded) recordStat(sk.cat, sk.key, true);
-        /* Ruling A: a revealed answer ends the streak; typing the revealed
-           value back in must not restart it at 1. The credit-withholding
-           above (recordStat gated on missRecorded) is untouched. */
-        if (revealUsed) streak = 0; else streak++;
-        /* Design item 7: the unconditional createConfetti(220, 3) that used to
-           follow fired a tier-3 burst on EVERY correct Applications answer.
-           celebrateStreak() alone now decides, on the milestone schedule. */
-        celebrateStreak(streak);
-        feedback.textContent = pick(['Correct!', 'Excellent!', 'Nailed it!', 'Perfect!', 'Great work!']);
-        feedback.className = 'feedback correct';
-        xi.disabled = true; yi.disabled = true;
-        document.getElementById('submit-btn').disabled = true;
-        showNextProblemButton();
-    } else {
-        if (xOk && !xLocked) { xLocked = true; xi.classList.add('locked-correct'); xi.disabled = true; xi.value = correctX; }
-        if (yOk && !yLocked) { yLocked = true; yi.classList.add('locked-correct'); yi.disabled = true; yi.value = correctY; }
-        if (!missRecorded) { missRecorded = true; recordStat(sk.cat, sk.key, false); }
-        streak = 0;
-        stopTimer();
-        if (category !== 'app') lifelines--;
-        if (category !== 'app' && lifelines <= 0) {
-            if (!xLocked) { xi.value = correctX; xi.classList.add('locked-correct'); xi.disabled = true; }
-            if (!yLocked) { yi.value = correctY; yi.classList.add('locked-correct'); yi.disabled = true; }
-            feedback.innerHTML = 'The answer is x = ' + correctX + ', y = ' + correctY + '. Let\'s try another.';
-            feedback.className = 'feedback incorrect';
-            document.getElementById('submit-btn').disabled = true;
-            showNextProblemButton();
-        } else if (category === 'app') {
-            if (xOk && !yOk) feedback.textContent = 'x is correct! Try y again.';
-            else if (yOk && !xOk) feedback.textContent = 'y is correct! Try x again.';
-            else feedback.textContent = 'Not quite -- check both x and y.';
-            feedback.className = 'feedback incorrect';
+    var val = parseNum(raw);
+    if (isNaN(val)) {
+        markVarWrong(which, input, status);
+        setFeedback('That is not a number I can read. Enter a plain number or a fraction such as 3/4 for ' + name + '.', 'incorrect');
+        return;
+    }
+    if (isClose(val, target)) {
+        lockInput(input, target);
+        if (which === 'x') xLocked = true; else yLocked = true;
+        var cb = document.getElementById(which + '-check');
+        if (cb) cb.style.display = 'none';
+        if (status) { status.textContent = 'Correct'; status.className = 'var-status ok'; }
+        if (xLocked && yLocked) {
+            completeDualProblem();
         } else {
-            var chanceWord = lifelines === 1 ? 'chance' : 'chances';
-            if (xOk && !yOk) feedback.textContent = 'x is correct! Try y again. (' + lifelines + ' ' + chanceWord + ' left)';
-            else if (yOk && !xOk) feedback.textContent = 'y is correct! Try x again. (' + lifelines + ' ' + chanceWord + ' left)';
-            else feedback.textContent = 'Not quite -- check both x and y. (' + lifelines + ' ' + chanceWord + ' left)';
-            feedback.className = 'feedback incorrect';
+            var other = which === 'x' ? 'y' : 'x';
+            setFeedback(name + ' is correct. Now find ' + varSpokenName(other) + '.', 'correct');
+            var oi = document.getElementById(other + '-input');
+            if (oi && !isLocked(oi)) oi.focus();
         }
+    } else {
+        markVarWrong(which, input, status);
+        setFeedback('The ' + name + ' value is not correct. Try again' + HELP_POINTER +
+            (isSignSlip(val, target) ? SIGN_NUDGE : ''), 'incorrect');
     }
     updateDisplay();
 }
+function markVarWrong(which, input, status) {
+    input.classList.remove('box-error');
+    /* Restart the shake: removing and re-adding in one frame is a no-op. */
+    void input.offsetWidth;
+    input.classList.add('box-error');
+    input.setAttribute('aria-invalid', 'true');
+    if (status) { status.textContent = 'Try again'; status.className = 'var-status no'; }
+    input.focus();
+    input.select();
+}
+/* Both variables are in and both are right. This is the ONLY place a dual
+   problem is scored. */
+function completeDualProblem() {
+    var sk = currentStatKey();
+    recordStat(sk.cat, sk.key, !revealUsed);
+    if (revealUsed) streak = 0; else streak++;
+    celebrateStreak(streak);
+    setFeedback(pick(['Correct!', 'Excellent!', 'Nailed it!', 'Perfect!', 'Great work!']) +
+        ' ' + varSpokenName('x') + ' = ' + currentProblem.x + ', ' + varSpokenName('y') + ' = ' + currentProblem.y + '.', 'correct');
+    showNextProblemButton();
+    updateDisplay();
+}
+/* Focuses an "advance" button without letting the key press that created it
+   activate it. A button that is focused inside a keydown handler receives the
+   rest of that same Enter, fires, and skips the screen the student was meant to
+   read -- the "Correct!" line, or the guided panel listing the steps just
+   completed. preventDefault in the input handlers stops the usual path; this
+   guard is the belt to that pair of braces, and also covers a stray repeat from
+   a held key. Focus still moves immediately, so keyboard flow is unchanged. */
+function armAdvanceButton(btn, go) {
+    if (!btn) return;
+    var armed = false;
+    btn.onclick = function () { if (armed) go(); };
+    setTimeout(function () { armed = true; }, 300);
+    btn.focus();
+}
+function advanceToNextProblem() { problemCount++; generateProblem(); updateDisplay(); }
 function showNextProblemButton() {
     document.getElementById('helper-buttons').style.display = 'none';
     var area = document.getElementById('next-problem-area');
-    area.innerHTML =
-        '<button class="submit-btn" onclick="problemCount++; generateProblem(); updateDisplay();">Next Problem</button>';
-    var btn = area.querySelector('button');
-    if (btn) btn.focus();
+    area.innerHTML = '<button class="submit-btn">Next Problem</button>';
+    armAdvanceButton(area.querySelector('button'), advanceToNextProblem);
 }
 /* =====================================================================
    HINT / ANSWER / SOLUTION (practice levels 1-3 and applications)
@@ -1758,8 +2629,8 @@ function showNextProblemButton() {
 var PRACTICE_HINTS = {
     sub: 'One equation already tells you a variable in terms of the other. Substitute that whole expression into the other equation, then solve.',
     elim: {
-        1: 'Look at a variable\'s coefficients in both equations. If they\'re already opposites (or the same, just multiply one equation by -1), add the equations directly. Otherwise, multiply ONE equation by a constant so the coefficients become opposites, then add.',
-        2: 'Multiply BOTH equations by constants so a variable\'s coefficients become opposites, then add the two equations.'
+        1: 'Pick the variable you want to get rid of and look at its coefficients in the two equations. If they are already opposites, add the equations as they are. Otherwise, multiply one equation by an appropriate constant so that the variable you are getting rid of has opposite coefficients, then add the two equations.',
+        2: 'Multiply each equation by an appropriate constant so that the variable you are trying to get rid of will have opposite coefficients. Then add the two equations.'
     }
 };
 function buildHintText() {
@@ -1767,9 +2638,9 @@ function buildHintText() {
         var p = currentProblem;
         var dvX = p.varX || 'x', dvY = p.varY || 'y';
         if (appPhase === 'eq') {
-            return 'Read the story carefully: one fact gives a simple total (count or sum), and the other fact involves the individual values, rates, or prices. Turn each fact into its own equation using ' + dvX + ' and ' + dvY + '.';
+            return 'Read the given problem carefully: one fact gives a simple total (count or sum), and the other fact involves the individual values, rates, or prices. Turn each fact into its own equation using ' + dvX + ' and ' + dvY + '.';
         }
-        return 'Write two equations from the story: ' + fmtEq(p.a1, p.b1, dvX, dvY, p.d1) + '  and  ' + fmtEq(p.a2, p.b2, dvX, dvY, p.d2) + '. Then solve using substitution or elimination.';
+        return 'Write two equations from the given problem: ' + fmtEq(p.a1, p.b1, dvX, dvY, p.d1) + '  and  ' + fmtEq(p.a2, p.b2, dvX, dvY, p.d2) + '. Then solve using substitution or elimination.';
     }
     if (category === 'sub') return PRACTICE_HINTS.sub;
     return PRACTICE_HINTS.elim[level];
@@ -1777,9 +2648,11 @@ function buildHintText() {
 function toggleHint() {
     var box = document.getElementById('hint');
     if (box.style.display === 'none') {
-        // In guided mode the hint IS the step's answer, so it is charged like a
-        // reveal. On practice levels the hint is strategy only and stays free.
-        if (isGuidedMode()) chargeReveal();
+        /* IRA, 2026-09-16: the hint is free everywhere now, guided mode
+           included. It does print the step's answer there, but a student who
+           needed that nudge and then finished the problem has still done the
+           work, and this game is hard enough that the encouragement is worth
+           more than the precision of the statistic. */
         var text = isGuidedMode() ? currentScaffold.steps[scaffoldStepIndex].hint : buildHintText();
         box.className = 'hint-box';
         box.innerHTML = '<b>Hint:</b> ' + text;
@@ -1795,10 +2668,11 @@ function toggleAnswer() {
             var p = currentProblem;
             var dvX = p.varX || 'x', dvY = p.varY || 'y';
             var e1 = fmtEq(p.a1, p.b1, dvX, dvY, p.d1), e2 = fmtEq(p.a2, p.b2, dvX, dvY, p.d2);
-            box.innerHTML = '<b>Answer:</b> <span aria-hidden="true">' + e1 + ' &nbsp; and &nbsp; ' + e2 + '</span>' +
+            box.innerHTML = '<b>Answer:</b> <span class="reveal-val" aria-hidden="true">' + e1 + ' &nbsp; and &nbsp; ' + e2 + '</span>' +
                 '<span class="sr-only">' + escHtml(speakEquation(e1)) + ', and ' + escHtml(speakEquation(e2)) + '</span>';
         } else {
-            box.innerHTML = '<b>Answer:</b> x = ' + currentProblem.x + ', &nbsp; y = ' + currentProblem.y;
+            box.innerHTML = '<b>Answer:</b> <span class="reveal-val">x = ' + currentProblem.x +
+                ', &nbsp; y = ' + currentProblem.y + '</span>';
         }
         box.style.display = 'block';
     } else box.style.display = 'none';
@@ -1885,7 +2759,9 @@ function updateDisplay() {
     if (!isGuidedMode()) {
         html += '<div class="info-item' + (streak >= 5 ? ' hot' : '') + '">Streak: ' + streak + '</div>';
         html += '<div class="info-item" id="timer-display">Time: ' + timer + 's</div>';
-        html += '<div class="info-item">Chances: ' + lifelines + '</div>';
+        /* The "Chances" counter is gone. Wrong answers no longer cost anything,
+           so a counter frozen at 2 would only imply a penalty that cannot
+           happen. Retries are unlimited and the feedback line says so. */
     }
     info.innerHTML = html;
     if (streak === 1 && !isGuidedMode()) startTimer();
