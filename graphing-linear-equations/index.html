@@ -562,6 +562,41 @@ svg#graph { width: 100%; max-width: 380px; height: auto; display: block; cursor:
         <button type="button" class="switch" id="confetti-switch" aria-pressed="true"
                 aria-label="Confetti celebrations" onclick="toggleConfettiSetting()"><span class="switch-knob" aria-hidden="true"></span></button>
     </div>
+    <!-- Polar Rose Studio insignia -->
+<style>
+.insignia { display: block; margin: 20px auto 4px; width: 62px; opacity: 0.9; }
+.insignia-caption {
+    text-align: center;
+    font-size: 6.5px;
+    letter-spacing: 1.2px;
+    color: #5d6798;
+    opacity: 0.9;
+    margin-top: 2px;
+}
+</style>
+<svg class="insignia" viewBox="-28 -26 56 64" aria-hidden="true" focusable="false" role="presentation">
+    <defs>
+        <linearGradient id="pr-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#1e3a5f"/>
+            <stop offset="100%" stop-color="#0d9488"/>
+        </linearGradient>
+    </defs>
+    <path id="pr-path" fill="none" stroke="url(#pr-grad)" stroke-width="1.7"/>
+</svg>
+<div class="insignia-caption" aria-hidden="true">POLAR ROSE STUDIO</div>
+<script>
+(function () {
+    var d = '', steps = 240, i, t, r;
+    for (i = 0; i <= steps; i++) {
+        t = (i / steps) * 4 * Math.PI;
+        r = 2 * Math.cos(1.5 * t);
+        d += (i === 0 ? 'M ' : 'L ') + (r * Math.cos(t) * 12).toFixed(2)
+            + ' ' + (r * Math.sin(t) * 12).toFixed(2) + ' ';
+    }
+    var el = document.getElementById('pr-path');
+    if (el) el.setAttribute('d', d.trim());
+})();
+</script>
 </main>
 
 <script>
