@@ -129,6 +129,36 @@ h1::after {
     color: #5b21b6;
     margin: 0 0 8px;
 }
+/* The typed relationship equation on a rectangle problem. Wide enough for
+   "L = 2W + 12" at the card's monospace size, and it takes the same locked
+   and flagged treatments as every other box. */
+.row-hint { text-align: center; font-size: 12px; color: #4a5480; margin: 2px 0 4px; }
+/* Specificity matters here: the global `input[type="text"]` rule below is
+   (0,1,1) and sets width:100px, which outranks a bare `.rel-input` (0,1,0) and
+   squeezed this box down to 100px on a laptop and 84px on a phone -- far too
+   narrow to read "L = 2W + 5". Qualifying it by its row wins cleanly without
+   !important. */
+.eq-write-row input.rel-input {
+    width: 280px;
+    max-width: 100%;
+    font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    padding: 10px 8px;
+    border: 3px solid #7c3aed;
+    border-radius: 12px;
+    color: #1e2a5e;
+    background: #ffffff;
+}
+.eq-write-row input.rel-input.locked-correct { border-color: #047857; background: #ecfdf5; color: #047857; }
+.eq-write-row input.rel-input.box-error {
+    border-color: #7c3aed;
+    background: #ffffff;
+    color: #5b21b6;
+    box-shadow: inset 0 0 0 3px #be185d;
+    animation: box-shake 0.3s ease-in-out;
+}
 .your-equations-label {
     text-align: center;
     font-size: 12px;
@@ -700,6 +730,8 @@ input.box-error, input.coef-input.box-error {
     .method-btn { padding: 8px 12px; font-size: 12px; }
     .level-btn { padding: 7px 10px; font-size: 11px; }
     input[type="number"], input[type="text"] { width: 84px; font-size: 21px; }
+    /* ...but not the typed relationship equation, which needs the room. */
+    .eq-write-row input.rel-input { width: 100%; max-width: 280px; font-size: 17px; padding: 10px 6px; }
     /* IRA, 2026-09-16: on a phone these two were 26px and 29px tall - legal
        (the WCAG 2.2 floor is 24) but fiddly for a thumb, and the sign toggle
        sits right beside the answer box where a mis-tap is easy. Raised to the
@@ -987,13 +1019,19 @@ function genElim2_() {
     var k1 = nz(2, 5), f = pick([2, 3]);
     var sign1 = pick([1, -1]), sign2 = pick([1, -1]);
     var c1 = sign1 * k1, c2 = sign2 * k1 * f;
-    // The other variable shouldn't already be a coefficient-+-1 (zero-multiplication)
-    // shortcut -- that would make elimVar's one-multiplication path look pointless.
+    /* The OTHER variable must not offer an easier way out. The old guard only
+       rejected both coefficients being +-1, which still let through pairs like
+       4 and -4 (already opposites -- just add, no multiplying at all) or 5 and
+       5 (multiply by -1). About one problem in thirteen could be solved without
+       ever doing the multiplication it was built to teach.
+       Rejecting equal MAGNITUDES closes both holes at once, and subsumes the
+       old both-are-+-1 case. */
     var other1, other2, guard = 0;
     do {
         other1 = nz(-6, 6); other2 = nz(-6, 6);
         guard++;
-    } while (Math.abs(other1) === 1 && Math.abs(other2) === 1 && guard < 100);
+    } while (Math.abs(other1) === Math.abs(other2) && guard < 100);
+    if (Math.abs(other1) === Math.abs(other2)) return null;
     var a1, b1, a2, b2;
     if (elimVar === 'x') { a1 = c1; b1 = other1; a2 = c2; b2 = other2; }
     else { a1 = other1; b1 = c1; a2 = other2; b2 = c2; }
@@ -1001,17 +1039,57 @@ function genElim2_() {
     if (a1 * b2 - a2 * b1 === 0) return null;
     return { method: 'elim', level: 2, elimVar: elimVar, x: x, y: y, a1: a1, b1: b1, d1: d1, a2: a2, b2: b2, d2: d2, mult: f };
 }
+/* The eliminated variable has the SAME coefficient in both equations (+1 and
+   +1, or -1 and -1), so the only move available is to multiply one equation by
+   negative one. The OTHER variable is kept away from being already-opposite,
+   otherwise a student could eliminate that one instead with no work at all and
+   never meet the idea this problem exists to teach. */
+function genElimNegateOne_() {
+    var x = nz(-9, 9), y = nz(-9, 9);
+    var elimVar = Math.random() < 0.5 ? 'x' : 'y';
+    var c = pick([1, -1]);
+    var other1, other2, guard = 0;
+    do {
+        other1 = otherCoefL1(); other2 = otherCoefL1();
+        guard++;
+    } while ((other1 === -other2 || other1 === other2) && guard < 100);
+    if (other1 === -other2 || other1 === other2) return null;
+    var a1, b1, a2, b2;
+    if (elimVar === 'x') { a1 = c; b1 = other1; a2 = c; b2 = other2; }
+    else { a1 = other1; b1 = c; a2 = other2; b2 = c; }
+    var d1 = a1 * x + b1 * y, d2 = a2 * x + b2 * y;
+    if (a1 * b2 - a2 * b1 === 0) return null;
+    return { method: 'elim', level: 1, elimVar: elimVar, x: x, y: y,
+             a1: a1, b1: b1, d1: d1, a2: a2, b2: b2, d2: d2 };
+}
+
 var elimCombinedCount = 0;
-/* Level 1's ramp. The first TWO problems are guaranteed already-opposites so
-   the student meets "the terms cancel, just add" cleanly; from the third on,
-   multiplying one equation enters the mix and then takes over. */
+/* Level 1's ramp.  IRA, 2026-09-25: the old version kept handing out trivial
+   problems forever -- a 35% chance of a +-1 coefficient pair even at problem
+   twenty, where the whole task is "just add" or "multiply by negative one".
+   The ramp is now three rungs and it climbs once:
+
+     problem 1   coefficients already opposites      -> just add
+     problem 2   coefficients the same               -> multiply one by -1
+     problem 3+  a genuine multiplier                -> multiply one by 2 or 3
+
+   So a student meets each easy idea exactly once and then works. Nothing after
+   problem 2 can be solved without multiplying by something other than +-1. */
 function genElimCombined_() {
-    elimCombinedCount++;
-    if (elimCombinedCount <= 2) return genElimOpposites_();
-    var useEasy;
-    if (elimCombinedCount <= 5) useEasy = Math.random() < 0.5;
-    else useEasy = Math.random() < 0.35;
-    return useEasy ? genElim1_() : genElim2_();
+    /* OVERSIGHT, 2026-09-25: the rung must be spent by the STUDENT, not by a
+       retry. This used to increment on entry, so when genElimOpposites_ hit its
+       own singular-system guard and returned null, genWithRetry called straight
+       back in, the counter had already moved on, and the "just add" problem was
+       never dealt. Measured: 42 of 500 fresh visits to Level 1 opened on
+       "multiply by -1" and the first rung was silently skipped. The stage is
+       now read, not consumed, and only a problem that actually exists advances
+       it. */
+    var stage = elimCombinedCount;
+    var p = stage === 0 ? genElimOpposites_()
+          : stage === 1 ? genElimNegateOne_()
+          : genElim2_();
+    if (p && elimCombinedCount < 2) elimCombinedCount++;
+    return p;
 }
 function genElim3_() {
     var x = nz(-9, 9), y = nz(-9, 9);
@@ -1091,18 +1169,165 @@ function genAppCountValue_() {
         xLabel: skin.xLabel, yLabel: skin.yLabel,
         a1: 1, b1: 1, d1: total, a2: px, b2: py, d2: val };
 }
-function genAppRectangle_() {
-    var w = ri(4, 20);
-    var l = ri(w + 1, w + 20); // length longer than width
-    var k = pick([2, 3, 4]);
-    var P = 2 * l + 2 * w;
-    var M = l + k * w;
-    return { method: 'app', appType: 'rectangle', x: l, y: w,
-        story: "A rectangle's perimeter is " + P + ' inches. Its length plus ' + k + ' times its width is ' + M + ' inches. Find the length and the width of the rectangle.',
+/* =====================================================================
+   RECTANGLE PROBLEMS  (IRA, 2026-09-25)
+
+   The second fact used to be standard form -- "its length plus 3 times its
+   width is 47 inches" -- which pushes a student toward elimination. It is now
+   a RELATIONSHIP already solved for one dimension, so substitution falls out
+   of it naturally:
+
+     A1  The length is k more than the width.             L = 1W + k
+     A2  The length is k more than m times the width.     L = mW + k
+     S1  The width is k less than the length.             W = 1L - k
+     S2  The length is k less than m times the width.     L = mW - k
+
+   A1/A2 are the addition group, S1/S2 the subtraction group. "Less than" is
+   the harder idea, so it is held back -- see rectDeck() below.
+
+   Every problem carries BOTH shapes: iso/m/sign/k, which is what the student
+   types in part 1, and a1..d2 standard form, which the solver, the stats path
+   and part 2 all still use unchanged.
+   ===================================================================== */
+function rectStory_(form, P, m, k) {
+    var rel;
+    if (form === 'A1') rel = 'The length is ' + k + ' more than the width.';
+    else if (form === 'A2') rel = 'The length is ' + k + ' more than ' + m + ' times the width.';
+    else if (form === 'S1') rel = 'The width is ' + k + ' less than the length.';
+    else rel = 'The length is ' + k + ' less than ' + m + ' times the width.';
+    return "A rectangle's perimeter is " + P + ' inches. ' + rel +
+        ' Find the length and the width of the rectangle.';
+}
+function rectBuild_(form, iso, m, sign, k, L, W) {
+    if (!(L > W) || W < 3 || L < 4) return null;
+    if (L !== Math.round(L) || W !== Math.round(W)) return null;
+    var isoVal = iso === 'L' ? L : W, otherVal = iso === 'L' ? W : L;
+    if (isoVal !== m * otherVal + sign * k) return null;   // the sentence must be true
+    var a2, b2;
+    if (iso === 'L') { a2 = 1; b2 = -m; } else { a2 = -m; b2 = 1; }
+    var P = 2 * L + 2 * W;
+    return { method: 'app', appType: 'rectangle', rectForm: form,
+        x: L, y: W, L: L, W: W, P: P,
+        iso: iso, other: iso === 'L' ? 'W' : 'L', m: m, sign: sign, k: k,
+        story: rectStory_(form, P, m, k),
         defs: 'Let L = the length of the rectangle in inches, and W = the width of the rectangle in inches.',
         xLabel: 'Length', yLabel: 'Width', varX: 'L', varY: 'W',
-        a1: 2, b1: 2, d1: P, a2: 1, b2: k, d2: M };
+        a1: 2, b1: 2, d1: P, a2: a2, b2: b2, d2: sign * k };
 }
+function genRectA1_() { var W = ri(4, 20), k = ri(1, 12); return rectBuild_('A1', 'L', 1, 1, k, W + k, W); }
+function genRectA2_() { var m = pick([2, 3]), W = ri(3, 12), k = ri(1, 10); return rectBuild_('A2', 'L', m, 1, k, m * W + k, W); }
+function genRectS1_() { var L = ri(9, 30), k = ri(1, Math.min(12, L - 4)); return rectBuild_('S1', 'W', 1, -1, k, L, L - k); }
+function genRectS2_() {
+    var m = pick([2, 3]), W = ri(4, 14), kMax = Math.min(12, (m - 1) * W - 1);
+    if (kMax < 1) return null;
+    var k = ri(1, kMax);
+    return rectBuild_('S2', 'L', m, -1, k, m * W - k, W);
+}
+var RECT_GEN_ = { A1: genRectA1_, A2: genRectA2_, S1: genRectS1_, S2: genRectS2_ };
+var RECT_IS_SUB_ = { A1: false, A2: false, S1: true, S2: true };
+
+/* The ladder. Shuffled decks, the same machinery the Mixed category uses:
+     deck 1   A1 A1 A2 A2    four addition problems, A1 forced first
+     deck 2   A1 A2 A2 S1    subtraction appears once
+     deck 3+  A1 A2 S1 S2    even split from here on
+   So a "less than" problem cannot appear before #5, and the boundary guard
+   stops one deck ending on subtraction and the next opening on it. */
+var rectQueue = [], rectDecksDealt = 0, rectLastDealt = null;
+function resetRectQueue() { rectQueue = []; rectDecksDealt = 0; rectLastDealt = null; }
+function rectDeck_() {
+    var deck, i, t;
+    if (rectDecksDealt === 0) deck = ['A1', 'A1', 'A2', 'A2'];
+    else if (rectDecksDealt === 1) deck = ['A1', 'A2', 'A2', 'S1'];
+    else deck = ['A1', 'A2', 'S1', 'S2'];
+    shuffleInPlace(deck);
+    if (rectDecksDealt === 0) {
+        i = deck.indexOf('A1');                       // simplest form goes first, always
+        if (i > 0) { t = deck[0]; deck[0] = deck[i]; deck[i] = t; }
+    } else if (rectLastDealt && RECT_IS_SUB_[rectLastDealt] && RECT_IS_SUB_[deck[0]]) {
+        for (i = 1; i < deck.length; i++) {           // cap a subtraction run at two
+            if (!RECT_IS_SUB_[deck[i]]) { t = deck[0]; deck[0] = deck[i]; deck[i] = t; break; }
+        }
+    }
+    rectDecksDealt++;
+    return deck;
+}
+function genAppRectangle_() {
+    if (!rectQueue.length) rectQueue = rectDeck_();
+    rectLastDealt = rectQueue.shift();
+    return genWithRetry(RECT_GEN_[rectLastDealt]);
+}
+
+/* Reads a typed relationship equation into iso / m / k.
+   All whitespace is stripped first, so extra spaces, tabs, newlines and the
+   non-breaking spaces you get pasting from a document are harmless. The one
+   case that bites is a space typed INSIDE a number ("1 2W" becomes 12W); it
+   is graded wrong either way, but the student is told a stray space did it. */
+function parseRelEq(raw) {
+    var original = String(raw || '');
+    /* A space where an operator belongs is the one typo the parser cannot see
+       through: "2W 5" reads as the coefficient 25, and "1 2" as twelve. Caught
+       here on the raw text so the wrong-answer line can say so. */
+    var spaced = /[\dlw][\s\u00a0]+\d/i.test(original);
+    /* OVERSIGHT, 2026-09-25: fold every dash variant, not just U+2212. iOS and
+       macOS smart punctuation turn " - " into an EN DASH as you type, and word
+       processors do the same -- so a student on a phone could write a perfectly
+       correct "L = 2W - 5" and be told "I could not read that". The rest of the
+       suite has folded these since the August sweep (normalizeAnswerText); this
+       parser was the one place that did not. */
+    var s = original.toLowerCase().replace(/\s+/g, '')
+        .replace(/[\u2212\u2013\u2014\u2012\u2010\u2011]/g, '-')
+        .replace(/[\uff0b]/g, '+');
+    if (s === '') return { err: 'empty' };
+    var parts = s.split('=');
+    if (parts.length !== 2) return { err: 'noequals' };
+    var lhs = parts[0], rhs = parts[1];
+    if (lhs !== 'l' && lhs !== 'w') return { err: 'lhs' };
+    /* A trailing operator means the student is not finished. Without this the
+       "+" is simply dropped and "L = 2W +" parses as L = 2W + 0, which is then
+       reported as a wrong constant rather than an incomplete equation. */
+    if (/[+-]$/.test(rhs)) return { err: 'rhs' };
+    var other = lhs === 'l' ? 'w' : 'l';
+    var terms = rhs.match(/[+-]?[^+-]+/g);
+    if (!terms) return { err: 'rhs' };
+    var m = null, k = 0, sawVar = false, sawConst = false, i, t, sign, num, bad = false;
+    for (i = 0; i < terms.length; i++) {
+        t = terms[i]; sign = 1;
+        if (t.charAt(0) === '+') t = t.slice(1);
+        else if (t.charAt(0) === '-') { sign = -1; t = t.slice(1); }
+        if (t === '') return { err: 'rhs' };
+        if (t.indexOf(lhs) !== -1) return { err: 'bothsides' };
+        if (t.indexOf(other) !== -1) {
+            if (sawVar) return { err: 'rhs' };
+            num = t.split(other).join('');
+            if (num === '') num = '1';
+            if (!/^\d+(\.\d+)?$/.test(num)) return { err: 'rhs' };
+            sawVar = true; m = sign * parseFloat(num);
+        } else {
+            /* Note the mistake but keep reading: if it turns out there is no
+               variable anywhere on the right, "you need the other variable" is
+               the more useful thing to say than "I could not read that". */
+            if (sawConst || !/^\d+(\.\d+)?$/.test(t)) { bad = true; continue; }
+            sawConst = true; k = sign * parseFloat(t);
+        }
+    }
+    if (!sawVar) return { err: 'novar' };
+    if (bad) return { err: 'rhs' };
+    return { iso: lhs.toUpperCase(), other: other.toUpperCase(), m: m, k: k, spaced: spaced };
+}
+var REL_PARSE_MSG = {
+    empty:     'Type the relationship equation, for example L = 2W + 5.',
+    noequals:  'Write it as an equation with one equals sign, like L = 2W + 5.',
+    lhs:       'Start with a single variable on the left-hand side \u2014 L = ... or W = ...',
+    bothsides: 'Keep one variable on the left on its own, and the other variable on the right.',
+    novar:     'The right-hand side needs the other variable in it.',
+    rhs:       'I could not read that. Write it like L = 2W + 5 or W = L \u2212 6.'
+};
+/* The relationship as the game prints it, e.g. "L = 2W \u2212 8". */
+function rectRelString(p) {
+    return p.iso + ' = ' + (p.m === 1 ? p.other : p.m + p.other) +
+        (p.sign > 0 ? ' + ' : ' \u2212 ') + p.k;
+}
+function isRect() { return category === 'app' && currentProblem && currentProblem.appType === 'rectangle'; }
 function genAppInvestment_() {
     var rates = [0.03, 0.04, 0.05, 0.06, 0.07, 0.08];
     var r1 = pick(rates), r2 = pick(rates);
@@ -1375,6 +1600,52 @@ function copyWith(src, key, value) {
     return out;
 }
 
+/* Substitution worked solution for a rectangle problem.
+   Returned in the same {eq1, eq2, steps:[{label, resultEquation}]} shape as the
+   elimination scaffolds, so toggleSolution feeds it through the SAME
+   renderSolutionBox -- which means it inherits the one-step-at-a-time Next Step
+   reveal, the "Start with:" pair and the spoken forms for free.
+
+     iso L:  2L + 2W = P,  L = mW + sk
+             2(mW + sk) + 2W = P
+             2mW + 2sk + 2W  = P
+             (2m + 2)W       = P - 2sk
+             W = (P - 2sk) / (2m + 2),  then L = mW + sk
+     iso W:  the same with the roles swapped. */
+function buildRectSubScaffold(p) {
+    var iso = p.iso, other = p.other, m = p.m, sk = p.sign * p.k;
+    var isoRHS = fmtCoefVar(m, other) + ' ' + signed(sk);
+    var combined = 2 * m + 2;
+    var rhs = p.d1 - 2 * sk;
+    var otherVal = rhs / combined;
+    var isoVal = m * otherVal + sk;
+    var steps = [];
+    steps.push({
+        label: 'Equation 2 is already solved for ' + iso + ', so substitute it into equation 1',
+        resultEquation: '2(' + isoRHS + ') + 2' + other + ' = ' + p.d1
+    });
+    steps.push({
+        label: 'Distribute the 2',
+        resultEquation: fmtCoefVar(2 * m, other) + ' ' + signed(2 * sk) + ' + 2' + other + ' = ' + p.d1
+    });
+    steps.push({
+        label: 'Combine the ' + other + '-terms',
+        resultEquation: fmtCoefVar(combined, other) + ' ' + signed(2 * sk) + ' = ' + p.d1
+    });
+    steps.push({
+        label: 'Move the constant to the other side',
+        resultEquation: fmtCoefVar(combined, other) + ' = ' + rhs
+    });
+    steps.push({
+        label: 'Divide both sides by ' + combined,
+        resultEquation: other + ' = ' + otherVal
+    });
+    steps.push({
+        label: 'Substitute back into equation 2 to find ' + iso,
+        resultEquation: iso + ' = ' + isoVal
+    });
+    return { eq1: fmtEq(p.a1, p.b1, 'L', 'W', p.d1), eq2: rectRelString(p), steps: steps, x: p.x, y: p.y };
+}
 /* Generic Cramer's-rule solver -- used for the Applications "Show Solution" (works for any system) */
 function buildAppScaffold(p) {
     var pX = copyWith(p, 'elimVar', 'x');
@@ -1837,7 +2108,7 @@ function setCategory(cat) {
        the highlight on whatever category was selected last time, so the button
        marked as chosen was not the one actually generating problems. */
     if (cat === 'elim') resetTypeProgress(cat);
-    if (cat === 'app') { appCategory = APP_CATEGORIES[0].key; resetMixedQueue(); }
+    if (cat === 'app') { appCategory = APP_CATEGORIES[0].key; resetMixedQueue(); resetRectQueue(); }
     renderLevelButtons();
     generateProblem();
     updateDisplay();
@@ -1891,6 +2162,7 @@ function setAppCategory(key) {
        on Rectangles anyway, and inside Mixed the opening deck does the same job
        without handing a student four of one type in a row. */
     resetMixedQueue();
+    resetRectQueue();
     renderLevelButtons();
     generateProblem();
     updateDisplay();
@@ -1935,7 +2207,7 @@ function generateProblem() {
         currentProblem = genApp_();
         currentScaffold = null;
         appPhase = 'eq';
-        eqLocked = { a1: false, b1: false, c1: false, a2: false, b2: false, c2: false };
+        eqLocked = { a1: false, b1: false, c1: false, a2: false, b2: false, c2: false, rel: false };
         eqOrder = null;
         appContextShown[currentProblem.appType] = (appContextShown[currentProblem.appType] || 0) + 1;
         renderApp();
@@ -2324,9 +2596,28 @@ function renderAppEquations() {
        must not be left guessing what the letters stand for. */
     html += '<div class="defs-line">' + escHtml(p.defs) + '</div>';
     html += '<div class="solve-instruction">Part 1: Write the two equations for this situation.</div>';
-    html += '<div class="order-note">Either equation can go on either row.</div>';
-    html += eqWriteRowHtml(1, dvX, dvY);
-    html += eqWriteRowHtml(2, dvX, dvY);
+
+    if (p.appType === 'rectangle') {
+        /* A rectangle problem's two facts have different shapes -- a perimeter
+           in standard form and a relationship already solved for a variable --
+           so the rows are labelled and are NOT interchangeable. The other three
+           application types keep the either-order acceptance below. */
+        html += '<div class="eq-write-label" id="lbl-per">Perimeter equation</div>';
+        html += '<div class="eq-write-row" role="group" aria-labelledby="lbl-per">' +
+            '<input type="text" inputmode="decimal" class="coef-input" id="eq1-a" autocomplete="off" aria-label="Perimeter equation, coefficient of L"> L +' +
+            '<input type="text" inputmode="decimal" class="coef-input" id="eq1-b" autocomplete="off" aria-label="Perimeter equation, coefficient of W"> W =' +
+            '<input type="text" inputmode="decimal" class="coef-input" id="eq1-c" autocomplete="off" aria-label="Perimeter equation, the number on the right"></div>';
+        html += '<div class="eq-write-label" id="lbl-rel">Relationship equation</div>';
+        html += '<div class="row-hint" id="rel-hint">Type it the way you would write it, for example  L = 2W + 5</div>';
+        html += '<div class="eq-write-row">' +
+            '<input type="text" class="rel-input" id="rel-eq" autocomplete="off" autocorrect="off" ' +
+            'autocapitalize="characters" spellcheck="false" aria-labelledby="lbl-rel" aria-describedby="rel-hint"></div>';
+    } else {
+        html += '<div class="order-note">Either equation can go on either row.</div>';
+        html += eqWriteRowHtml(1, dvX, dvY);
+        html += eqWriteRowHtml(2, dvX, dvY);
+    }
+
     html += '<div style="text-align:center;margin-top:10px;"><button class="submit-btn" onclick="checkAppEquations()">Check Equations</button></div>';
     document.getElementById('main-content').innerHTML = html;
     /* IRA, 2026-09-16: Enter submits here too. Every other box in the game
@@ -2334,14 +2625,24 @@ function renderAppEquations() {
        through part 1 hit a dead key and had to reach for the mouse.
        preventDefault for the same reason as everywhere else - see
        armAdvanceButton. */
-    EQ_FIELDS.forEach(function (f) {
-        var el = document.getElementById(EQ_IDS[f]);
-        if (el) el.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); checkAppEquations(); } };
-    });
+    var onEnter = function (e) { if (e.key === 'Enter') { e.preventDefault(); checkAppEquations(); } };
+    if (p.appType === 'rectangle') {
+        ['eq1-a', 'eq1-b', 'eq1-c', 'rel-eq'].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el) el.onkeydown = onEnter;
+        });
+    } else {
+        EQ_FIELDS.forEach(function (f) {
+            var el = document.getElementById(EQ_IDS[f]);
+            if (el) el.onkeydown = onEnter;
+        });
+    }
     var first = document.getElementById('eq1-a');
     if (first) first.focus();
     announceProblem('New word problem, part 1 of 2. ' + p.story + ' ' + p.defs +
-        '. Write the two equations by filling in each coefficient and constant. The two equations may be entered in either order.');
+        (p.appType === 'rectangle'
+            ? '. Fill in the perimeter equation, then type the relationship equation, for example L = 2W + 5.'
+            : '. Write the two equations by filling in each coefficient and constant. The two equations may be entered in either order.'));
 }
 function eqWriteRowHtml(n, dvX, dvY) {
     return '<div class="eq-write-label" id="eq' + n + '-heading">Equation ' + n + '</div>' +
@@ -2366,7 +2667,14 @@ function renderAppSolve() {
        stay on screen for the whole of part 2, in the row order the student
        entered them. */
     var e1 = fmtEq(p.a1, p.b1, dvX, dvY, p.d1), e2 = fmtEq(p.a2, p.b2, dvX, dvY, p.d2);
-    var rows = (eqOrder === 2) ? [e2, e1] : [e1, e2];
+    var rows;
+    if (p.appType === 'rectangle') {
+        /* Show the relationship the way it was written and the way substitution
+           will use it -- "L = 2W + 5" -- not its standard-form equivalent. */
+        rows = [e1, rectRelString(p)];
+    } else {
+        rows = (eqOrder === 2) ? [e2, e1] : [e1, e2];
+    }
     html += '<div class="your-equations-label">Your equations</div>';
     html += '<div class="eq-pair">' + spokenEquationBox(rows[0]) + spokenEquationBox(rows[1]) + '</div>';
     html += '<div class="solve-instruction">Part 2: Solve the system for ' + escHtml(dvX) + ' and ' + escHtml(dvY) + '.</div>';
@@ -2415,7 +2723,84 @@ function appOrderScore(order) {
     });
     return hits;
 }
+/* Rectangle part 1: three perimeter boxes plus one typed relationship.
+   Correct pieces lock and stay locked, exactly like the six-box version, and
+   the typed equation is parsed into its parts so the message can name what is
+   actually wrong rather than just saying the line is wrong. */
+function checkRectEquations() {
+    var p = currentProblem;
+    var pa = document.getElementById('eq1-a'), pb = document.getElementById('eq1-b'),
+        pc = document.getElementById('eq1-c'), rel = document.getElementById('rel-eq');
+    var boxes = [pa, pb, pc, rel], i, firstEmpty = null;
+    for (i = 0; i < boxes.length; i++) {
+        if (boxes[i] && !isLocked(boxes[i]) && boxes[i].value.trim() === '') { firstEmpty = boxes[i]; break; }
+    }
+    if (firstEmpty) {
+        setFeedback('Fill in both equations before checking.', 'partial');
+        firstEmpty.focus();
+        return;
+    }
+    var wrong = [], extra = '', firstWrong = null;
+    function grade(el, want, name) {
+        if (isLocked(el)) return;
+        if (isClose(parseNum(el.value), want)) { lockInput(el, want); return; }
+        el.classList.remove('box-error');
+        void el.offsetWidth;
+        el.classList.add('box-error');
+        el.setAttribute('aria-invalid', 'true');
+        wrong.push(name);
+        if (!firstWrong) firstWrong = el;
+    }
+    grade(pa, p.a1, 'the coefficient of L');
+    grade(pb, p.b1, 'the coefficient of W');
+    grade(pc, p.d1, 'the perimeter on the right');
+
+    if (!eqLocked.rel) {
+        var r = parseRelEq(rel.value);
+        if (r.err) {
+            rel.classList.remove('box-error'); void rel.offsetWidth;
+            rel.classList.add('box-error'); rel.setAttribute('aria-invalid', 'true');
+            wrong.push('the relationship equation');
+            extra += ' ' + REL_PARSE_MSG[r.err];
+            if (!firstWrong) firstWrong = rel;
+        } else {
+            var bad = [], wantK = p.sign * p.k;
+            if (r.iso !== p.iso) bad.push('the variable on the left-hand side');
+            if (r.m !== p.m) bad.push('the coefficient');
+            if (r.k !== wantK) {
+                if (Math.abs(r.k) === Math.abs(wantK)) bad.push('the sign');
+                else bad.push('the constant on the right-hand side');
+            }
+            if (bad.length === 0) {
+                eqLocked.rel = true;
+                lockInput(rel, rectRelString(p));   /* tidy up what they typed */
+            } else {
+                rel.classList.remove('box-error'); void rel.offsetWidth;
+                rel.classList.add('box-error'); rel.setAttribute('aria-invalid', 'true');
+                wrong = wrong.concat(bad);
+                if (r.spaced) extra += ' Watch for a space inside a number \u2014 "1 2" is read as twelve.';
+                if (!firstWrong) firstWrong = rel;
+            }
+        }
+    }
+
+    if (!wrong.length) {
+        setFeedback('Both equations are correct. Now solve the system.', 'correct');
+        var tok = problemToken;
+        setTimeout(function () {
+            if (tok !== problemToken || category !== 'app') return;
+            appPhase = 'solve';
+            closeRevealBoxes();
+            renderApp();
+            document.getElementById('feedback').textContent = '';
+        }, 2400);
+    } else {
+        setFeedback('Check ' + listPhrase(wrong) + '.' + extra, 'incorrect');
+        if (firstWrong) { firstWrong.focus(); firstWrong.select(); }
+    }
+}
 function checkAppEquations() {
+    if (isRect()) { checkRectEquations(); return; }
     var fields = EQ_FIELDS, ids = EQ_IDS;
     var firstEmpty = null;
     fields.forEach(function (f) {
@@ -2472,7 +2857,11 @@ function checkAppEquations() {
             closeRevealBoxes();
             renderApp();
             document.getElementById('feedback').textContent = '';
-        }, 1100);
+        /* IRA, 2026-09-25: 1100ms was not long enough to read "Both equations
+           are correct" before the screen changed under you. Moving between the
+           two halves of a word problem is the biggest context switch in the
+           game, so it gets time to land. */
+        }, 2400);
     } else {
         /* A wrong equation costs nothing but another try. */
         setFeedback(correctCount + ' of 6 correct. Take another look at ' + listPhrase(wrongNames) + '.' +
@@ -2679,6 +3068,16 @@ function buildHintText() {
     if (category === 'app') {
         var p = currentProblem;
         var dvX = p.varX || 'x', dvY = p.varY || 'y';
+        if (p.appType === 'rectangle') {
+            /* The generic "one fact gives a total, the other involves prices"
+               line describes none of a rectangle problem. */
+            if (appPhase === 'eq') {
+                return 'A rectangle\'s perimeter is 2L + 2W, so that is the first equation. The second sentence tells you one dimension in terms of the other \u2014 write it exactly as the sentence says, starting with the dimension it describes, for example L = 2W + 5.';
+            }
+            return 'You have ' + fmtEq(p.a1, p.b1, 'L', 'W', p.d1) + '  and  ' + rectRelString(p) +
+                '. The second equation is already solved for ' + p.iso +
+                ', so substitute it into the first and solve for ' + p.other + '.';
+        }
         if (appPhase === 'eq') {
             return 'Read the given problem carefully: one fact gives a simple total (count or sum), and the other fact involves the individual values, rates, or prices. Turn each fact into its own equation using ' + dvX + ' and ' + dvY + '.';
         }
@@ -2709,7 +3108,8 @@ function toggleAnswer() {
         if (category === 'app' && appPhase === 'eq') {
             var p = currentProblem;
             var dvX = p.varX || 'x', dvY = p.varY || 'y';
-            var e1 = fmtEq(p.a1, p.b1, dvX, dvY, p.d1), e2 = fmtEq(p.a2, p.b2, dvX, dvY, p.d2);
+            var e1 = fmtEq(p.a1, p.b1, dvX, dvY, p.d1);
+            var e2 = (p.appType === 'rectangle') ? rectRelString(p) : fmtEq(p.a2, p.b2, dvX, dvY, p.d2);
             box.innerHTML = '<b>Answer:</b> <span class="reveal-val" aria-hidden="true">' + e1 + ' &nbsp; and &nbsp; ' + e2 + '</span>' +
                 '<span class="sr-only">' + escHtml(speakEquation(e1)) + ', and ' + escHtml(speakEquation(e2)) + '</span>';
         } else {
@@ -2726,7 +3126,10 @@ function toggleSolution() {
     if (box.style.display === 'none') {
         chargeReveal();
         var p = currentProblem;
-        var scaffold = category === 'sub' ? buildSubScaffold(p) : category === 'app' ? buildAppScaffold(p) : buildElimScaffold(p);
+        var scaffold = category === 'sub' ? buildSubScaffold(p)
+            : isRect() ? buildRectSubScaffold(p)
+            : category === 'app' ? buildAppScaffold(p)
+            : buildElimScaffold(p);
         currentSolutionStart = [scaffold.eq1, scaffold.eq2];
         currentSolutionLines = scaffold.steps.map(function (st) {
             return { label: st.solutionLabel || st.label || 'Next step', eq: st.resultEquation, detail: st.solutionDetail || null };
