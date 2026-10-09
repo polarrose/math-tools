@@ -100,7 +100,9 @@
         font-size: 12.5px;
         font-weight: 800;
         cursor: pointer;
-        transition: all 0.15s;
+        /* Not 'all': that also animated the focus outline in from 0px, so the
+           keyboard ring faded in over 150ms instead of appearing at once. */
+        transition: background-color 0.15s, box-shadow 0.15s, transform 0.15s, filter 0.15s;
         -webkit-tap-highlight-color: transparent;
         font-family: inherit;
     }
@@ -110,6 +112,56 @@
         color: white !important;
         box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.25), 0 6px 14px rgba(11, 122, 112, 0.35);
     }
+    /* Toggle switch (design system): 44x24 track, 18px white knob, mint when
+       on, label in navy slate 13px. The whole button -- track plus label -- is
+       the tap target, so it is at least 44px tall. The inset rim gives the
+       track 3:1 against the white card (WCAG 1.4.11): the bare #d5d9e8 track
+       is only 1.4:1, and mint #10b981 alone is 2.5:1. */
+    .mix-options {
+        display: flex;
+        justify-content: center;
+        margin: -6px 0 14px;
+    }
+    .switch {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 44px;
+        padding: 8px 12px;
+        background: transparent;
+        color: #4a5480;
+        font-size: 13px;
+        font-weight: 700;
+        border-radius: 12px;
+    }
+    .switch:hover { background: #f4f5fb; }
+    .switch:active { transform: none; }
+    .switch-track {
+        position: relative;
+        flex: 0 0 44px;
+        width: 44px;
+        height: 24px;
+        border-radius: 12px;
+        background: #d5d9e8;
+        box-shadow: inset 0 0 0 2px #5d6798;
+        transition: background 0.15s;
+    }
+    .switch-knob {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #ffffff;
+        box-shadow: 0 1px 3px rgba(30, 42, 94, 0.35);
+        transition: left 0.15s;
+    }
+    .switch[aria-checked="true"] .switch-track {
+        background: #10b981;
+        box-shadow: inset 0 0 0 2px #047857;
+    }
+    .switch[aria-checked="true"] .switch-knob { left: 23px; }
     /* "Mixed" used to carry a permanent violet gradient, so it looked selected
        whatever mode was actually on. It is a mode pill like the others: plain
        inactive treatment, and the one shared active state when it is chosen. */
@@ -222,6 +274,17 @@
         line-height: 1;
         padding: 0 1px;
     }
+    /* The exponent on a stretched-parenthesis group. An ordinary superscript is
+       lifted relative to the TEXT, but these parentheses are drawn about three
+       times taller than the text, so a normal <sup> landed level with the
+       middle of the fraction instead of at the top corner of ")" (IRA,
+       2026-10-09, screenshot of (x^4/y^3)^4). This lifts it to the top of the
+       parenthesis. Measured in the browser, not guessed: see the report. */
+    .problem sup.bp-exp, sup.bp-exp {
+        font-size: 0.7em;
+        vertical-align: 2.15em;   /* measured: exponent top level with the top of ")" */
+        margin-left: -2px;   /* the ")" glyph carries its own side spacing */
+    }
     .blank-input {
         width: 56px;
         font-size: 17px;
@@ -282,7 +345,9 @@
         border: none;
         border-radius: 12px;
         cursor: pointer;
-        transition: all 0.15s;
+        /* Not 'all': that also animated the focus outline in from 0px, so the
+           keyboard ring faded in over 150ms instead of appearing at once. */
+        transition: background-color 0.15s, box-shadow 0.15s, transform 0.15s, filter 0.15s;
         -webkit-tap-highlight-color: transparent;
         touch-action: manipulation;
         font-family: inherit;
@@ -468,12 +533,12 @@
         white-space: nowrap;
         border: 0;
     }
-    .insignia {
-        text-align: center;
-        margin-top: 22px;
-        opacity: 0.9;
-    }
+    /* Same component as claude/insignia_snippet.html: the class sits on the SVG
+       itself, 62px at every screen size (IRA, 2026-09-16). */
+    .insignia { display: block; margin: 20px auto 4px; width: 62px; opacity: 0.9; }
     .insignia-caption {
+        text-align: center;
+        opacity: 0.9;
         font-size: 6.5px;
         letter-spacing: 1.2px;
         color: #5d6798;
@@ -517,10 +582,20 @@
         <button type="button" class="mode-btn" aria-pressed="false" onclick="setMode('div')">Divide</button>
         <button type="button" class="mode-btn" aria-pressed="false" onclick="setMode('zero')">Zero Power</button>
         <button type="button" class="mode-btn" aria-pressed="false" onclick="setMode('neg')">Neg Exp</button>
-        <button type="button" class="mode-btn" aria-pressed="false" onclick="setMode('frac')">Frac Exp</button>
         <button type="button" class="mode-btn" aria-pressed="false" onclick="setMode('powpow')">Pow of Pow</button>
         <button type="button" class="mode-btn" aria-pressed="false" onclick="setMode('prodquot')">Distribute</button>
+        <button type="button" class="mode-btn" aria-pressed="false" onclick="setMode('frac')">Frac Exp</button>
         <button type="button" class="mode-btn" aria-pressed="false" onclick="setMode('mix')">Mixed</button>
+    </div>
+    <!-- Shown only while Mixed is selected. Fractional exponents are taught
+         later in the semester, so Mixed leaves them out until a student turns
+         this on (IRA, 2026-10-09). role="switch" + aria-checked announces as
+         "Include fractional exponents in Mixed, switch, off/on". -->
+    <div class="mix-options" id="mix-options" style="display:none;">
+        <button type="button" class="switch" id="mix-frac-switch" role="switch" aria-checked="false" onclick="toggleMixFrac()">
+            <span class="switch-track" aria-hidden="true"><span class="switch-knob"></span></span>
+            <span class="switch-label">Include fractional exponents in Mixed</span>
+        </button>
     </div>
     <div id="main-content"></div>
     <!-- Spoken form of the current problem; the visual copy above is aria-hidden -->
@@ -542,18 +617,17 @@
     <div id="hint" style="display:none;"></div>
     <div id="explain" style="display:none;"></div>
     <div id="answer-box" style="display:none;"></div>
-    <div class="insignia" aria-hidden="true">
-        <svg width="90" height="103" viewBox="-28 -26 56 64" role="presentation" focusable="false">
-            <defs>
-                <linearGradient id="pr-grad" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stop-color="#1e3a5f"></stop>
-                    <stop offset="100%" stop-color="#0d9488"></stop>
-                </linearGradient>
-            </defs>
-            <path id="pr-path" fill="none" stroke="url(#pr-grad)" stroke-width="1.7"></path>
-        </svg>
-        <div class="insignia-caption">POLAR ROSE STUDIO</div>
-    </div>
+    <!-- 62px at every screen size (IRA, 2026-09-16, PRE_SHIP_CHECKLIST B1). -->
+    <svg class="insignia" viewBox="-28 -26 56 64" aria-hidden="true" focusable="false" role="presentation">
+        <defs>
+            <linearGradient id="pr-grad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#1e3a5f"></stop>
+                <stop offset="100%" stop-color="#0d9488"></stop>
+            </linearGradient>
+        </defs>
+        <path id="pr-path" fill="none" stroke="url(#pr-grad)" stroke-width="1.7"></path>
+    </svg>
+    <div class="insignia-caption" aria-hidden="true">POLAR ROSE STUDIO</div>
 </main>
 
 <script>
@@ -566,8 +640,13 @@ var streak = 0;
 var bestStreak = 0;
 var problemNum = 0;
 var missRecorded = false;
+/* Set the moment a problem is graded correct, cleared by generateProblem. The
+   grader refuses to score the same problem twice -- see checkAnswer. */
+var problemResolved = false;
 
-var CATS = ['mul', 'div', 'zero', 'neg', 'frac', 'powpow', 'prodquot'];
+/* Fractional exponents last, just before Mixed - taught later in the semester
+   (IRA, 2026-10-09). This order also sets the order of the My Stats rows. */
+var CATS = ['mul', 'div', 'zero', 'neg', 'powpow', 'prodquot', 'frac'];
 var CAT_LABELS = {
     mul: 'Multiply', div: 'Divide', zero: 'Power of Zero',
     neg: 'Negative Exponents', frac: 'Fractional Exponents', powpow: 'Power of a Power', prodquot: 'Distribute the Power'
@@ -589,6 +668,17 @@ var stats = {
 
 var SAVE_KEY = 'exponentRulesGame_v1';
 var confettiOn = true;
+/* Fractional exponents come later in the semester, so Mixed leaves them out
+   by default (IRA, 2026-10-09). The Frac Exp button still works on its own;
+   this only controls whether Mixed can draw from it. Persisted per device. */
+var mixIncludesFrac = false;
+var suppressAutoFocus = false;
+
+/* Categories Mixed may draw from right now. */
+function mixCats() {
+    if (mixIncludesFrac) return CATS;
+    return CATS.filter(function (c) { return c !== 'frac'; });
+}
 
 /* =====================================================================
    Utilities
@@ -745,7 +835,30 @@ function buildMul() {
 }
 
 function buildDiv() {
-    var subtype = pick(['simple', 'coef', 'numbase', 'twovar']);
+    /* Problems with x AND y in both the numerator and the denominator are the
+       ones Ira wants students to see most (IRA, 2026-10-09): 'twovar' and
+       'twovar_coef' together make up about 60% of the Divide category. */
+    var subtype = pick(['simple', 'coef', 'numbase', 'twovar', 'twovar', 'twovar_coef', 'twovar_coef']);
+    if (subtype === 'twovar_coef') {
+        var d2 = ri(2, 5), q = ri(2, 6), n1 = d2 * q;
+        var xa = ri(4, 10), xb = ri(1, xa - 1), ya = ri(4, 10), yb = ri(1, ya - 1);
+        var xe = xa - xb, ye = ya - yb;
+        var den = d2 + 'x' + (xb === 1 ? '' : '<sup>' + xb + '</sup>') + 'y' + (yb === 1 ? '' : '<sup>' + yb + '</sup>');
+        return {
+            category: 'div', subtype: subtype,
+            html: fracHtml(n1 + 'x<sup>' + xa + '</sup>y<sup>' + ya + '</sup>', den) + ' = ' + blankInline('b0') + 'x' + expSlot('b1') + 'y' + expSlot('b2'),
+            blanks: [{ id: 'b0', key: 'cf', kind: 'int' }, { id: 'b1', key: 'e1', kind: 'int' }, { id: 'b2', key: 'e2', kind: 'int' }],
+            answers: { cf: q, e1: xe, e2: ye },
+            hint: HINT_DIV + ' Work on each piece separately: the numbers, then the x&rsquo;s, then the y&rsquo;s.',
+            explanation: '<b>Divide the coefficients, then subtract exponents for each variable separately:</b>' +
+                '<div class="rewrite">' + n1 + ' &divide; ' + d2 + ' = ' + q + '</div>' +
+                '<div class="rewrite">x: ' + xa + ' &minus; ' + xb + ' = ' + xe + '</div>' +
+                '<div class="rewrite">y: ' + ya + ' &minus; ' + yb + ' = ' + ye + '</div>' +
+                ((xb === 1 || yb === 1) ? 'A variable with no exponent written has exponent 1. ' : '') +
+                'Answer: ' + q + 'x<sup>' + xe + '</sup>y<sup>' + ye + '</sup>',
+            answerLine: q + 'x<sup>' + xe + '</sup>y<sup>' + ye + '</sup>'
+        };
+    }
     if (subtype === 'simple') {
         var A = ri(5, 12), B = ri(2, A - 1), e = A - B;
         return {
@@ -1011,8 +1124,83 @@ function buildPowPow() {
     };
 }
 
+/* (C x^a y^b)^n. Coefficient/power pairs are chosen so C^n stays something a
+   student can work out by hand (largest is 5^3 = 125). */
+var DIST_COEF_POWERS = [[2, 2], [2, 3], [2, 4], [2, 5], [3, 2], [3, 3], [4, 2], [4, 3], [5, 2], [5, 3]];
+
 function buildProdQuot() {
-    var subtype = pick(['product_simple', 'quotient_simple', 'product_coef', 'product_three', 'quotient_coef_num']);
+    /* 'product_coef_powers' -- a coefficient and two variables that already
+       carry exponents, all raised to a power (IRA, 2026-10-09) -- is listed
+       twice so it comes up about a third of the time. */
+    /* Weighted out of 20 (IRA, 2026-10-09). The shapes Ira asked for --
+       (2x^4)^2, (3x^2y^5)^2 and (x^3/y^4)^2, i.e. factors that already carry
+       exponents -- are 13 in 20. (Cxy)^n, e.g. (4xy)^4, is 1 in 20. */
+    var subtype = pick(['product_simple', 'quotient_simple',
+                        'product_coef', 'product_coef',
+                        'quotient_coef_num', 'quotient_coef_num',
+                        'product_three',
+                        'product_coef_power1', 'product_coef_power1', 'product_coef_power1', 'product_coef_power1',
+                        'product_coef_powers', 'product_coef_powers', 'product_coef_powers',
+                        'product_coef_powers', 'product_coef_powers',
+                        'quotient_powers', 'quotient_powers', 'quotient_powers', 'quotient_powers']);
+    if (subtype === 'quotient_powers') {
+        var qa = ri(2, 6), qb = ri(2, 6), qn = ri(2, 4), qx = qa * qn, qy = qb * qn;
+        var qInner = fracHtml('x<sup>' + qa + '</sup>', 'y<sup>' + qb + '</sup>');
+        return {
+            category: 'prodquot', subtype: subtype,
+            html: bigParenWrap(qInner) + '<sup class="bp-exp">' + qn + '</sup> = ' + fracHtml('x' + expSlot('b0'), 'y' + expSlot('b1')),
+            blanks: [{ id: 'b0', key: 'e1', kind: 'int' }, { id: 'b1', key: 'e2', kind: 'int' }],
+            answers: { e1: qx, e2: qy },
+            hint: HINT_PRODQUOT + ' The power goes to the top and to the bottom; where they already have exponents, <b>multiply</b> the exponents.',
+            explanation: 'The outer exponent ' + qn + ' goes to <b>the top and the bottom</b> of the fraction. ' +
+                'Each already has an exponent, so multiply the exponents.' +
+                '<div class="rewrite">' + bigParenWrap(qInner) + '<sup class="bp-exp">' + qn + '</sup> = ' +
+                fracHtml('(x<sup>' + qa + '</sup>)<sup>' + qn + '</sup>', '(y<sup>' + qb + '</sup>)<sup>' + qn + '</sup>') + '</div>' +
+                '<div class="rewrite">top: (x<sup>' + qa + '</sup>)<sup>' + qn + '</sup> = x<sup>' + qa + '&times;' + qn + '</sup> = x<sup>' + qx + '</sup></div>' +
+                '<div class="rewrite">bottom: (y<sup>' + qb + '</sup>)<sup>' + qn + '</sup> = y<sup>' + qb + '&times;' + qn + '</sup> = y<sup>' + qy + '</sup></div>' +
+                'Answer: ' + fracHtml('x<sup>' + qx + '</sup>', 'y<sup>' + qy + '</sup>'),
+            answerLine: fracHtml('x<sup>' + qx + '</sup>', 'y<sup>' + qy + '</sup>')
+        };
+    }
+    if (subtype === 'product_coef_power1') {
+        var pr1 = pick(DIST_COEF_POWERS), K1 = pr1[0], n1 = pr1[1], cf1 = Math.pow(K1, n1);
+        var xa1 = ri(2, 6), xe1 = xa1 * n1;
+        return {
+            category: 'prodquot', subtype: subtype,
+            html: '(' + K1 + 'x<sup>' + xa1 + '</sup>)<sup>' + n1 + '</sup> = ' + blankInline('b0') + 'x' + expSlot('b1'),
+            blanks: [{ id: 'b0', key: 'cf', kind: 'int' }, { id: 'b1', key: 'e', kind: 'int' }],
+            answers: { cf: cf1, e: xe1 },
+            hint: HINT_PRODQUOT + ' When a factor already has an exponent, <b>multiply</b> the exponents.',
+            explanation: 'The outer exponent ' + n1 + ' goes to <b>both factors</b> inside the parentheses: the ' + K1 + ' and the x<sup>' + xa1 + '</sup>.' +
+                '<div class="rewrite">(' + K1 + 'x<sup>' + xa1 + '</sup>)<sup>' + n1 + '</sup> = ' +
+                K1 + '<sup>' + n1 + '</sup> &middot; (x<sup>' + xa1 + '</sup>)<sup>' + n1 + '</sup></div>' +
+                '<div class="rewrite">' + K1 + '<sup>' + n1 + '</sup> = ' + cf1 + '</div>' +
+                '<div class="rewrite">(x<sup>' + xa1 + '</sup>)<sup>' + n1 + '</sup> = x<sup>' + xa1 + '&times;' + n1 + '</sup> = x<sup>' + xe1 + '</sup></div>' +
+                'Answer: ' + cf1 + 'x<sup>' + xe1 + '</sup>',
+            answerLine: cf1 + 'x<sup>' + xe1 + '</sup>'
+        };
+    }
+    if (subtype === 'product_coef_powers') {
+        var pr = pick(DIST_COEF_POWERS), K = pr[0], n = pr[1], cfk = Math.pow(K, n);
+        var xa = ri(2, 5), yb = ri(2, 5), xe = xa * n, ye = yb * n;
+        return {
+            category: 'prodquot', subtype: subtype,
+            html: '(' + K + 'x<sup>' + xa + '</sup>y<sup>' + yb + '</sup>)<sup>' + n + '</sup> = ' +
+                  blankInline('b0') + 'x' + expSlot('b1') + 'y' + expSlot('b2'),
+            blanks: [{ id: 'b0', key: 'cf', kind: 'int' }, { id: 'b1', key: 'e1', kind: 'int' }, { id: 'b2', key: 'e2', kind: 'int' }],
+            answers: { cf: cfk, e1: xe, e2: ye },
+            hint: HINT_PRODQUOT + ' When a factor already has an exponent, <b>multiply</b> the exponents.',
+            explanation: 'The outer exponent ' + n + ' goes to <b>every factor</b> inside the parentheses. ' +
+                'Where a factor already has an exponent, multiply the exponents.' +
+                '<div class="rewrite">(' + K + 'x<sup>' + xa + '</sup>y<sup>' + yb + '</sup>)<sup>' + n + '</sup> = ' +
+                K + '<sup>' + n + '</sup> &middot; (x<sup>' + xa + '</sup>)<sup>' + n + '</sup> &middot; (y<sup>' + yb + '</sup>)<sup>' + n + '</sup></div>' +
+                '<div class="rewrite">' + K + '<sup>' + n + '</sup> = ' + cfk + '</div>' +
+                '<div class="rewrite">(x<sup>' + xa + '</sup>)<sup>' + n + '</sup> = x<sup>' + xa + '&times;' + n + '</sup> = x<sup>' + xe + '</sup></div>' +
+                '<div class="rewrite">(y<sup>' + yb + '</sup>)<sup>' + n + '</sup> = y<sup>' + yb + '&times;' + n + '</sup> = y<sup>' + ye + '</sup></div>' +
+                'Answer: ' + cfk + 'x<sup>' + xe + '</sup>y<sup>' + ye + '</sup>',
+            answerLine: cfk + 'x<sup>' + xe + '</sup>y<sup>' + ye + '</sup>'
+        };
+    }
     if (subtype === 'product_simple') {
         var A = ri(2, 6);
         return {
@@ -1028,10 +1216,10 @@ function buildProdQuot() {
         var A2 = ri(2, 6);
         return {
             category: 'prodquot', subtype: subtype,
-            html: bigParenWrap(fracHtml('x', 'y')) + '<sup>' + A2 + '</sup> = ' + fracHtml('x' + expSlot('b0'), 'y' + expSlot('b1')),
+            html: bigParenWrap(fracHtml('x', 'y')) + '<sup class="bp-exp">' + A2 + '</sup> = ' + fracHtml('x' + expSlot('b0'), 'y' + expSlot('b1')),
             blanks: [{ id: 'b0', key: 'e1', kind: 'int' }, { id: 'b1', key: 'e2', kind: 'int' }], answers: { e1: A2, e2: A2 },
             hint: HINT_PRODQUOT,
-            explanation: 'The outer exponent distributes to both the top and the bottom.<div class="rewrite">' + bigParenWrap(fracHtml('x', 'y')) + '<sup>' + A2 + '</sup> = ' + fracHtml('x<sup>' + A2 + '</sup>', 'y<sup>' + A2 + '</sup>') + '</div>',
+            explanation: 'The outer exponent distributes to both the top and the bottom.<div class="rewrite">' + bigParenWrap(fracHtml('x', 'y')) + '<sup class="bp-exp">' + A2 + '</sup> = ' + fracHtml('x<sup>' + A2 + '</sup>', 'y<sup>' + A2 + '</sup>') + '</div>',
             answerLine: fracHtml('x<sup>' + A2 + '</sup>', 'y<sup>' + A2 + '</sup>')
         };
     }
@@ -1047,7 +1235,9 @@ function buildProdQuot() {
         };
     }
     if (subtype === 'product_three') {
-        var C2 = ri(2, 4), A4 = ri(2, 4), cf2 = Math.pow(C2, A4);
+        /* Same hand-workable coefficient powers as product_coef_powers, so it
+           can no longer produce 4^4 = 256. */
+        var pr3 = pick(DIST_COEF_POWERS), C2 = pr3[0], A4 = pr3[1], cf2 = Math.pow(C2, A4);
         return {
             category: 'prodquot', subtype: subtype,
             html: '(' + C2 + 'xy)<sup>' + A4 + '</sup> = ' + blankInline('b0') + 'x' + expSlot('b1') + 'y' + expSlot('b2'),
@@ -1060,7 +1250,7 @@ function buildProdQuot() {
     var C3 = ri(2, 4), A5 = ri(2, 4), cf3 = Math.pow(C3, A5);
     return {
         category: 'prodquot', subtype: 'quotient_coef_num',
-        html: bigParenWrap(fracHtml('x', String(C3))) + '<sup>' + A5 + '</sup> = ' + fracHtml('x' + expSlot('b0'), blankInline('b1')),
+        html: bigParenWrap(fracHtml('x', String(C3))) + '<sup class="bp-exp">' + A5 + '</sup> = ' + fracHtml('x' + expSlot('b0'), blankInline('b1')),
         blanks: [{ id: 'b0', key: 'e', kind: 'int' }, { id: 'b1', key: 'cf', kind: 'int' }], answers: { e: A5, cf: cf3 },
         hint: HINT_PRODQUOT,
         explanation: 'The exponent applies to both the x on top and the ' + C3 + ' on the bottom.<div class="rewrite">' + C3 + '<sup>' + A5 + '</sup> = ' + cf3 + '</div>Answer: ' + fracHtml('x<sup>' + A5 + '</sup>', String(cf3)),
@@ -1077,7 +1267,8 @@ var CATEGORY_BUILDERS = {
    Adaptive picker for Mixed mode
    ===================================================================== */
 function pickAdaptiveCategory() {
-    var weights = CATS.map(function (c) {
+    var pool = mixCats();
+    var weights = pool.map(function (c) {
         var s = stats[c];
         if (s.t < 3) return 1.0;
         var acc = s.c / s.t;
@@ -1085,11 +1276,11 @@ function pickAdaptiveCategory() {
     });
     var total = weights.reduce(function (a, b) { return a + b; }, 0);
     var r = Math.random() * total;
-    for (var i = 0; i < CATS.length; i++) {
+    for (var i = 0; i < pool.length; i++) {
         r -= weights[i];
-        if (r <= 0) return CATS[i];
+        if (r <= 0) return pool[i];
     }
-    return CATS[0];
+    return pool[0];
 }
 
 /* =====================================================================
@@ -1131,6 +1322,10 @@ function spokenFromHtml(html) {
         var t = inner.replace(/^\s*\(([\s\S]*)\)\s*$/, '$1');
         return ' to the power of ' + t + ' ';
     });
+    /* Each worked step in an explanation is its own block. Without a pause
+       they ran together aloud ("...to the power of 3 2 to the power of 3
+       equals 8"), so a block end becomes a sentence break. */
+    s = s.replace(/<\/div>/gi, '. ');
     // Strip remaining tags
     s = s.replace(/<[^>]+>/g, ' ');
     // Entities and symbols to words
@@ -1144,7 +1339,7 @@ function spokenFromHtml(html) {
          .replace(/&amp;/g, ' and ');
     s = s.replace(/\(/g, ' open parenthesis ').replace(/\)/g, ' close parenthesis ');
     s = s.replace(/\//g, ' over ').replace(/=/g, ' equals ');
-    return s.replace(/\s+/g, ' ').trim();
+    return s.replace(/\s+/g, ' ').replace(/ \./g, '.').replace(/\.(\s*\.)+/g, '.').trim();
 }
 
 /* The 1100ms "advance to the next problem" delay used to run unconditionally.
@@ -1164,6 +1359,7 @@ function generateProblem() {
     currentProblem = CATEGORY_BUILDERS[cat]();
     currentProblem.trackCategory = cat;
     missRecorded = false;
+    problemResolved = false;
     renderProblem();
 }
 
@@ -1203,11 +1399,19 @@ function renderProblem() {
     hideHelperBox('explain', 'explain-toggle', 'Show Explanation');
     hideHelperBox('answer-box', 'answer-toggle', 'Show Answer');
     document.getElementById('helper-buttons').style.display = 'block';
-    setTimeout(function () {
+    /* Only the newest render may move focus: a pending focus from an earlier
+       problem must never fire after a newer one has been drawn. */
+    if (focusTimer !== null) { clearTimeout(focusTimer); focusTimer = null; }
+    /* Turning the Mixed switch off can replace the problem on screen; focus
+       stays on the switch the student just pressed instead of jumping away. */
+    if (suppressAutoFocus) { suppressAutoFocus = false; return; }
+    focusTimer = setTimeout(function () {
+        focusTimer = null;
         var el = document.getElementById(p.blanks[0].id);
         if (el) el.focus();
     }, 100);
 }
+var focusTimer = null;
 
 /* Hide superscripts, fraction scaffolding and stretched parentheses from the
    accessibility tree so the expression is not read as raw markup alongside the
@@ -1298,6 +1502,20 @@ function blankCorrect(kind, raw, expected) {
 function checkAnswer() {
     var p = currentProblem;
     var feedback = document.getElementById('feedback');
+    /* OVERSIGHT, 2026-10-09: a problem is graded ONCE. The answer boxes stay
+       live through the 1100ms advance, so a second Enter -- or a second click
+       on Submit -- used to re-grade the same correct answer and book it again:
+       three Enters on one problem gave 3/3 and a streak of 3 while the problem
+       counter stayed at 1. Pressing Enter after grading now means "next", which
+       is the ruling the Polynomial Operations audit settled, and it also rewards
+       the fast keyboard student rather than inflating their figures. */
+    if (problemResolved) {
+        cancelAdvance();
+        problemNum++;
+        generateProblem();
+        updateDisplay();
+        return;
+    }
     for (var i = 0; i < p.blanks.length; i++) {
         var el = document.getElementById(p.blanks[i].id);
         if (!el || el.value.trim() === '') {
@@ -1329,6 +1547,7 @@ function checkAnswer() {
         }
         feedback.textContent = pick(['Correct!', 'Nice!', 'Got it!', 'Perfect!', 'Nailed it!', 'Yes!']);
         feedback.className = 'feedback correct';
+        problemResolved = true;
         updateDisplay();
         saveState();
         cancelAdvance();
@@ -1470,7 +1689,13 @@ function buildRecommendation() {
     CATS.forEach(function (c) { totalT += stats[c].t; });
     if (totalT === 0) return null;
 
-    var untried = CATS.filter(function (c) { return stats[c].t === 0; });
+    /* Fractional exponents are taught later, so until a student has tried them
+       or switched them on for Mixed, the panel does not nudge them toward that
+       category or hold back "great work" because of it. */
+    var considered = CATS.filter(function (c) {
+        return c !== 'frac' || mixIncludesFrac || stats.frac.t > 0;
+    });
+    var untried = considered.filter(function (c) { return stats[c].t === 0; });
     if (untried.length > 0) {
         var names = untried.map(function (c) { return CAT_LABELS[c]; });
         var list = names.length > 1 ? (names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1]) : names[0];
@@ -1478,13 +1703,14 @@ function buildRecommendation() {
     }
 
     var weakest = null, weakestPct = 101;
-    CATS.forEach(function (c) {
+    considered.forEach(function (c) {
         var s = stats[c];
         var p = s.c / s.t * 100;
         if (p < weakestPct) { weakestPct = p; weakest = c; }
     });
     if (weakestPct >= 85) {
-        return '<b>Great work overall!</b> You are strong across all seven categories. Try the Mixed mode to keep sharp.';
+        var countWord = { 6: 'six', 7: 'seven' }[considered.length] || String(considered.length);
+        return '<b>Great work overall!</b> You are strong across all ' + countWord + ' categories. Try the Mixed mode to keep sharp.';
     }
     return '<b>Focus area:</b> ' + CAT_LABELS[weakest] + ' is your weakest (' + Math.round(weakestPct) + '%). Try the ' + CAT_SHORT[weakest] + ' mode for focused practice.';
 }
@@ -1532,15 +1758,37 @@ function skipProblem() {
 function setMode(m) {
     mode = m;
     var btns = document.querySelectorAll('.mode-btn');
-    var order = ['mul', 'div', 'zero', 'neg', 'frac', 'powpow', 'prodquot', 'mix'];
+    var order = ['mul', 'div', 'zero', 'neg', 'powpow', 'prodquot', 'frac', 'mix'];   // must match the button order
     for (var i = 0; i < btns.length; i++) {
         var on = order[i] === m;
         btns[i].classList.toggle('active', on);
         btns[i].setAttribute('aria-pressed', on ? 'true' : 'false');
     }
+    syncMixSwitch();
     streak = 0;
     generateProblem();
     updateDisplay();
+}
+
+/* The switch only means something in Mixed, so it is only shown there.
+   display:none also takes it out of the tab order in every other mode. */
+function syncMixSwitch() {
+    var wrap = document.getElementById('mix-options');
+    if (wrap) wrap.style.display = (mode === 'mix') ? 'flex' : 'none';
+    var sw = document.getElementById('mix-frac-switch');
+    if (sw) sw.setAttribute('aria-checked', mixIncludesFrac ? 'true' : 'false');
+}
+function toggleMixFrac() {
+    mixIncludesFrac = !mixIncludesFrac;
+    syncMixSwitch();
+    saveState();
+    /* Turning it OFF while a fractional-exponent problem is on screen swaps
+       that problem out, since the student has just said they don't want it. */
+    if (mode === 'mix' && !mixIncludesFrac && currentProblem && currentProblem.trackCategory === 'frac') {
+        suppressAutoFocus = true;
+        generateProblem();
+        updateDisplay();
+    }
 }
 
 function updateDisplay() {
@@ -1576,7 +1824,8 @@ function saveState() {
     try {
         localStorage.setItem(SAVE_KEY, JSON.stringify({
             stats: stats, bestStreak: bestStreak, problemNum: problemNum,
-            fracProgress: fracProgress, confettiOn: confettiOn
+            fracProgress: fracProgress, confettiOn: confettiOn,
+            mixIncludesFrac: mixIncludesFrac
         }));
     } catch (e) { /* storage unavailable -- play without saving */ }
 }
@@ -1599,6 +1848,9 @@ function loadState() {
             problemNum = safeCount(st.problemNum, 1e6);
             fracProgress = safeCount(st.fracProgress, 1e6);
             confettiOn = st.confettiOn !== false;
+            /* Strict true only: anything else (missing, tampered, a string)
+               falls back to the default, which is OFF. */
+            mixIncludesFrac = st.mixIncludesFrac === true;
         }
     } catch (e) { /* corrupt or unreadable -- start fresh rather than fail */ }
 }
@@ -1707,6 +1959,7 @@ function syncConfettiButton() {
 loadState();
 drawInsignia();
 syncConfettiButton();
+syncMixSwitch();
 generateProblem();
 updateDisplay();
 </script>
