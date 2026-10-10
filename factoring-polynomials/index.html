@@ -1,0 +1,1811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>Factoring Polynomials</title>
+<meta name="theme-color" content="#1b2450">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&amp;display=swap" rel="stylesheet">
+<style>
+    /* ===== MIDNIGHT SCHOLAR - navy stage, white card, violet + mint accents ===== */
+    * { box-sizing: border-box; }
+    button, input, select, textarea { font-family: inherit; }
+    body {
+        font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+        background:
+            radial-gradient(900px 500px at 85% -10%, rgba(124, 58, 237, 0.28), transparent 60%),
+            radial-gradient(800px 500px at -10% 110%, rgba(16, 185, 129, 0.18), transparent 55%),
+            linear-gradient(160deg, #141b3d 0%, #1b2450 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 16px 12px;
+        margin: 0;
+        color: #1e2a5e;
+    }
+    .card {
+        background: #ffffff;
+        border-radius: 22px;
+        box-shadow: 0 24px 60px rgba(8, 12, 40, 0.55);
+        max-width: 720px;
+        width: 100%;
+        padding: 30px 24px 22px;
+        position: relative;
+        overflow: hidden;
+    }
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+    }
+    /* Title-width underline (design system 3.1) */
+    h1 {
+        text-align: center;
+        color: #1e2a5e;
+        margin: 4px auto 6px;
+        font-size: 25px;
+        letter-spacing: 0.3px;
+        width: fit-content;
+        max-width: 100%;
+    }
+    h1::after {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 4px;
+        border-radius: 2px;
+        margin: 8px auto 14px;
+        background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981);
+    }
+    .info { display: flex; justify-content: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+    .info-item {
+        font-size: 12px; font-weight: 800; background: #eef0fb; color: #2e3d8f;
+        padding: 6px 14px; border-radius: 999px;
+    }
+
+    /* ===== Category tiles: native radios, Favorite gradient ===== */
+    .cat-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px 12px;
+        padding: 6px 8px;
+        margin: 0 0 12px;
+        border: none;
+    }
+    .cat-tile { position: relative; display: block; cursor: pointer; }
+    .cat-radio {
+        position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0;
+    }
+    .tile-face {
+        display: flex; align-items: center; justify-content: center; text-align: center;
+        min-height: 44px; padding: 8px 10px; border-radius: 999px;
+        background: linear-gradient(135deg, #1e3a5f, #0b7a70);
+        color: #ffffff; font-size: 12.5px; font-weight: 800; line-height: 1.2;
+        transition: box-shadow 0.15s, filter 0.15s, transform 0.15s;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .cat-tile:hover .tile-face { filter: brightness(0.92); }
+    /* Selected: a white gap, then a bright green ring (green #059669 is
+       3.77:1 on white, so the ring itself passes 1.4.11). */
+    .cat-radio:checked + .tile-face {
+        box-shadow: 0 0 0 3px #ffffff, 0 0 0 6px #059669, 0 6px 14px rgba(16, 185, 129, 0.35);
+    }
+    .cat-radio:focus-visible + .tile-face { outline: 3px solid #7c3aed; outline-offset: 7px; }
+
+    /* ===== Mixed options ===== */
+    .mixed-box {
+        display: flex; flex-direction: column; gap: 8px;
+        background: #f4f6fd; border-radius: 14px; padding: 12px 16px; margin: 0 0 12px;
+    }
+    .mixed-note { font-size: 12px; font-weight: 700; color: #5d6798; text-align: center; margin: 0; }
+    .switch-row { display: flex; justify-content: center; gap: 10px 28px; flex-wrap: wrap; }
+    /* Toggle switch: a real button with aria-pressed and a visible rim
+       (design system 4.2). */
+    .switch-btn {
+        display: inline-flex; align-items: center; gap: 10px; background: none; border: none;
+        padding: 6px 4px; min-height: 44px; cursor: pointer; color: #4a5480;
+        font-size: 12.5px; font-weight: 800; border-radius: 10px;
+        -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+    }
+    .switch-btn:focus { outline: 3px solid #7c3aed; outline-offset: 2px; }
+    .track {
+        position: relative; display: inline-block; width: 42px; height: 24px; flex-shrink: 0;
+        border-radius: 999px; background: #d5d9e8; border: 1px solid #8a93b8;
+        transition: background 0.2s, border-color 0.2s;
+    }
+    .knob {
+        position: absolute; left: 2px; top: 2px; width: 18px; height: 18px; border-radius: 50%;
+        background: #ffffff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); transition: transform 0.2s;
+    }
+    .switch-btn[aria-pressed="true"] .track { background: #10b981; border-color: #0b7a70; }
+    .switch-btn[aria-pressed="true"] .knob { transform: translateX(18px); }
+
+    /* ===== Problem ===== */
+    .instruction { text-align: center; font-size: 13.5px; font-weight: 800; color: #2e3d8f; margin: 4px 0 8px; }
+    .equation {
+        font-size: 25px; font-weight: bold; text-align: center;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace; color: #1e2a5e;
+        background: #eef0fb; border: 2px solid #c7cdf0; border-radius: 14px;
+        padding: 16px 12px; margin: 0 auto 14px; overflow-wrap: break-word;
+    }
+    sup { font-size: 0.68em; line-height: 0; }
+    .banner {
+        background: #f7f5ff; border: 2px solid #d8ccf7; border-radius: 12px;
+        padding: 10px 14px; margin: 0 0 14px; text-align: center;
+        font-size: 14px; font-weight: 700; color: #4b3bbd;
+    }
+    .banner-label { font-size: 11px; font-weight: 800; color: #6a5fae; letter-spacing: 0.3px; margin-right: 6px; }
+    /* Label on its own line, one formula per line: easier to read than one long row. */
+    .reminder {
+        display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px;
+        background: #f7f5ff; border: 2px solid #d8ccf7; border-radius: 12px;
+        padding: 10px 14px; margin: 0 0 14px; color: #4b3bbd;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace; font-weight: bold; font-size: 15px;
+    }
+    .reminder .banner-label { font-family: 'Nunito', sans-serif; }
+    .answer-area { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .input-label { font-size: 13px; font-weight: 800; color: #4a5480; }
+    #answer {
+        width: 100%; max-width: 440px; font-size: 22px; font-weight: bold; text-align: center;
+        padding: 10px 8px; border: 3px solid #7c3aed; border-radius: 12px; color: #1e2a5e;
+        background: #ffffff; font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    }
+    /* Focus stays violet: green is reserved for a solved answer, so the two
+       states can never be mistaken for each other. */
+    #answer:focus { outline: none; border-color: #5b21b6; box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.28); }
+    #answer.field-error {
+        border-color: #6d28d9;
+        background: #f3eefe
+            repeating-linear-gradient(90deg, #6d28d9 0, #6d28d9 5px, rgba(0,0,0,0) 5px, rgba(0,0,0,0) 10px)
+            bottom left / 100% 3px no-repeat;
+        box-shadow: 0 0 0 4px rgba(109, 40, 217, 0.35);
+    }
+    #answer:disabled { background: #f3f4f8; color: #5d6798; border-color: #c7cdf0; }
+    /* Solved: green border and mint field, plus a check mark so the state is
+       not carried by colour alone. #047857 is 5.21:1 on white; the student's
+       answer stays in dark green ink (#065f46) so it is easy to read back. */
+    #answer.field-correct, #answer.field-correct:disabled {
+        border-color: #047857; color: #065f46; opacity: 1; -webkit-text-fill-color: #065f46;
+        background: #ecfdf5 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4 10.5l4 4 8-9' fill='none' stroke='%23047857' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 12px center / 20px 20px;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.22);
+        padding-right: 40px; padding-left: 40px;
+    }
+    .key-row { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 10px 0 2px; }
+    button {
+        border: none; border-radius: 12px; cursor: pointer; font-weight: 800;
+        transition: background 0.2s, filter 0.2s, transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+        -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+    }
+    button:active { transform: scale(0.95); }
+    /* Focus ring on every focus, not only keyboard focus: the suite's games
+       move focus in script (Next, Next Step, dialogs) and the ring must show. */
+    button:focus { outline: 3px solid #7c3aed; outline-offset: 2px; }
+    .key-btn {
+        background: #e6e9f6; color: #2e3d8f; padding: 10px 14px; font-size: 15px;
+        min-width: 46px; min-height: 44px; font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    }
+    .key-btn:hover { background: #d9def2; }
+    .submit-row { text-align: center; margin: 10px 0 2px; }
+    .submit-btn {
+        padding: 12px 26px; font-size: 15px; color: #ffffff; min-height: 46px;
+        background: linear-gradient(135deg, #2e3d8f, #4b3bbd);
+        box-shadow: 0 6px 16px rgba(46, 61, 143, 0.35);
+    }
+    .submit-btn:hover { filter: brightness(0.92); }
+    .next-btn { background: linear-gradient(135deg, #047857, #065f46); box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35); }
+    /* Feedback sits right under Submit, where the eye goes after pressing it. */
+    /* Feedback sits directly under the answer box; it takes no space when empty. */
+    .feedback { text-align: center; margin: 4px 0 2px; line-height: 1.45; max-width: 620px; }
+    .feedback:empty { margin: 0; }
+    .correct { color: #047857; font-size: 20px; font-weight: 800; }
+    .incorrect { color: #1e2a5e; font-size: 18px; font-weight: 700; }
+    .feedback .tip { display: block; font-size: 15px; margin-top: 4px; }
+    .feedback .exp { font-family: 'Consolas', 'SF Mono', 'Menlo', monospace; font-weight: bold; white-space: nowrap; }
+    #next-row { text-align: center; margin: 14px 0 6px; }
+    #next-row:empty { margin: 0; }
+
+    /* ===== Helpers ===== */
+    /* Breathing room: a clear gap between the answer controls and the
+       Hint / Answer / Solution / Skip row. */
+    .helpers { text-align: center; margin: 84px 0 8px; }
+    .help-btn {
+        background: #ede7fd; color: #5b21b6; border: 1.5px solid #8b6fe8;
+        margin: 4px; padding: 11px 16px; font-size: 12.5px; min-height: 44px;
+    }
+    .help-btn:hover { background: #e2d8fb; }
+    .panel {
+        background: #f7f5ff; border: 2px solid #d8ccf7; border-radius: 14px;
+        padding: 15px; margin: 12px 0; color: #3b3568; font-size: 14px; line-height: 1.5;
+    }
+    .panel-title { font-weight: 800; margin-bottom: 6px; }
+    .math { font-family: 'Consolas', 'SF Mono', 'Menlo', monospace; font-weight: bold; color: #1e2a5e; }
+    .solution-step { padding: 9px 0 6px; border-top: 1px dashed rgba(0, 0, 0, 0.15); }
+    .solution-eq { font-family: 'Consolas', 'SF Mono', 'Menlo', monospace; font-weight: bold; font-size: 16px; margin: 6px 0 2px 18px; color: #1e2a5e; }
+    .step-controls { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
+    .steps-left { font-size: 12.5px; font-weight: 800; color: #5d6798; }
+    .sol-formula {
+        display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px 12px;
+        background: #ffffff; border: 2px solid #d8ccf7; border-radius: 10px; padding: 8px 12px; margin: 4px 0 10px;
+    }
+    .sol-formula .math { color: #4b3bbd; font-size: 16px; }
+    .alt-block { margin-top: 14px; padding-top: 10px; border-top: 2px solid #d8ccf7; }
+    .done-line { text-align: center; margin-top: 10px; font-weight: 800; color: #047857; }
+    /* Stacked fraction (design system 5) */
+    .frac { display: inline-flex; flex-direction: column; align-items: stretch; vertical-align: middle; margin: 0 2px; text-align: center; }
+    .frac-num, .frac-den { padding: 2px 8px; }
+    .frac-bar { height: 2px; background: #1e2a5e; border-radius: 2px; margin: 3px 0; }
+    .frac-sign { margin-right: 2px; }
+    .div-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 26px; }
+    .div-item { display: inline-flex; align-items: center; gap: 4px; }
+
+    /* ===== Settings, stats ===== */
+    .settings-row { display: flex; justify-content: center; margin-top: 18px; padding-top: 12px; border-top: 1px solid #e6e9f6; }
+    .stats-row { text-align: center; margin-top: 8px; }
+    .stats-btn { background: #ede7fd; color: #5b21b6; border: 1.5px solid #8b6fe8; border-radius: 999px; padding: 9px 18px; font-size: 12.5px; min-height: 40px; }
+    .stats-overlay {
+        position: fixed; inset: 0; background: rgba(20, 27, 61, 0.82);
+        display: flex; align-items: center; justify-content: center; z-index: 10000; padding: 16px;
+    }
+    .stats-panel {
+        background: #ffffff; border-radius: 20px; padding: 24px 22px; max-width: 460px; width: 100%;
+        max-height: 85vh; overflow-y: auto; box-shadow: 0 24px 60px rgba(8, 12, 40, 0.55);
+    }
+    .stats-panel:focus { outline: none; }
+    .stats-panel h2 { color: #1e2a5e; font-size: 19px; text-align: center; margin-top: 0; }
+    .stat-row { margin: 12px 0; }
+    .stat-name { font-size: 13px; font-weight: 800; color: #1e2a5e; margin-bottom: 4px; }
+    .stat-bar-wrap { background: #e6e9f6; border-radius: 999px; height: 14px; overflow: hidden; }
+    .stat-bar { height: 100%; border-radius: 999px; }
+    .tier-low { background: linear-gradient(90deg, #2e3d8f, #8b96d8); }
+    .tier-mid { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+    .tier-full { background: linear-gradient(90deg, #059669, #34d399); }
+    .stat-num { font-size: 11.5px; color: #5d6798; margin-top: 3px; text-align: right; font-weight: 700; }
+    .best-line { text-align: center; font-size: 13px; font-weight: 800; color: #2e3d8f; margin: 6px 0 4px; }
+    .recommend {
+        background: #f3eefe; border: 2px solid #c4b5fd; border-radius: 12px; padding: 10px;
+        margin-top: 14px; font-size: 13px; font-weight: 700; color: #6d28d9;
+    }
+    .stats-actions { text-align: center; margin-top: 18px; }
+    .close-btn { background: #e6e9f6; color: #2e3d8f; padding: 11px 20px; font-size: 14px; }
+    .close-btn:hover { background: #d9def2; }
+    .reset-btn { background: #4a5480; color: #ffffff; margin-left: 8px; padding: 11px 20px; font-size: 14px; }
+    .reset-btn:hover { background: #3c4569; }
+    .reset-btn.armed { background: #1e2a5e; }
+
+    /* ===== Insignia: 62px everywhere ===== */
+    .insignia { display: block; margin: 22px auto 4px; width: 62px; opacity: 0.9; }
+    .insignia-caption { text-align: center; font-size: 6.5px; letter-spacing: 1.2px; color: #5d6798; opacity: 0.9; margin-top: 2px; font-weight: 800; }
+
+    /* ===== Confetti ===== */
+    .confetti { position: fixed; opacity: 1; pointer-events: none; z-index: 9999; }
+    @keyframes confetti-fall {
+        0% { transform: translateY(-20px) rotate(0deg); }
+        100% { transform: translateY(110vh) rotate(720deg); }
+    }
+    @keyframes confetti-fall-slow {
+        0% { transform: translateY(-20px) rotate(0deg) scale(1); }
+        100% { transform: translateY(115vh) rotate(1080deg) scale(0.85); }
+    }
+    .sparkle {
+        position: fixed; width: 20px; height: 20px; border-radius: 50%; pointer-events: none; z-index: 9999;
+        background: radial-gradient(circle, #fff 0%, #ffd700 50%, transparent 70%);
+        animation: sparkle 0.5s ease-in-out infinite;
+    }
+    @keyframes sparkle { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.6); } }
+
+    .sr-only {
+        position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+        overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+    }
+    [hidden] { display: none !important; }
+    @media (prefers-reduced-motion: reduce) {
+        .confetti, .sparkle { display: none !important; }
+        * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+    @media (max-width: 560px) {
+        .cat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 480px) {
+        .card { padding: 24px 14px 20px; }
+        h1 { font-size: 21px; }
+        .equation { font-size: 19px; padding: 12px 8px; }
+        #answer { font-size: 19px; }
+        .reminder { font-size: 13px; }
+        .key-row { gap: 6px; }
+        .key-btn { min-width: 40px; padding: 10px 9px; }
+    }
+</style>
+</head>
+<body>
+<main class="card" id="game-card">
+    <h1>Factoring Polynomials</h1>
+
+    <div class="info">
+        <div class="info-item">Problem: <span id="problemNum">1</span></div>
+        <div class="info-item">Streak: <span id="streak">0</span></div>
+        <div class="info-item" id="timer-display" hidden></div>
+    </div>
+
+    <div class="cat-grid" id="cat-grid" role="radiogroup" aria-label="Factoring type"></div>
+
+    <div class="mixed-box" id="mixed-box" hidden></div>
+
+    <div class="instruction" aria-hidden="true">Factor completely</div>
+    <div class="equation" id="equation" aria-hidden="true"></div>
+    <p class="sr-only" id="problem-text"></p>
+    <div class="banner" id="banner" hidden></div>
+    <div class="reminder" id="reminder" hidden></div>
+
+    <div class="answer-area">
+        <label class="sr-only" for="answer">Your factored form</label>
+        <input type="text" id="answer" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="e.g. 3x(2x - 5)" aria-describedby="problem-text">
+        <div class="feedback" id="feedback" role="alert" aria-atomic="true"></div>
+    </div>
+    <div class="key-row" id="key-row" role="group" aria-label="Typing keys"></div>
+    <div class="submit-row" id="submit-row"></div>
+
+    <!-- Polite region: announces each new problem in words. -->
+    <div id="problem-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+    <div id="next-row"></div>
+
+    <div class="helpers">
+        <button type="button" class="help-btn" id="hint-btn" aria-expanded="false" aria-controls="hint-box">Show Hint</button>
+        <button type="button" class="help-btn" id="answer-btn" aria-expanded="false" aria-controls="answer-box">Show Answer</button>
+        <button type="button" class="help-btn" id="solution-btn" aria-expanded="false" aria-controls="solution-box">Show Solution</button>
+        <button type="button" class="help-btn" id="skip-btn">Skip</button>
+    </div>
+    <div class="panel" id="hint-box" hidden></div>
+    <div class="panel" id="answer-box" hidden></div>
+    <div class="panel" id="solution-box" hidden></div>
+
+    <div class="settings-row">
+        <button type="button" class="switch-btn" id="sw-confetti" aria-pressed="true"><span class="track" aria-hidden="true"><span class="knob"></span></span><span>Confetti celebrations</span></button>
+    </div>
+    <div class="stats-row"><button type="button" class="stats-btn" id="stats-btn">My Stats</button></div>
+
+    <svg class="insignia" viewBox="-28 -26 56 64" aria-hidden="true" focusable="false">
+        <defs>
+            <linearGradient id="pr-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1e3a5f"/>
+                <stop offset="100%" stop-color="#0d9488"/>
+            </linearGradient>
+        </defs>
+        <path id="pr-path" fill="none" stroke="url(#pr-grad)" stroke-width="1.7" stroke-linejoin="round"/>
+    </svg>
+    <div class="insignia-caption" aria-hidden="true">POLAR ROSE STUDIO</div>
+</main>
+
+<div class="stats-overlay" id="stats-overlay" hidden>
+    <div class="stats-panel" id="stats-panel" role="dialog" aria-modal="true" aria-labelledby="stats-heading" tabindex="-1"></div>
+</div>
+
+<script>
+/* =====================================================================
+   Factoring engine -- polynomial math, answer parser, completeness
+   check, wrong-answer diagnosis, problem generators and worked steps.
+   ES5 only, ASCII-only source. Shared verbatim by the game page and the
+   Node test harness (the harness reads this file and evaluates it).
+   ===================================================================== */
+
+/* ---------- small helpers ---------- */
+function ri(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { var t = b; b = a % b; a = t; } return a; }
+function isSquare(n) { if (n < 0) return false; var r = Math.round(Math.sqrt(n)); return r * r === n; }
+function nz(min, max) { var v = 0; while (v === 0) v = ri(min, max); return v; }
+
+/* ---------- polynomials: coefficient arrays, index = power of x ---------- */
+function pTrim(p) { var q = p.slice(); while (q.length > 1 && q[q.length - 1] === 0) q.pop(); if (q.length === 0) q = [0]; return q; }
+function pDeg(p) { p = pTrim(p); return (p.length === 1 && p[0] === 0) ? -1 : p.length - 1; }
+function pAdd(a, b) { var n = Math.max(a.length, b.length), r = [], i; for (i = 0; i < n; i++) r.push((a[i] || 0) + (b[i] || 0)); return pTrim(r); }
+function pScale(a, k) { var r = [], i; for (i = 0; i < a.length; i++) r.push(a[i] * k); return pTrim(r); }
+function pMul(a, b) {
+    var r = [], i, j;
+    for (i = 0; i < a.length + b.length - 1; i++) r.push(0);
+    for (i = 0; i < a.length; i++) for (j = 0; j < b.length; j++) r[i + j] += a[i] * b[j];
+    return pTrim(r);
+}
+function pEq(a, b) { a = pTrim(a); b = pTrim(b); if (a.length !== b.length) return false; for (var i = 0; i < a.length; i++) if (a[i] !== b[i]) return false; return true; }
+function pContent(p) { var g = 0; for (var i = 0; i < p.length; i++) g = gcd(g, p[i]); return g; }
+function pMulAll(list) { var r = [1]; for (var i = 0; i < list.length; i++) r = pMul(r, list[i]); return r; }
+/* Divide p by (q x - r) exactly; returns null when it does not divide. */
+function pDivLinear(p, q, r) {
+    p = pTrim(p);
+    var n = p.length - 1, out = [], rem = p.slice(), i;
+    for (i = 0; i < n; i++) out.push(0);
+    for (i = n; i >= 1; i--) {
+        if (rem[i] % q !== 0) return null;
+        var c = rem[i] / q;
+        out[i - 1] = c;
+        rem[i] = 0;
+        rem[i - 1] += c * r;
+    }
+    if (rem[0] !== 0) return null;
+    return pTrim(out);
+}
+function divisors(n) { n = Math.abs(n); var d = [], i; for (i = 1; i <= n; i++) if (n % i === 0) d.push(i); return d; }
+/* Number of irreducible non-constant factors over the integers, counted
+   with multiplicity. Peels rational roots; what is left (degree <= 3 after
+   peeling, which every generated problem satisfies) has no rational root
+   and so is irreducible. Independent of the generators, so the tests can
+   check them against it. */
+function irreducibleCount(p) {
+    p = pTrim(p);
+    var g = pContent(p); if (g > 1) p = pScale(p, 1 / g);
+    var count = 0, guard = 0;
+    while (pDeg(p) >= 1 && guard++ < 40) {
+        if (pDeg(p) === 1) { count++; break; }
+        var found = null;
+        if (p[0] === 0) found = [1, 0];
+        else {
+            var ps = divisors(p[0]), qs = divisors(p[p.length - 1]), i, j, s;
+            for (i = 0; i < qs.length && !found; i++) for (j = 0; j < ps.length && !found; j++) for (s = -1; s <= 1 && !found; s += 2) {
+                if (gcd(ps[j], qs[i]) !== 1) continue;
+                if (pDivLinear(p, qs[i], s * ps[j])) found = [qs[i], s * ps[j]];
+            }
+        }
+        if (!found) { count++; break; }
+        p = pDivLinear(p, found[0], found[1]);
+        count++;
+        var g2 = pContent(p); if (g2 > 1) p = pScale(p, 1 / g2);
+    }
+    return count;
+}
+function irreducibleRemainderDeg(p) {
+    p = pTrim(p);
+    var g = pContent(p); if (g > 1) p = pScale(p, 1 / g);
+    var guard = 0;
+    while (pDeg(p) >= 2 && guard++ < 40) {
+        var found = null;
+        if (p[0] === 0) found = [1, 0];
+        else {
+            var ps = divisors(p[0]), qs = divisors(p[p.length - 1]), i, j, s;
+            for (i = 0; i < qs.length && !found; i++) for (j = 0; j < ps.length && !found; j++) for (s = -1; s <= 1 && !found; s += 2) {
+                if (gcd(ps[j], qs[i]) !== 1) continue;
+                if (pDivLinear(p, qs[i], s * ps[j])) found = [qs[i], s * ps[j]];
+            }
+        }
+        if (!found) return pDeg(p);
+        p = pDivLinear(p, found[0], found[1]);
+        var g2 = pContent(p); if (g2 > 1) p = pScale(p, 1 / g2);
+    }
+    return pDeg(p);
+}
+
+/* ---------- display: HTML (entities only) and spoken text ---------- */
+var MINUS = '&#8722;';
+function ordinal(n) { var s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
+function xHTML(d) { if (d === 0) return ''; if (d === 1) return 'x'; return 'x<sup>' + d + '</sup>'; }
+function xSpeech(d) { if (d === 0) return ''; if (d === 1) return 'x'; if (d === 2) return 'x squared'; if (d === 3) return 'x cubed'; return 'x to the ' + ordinal(d); }
+/* |c| x^d without sign */
+function monoAbsHTML(c, d) { c = Math.abs(c); if (d === 0) return String(c); return (c === 1 ? '' : String(c)) + xHTML(d); }
+function monoAbsSpeech(c, d) { c = Math.abs(c); if (d === 0) return String(c); return (c === 1 ? '' : c + ' ') + xSpeech(d); }
+/* A list of [coef, power] terms in the given order (zero terms skipped). */
+function termsHTML(terms) {
+    var out = '', first = true, i;
+    for (i = 0; i < terms.length; i++) {
+        var c = terms[i][0], d = terms[i][1];
+        if (c === 0) continue;
+        if (first) out += (c < 0 ? MINUS : '') + monoAbsHTML(c, d);
+        else out += (c < 0 ? ' ' + MINUS + ' ' : ' + ') + monoAbsHTML(c, d);
+        first = false;
+    }
+    return first ? '0' : out;
+}
+function termsSpeech(terms) {
+    var out = '', first = true, i;
+    for (i = 0; i < terms.length; i++) {
+        var c = terms[i][0], d = terms[i][1];
+        if (c === 0) continue;
+        if (first) out += (c < 0 ? 'negative ' : '') + monoAbsSpeech(c, d);
+        else out += (c < 0 ? ' minus ' : ' plus ') + monoAbsSpeech(c, d);
+        first = false;
+    }
+    return first ? '0' : out;
+}
+function polyTerms(p) { var t = [], i; p = pTrim(p); for (i = p.length - 1; i >= 0; i--) if (p[i] !== 0) t.push([p[i], i]); return t; }
+function polyHTML(p) { return termsHTML(polyTerms(p)); }
+function polySpeech(p) { return termsSpeech(polyTerms(p)); }
+function monoHTML(c, d) { return (c < 0 ? MINUS : '') + monoAbsHTML(c, d); }
+function monoSpeech(c, d) { return (c < 0 ? 'negative ' : '') + monoAbsSpeech(c, d); }
+
+/* Factored form: constant k, then a list of factor polynomials. Factors
+   equal to x merge into the monomial in front (6x^2), and repeated
+   bracketed factors merge into a power. */
+function factoredHTML(k, factors) { return factoredRender(k, factors, false); }
+function factoredSpeech(k, factors) { return factoredRender(k, factors, true); }
+function isX(p) { p = pTrim(p); return p.length === 2 && p[0] === 0 && p[1] === 1; }
+function factoredRender(k, factors, speak) {
+    var m = 0, rest = [], i;
+    for (i = 0; i < factors.length; i++) { if (isX(factors[i])) m++; else rest.push(factors[i]); }
+    var groups = [];
+    for (i = 0; i < rest.length; i++) {
+        if (groups.length && pEq(groups[groups.length - 1].p, rest[i])) groups[groups.length - 1].n++;
+        else groups.push({ p: rest[i], n: 1 });
+    }
+    var front = '';
+    if (m > 0 || k !== 1 || groups.length === 0) {
+        if (m === 0) front = speak ? (k < 0 ? 'negative ' : '') + Math.abs(k) : (k < 0 ? MINUS : '') + Math.abs(k);
+        else if (k === 1) front = speak ? xSpeech(m) : xHTML(m);
+        else if (k === -1) front = speak ? 'negative ' + xSpeech(m) : MINUS + xHTML(m);
+        else front = speak ? monoSpeech(k, m) : monoHTML(k, m);
+    }
+    var parts = [], g;
+    for (i = 0; i < groups.length; i++) {
+        g = groups[i];
+        if (speak) parts.push('the quantity ' + polySpeech(g.p) + (g.n > 1 ? ', ' + (g.n === 2 ? 'squared' : 'to the ' + ordinal(g.n)) : ''));
+        else parts.push('(' + polyHTML(g.p) + ')' + (g.n > 1 ? '<sup>' + g.n + '</sup>' : ''));
+    }
+    if (speak) {
+        var s = front;
+        for (i = 0; i < parts.length; i++) s += (s ? (i === 0 ? ' times ' : ', times ') : '') + parts[i];
+        return s;
+    }
+    return front + parts.join('');
+}
+
+/* ---------- parsing the student's answer ---------- */
+/* Returns {ok:true, ast} or {ok:false, code}. Accepts whole numbers, x or X,
+   ^ powers (also the superscript 2/3/4 characters), implicit
+   multiplication, *, the unicode minus and the middle dot. */
+function normalizeInput(s) {
+    s = String(s);
+    s = s.replace(/[\u2212\u2012\u2013\u2014]/g, '-').replace(/[\u00b7\u00d7\u22c5]/g, '*')
+         .replace(/\u00b2/g, '^2').replace(/\u00b3/g, '^3').replace(/\u2074/g, '^4')
+         .replace(/X/g, 'x').replace(/\s+/g, '');
+    return s;
+}
+function tokenize(s) {
+    var toks = [], i = 0, ch;
+    while (i < s.length) {
+        ch = s.charAt(i);
+        if (/[0-9]/.test(ch)) {
+            var j = i; while (j < s.length && /[0-9]/.test(s.charAt(j))) j++;
+            if (s.charAt(j) === '.' ) return { err: 'decimal' };
+            var v = parseInt(s.slice(i, j), 10);
+            if (j - i > 6) return { err: 'big' };
+            toks.push({ t: 'num', v: v }); i = j; continue;
+        }
+        if (ch === '.') return { err: 'decimal' };
+        if (ch === 'x') { toks.push({ t: 'x' }); i++; continue; }
+        if ('+-*^()'.indexOf(ch) !== -1) { toks.push({ t: ch }); i++; continue; }
+        if (ch === '[' || ch === '{') { toks.push({ t: '(' }); i++; continue; }
+        if (ch === ']' || ch === '}') { toks.push({ t: ')' }); i++; continue; }
+        return { err: 'char' };
+    }
+    return { toks: toks };
+}
+function parseAnswer(raw) {
+    var s = normalizeInput(raw);
+    if (s === '') return { ok: false, code: 'empty' };
+    if (/[a-wyz]/i.test(s)) return { ok: false, code: 'letter' };
+    if (/x[0-9]/.test(s)) return { ok: false, code: 'xdigit' };
+    var open = 0, i;
+    for (i = 0; i < s.length; i++) {
+        var c = s.charAt(i);
+        if (c === '(' || c === '[' || c === '{') open++;
+        if (c === ')' || c === ']' || c === '}') { open--; if (open < 0) return { ok: false, code: 'parens' }; }
+    }
+    if (open !== 0) return { ok: false, code: 'parens' };
+    var tk = tokenize(s);
+    if (tk.err) return { ok: false, code: tk.err };
+    var toks = tk.toks, pos = 0;
+    function peek() { return toks[pos]; }
+    function eat(t) { if (toks[pos] && toks[pos].t === t) { pos++; return true; } return false; }
+    function fail() { throw { code: 'syntax' }; }
+    function parseExpr() {
+        var terms = [{ s: 1, n: parseTerm() }];
+        while (peek() && (peek().t === '+' || peek().t === '-')) {
+            var sg = peek().t === '-' ? -1 : 1; pos++;
+            terms.push({ s: sg, n: parseTerm() });
+        }
+        if (terms.length === 1 && terms[0].s === 1) return terms[0].n;
+        return { t: 'add', terms: terms };
+    }
+    function startsAtom(tok) { return tok && (tok.t === 'num' || tok.t === 'x' || tok.t === '('); }
+    function parseTerm() {
+        var fs = [parseUnary()];
+        while (true) {
+            if (peek() && peek().t === '*') { pos++; fs.push(parseUnary()); continue; }
+            if (startsAtom(peek())) {
+                /* "2 3" never reaches here (spaces removed -> 23), but "x 2" is
+                   caught above as xdigit; a number right after ")" or "x" is
+                   ambiguous, so refuse it. */
+                if (peek().t === 'num') fail();
+                fs.push(parsePower()); continue;
+            }
+            break;
+        }
+        return fs.length === 1 ? fs[0] : { t: 'mul', fs: fs };
+    }
+    function parseUnary() {
+        if (eat('-')) return { t: 'neg', a: parseUnary() };
+        if (eat('+')) return parseUnary();
+        return parsePower();
+    }
+    function parsePower() {
+        var base = parseAtom();
+        if (eat('^')) {
+            var e;
+            if (eat('(')) { if (!peek() || peek().t !== 'num') fail(); e = toks[pos++].v; if (!eat(')')) fail(); }
+            else { if (!peek() || peek().t !== 'num') fail(); e = toks[pos++].v; }
+            if (e > 12) throw { code: 'bigpow' };
+            if (peek() && peek().t === '^') fail();
+            return { t: 'pow', b: base, e: e };
+        }
+        return base;
+    }
+    function parseAtom() {
+        var tok = peek();
+        if (!tok) fail();
+        if (tok.t === 'num') { pos++; return { t: 'num', v: tok.v }; }
+        if (tok.t === 'x') { pos++; return { t: 'x' }; }
+        if (tok.t === '(') { pos++; var inner = parseExpr(); if (!eat(')')) fail(); return { t: 'paren', a: inner }; }
+        fail();
+    }
+    try {
+        var ast = parseExpr();
+        if (pos !== toks.length) return { ok: false, code: 'syntax' };
+        return { ok: true, ast: ast };
+    } catch (e) {
+        return { ok: false, code: (e && e.code) || 'syntax' };
+    }
+}
+function astPoly(n) {
+    switch (n.t) {
+        case 'num': return [n.v];
+        case 'x': return [0, 1];
+        case 'paren': return astPoly(n.a);
+        case 'neg': return pScale(astPoly(n.a), -1);
+        case 'add': var r = [0]; for (var i = 0; i < n.terms.length; i++) r = pAdd(r, pScale(astPoly(n.terms[i].n), n.terms[i].s)); return r;
+        case 'mul': var m = [1]; for (var j = 0; j < n.fs.length; j++) m = pMul(m, astPoly(n.fs[j])); return m;
+        case 'pow': var b = astPoly(n.b), out = [1]; for (var k = 0; k < n.e; k++) out = pMul(out, b); return out;
+    }
+    return [0];
+}
+/* The factors the student actually wrote: a constant and a list of
+   non-constant factor polynomials. Products, powers, signs and redundant
+   brackets are opened up; a sum is one factor however it is written. */
+function astFactors(n) {
+    var k = 1, list = [];
+    function walk(node, times) {
+        var i, t;
+        switch (node.t) {
+            case 'paren': walk(node.a, times); return;
+            case 'neg': for (t = 0; t < times; t++) k = -k; walk(node.a, times); return;
+            case 'mul': for (i = 0; i < node.fs.length; i++) walk(node.fs[i], times); return;
+            case 'pow': walk(node.b, times * node.e); return;
+            default:
+                var p = astPoly(node);
+                if (pDeg(p) <= 0) { for (t = 0; t < times; t++) k *= p[0]; return; }
+                for (t = 0; t < times; t++) list.push(p);
+        }
+    }
+    walk(n, 1);
+    return { k: k, list: list };
+}
+
+/* ---------- grading ---------- */
+/* Result kinds:
+   parse      -- unreadable; not an attempt (msg explains)
+   wrong      -- not equal to the problem; diagnosis in msg
+   unfactored -- equal, but just the polynomial again
+   partial    -- equal, but some factor can still be factored
+   correct    -- equal and factored completely */
+var PARSE_MSG = {
+    empty: 'Type your factored form first.',
+    letter: 'Use x as the variable, with numbers, ^, +, - and parentheses.',
+    xdigit: 'To write a power, use ^ (like x^2) or the x&#178; key.',
+    parens: 'Check your parentheses: every ( needs a matching ).',
+    decimal: 'Use whole numbers only.',
+    big: 'That number is much bigger than any in this problem. Check what you typed.',
+    bigpow: 'That power is much bigger than any in this problem. Check what you typed.',
+    char: 'Use only numbers, x, ^, +, - and parentheses.',
+    syntax: 'Couldn&#39;t read that. Check your signs, powers and parentheses.'
+};
+function gradeAnswer(prob, raw) {
+    var pr = parseAnswer(raw);
+    if (!pr.ok) return { kind: 'parse', msg: PARSE_MSG[pr.code] || PARSE_MSG.syntax, code: pr.code };
+    var sp = astPoly(pr.ast);
+    if (!pEq(sp, prob.target)) {
+        /* Factored the rest but left off the GCF taken out earlier, e.g.
+           (x - 9)(x + 9) for x^3 - 81x: coach it, do not mark it wrong. */
+        if (missingMonomial(prob.target, sp)) return { kind: 'partial', why: 'gcfMissing' };
+        return { kind: 'wrong', poly: sp, diag: diagnose(prob, sp) };
+    }
+    var f = astFactors(pr.ast);
+    var bad = null, i;
+    for (i = 0; i < f.list.length; i++) {
+        if (pContent(f.list[i]) > 1) { bad = { why: 'content', p: f.list[i], g: pContent(f.list[i]) }; break; }
+    }
+    /* One factor and no number in front: the polynomial itself, not a product. */
+    var notFinished = prob.irrCount > 1 || pContent(prob.target) > 1;
+    if (f.list.length === 1 && Math.abs(f.k) === 1 && notFinished) return { kind: 'unfactored' };
+    if (bad) return { kind: 'partial', why: 'content', p: bad.p, g: bad.g };
+    if (f.list.length === prob.irrCount) return { kind: 'correct' };
+    /* fewer factors than the complete factorization: name one that splits */
+    for (i = 0; i < f.list.length; i++) {
+        if (irreducibleCount(f.list[i]) > 1) {
+            if (f.list.length === 1 && f.k === 1) return { kind: 'unfactored' };
+            return { kind: 'partial', why: 'reducible', p: f.list[i] };
+        }
+    }
+    return { kind: 'partial', why: 'reducible', p: f.list[0] };
+}
+/* True when target = student * (c x^j) for a number c and power j that are
+   not simply 1 or -1 with no x: the student's answer is missing a GCF. */
+function missingMonomial(t, s) {
+    t = pTrim(t); s = pTrim(s);
+    if (pDeg(s) < 1) return false;
+    var dt = 0, ds = 0;
+    while (t[dt] === 0) dt++;
+    while (s[ds] === 0) ds++;
+    var j = dt - ds;
+    if (j < 0 || t[dt] % s[ds] !== 0) return false;
+    var c = t[dt] / s[ds];
+    if (j === 0 && Math.abs(c) === 1) return false;
+    return pEq(pMul(s, monoPoly(c, j)), t);
+}
+var GCF_MISSING = 'Right so far, but don&#39;t forget the GCF you factored out at the start. It belongs in the final answer too.';
+function partialMsgHTML(g) {
+    if (g.why === 'gcfMissing') return GCF_MISSING;
+    if (g.why === 'content') return 'Right so far, but (' + polyHTML(g.p) + ') still has a common factor of ' + g.g + '. Factor it out too.';
+    return 'Right so far, but (' + polyHTML(g.p) + ') can be factored further.';
+}
+function partialMsgSpeech(g) {
+    if (g.why === 'gcfMissing') return "Right so far, but don't forget the GCF you factored out at the start. It belongs in the final answer too.";
+    if (g.why === 'content') return 'Right so far, but ' + polySpeech(g.p) + ' still has a common factor of ' + g.g + '. Factor it out too.';
+    return 'Right so far, but ' + polySpeech(g.p) + ' can be factored further.';
+}
+/* Name the mistake. Every wrong answer is multiplied back out and shown,
+   then one specific pointer is added when the error has a known shape. */
+function diagnose(prob, sp) {
+    var t = pTrim(prob.target), s = pTrim(sp), tip = '', i;
+    var sameAbs = t.length === s.length;
+    if (sameAbs) for (i = 0; i < t.length; i++) if (Math.abs(t[i]) !== Math.abs(s[i])) { sameAbs = false; break; }
+    if (pDeg(s) !== pDeg(t)) {
+        tip = 'That has a different highest power of x than the original. Check the powers.';
+    } else if (sameAbs) {
+        tip = 'The numbers are right, but some signs are not. Check the signs in each factor.';
+    } else if (prob.kind === 'special' || (prob.kind === 'multi' && prob.sub === 'dos')) {
+        tip = 'A difference of squares has no middle term, so one factor needs a plus and the other a minus.';
+    } else if (prob.kind === 'tri1' || (prob.kind === 'multi' && prob.sub === 'tri')) {
+        var lo = prob.kind === 'tri1' ? 0 : prob.shift;
+        var cOk = s[lo] === t[lo], bOk = s[lo + 1] === t[lo + 1];
+        if (cOk && !bOk) tip = 'Your two numbers multiply to the right number but do not add to the middle coefficient.';
+        else if (bOk && !cOk) tip = 'Your two numbers add to the middle coefficient but do not multiply to the last number.';
+    } else if (prob.kind === 'gcf') {
+        if (s[s.length - 1] !== t[t.length - 1] && pDeg(s) === pDeg(t)) tip = 'Divide every term by the GCF, including the first one.';
+        else tip = 'Divide each term by the GCF and check every result.';
+    } else if (prob.kind === 'cubes') {
+        tip = 'Check the formula: the binomial takes the same sign as the original, and the middle term of the trinomial takes the opposite sign.';
+    } else if (prob.kind === 'grouping' || prob.kind === 'triA') {
+        tip = 'Multiply your two binomials back out and compare each term with the original.';
+    }
+    return { expHTML: polyHTML(s), expSpeech: polySpeech(s), tip: tip };
+}
+
+/* ---------- problem generators ---------- */
+/* Each returns {kind, label, target, display (terms), k, factors, irrCount,
+   hint, steps:[{label, math, speech}], banner?, reminder?, sub?} */
+function stepMath(label, mathHTML, mathSpeech) { return { label: label, math: mathHTML, speech: mathSpeech }; }
+function linear(a, b) { return [b, a]; }          /* a x + b */
+function quad(a, b, c) { return [c, b, a]; }      /* a x^2 + b x + c */
+function fracHTML(numHTML, denHTML) {
+    return '<span class="frac"><span class="frac-num">' + numHTML + '</span><span class="frac-bar"></span><span class="frac-den">' + denHTML + '</span></span>';
+}
+function signedNum(n) { return n < 0 ? MINUS + Math.abs(n) : String(n); }
+function signedSpeech(n) { return n < 0 ? 'negative ' + Math.abs(n) : String(n); }
+
+/* ===== GCF =====
+   stage: num2, x2, both2, num3, x3, both3 */
+function gcfStageFor(n) {
+    if (n <= 2) return 'num2';
+    if (n <= 4) return 'x2';
+    if (n <= 6) return 'both2';
+    if (n <= 8) return 'num3';
+    if (n <= 10) return 'x3';
+    if (Math.random() < 0.7) return 'both3';
+    return pick(['num2', 'x2', 'both2', 'num3', 'x3']);
+}
+function genGCF(stage) {
+    var three = stage.charAt(stage.length - 1) === '3';
+    var kind = stage.slice(0, stage.length - 1);
+    var g = (kind === 'x') ? 1 : (kind === 'num' ? ri(2, 9) : ri(2, 8));
+    var m = (kind === 'num') ? 0 : (three ? ri(1, 2) : ri(1, 3));
+    var inner, tries = 0;
+    do {
+        tries++;
+        if (three) {
+            /* What is left after the GCF is never a quadratic trinomial
+               (students would try to factor it further). It is a cubic with
+               a missing term, x^3 + r x + q or x^3 + r x^2 + q, chosen with no
+               rational root, so the GCF really is the whole job. */
+            var p = ri(1, 5), r = nz(-9, 9), q = nz(-9, 9), mid = pick([1, 2]);
+            if (gcd(gcd(p, r), q) !== 1) continue;
+            inner = (mid === 1) ? [q, r, 0, p] : [q, 0, r, p];
+            if (irreducibleCount(inner) !== 1) continue;
+        } else {
+            var kk = (kind === 'num') ? pick([1, 1, 1, 2]) : pick([1, 1, 2]);
+            var p2 = ri(1, 9), q2 = nz(-9, 9);
+            if (gcd(p2, q2) !== 1) continue;
+            if (kk === 2 && q2 < 0 && isSquare(p2) && isSquare(-q2)) continue;
+            inner = (kk === 1) ? linear(p2, q2) : quad(p2, 0, q2);
+        }
+        break;
+    } while (tries < 500);
+    var factors = [];
+    for (var i = 0; i < m; i++) factors.push([0, 1]);
+    factors.push(inner);
+    var target = pMul(pScale(inner, g), monoPoly(1, m));
+    var terms = polyTerms(target);
+    var gcfH = (m === 0) ? String(g) : monoHTML(g, m), gcfS = (m === 0) ? String(g) : monoSpeech(g, m);
+    var nums = [], j;
+    for (j = 0; j < terms.length; j++) nums.push(Math.abs(terms[j][0]));
+    var steps = [];
+    if (kind === 'num') {
+        steps.push(stepMath('Find the GCF of the numbers ' + nums.join(', ') + '. No power of x is in every term, so the GCF is just the number', 'GCF = ' + gcfH, 'GCF equals ' + gcfS));
+    } else if (kind === 'x') {
+        steps.push(stepMath('The numbers ' + nums.join(', ') + ' have no common factor bigger than 1. The smallest power of x in every term is ' + xHTML(m) + ', so the GCF is', 'GCF = ' + gcfH, 'GCF equals ' + gcfS));
+    } else {
+        steps.push(stepMath('Find the GCF of the numbers ' + nums.join(', ') + ', which is ' + g + ', and the smallest power of x in every term, which is ' + xHTML(m), 'GCF = ' + gcfH, 'GCF equals ' + gcfS));
+    }
+    var divH = '<span class="div-row">', divS = [], qTerms = [];
+    for (j = 0; j < terms.length; j++) {
+        var c = terms[j][0], d = terms[j][1], qc = c / g, qd = d - m;
+        qTerms.push([qc, qd]);
+        divH += '<span class="div-item">' + (c < 0 ? '<span class="frac-sign">' + MINUS + '</span>' : '') + fracHTML(monoAbsHTML(c, d), gcfH) + '<span>&nbsp;= ' + monoHTML(qc, qd) + '</span></span>';
+        divS.push((c < 0 ? 'negative ' : '') + monoAbsSpeech(c, d) + ' over ' + gcfS + ' equals ' + monoSpeech(qc, qd));
+    }
+    divH += '</span>';
+    steps.push(stepMath('Divide each term by the GCF', divH, divS.join('; ')));
+    steps.push(stepMath('Write the GCF in front and the results inside the parentheses', factoredHTML(g, factors), factoredSpeech(g, factors)));
+    return {
+        kind: 'gcf', label: 'GCF', target: target, display: terms, k: g, factors: factors,
+        irrCount: m + 1,
+        hint: 'The GCF is the largest number that divides every coefficient, times the smallest power of x that appears in every term. Here the GCF is ' + gcfH + '. Factor it out: divide each term by ' + gcfH + ' to find what is left inside the parentheses.',
+        steps: steps
+    };
+}
+function monoPoly(c, d) { var p = [], i; for (i = 0; i < d; i++) p.push(0); p.push(c); return p; }
+
+/* ===== Grouping ===== (dx + e)(fx + g) shown as four terms */
+function genGrouping(n) {
+    var d, e, f, g, tries = 0;
+    do {
+        tries++;
+        if (n <= 2) { d = 1; f = 1; e = ri(1, 9); g = ri(1, 9); }
+        else if (n <= 4) { d = 1; f = 1; e = nz(-9, 9); g = nz(-9, 9); }
+        else { d = ri(1, 4); f = ri(1, 3); if (d === 1 && f === 1) continue; e = nz(-7, 7); g = nz(-7, 7); }
+        if (gcd(d, e) !== 1 || gcd(f, g) !== 1) continue;
+        if (d * g + e * f === 0) continue;
+        if (e === g && d === f) continue;
+        break;
+    } while (tries < 500);
+    var display = [[d * f, 2], [d * g, 1], [e * f, 1], [e * g, 0]];
+    var common = linear(f, g), other = linear(d, e);
+    var target = pMul(common, other);
+    var g1 = termsHTML([[d * f, 2], [d * g, 1]]), g2 = termsHTML([[e * f, 1], [e * g, 0]]);
+    var g1s = termsSpeech([[d * f, 2], [d * g, 1]]), g2s = termsSpeech([[e * f, 1], [e * g, 0]]);
+    var cH = polyHTML(common), cS = polySpeech(common);
+    var step2H = monoHTML(d, 1) + '(' + cH + ')' + (e < 0 ? ' ' + MINUS + ' ' : ' + ') + Math.abs(e) + '(' + cH + ')';
+    var step2S = monoSpeech(d, 1) + ' times the quantity ' + cS + (e < 0 ? ', minus ' : ', plus ') + Math.abs(e) + ' times the quantity ' + cS;
+    var hint = 'Group the first two terms and the last two terms. Factor the GCF out of each group; if you factor correctly, the same binomial shows up twice.';
+    if (e < 0) hint += ' The third term is negative, so factor a negative number out of the second group to make the binomials match.';
+    var steps = [
+        stepMath('Group the first two terms and the last two terms', '(' + g1 + ') + (' + g2 + ')', 'the quantity ' + g1s + ', plus the quantity ' + g2s),
+        stepMath('Factor the GCF out of each group' + (e < 0 ? ' (take out ' + MINUS + Math.abs(e) + ' from the second group so the binomials match)' : ''), step2H, step2S),
+        stepMath('Both parts share (' + cH + '). Factor it out', factoredHTML(1, [common, other]), factoredSpeech(1, [common, other]))
+    ];
+    return { kind: 'grouping', label: 'Grouping', target: target, display: display, k: 1, factors: [common, other], irrCount: 2, hint: hint, steps: steps };
+}
+
+/* ===== Trinomial a = 1 ===== */
+function pickPair(n, maxAbs, maxC) {
+    var m, q, tries = 0;
+    do {
+        tries++;
+        if (n <= 2) { m = ri(1, 6); q = ri(1, 6); }
+        else if (n <= 4) { m = -ri(1, 7); q = -ri(1, 7); }
+        else {
+            m = nz(-maxAbs, maxAbs); q = nz(-maxAbs, maxAbs);
+            if (Math.random() < 0.5 && m * q > 0) continue; /* lean toward a negative c */
+        }
+        if (m === q || m + q === 0) continue;
+        if (Math.abs(m * q) > maxC) continue;
+        break;
+    } while (tries < 500);
+    return [m, q];
+}
+function genTri1(n) {
+    /* Problem 5, then about 1 in 7 after that: a perfect square trinomial,
+       e.g. x^2 - 4x + 4 = (x - 2)(x - 2). */
+    var pr = (n === 5 || (n > 5 && Math.random() < 0.15)) ? (function () { var v = nz(-7, 7); return [v, v]; })() : pickPair(n, 9, 40);
+    var m = pr[0], q = pr[1];
+    var b = m + q, c = m * q;
+    var f1 = linear(1, m), f2 = linear(1, q), target = pMul(f1, f2);
+    var steps = [
+        stepMath('Find two numbers that multiply to ' + signedNum(c) + ' and add to ' + signedNum(b),
+            signedNum(m) + ' and ' + signedNum(q) + ':&nbsp; (' + signedNum(m) + ')(' + signedNum(q) + ') = ' + signedNum(c) + ',&nbsp; ' + signedNum(m) + ' + ' + (q < 0 ? '(' + signedNum(q) + ')' : q) + ' = ' + signedNum(b),
+            signedSpeech(m) + ' and ' + signedSpeech(q) + '. ' + signedSpeech(m) + ' times ' + signedSpeech(q) + ' equals ' + signedSpeech(c) + ', and ' + signedSpeech(m) + ' plus ' + signedSpeech(q) + ' equals ' + signedSpeech(b)),
+        stepMath('Use them as the constants in the two binomials', '(' + polyHTML(f1) + ')(' + polyHTML(f2) + ')', 'the quantity ' + polySpeech(f1) + ', times the quantity ' + polySpeech(f2))
+    ];
+    if (m === q) steps.push(stepMath('Both factors are the same, so this can also be written as a square', factoredHTML(1, [f1, f2]), factoredSpeech(1, [f1, f2])));
+    return {
+        kind: 'tri1', label: 'Trinomials (a = 1)', target: target, display: polyTerms(target), k: 1, factors: [f1, f2], irrCount: 2,
+        hint: 'Find two numbers that multiply to ' + signedNum(c) + ' (the last number) and add to ' + signedNum(b) + ' (the middle coefficient).',
+        steps: steps
+    };
+}
+
+/* ===== Special products: difference of squares ===== */
+function genSpecial(n) {
+    var s = 1, K, tries = 0;
+    if (n > 4 && Math.random() < 0.6) {
+        do { s = ri(2, 6); K = ri(1, 11); tries++; } while (gcd(s, K) !== 1 && tries < 200);
+        if (gcd(s, K) !== 1) { s = 2; K = 3; }
+    } else K = ri(1, 12);
+    var f1 = linear(s, -K), f2 = linear(s, K), target = pMul(f1, f2);
+    var aH = s === 1 ? 'x' : s + 'x', aS = s === 1 ? 'x' : s + ' x';
+    var steps = [
+        stepMath('Write each term as a perfect square',
+            monoHTML(s * s, 2) + ' = (' + aH + ')<sup>2</sup>&nbsp;&nbsp; and &nbsp;&nbsp;' + (K * K) + ' = ' + K + '<sup>2</sup>',
+            monoSpeech(s * s, 2) + ' equals the quantity ' + aS + ', squared, and ' + (K * K) + ' equals ' + K + ' squared'),
+        stepMath('Use the formula with a = ' + aH + ' and b = ' + K,
+            factoredHTML(1, [f1, f2]), factoredSpeech(1, [f1, f2])),
+        /* Why there is no middle term: outer + inner cancel. */
+        stepMath('Check: the outer and inner products add to 0, which is why there is no middle term',
+            '(' + aH + ')(' + K + ') + (' + MINUS + K + ')(' + aH + ') = ' + termsHTML([[s * K, 1], [-s * K, 1]]) + ' = 0',
+            aS + ' times ' + K + ', plus negative ' + K + ' times ' + aS + ', equals ' + termsSpeech([[s * K, 1], [-s * K, 1]]) + ', which is 0')
+    ];
+    return {
+        formula: 'a<sup>2</sup> ' + MINUS + ' b<sup>2</sup> = (a ' + MINUS + ' b)(a + b)',
+        formulaSpeech: 'a squared minus b squared equals the quantity a minus b, times the quantity a plus b',
+        kind: 'special', label: 'Diff of Squares', target: target, display: polyTerms(target), k: 1, factors: [f1, f2], irrCount: 2,
+        hint: 'Both terms are perfect squares with a minus sign between them: a<sup>2</sup> ' + MINUS + ' b<sup>2</sup> = (a ' + MINUS + ' b)(a + b).',
+        steps: steps
+    };
+}
+
+/* ===== Multi-step: a GCF first, then keep factoring ===== */
+function genMulti(n) {
+    var sub;
+    if (n === 1) sub = 'xDoS'; else if (n === 2) sub = 'gTri'; else if (n === 3) sub = 'gDoS'; else if (n === 4) sub = 'xTri';
+    else sub = pick(['xDoS', 'gDoS', 'gxDoS', 'gTri', 'xTri', 'gxTri']);
+    var g = 1, mx = 0, inner, f1, f2, kindSub;
+    if (sub === 'xDoS') { mx = 1; }
+    if (sub === 'gDoS') { g = ri(2, 6); }
+    if (sub === 'gxDoS') { g = ri(2, 5); mx = 1; }
+    if (sub === 'gTri') { g = ri(2, 6); }
+    if (sub === 'xTri') { mx = 1; }
+    if (sub === 'gxTri') { g = ri(2, 5); mx = 1; }
+    if (sub.indexOf('DoS') !== -1) {
+        kindSub = 'dos';
+        var K = (g > 1) ? ri(1, 6) : ri(1, 9);
+        f1 = linear(1, -K); f2 = linear(1, K); inner = pMul(f1, f2);
+    } else {
+        kindSub = 'tri';
+        var pr = pickPair(9, 7, 30); f1 = linear(1, pr[0]); f2 = linear(1, pr[1]); inner = pMul(f1, f2);
+    }
+    var lead = monoPoly(g, mx), target = pMul(pScale(inner, 1), lead);
+    var factors = [], i;
+    for (i = 0; i < mx; i++) factors.push([0, 1]);
+    var gcfFactors = factors.slice();
+    factors.push(f1); factors.push(f2);
+    gcfFactors.push(inner);
+    var gH = mx === 0 ? String(g) : monoHTML(g, mx), gS = mx === 0 ? String(g) : monoSpeech(g, mx);
+    var step2;
+    if (kindSub === 'dos') {
+        var K2 = Math.abs(f2[0]);
+        step2 = stepMath('What is left, ' + polyHTML(inner) + ', is a difference of squares: x<sup>2</sup> ' + MINUS + ' ' + K2 + '<sup>2</sup>',
+            polyHTML(inner) + ' = ' + factoredHTML(1, [f1, f2]),
+            polySpeech(inner) + ' equals ' + factoredSpeech(1, [f1, f2]));
+    } else {
+        var m1 = f1[0], m2 = f2[0];
+        step2 = stepMath('Factor the trinomial that is left: find two numbers that multiply to ' + signedNum(inner[0]) + ' and add to ' + signedNum(inner[1]),
+            signedNum(m1) + ' and ' + signedNum(m2) + ', so ' + polyHTML(inner) + ' = ' + factoredHTML(1, [f1, f2]),
+            signedSpeech(m1) + ' and ' + signedSpeech(m2) + ', so ' + polySpeech(inner) + ' equals ' + factoredSpeech(1, [f1, f2]));
+    }
+    var steps = [
+        stepMath('Factor out the GCF, ' + gH, factoredHTML(g, gcfFactors), factoredSpeech(g, gcfFactors)),
+        step2,
+        stepMath('Write the complete factorization', factoredHTML(g, factors), factoredSpeech(g, factors))
+    ];
+    return {
+        kind: 'multi', sub: kindSub, shift: mx, label: 'Multi-step', target: target, display: polyTerms(target), k: g, factors: factors,
+        irrCount: mx + 2,
+        hint: 'Start by factoring out the GCF, ' + gH + '. Then look at what is left: is it a difference of squares or a trinomial?',
+        banner: 'Look for a GCF and factor it out. Then keep factoring what&#39;s left.',
+        steps: steps
+    };
+}
+
+/* ===== Trinomial a != 1, AC method ===== (dx + e)(fx + g) */
+function genTriA(n) {
+    var d, e, f, g, a, b, c, tries = 0;
+    do {
+        tries++;
+        if (n <= 2) { d = 1; f = pick([2, 3, 5]); e = ri(1, 6); g = ri(1, 6); }
+        else { d = ri(1, 4); f = ri(1, 4); e = nz(-7, 7); g = nz(-7, 7); }
+        a = d * f; b = d * g + e * f; c = e * g;
+        if (a < 2 || b === 0) continue;
+        if (gcd(d, e) !== 1 || gcd(f, g) !== 1) continue;
+        if (Math.abs(c) > 42 || Math.abs(a * c) > 120) continue;
+        if (d === f && e === g) continue;
+        break;
+    } while (tries < 800);
+    /* order so the split groups cleanly: first pair's GCF is dx */
+    var common = linear(f, g), other = linear(d, e), target = pMul(common, other);
+    var mSplit = d * g, nSplit = e * f, ac = a * c;
+    var splitH = termsHTML([[a, 2], [mSplit, 1], [nSplit, 1], [c, 0]]), splitS = termsSpeech([[a, 2], [mSplit, 1], [nSplit, 1], [c, 0]]);
+    var cH = polyHTML(common), cS = polySpeech(common);
+    var grpH = monoHTML(d, 1) + '(' + cH + ')' + (e < 0 ? ' ' + MINUS + ' ' : ' + ') + Math.abs(e) + '(' + cH + ')';
+    var grpS = monoSpeech(d, 1) + ' times the quantity ' + cS + (e < 0 ? ', minus ' : ', plus ') + Math.abs(e) + ' times the quantity ' + cS;
+    var steps = [
+        stepMath('Multiply a and c', 'a &middot; c = (' + a + ')(' + signedNum(c) + ') = ' + signedNum(ac), 'a times c equals ' + a + ' times ' + signedSpeech(c) + ', which is ' + signedSpeech(ac)),
+        stepMath('Find two numbers that multiply to ' + signedNum(ac) + ' and add to ' + signedNum(b), signedNum(mSplit) + ' and ' + signedNum(nSplit), signedSpeech(mSplit) + ' and ' + signedSpeech(nSplit)),
+        stepMath('Split the middle term with those numbers', splitH, splitS),
+        stepMath('Group in pairs and factor each pair', grpH, grpS),
+        stepMath('Factor out the common binomial (' + cH + ')', factoredHTML(1, [common, other]), factoredSpeech(1, [common, other]))
+    ];
+    return {
+        kind: 'triA', label: 'Trinomials (a &#8800; 1)', target: target, display: polyTerms(target), k: 1, factors: [common, other], irrCount: 2,
+        hint: 'Use the AC method: a &middot; c = ' + signedNum(ac) + '. Find two numbers that multiply to ' + signedNum(ac) + ' and add to ' + signedNum(b) + ', split the middle term with them, then factor by grouping.',
+        altTitle: 'Another way: trial and error',
+        alt: trialSteps(d, e, f, g),
+        steps: steps
+    };
+}
+
+/* Trial and error for (dx + e)(fx + g): offered only after the AC solution
+   is finished (design system 9: one method first, the other unlocked at the end). */
+function trialSteps(d, e, f, g) {
+    var a = d * f, b = d * g + e * f, c = e * g, out = [];
+    function xt(k) { return k === 1 ? 'x' : k + 'x'; }
+    function tryStep(p1, q1, p2, q2, good) {      /* (p1 x + q1)(p2 x + q2) */
+        var mid = p1 * q2 + q1 * p2;
+        var lab = 'Try (' + polyHTML(linear(p1, q1)) + ')(' + polyHTML(linear(p2, q2)) + '). Outer plus inner: (' + xt(p1) + ')(' + signedNum(q2) + ') + (' + signedNum(q1) + ')(' + xt(p2) + ')';
+        var math = termsHTML([[p1 * q2, 1], [q1 * p2, 1]]) + ' = ' + monoHTML(mid, 1) + (good ? '. It matches the middle term.' : ', not ' + monoHTML(b, 1) + '. Try again.');
+        var sp = 'that gives ' + monoSpeech(mid, 1) + (good ? ', which matches the middle term.' : ', not ' + monoSpeech(b, 1) + '. Try again.');
+        out.push(stepMath(lab, math, sp));
+    }
+    out.push(stepMath('Set up two binomials. The x-coefficients must multiply to ' + a + ' and the constants must multiply to ' + signedNum(c),
+        '(&#95;x + &#95;)(&#95;x + &#95;)', 'blank x plus blank, times blank x plus blank'));
+    /* A plausible miss first: same pairs with the constants swapped, shown
+       only when both binomials are still primitive and the middle differs. */
+    if (gcd(f, e) === 1 && gcd(d, g) === 1 && f * g + e * d !== b) tryStep(f, e, d, g, false);
+    tryStep(f, g, d, e, true);
+    out.push(stepMath('So the factored form is', factoredHTML(1, [linear(f, g), linear(d, e)]), factoredSpeech(1, [linear(f, g), linear(d, e)])));
+    return out;
+}
+
+/* ===== Sum and difference of cubes ===== */
+function genCubes(n) {
+    var s = 1, k, sum = Math.random() < 0.5, tries = 0;
+    /* Only the simplest form, x^3 plus or minus a number cubed. */
+    k = (n <= 2) ? ri(1, 4) : ri(1, 6);
+    var sg = sum ? 1 : -1;
+    var f1 = linear(s, sg * k), f2 = quad(s * s, -sg * s * k, k * k);
+    var target = pMul(f1, f2);
+    var aH = s === 1 ? 'x' : s + 'x', aS = s === 1 ? 'x' : s + ' x';
+    var formH = sum ? 'a<sup>3</sup> + b<sup>3</sup> = (a + b)(a<sup>2</sup> ' + MINUS + ' ab + b<sup>2</sup>)' : 'a<sup>3</sup> ' + MINUS + ' b<sup>3</sup> = (a ' + MINUS + ' b)(a<sup>2</sup> + ab + b<sup>2</sup>)';
+    var aSqH = s === 1 ? 'x<sup>2</sup>' : '(' + aH + ')<sup>2</sup>';
+    var subH = '(' + aH + (sum ? ' + ' : ' ' + MINUS + ' ') + k + ')(' + aSqH + (sum ? ' ' + MINUS + ' ' : ' + ') + '(' + aH + ')(' + k + ') + ' + k + '<sup>2</sup>)';
+    var subS = 'the quantity ' + aS + (sum ? ' plus ' : ' minus ') + k + ', times the quantity ' + aS + ' squared' + (sum ? ' minus ' : ' plus ') + aS + ' times ' + k + ' plus ' + k + ' squared';
+    var steps = [
+        (s === 1
+            ? stepMath('x<sup>3</sup> is already a cube, so a = x. Write ' + (k * k * k) + ' as a cube',
+                (k * k * k) + ' = ' + k + '<sup>3</sup>, so b = ' + k,
+                (k * k * k) + ' equals ' + k + ' cubed, so b equals ' + k)
+            : stepMath('Write each term as a cube',
+                monoHTML(s * s * s, 3) + ' = (' + aH + ')<sup>3</sup>&nbsp;&nbsp; and &nbsp;&nbsp;' + (k * k * k) + ' = ' + k + '<sup>3</sup>',
+                monoSpeech(s * s * s, 3) + ' equals the quantity ' + aS + ', cubed, and ' + (k * k * k) + ' equals ' + k + ' cubed')),
+        stepMath('Use the formula with a = ' + aH + ' and b = ' + k, subH, subS),
+        stepMath('Simplify the second factor', factoredHTML(1, [f1, f2]), factoredSpeech(1, [f1, f2]))
+    ];
+    return {
+        formula: formH,
+        formulaSpeech: sum ? 'a cubed plus b cubed equals the quantity a plus b, times the quantity a squared minus a b plus b squared'
+                           : 'a cubed minus b cubed equals the quantity a minus b, times the quantity a squared plus a b plus b squared',
+        kind: 'cubes', label: 'Sum/Diff Cubes', target: target, display: polyTerms(target), k: 1, factors: [f1, f2], irrCount: 2,
+        hint: 'Write each term as a cube to find a and b, then use the formula. The binomial gets the same sign as the original; the middle term of the trinomial gets the opposite sign.',
+        reminder: true,
+        steps: steps
+    };
+}
+
+/* Labels and speech for the problem itself */
+function problemHTML(prob) { return termsHTML(prob.display); }
+function problemSpeech(prob) { return termsSpeech(prob.display); }
+function answerHTML(prob) { return factoredHTML(prob.k, prob.factors); }
+function answerSpeech(prob) { return factoredSpeech(prob.k, prob.factors); }
+
+
+/* =====================================================================
+   Game
+   ===================================================================== */
+var CATS = [
+    { id: 'gcf', name: 'GCF' },
+    { id: 'grouping', name: 'Grouping' },
+    { id: 'tri1', name: 'Trinomials (a = 1)' },
+    { id: 'special', name: 'Diff of Squares', speech: 'Difference of squares' },
+    { id: 'multi', name: 'Multi-step' },
+    { id: 'triA', name: 'Trinomials (a &#8800; 1)', speech: 'Trinomials, a not equal to 1' },
+    { id: 'cubes', name: 'Sum/Diff Cubes', speech: 'Sum and difference of cubes' },
+    { id: 'mixed', name: 'Mixed' }
+];
+var STAT_KEYS = ['gcf', 'grouping', 'tri1', 'special', 'multi', 'triA', 'cubes'];
+var SAVE_KEY = 'factoringGame_v1';
+var CONFETTI_KEY = 'factoringGame_confetti_v1';
+
+var currentCat = 'gcf';
+var mixedTriA = false, mixedCubes = false;
+var catCount = {};
+var prob = null;
+var pState = null;      /* per problem: booked, missed, revealed, solved */
+var streak = 0, bestStreak = 0, problemCount = 0;
+var timer = 0, timerInterval = null;
+var stats = blankStats();
+var confettiEnabled = true;
+var solutionShown = 0, altShown = false;
+var lastMixedCat = null;
+
+function blankStats() { var s = {}; for (var i = 0; i < STAT_KEYS.length; i++) s[STAT_KEYS[i]] = { c: 0, t: 0 }; return s; }
+function esc(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function safeCount(n) { n = Number(n); if (!isFinite(n) || n < 0) return 0; return Math.min(Math.floor(n), 1e9); }
+function sanitizeStats(raw) {
+    var src = (raw && typeof raw === 'object') ? raw : {}, out = {}, i;
+    for (i = 0; i < STAT_KEYS.length; i++) {
+        var v = (src[STAT_KEYS[i]] && typeof src[STAT_KEYS[i]] === 'object') ? src[STAT_KEYS[i]] : {};
+        var t = safeCount(v.t), c = safeCount(v.c);
+        if (c > t) c = t;
+        out[STAT_KEYS[i]] = { c: c, t: t };
+    }
+    return out;
+}
+function saveState() {
+    try { localStorage.setItem(SAVE_KEY, JSON.stringify({ stats: stats, best: bestStreak })); } catch (e) { /* storage unavailable */ }
+}
+function loadState() {
+    try {
+        var raw = localStorage.getItem(SAVE_KEY);
+        if (raw) {
+            var data = JSON.parse(raw);
+            stats = sanitizeStats(data && data.stats);
+            bestStreak = safeCount(data && data.best);
+        }
+    } catch (e) { stats = blankStats(); bestStreak = 0; }
+    try {
+        var cf = localStorage.getItem(CONFETTI_KEY);
+        if (cf === '0') confettiEnabled = false;
+    } catch (e2) { /* ignore */ }
+}
+
+/* Turn display HTML into words for screen readers: powers, minus signs and
+   the dot are spoken, tags dropped. */
+function speakHTML(html) {
+    var s = String(html);
+    s = s.replace(/<sup>2<\/sup>/g, ' squared').replace(/<sup>3<\/sup>/g, ' cubed')
+         .replace(/<sup>(\d+)<\/sup>/g, function (m, d) { return ' to the ' + ordinal(parseInt(d, 10)); });
+    s = s.replace(/<[^>]+>/g, ' ');
+    s = s.replace(/&#8722;\s*(\d|x)/g, function (m, ch) { return ' minus ' + ch; });
+    s = s.replace(/&#8722;/g, ' minus ').replace(/&middot;/g, ' times ').replace(/&#8800;/g, ' not equal to ')
+         .replace(/&nbsp;/g, ' ').replace(/&#178;/g, ' squared').replace(/&#39;/g, "'").replace(/&amp;/g, 'and');
+    s = s.replace(/(\d)x/g, '$1 x').replace(/\(\s*minus\s/g, '( negative ');
+    s = s.replace(/=\s*minus/g, 'equals negative').replace(/\s*=\s*/g, ' equals ');
+    s = s.replace(/\(/g, ' ').replace(/\)/g, ' ');
+    return s.replace(/\s+/g, ' ').trim();
+}
+/* Visual HTML plus a spoken twin, so drawn math is never mute. */
+function dual(html, speech) {
+    return '<span aria-hidden="true">' + html + '</span><span class="sr-only">' + esc(speech) + '</span>';
+}
+
+/* ---------- category UI ---------- */
+function buildCategoryGrid() {
+    var grid = document.getElementById('cat-grid'), html = '', i;
+    for (i = 0; i < CATS.length; i++) {
+        var c = CATS[i];
+        html += '<label class="cat-tile"><input type="radio" class="cat-radio" name="cat" value="' + c.id + '"' +
+            (c.id === currentCat ? ' checked' : '') +
+            (c.speech ? ' aria-label="' + esc(c.speech) + '"' : '') + '>' +
+            '<span class="tile-face"' + (c.speech ? ' aria-hidden="true"' : '') + '>' + c.name + '</span></label>';
+    }
+    grid.innerHTML = html;
+    var radios = grid.querySelectorAll('.cat-radio');
+    for (i = 0; i < radios.length; i++) {
+        radios[i].addEventListener('change', function (e) { setCategory(e.target.value); });
+    }
+}
+function catName(id) { for (var i = 0; i < CATS.length; i++) if (CATS[i].id === id) return CATS[i].speech || CATS[i].name; return id; }
+/* The Mixed switches exist in the page only while Mixed is selected, so
+   nothing hidden sits in the tab order. */
+function buildMixedBox() {
+    var box = document.getElementById('mixed-box');
+    if (currentCat !== 'mixed') { box.innerHTML = ''; box.hidden = true; return; }
+    box.innerHTML = '<p class="mixed-note">Mixes GCF, Grouping, Trinomials (a = 1), Diff of Squares and Multi-step.</p>' +
+        '<div class="switch-row">' +
+        '<button type="button" class="switch-btn" id="sw-triA" aria-pressed="' + (mixedTriA ? 'true' : 'false') + '"><span class="track" aria-hidden="true"><span class="knob"></span></span><span>Include Trinomials (a &#8800; 1)</span></button>' +
+        '<button type="button" class="switch-btn" id="sw-cubes" aria-pressed="' + (mixedCubes ? 'true' : 'false') + '"><span class="track" aria-hidden="true"><span class="knob"></span></span><span>Include Sum/Diff Cubes</span></button>' +
+        '</div>';
+    box.hidden = false;
+    document.getElementById('sw-triA').addEventListener('click', function () {
+        mixedTriA = !mixedTriA; setSwitch(this, mixedTriA);
+        switchChanged(mixedTriA ? 'triA' : null);
+    });
+    document.getElementById('sw-cubes').addEventListener('click', function () {
+        mixedCubes = !mixedCubes; setSwitch(this, mixedCubes);
+        switchChanged(mixedCubes ? 'cubes' : null);
+    });
+}
+/* During the 13-problem opening a switch only changes which fixed spots it
+   fills; the problem on screen stays. After the opening, switching a
+   category on shows one of its problems right away. */
+function switchChanged(turnedOn) {
+    if (mixedStep < MIXED_OPENING.length) {
+        announce(turnedOn ? 'Added. Those problems will appear in the mix.' : 'Removed from the mix.');
+        return;
+    }
+    if (turnedOn) forceMixedCat = turnedOn;
+    newProblem(true);
+}
+function setCategory(id) {
+    currentCat = id;
+    if (id === 'mixed') { mixedStep = 0; lastMixedCat = null; }
+    buildMixedBox();
+    newProblem(true);
+}
+function setSwitch(btn, on) { btn.setAttribute('aria-pressed', on ? 'true' : 'false'); }
+
+/* ---------- problem generation ---------- */
+/* Mixed target shares (Ira, 2026-10-09), switches off:
+   Trinomials (a = 1) 30, Diff of Squares 25, Multi-step 20, Grouping 15, GCF 10.
+   A switched-on category gets 20%; the others shrink in proportion.
+   "Never the same category twice in a row" skews raw weights toward the
+   smaller categories, so the weights are solved once per pool so that the
+   long-run shares land on these targets. The adaptive factor (more of what
+   a student misses) is applied on top. */
+var MIXED_TARGET = { tri1: 30, special: 25, multi: 20, grouping: 15, gcf: 10 };
+var SWITCH_SHARE = 20;
+var mixedWeightCache = {};
+function mixedTargets(pool) {
+    var extra = 0, i, out = {};
+    for (i = 0; i < pool.length; i++) if (!MIXED_TARGET[pool[i]]) extra++;
+    var scale = (100 - extra * SWITCH_SHARE) / 100;
+    for (i = 0; i < pool.length; i++) out[pool[i]] = MIXED_TARGET[pool[i]] ? MIXED_TARGET[pool[i]] * scale : SWITCH_SHARE;
+    return out;
+}
+/* Long-run share of each category for the no-repeat chain
+   P(i -> j) = w_j / (W - w_i), by power iteration. */
+function noRepeatShares(w) {
+    var n = w.length, W = 0, i, j, k, p = [], q;
+    for (i = 0; i < n; i++) { W += w[i]; p.push(1 / n); }
+    for (k = 0; k < 400; k++) {
+        q = [];
+        for (j = 0; j < n; j++) q.push(0);
+        for (i = 0; i < n; i++) for (j = 0; j < n; j++) if (i !== j) q[j] += p[i] * w[j] / (W - w[i]);
+        p = q;
+    }
+    return p;
+}
+function mixedWeights(pool) {
+    var key = pool.join(',');
+    if (mixedWeightCache[key]) return mixedWeightCache[key];
+    var tg = mixedTargets(pool), w = [], i, k;
+    for (i = 0; i < pool.length; i++) w.push(tg[pool[i]]);
+    for (k = 0; k < 60; k++) {
+        var sh = noRepeatShares(w);
+        for (i = 0; i < pool.length; i++) w[i] *= (tg[pool[i]] / 100) / sh[i];
+    }
+    var out = {};
+    for (i = 0; i < pool.length; i++) out[pool[i]] = w[i];
+    mixedWeightCache[key] = out;
+    return out;
+}
+var forceMixedCat = null;
+/* Fixed opening for Mixed (Ira, 2026-10-09); after these 13 the weighted
+   mix takes over. Restarts each time Mixed is chosen. */
+var MIXED_OPENING = ['tri1', 'special', 'gcf', 'tri1', 'special', 'grouping', 'multi', 'tri1', 'multi', 'tri1', 'gcf', 'special', 'multi'];
+var mixedStep = 0;
+/* Switched-on categories take fixed spots in the opening (1-based):
+   a != 1 takes the trinomial spots 8 and 10, cubes takes 9 and 13. */
+function openingCat(i) {
+    var n = i + 1;
+    if (mixedTriA && (n === 8 || n === 10)) return 'triA';
+    if (mixedCubes && (n === 9 || n === 13)) return 'cubes';
+    return MIXED_OPENING[i];
+}
+function pickMixedCategory() {
+    if (forceMixedCat) { var f = forceMixedCat; forceMixedCat = null; lastMixedCat = f; return f; }
+    if (mixedStep < MIXED_OPENING.length) { lastMixedCat = openingCat(mixedStep++); return lastMixedCat; }
+    var pool = ['gcf', 'grouping', 'tri1', 'special', 'multi'];
+    if (mixedTriA) pool.push('triA');
+    if (mixedCubes) pool.push('cubes');
+    var weights = [], total = 0, i, base = mixedWeights(pool);
+    for (i = 0; i < pool.length; i++) {
+        var s = stats[pool[i]], w = (pool[i] === lastMixedCat) ? 0 : ((s.t < 3) ? 1 : Math.max(0.2, 1 - s.c / s.t));
+        w *= base[pool[i]];
+        weights.push(w); total += w;
+    }
+    var chosen = pool[0];
+    if (total <= 0) chosen = pick(pool);
+    else {
+        var r = Math.random() * total;
+        for (i = 0; i < pool.length; i++) { r -= weights[i]; if (r <= 0) { chosen = pool[i]; break; } }
+    }
+    lastMixedCat = chosen;
+    return chosen;
+}
+function generate(cat, n) {
+    if (cat === 'gcf') return genGCF(n === null ? pick(['num2', 'x2', 'both2', 'num3', 'x3', 'both3']) : gcfStageFor(n));
+    var k = (n === null) ? 99 : n;
+    if (cat === 'grouping') return genGrouping(k);
+    if (cat === 'tri1') return genTri1(k);
+    if (cat === 'special') return genSpecial(k);
+    if (cat === 'multi') return genMulti(k);
+    if (cat === 'triA') return genTriA(k);
+    return genCubes(k);
+}
+var recentProblems = [], RECENT_LIMIT = 8;
+function problemKey(p) { return JSON.stringify(p.display); }
+function newProblem(keepFocus) {
+    var inMixed = currentCat === 'mixed', cat;
+    if (inMixed) cat = pickMixedCategory();
+    else { cat = currentCat; catCount[cat] = (catCount[cat] || 0) + 1; }
+    /* No repeats: a problem that matches one of the last few shown is drawn
+       again (up to 60 times; the smallest pools still leave plenty of room). */
+    var n = inMixed ? null : catCount[cat], tries = 0;
+    prob = generate(cat, n);
+    while (recentProblems.indexOf(problemKey(prob)) !== -1 && tries < 60) { prob = generate(cat, n); tries++; }
+    recentProblems.push(problemKey(prob));
+    if (recentProblems.length > RECENT_LIMIT) recentProblems.shift();
+    prob.statKey = cat;
+    prob.inMixed = inMixed;
+    pState = { booked: false, missed: false, revealed: false, solved: false };
+    solutionShown = 0;
+    altShown = false;
+    renderProblem(keepFocus);
+}
+function renderProblem(keepFocus) {
+    document.getElementById('equation').innerHTML = problemHTML(prob);
+    var spoken = 'Factor completely: ' + problemSpeech(prob) + '.';
+    document.getElementById('problem-text').textContent = spoken;
+
+    var banner = document.getElementById('banner');
+    if (prob.banner && !prob.inMixed) {
+        banner.innerHTML = '<span class="banner-label">FIRST</span>' + prob.banner;
+        banner.hidden = false;
+    } else { banner.hidden = true; banner.innerHTML = ''; }
+
+    var rem = document.getElementById('reminder');
+    if (prob.reminder && !prob.inMixed) {
+        rem.innerHTML = '<span class="banner-label">REMINDER</span>' +
+            '<span aria-hidden="true">a<sup>3</sup> + b<sup>3</sup> = (a + b)(a<sup>2</sup> &#8722; ab + b<sup>2</sup>)</span>' +
+            '<span aria-hidden="true">a<sup>3</sup> &#8722; b<sup>3</sup> = (a &#8722; b)(a<sup>2</sup> + ab + b<sup>2</sup>)</span>' +
+            '<span class="sr-only">a cubed plus b cubed equals the quantity a plus b, times the quantity a squared minus a b plus b squared. ' +
+            'a cubed minus b cubed equals the quantity a minus b, times the quantity a squared plus a b plus b squared.</span>';
+        rem.hidden = false;
+    } else { rem.hidden = true; rem.innerHTML = ''; }
+
+    var input = document.getElementById('answer');
+    input.value = '';
+    input.disabled = false;
+    input.classList.remove('field-correct');
+    markField(false);
+    buildInputControls();
+    document.getElementById('next-row').innerHTML = '';
+    setFeedback('', '');
+    closePanel('hint'); closePanel('answer'); closePanel('solution');
+    updateDisplay();
+    if (!keepFocus) input.focus();
+
+    var label = prob.inMixed ? 'Mixed, ' + catName(prob.statKey) : catName(prob.statKey);
+    var extra = '';
+    if (prob.banner && !prob.inMixed) extra = ' Tip: look for a GCF first, then keep factoring.';
+    if (prob.reminder && !prob.inMixed) extra = ' The sum and difference of cubes formulas are shown below the problem.';
+    announce('Problem ' + (problemCount + 1) + '. ' + label + '. ' + spoken + extra);
+}
+
+/* ---------- live regions ---------- */
+function announce(text) {
+    var el = document.getElementById('problem-announcer');
+    el.textContent = '';
+    setTimeout(function () { el.textContent = text; }, 60);
+}
+function setFeedback(html, cls) {
+    var fb = document.getElementById('feedback');
+    fb.className = 'feedback' + (cls ? ' ' + cls : '');
+    fb.innerHTML = html;
+    if (html) revealFeedback();
+}
+/* Bring the message on screen if it landed below the fold, without moving
+   focus out of the answer box. */
+function revealFeedback() {
+    var fb = document.getElementById('feedback');
+    var r = fb.getBoundingClientRect(), vh = window.innerHeight || document.documentElement.clientHeight;
+    if (r.bottom > vh - 8 || r.top < 0) {
+        var behavior = prefersReducedMotion() ? 'auto' : 'smooth';
+        try { fb.scrollIntoView({ block: 'center', behavior: behavior }); } catch (e) { fb.scrollIntoView(false); }
+    }
+}
+function markField(bad) {
+    var el = document.getElementById('answer');
+    el.classList.toggle('field-error', !!bad);
+    if (bad) el.setAttribute('aria-invalid', 'true'); else el.removeAttribute('aria-invalid');
+}
+
+/* ---------- keys ---------- */
+var KEYS = [['x', 'x', 'Insert x'], ['x^2', 'x<sup>2</sup>', 'Insert x squared'], ['^', '^', 'Insert power sign'],
+    ['(', '(', 'Insert open parenthesis'], [')', ')', 'Insert close parenthesis'], ['+', '+', 'Insert plus'], ['-', '&#8722;', 'Insert minus']];
+function buildInputControls() {
+    var row = document.getElementById('key-row'), html = '', i;
+    for (i = 0; i < KEYS.length; i++) html += '<button type="button" class="key-btn" data-ins="' + esc(KEYS[i][0]) + '" aria-label="' + esc(KEYS[i][2]) + '">' + KEYS[i][1] + '</button>';
+    row.innerHTML = html;
+    var keys = row.querySelectorAll('.key-btn');
+    for (i = 0; i < keys.length; i++) {
+        keys[i].addEventListener('mousedown', function (e) { e.preventDefault(); });
+        keys[i].addEventListener('click', function () { insertAtCursor(this.getAttribute('data-ins')); });
+    }
+    document.getElementById('submit-row').innerHTML = '<button type="button" class="submit-btn" id="submit-btn">Submit</button>';
+    document.getElementById('submit-btn').addEventListener('click', checkAnswer);
+}
+function insertAtCursor(txt) {
+    var el = document.getElementById('answer');
+    if (el.disabled) return;
+    var s = (typeof el.selectionStart === 'number') ? el.selectionStart : el.value.length;
+    var e = (typeof el.selectionEnd === 'number') ? el.selectionEnd : el.value.length;
+    /* The x-squared key after an x squares that x: "x" + key gives "x^2",
+       never "xx^2". */
+    if (txt === 'x^2' && s === e && s > 0 && el.value.charAt(s - 1).toLowerCase() === 'x') txt = '^2';
+    el.value = el.value.slice(0, s) + txt + el.value.slice(e);
+    el.focus();
+    try { el.setSelectionRange(s + txt.length, s + txt.length); } catch (err) { /* ignore */ }
+}
+
+/* ---------- grading ---------- */
+var SUCCESS = ['Correct!', 'Great work!', 'Nicely factored!', 'Exactly right!', "That's it!"];
+var OPENERS = ['Good try.', 'Close, but not quite.', 'Good start.'];
+function checkAnswer() {
+    if (!prob || pState.solved) return;
+    var input = document.getElementById('answer');
+    var res = gradeAnswer(prob, input.value);
+    if (res.kind === 'parse') {
+        markField(false);
+        setFeedback(dual(res.msg, speakHTML(res.msg)), 'incorrect');
+        input.focus();
+        return;
+    }
+    if (res.kind === 'unfactored') {
+        markField(false);
+        var mU = 'That is the same polynomial, written out. Factor it into a product.';
+        setFeedback(esc(mU), 'incorrect');
+        input.focus();
+        return;
+    }
+    if (res.kind === 'partial') {
+        markField(false);
+        setFeedback(dual(partialMsgHTML(res), partialMsgSpeech(res)), 'incorrect');
+        input.focus();
+        return;
+    }
+    if (res.kind === 'wrong') {
+        markField(true);
+        /* Credit rule (Ira, 2026-09-16): wrong tries cost nothing. The
+           problem is booked once, when it is finished; a wrong try only
+           breaks the streak. Skipping after a wrong try books nothing. */
+        pState.missed = true;
+        streak = 0; stopTimer(); updateDisplay(); saveState();
+        var d = res.diag, opener = pick(OPENERS);
+        var vis = opener + ' Multiplying your answer back out gives <span class="exp">' + d.expHTML + '</span>, not the original.' +
+            (d.tip ? '<span class="tip">' + d.tip + '</span>' : '');
+        var sp = opener + ' Multiplying your answer back out gives ' + d.expSpeech + ', not the original. ' + (d.tip ? speakHTML(d.tip) : '');
+        setFeedback(dual(vis, sp), 'incorrect');
+        input.focus();
+        return;
+    }
+    /* correct */
+    markField(false);
+    pState.solved = true;
+    var firstTry = !pState.missed && !pState.revealed;
+    if (!pState.booked) { pState.booked = true; stats[prob.statKey].t++; if (!pState.revealed) stats[prob.statKey].c++; }
+    var msg = pick(SUCCESS);
+    if (firstTry) {
+        streak++;
+        if (streak > bestStreak) bestStreak = streak;
+        if (streak === 1) startTimer();
+        if (streak % 10 === 0) msg = streak + ' in a row! Time: ' + formatTime(timer);
+        celebrate(streak);
+    }
+    saveState();
+    updateDisplay();
+    setFeedback(esc(msg), 'correct');
+    lockAndShowNext();
+}
+function lockAndShowNext() {
+    document.getElementById('answer').disabled = true;
+    document.getElementById('answer').classList.add('field-correct');
+    /* Removed rather than hidden, so nothing invisible stays focusable. */
+    document.getElementById('key-row').innerHTML = '';
+    document.getElementById('submit-row').innerHTML = '';
+    var row = document.getElementById('next-row');
+    row.innerHTML = '<button type="button" class="submit-btn next-btn" id="next-btn">Next Question <svg width="14" height="12" viewBox="0 0 14 12" aria-hidden="true" focusable="false" style="vertical-align:-1px;margin-left:4px"><path d="M1 6h11M7.5 1.5 12 6l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
+    var nb = document.getElementById('next-btn');
+    /* Focus moves here from inside the answer box's Enter handler. A held
+       Enter (key auto-repeat) would press this button at once and wipe the
+       "Correct!" line before it is seen or announced, so an activation in
+       the first 300 ms after the button appears is ignored. */
+    var armedAt = Date.now() + 300;
+    nb.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.repeat) e.preventDefault(); });
+    nb.addEventListener('click', function () { if (Date.now() < armedAt) return; nextProblem(); });
+    nb.focus();
+}
+function nextProblem() { problemCount++; newProblem(); }
+
+/* ---------- reveals (design system 6.2): Answer and Solution charge one
+   attempt and end the streak; Hint is free; Skip is free ---------- */
+function chargeReveal() {
+    if (!pState.booked) { pState.booked = true; stats[prob.statKey].t++; }
+    pState.revealed = true;
+    streak = 0; stopTimer(); updateDisplay(); saveState();
+}
+function closePanel(name) {
+    document.getElementById(name + '-box').hidden = true;
+    document.getElementById(name + '-btn').setAttribute('aria-expanded', 'false');
+}
+function openPanel(name) {
+    document.getElementById(name + '-box').hidden = false;
+    document.getElementById(name + '-btn').setAttribute('aria-expanded', 'true');
+}
+function toggleHint() {
+    var box = document.getElementById('hint-box');
+    if (!box.hidden) { closePanel('hint'); return; }
+    box.innerHTML = '<div class="panel-title">Hint</div>' + dual(prob.hint, speakHTML(prob.hint));
+    openPanel('hint');
+}
+function toggleAnswer() {
+    var box = document.getElementById('answer-box');
+    if (!box.hidden) { closePanel('answer'); return; }
+    if (!pState.solved) chargeReveal();
+    box.innerHTML = '<div class="panel-title">Answer</div><div class="math">' + dual(answerHTML(prob), answerSpeech(prob)) + '</div>';
+    openPanel('answer');
+}
+function toggleSolution() {
+    var box = document.getElementById('solution-box');
+    if (!box.hidden) { closePanel('solution'); return; }
+    if (!pState.solved) chargeReveal();
+    if (solutionShown < 1) solutionShown = 1;
+    renderSolution();
+    openPanel('solution');
+}
+function renderSolution() {
+    var box = document.getElementById('solution-box'), steps = prob.steps, total = steps.length;
+    var shown = Math.min(solutionShown, total), html = '<div class="panel-title">Step-by-Step Solution</div>', i;
+    if (prob.formula) html += '<div class="sol-formula"><span class="banner-label">FORMULA</span><span class="math" role="img" aria-label="' + esc('Formula: ' + prob.formulaSpeech) + '">' + prob.formula + '</span></div>';
+    for (i = 0; i < shown; i++) {
+        html += '<div class="solution-step"><div>' + dual('<b>' + (i + 1) + '.</b> ' + steps[i].label + ':', (i + 1) + '. ' + speakHTML(steps[i].label) + '.') + '</div>' +
+            '<div class="solution-eq" role="img" aria-label="' + esc(steps[i].speech) + '">' + steps[i].math + '</div></div>';
+    }
+    if (shown < total) {
+        var left = total - shown;
+        html += '<div class="step-controls"><button type="button" class="submit-btn" id="next-step-btn">Next Step</button>' +
+            '<span class="steps-left">' + left + (left === 1 ? ' step left' : ' steps left') + '</span></div>';
+    } else {
+        html += '<div class="done-line">That&#39;s the complete solution. Try the next one yourself!</div>';
+        if (prob.alt) {
+            if (!altShown) html += '<div class="step-controls"><button type="button" class="help-btn" id="alt-btn">' + prob.altTitle + '</button></div>';
+            else {
+                html += '<div class="alt-block"><div class="panel-title">' + prob.altTitle + '</div>';
+                for (i = 0; i < prob.alt.length; i++) {
+                    html += '<div class="solution-step"><div>' + dual(prob.alt[i].label + ':', speakHTML(prob.alt[i].label) + '.') + '</div>' +
+                        '<div class="solution-eq" role="img" aria-label="' + esc(prob.alt[i].speech) + '">' + prob.alt[i].math + '</div></div>';
+                }
+                html += '</div>';
+            }
+        }
+    }
+    box.innerHTML = html;
+    var ab = document.getElementById('alt-btn');
+    if (ab) ab.addEventListener('click', function () {
+        altShown = true;
+        renderSolution();
+        var blk = box.querySelector('.alt-block .panel-title');
+        if (blk) { blk.setAttribute('tabindex', '-1'); blk.focus(); }
+    });
+    var nb = document.getElementById('next-step-btn');
+    if (nb) nb.addEventListener('click', function () {
+        solutionShown++;
+        renderSolution();
+        var again = document.getElementById('next-step-btn');
+        if (again) again.focus();
+        else { var steps2 = box.querySelectorAll('.solution-eq'); if (steps2.length) { steps2[steps2.length - 1].setAttribute('tabindex', '-1'); steps2[steps2.length - 1].focus(); } }
+    });
+}
+function skipProblem() { problemCount++; newProblem(); }
+
+/* ---------- timer ---------- */
+function startTimer() {
+    stopTimer(); timer = 0;
+    timerInterval = setInterval(function () { timer++; updateDisplay(); }, 1000);
+}
+function stopTimer() { if (timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
+function formatTime(s) { var m = Math.floor(s / 60), r = s % 60; return m + ':' + (r < 10 ? '0' : '') + r; }
+function updateDisplay() {
+    document.getElementById('problemNum').textContent = String(problemCount + 1);
+    document.getElementById('streak').textContent = String(streak);
+    var td = document.getElementById('timer-display');
+    if (timerInterval) { td.textContent = 'Time: ' + formatTime(timer); td.hidden = false; }
+    else td.hidden = true;
+}
+
+/* ---------- confetti (design system 7) ---------- */
+function prefersReducedMotion() { return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+function confettiTierFor(s) {
+    if (s < 3) return 0;
+    if (s % 10 === 0) return 3;
+    if (s % 5 === 0) return 2;
+    if (s % 5 === 3) return 1;
+    return 0;
+}
+function celebrate(s) {
+    if (!confettiEnabled) return;
+    var tier = confettiTierFor(s);
+    if (tier === 1) createConfetti(50, 1);
+    else if (tier === 2) createConfetti(100, 2);
+    else if (tier === 3) createConfetti(200, 3);
+}
+function createConfetti(count, tier) {
+    if (prefersReducedMotion()) return;
+    /* Orange (#fb923c) and red (#ef4444) are a documented exemption to the
+       no-orange/no-red rule (design system 7.2): confetti never shares the
+       screen with a wrong-answer message. Do not "fix" them back out. */
+    var colors = ['#7c3aed', '#a78bfa', '#2e3d8f', '#10b981', '#ffeb3b', '#fb923c', '#ef4444', '#ec4899'];
+    var massive = tier === 3, i;
+    for (i = 0; i < count; i++) {
+        var piece = document.createElement('div');
+        piece.className = 'confetti';
+        piece.setAttribute('aria-hidden', 'true');
+        var base = tier === 1 ? 7 + Math.random() * 5 : (tier === 2 ? 10 + Math.random() * 7 : 11 + Math.random() * 9);
+        var color = colors[Math.floor(Math.random() * colors.length)];
+        var shape = Math.floor(Math.random() * 4);
+        if (shape === 0) { piece.style.width = base + 'px'; piece.style.height = base + 'px'; piece.style.background = color; piece.style.borderRadius = '50%'; }
+        else if (shape === 1) { piece.style.width = base + 'px'; piece.style.height = base + 'px'; piece.style.background = color; piece.style.borderRadius = '2px'; }
+        else if (shape === 2) { piece.style.width = Math.max(4, base * 0.35) + 'px'; piece.style.height = (base * 1.7) + 'px'; piece.style.background = color; piece.style.borderRadius = '2px'; }
+        else { piece.style.width = '0'; piece.style.height = '0'; piece.style.borderLeft = (base * 0.6) + 'px solid transparent'; piece.style.borderRight = (base * 0.6) + 'px solid transparent'; piece.style.borderBottom = base + 'px solid ' + color; }
+        piece.style.left = (Math.random() * 100) + '%';
+        piece.style.top = '-20px';
+        var dur = tier === 1 ? 1.6 + Math.random() * 1.0 : (tier === 2 ? 2.0 + Math.random() * 1.5 : 2.5 + Math.random() * 2.0);
+        piece.style.animation = (massive ? 'confetti-fall-slow' : 'confetti-fall') + ' ' + dur + 's ease-out forwards';
+        piece.style.animationDelay = (Math.random() * (massive ? 0.8 : 0.4)) + 's';
+        document.body.appendChild(piece);
+        setTimeout((function (el) { return function () { if (el.parentNode) el.parentNode.removeChild(el); }; })(piece), massive ? 6000 : 4500);
+    }
+    if (massive) {
+        for (i = 0; i < 15; i++) {
+            var sp = document.createElement('div');
+            sp.className = 'sparkle';
+            sp.setAttribute('aria-hidden', 'true');
+            sp.style.left = (Math.random() * 90 + 5) + '%';
+            sp.style.top = (Math.random() * 55 + 10) + 'vh';
+            sp.style.animationDelay = (Math.random() * 0.5) + 's';
+            document.body.appendChild(sp);
+            setTimeout((function (el) { return function () { if (el.parentNode) el.parentNode.removeChild(el); }; })(sp), 3500);
+        }
+    }
+}
+
+/* ---------- stats ---------- */
+var STAT_NAMES = { gcf: 'GCF', grouping: 'Grouping', tri1: 'Trinomials (a = 1)', special: 'Diff of Squares', multi: 'Multi-step', triA: 'Trinomials (a &#8800; 1)', cubes: 'Sum/Diff Cubes' };
+function pct(s) { return s.t > 0 ? Math.round((s.c / s.t) * 100) : 0; }
+function showStats() {
+    var clean = sanitizeStats(stats), html = '<h2 id="stats-heading">My Stats</h2>', i;
+    html += '<div class="best-line">Best streak: ' + safeCount(bestStreak) + '</div>';
+    for (i = 0; i < STAT_KEYS.length; i++) {
+        var k = STAT_KEYS[i], s = clean[k], p = pct(s);
+        var tier = (p >= 90 && s.t >= 5) ? 'tier-full' : (p >= 60 ? 'tier-mid' : 'tier-low');
+        html += '<div class="stat-row"><div class="stat-name">' + STAT_NAMES[k] + '</div>' +
+            '<div class="stat-bar-wrap" aria-hidden="true"><div class="stat-bar ' + tier + '" style="width:' + p + '%"></div></div>' +
+            '<div class="stat-num">' + (s.t > 0 ? s.c + ' right out of ' + s.t + ' (' + p + '%)' : 'not tried yet') + '</div></div>';
+    }
+    var weakest = null, wp = 101;
+    for (i = 0; i < STAT_KEYS.length; i++) {
+        var s2 = clean[STAT_KEYS[i]];
+        if (s2.t >= 3 && pct(s2) < 80 && pct(s2) < wp) { wp = pct(s2); weakest = STAT_KEYS[i]; }
+    }
+    if (weakest) html += '<div class="recommend">Practise next: ' + STAT_NAMES[weakest] + ' (' + wp + '%)</div>';
+    html += '<div class="stats-actions"><button type="button" class="close-btn" id="close-stats">Close</button>' +
+        '<button type="button" class="reset-btn" id="reset-btn">Reset Progress</button></div>';
+    var panel = document.getElementById('stats-panel');
+    panel.innerHTML = html;
+    document.getElementById('stats-overlay').hidden = false;
+    document.getElementById('close-stats').addEventListener('click', hideStats);
+    document.getElementById('reset-btn').addEventListener('click', resetProgress);
+    panel.focus();
+}
+function hideStats() {
+    document.getElementById('stats-overlay').hidden = true;
+    disarmReset();
+    document.getElementById('stats-btn').focus();
+}
+var resetConfirming = false, resetTimer = null;
+function disarmReset() {
+    if (resetTimer) { clearTimeout(resetTimer); resetTimer = null; }
+    resetConfirming = false;
+    var b = document.getElementById('reset-btn');
+    if (b) { b.textContent = 'Reset Progress'; b.className = 'reset-btn'; }
+}
+function resetProgress() {
+    if (!resetConfirming) {
+        resetConfirming = true;
+        var b = document.getElementById('reset-btn');
+        b.textContent = 'Tap again to confirm'; b.className = 'reset-btn armed';
+        announce('Tap Reset Progress again within 3.5 seconds to erase your stats.');
+        resetTimer = setTimeout(disarmReset, 3500);
+        return;
+    }
+    disarmReset();
+    stats = blankStats(); bestStreak = 0;
+    /* A reset is a fresh start: the problem counter, streak and timer go back
+       to the beginning too, and the problem on screen becomes problem 1. */
+    problemCount = 0; streak = 0; stopTimer(); timer = 0;
+    updateDisplay();
+    saveState();
+    showStats();
+}
+
+/* ---------- insignia ---------- */
+function drawInsignia() {
+    var d = '', steps = 240, i, t, r;
+    for (i = 0; i <= steps; i++) {
+        t = (i / steps) * 4 * Math.PI; r = 2 * Math.cos(1.5 * t);
+        d += (i === 0 ? 'M ' : 'L ') + (r * Math.cos(t) * 12).toFixed(2) + ' ' + (r * Math.sin(t) * 12).toFixed(2) + ' ';
+    }
+    document.getElementById('pr-path').setAttribute('d', d.trim());
+}
+
+/* ---------- wiring ---------- */
+function init() {
+    loadState();
+    drawInsignia();
+    buildCategoryGrid();
+    setSwitch(document.getElementById('sw-confetti'), confettiEnabled);
+    document.getElementById('sw-confetti').addEventListener('click', function () {
+        confettiEnabled = !confettiEnabled;
+        setSwitch(this, confettiEnabled);
+        try { localStorage.setItem(CONFETTI_KEY, confettiEnabled ? '1' : '0'); } catch (e) { /* ignore */ }
+        if (confettiEnabled) createConfetti(40, 1);
+    });
+    document.getElementById('answer').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); checkAnswer(); }
+    });
+    document.getElementById('hint-btn').addEventListener('click', toggleHint);
+    document.getElementById('answer-btn').addEventListener('click', toggleAnswer);
+    document.getElementById('solution-btn').addEventListener('click', toggleSolution);
+    document.getElementById('skip-btn').addEventListener('click', skipProblem);
+    document.getElementById('stats-btn').addEventListener('click', showStats);
+    document.getElementById('stats-overlay').addEventListener('click', function (e) { if (e.target === this) hideStats(); });
+    document.addEventListener('keydown', function (e) {
+        if (document.getElementById('stats-overlay').hidden) return;
+        if (e.key === 'Escape') { hideStats(); return; }
+        /* The panel is aria-modal, so Tab cycles inside it rather than
+           wandering into the game behind the overlay. */
+        if (e.key === 'Tab') {
+            var f = document.getElementById('stats-panel').querySelectorAll('button');
+            if (!f.length) return;
+            var first = f[0], last = f[f.length - 1], act = document.activeElement;
+            if (e.shiftKey && (act === first || act === document.getElementById('stats-panel'))) { e.preventDefault(); last.focus(); }
+            else if (!e.shiftKey && act === last) { e.preventDefault(); first.focus(); }
+        }
+    });
+    newProblem();
+}
+init();
+</script>
+</body>
+</html>
