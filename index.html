@@ -97,7 +97,7 @@
     .category {
         background: #ffffff;
         border-radius: 16px;
-        margin-bottom: 14px;
+        margin-bottom: 30px;   /* was 14px: clearer break between sections */
         overflow: hidden;
         position: relative;
         box-shadow: 0 10px 26px rgba(8, 12, 40, 0.35);
@@ -249,15 +249,18 @@
         text-align: center;
         margin-top: 46px;
     }
+    /* 70px rose, 8.5px caption (suite standard, 2026-10-13). On this dark
+       stage the dark navy-to-teal game gradient disappeared, so the page uses
+       a light violet-to-mint version of it. */
     .insignia {
         display: block;
-        margin: 0 auto 2px;
-        width: 90px;
-        opacity: 0.9;
+        margin: 0 auto 4px;
+        width: 70px;
+        opacity: 1;
     }
     .insignia-caption {
         text-align: center;
-        font-size: 6.5px;
+        font-size: 8.5px;
         letter-spacing: 1.2px;
         font-weight: 800;
         /* the spec value #5d6798 is the on-white caption colour; on this
@@ -298,8 +301,8 @@
 
     <div class="category open" id="cat-algebra">
         <h2 class="category-heading">
-            <button type="button" class="section-toggle" aria-expanded="true" aria-controls="body-algebra" data-cat="cat-algebra" data-name="Algebra" data-count="16 games">
-                <span class="category-name">Algebra <span class="cat-count">16 games</span></span>
+            <button type="button" class="section-toggle" aria-expanded="true" aria-controls="body-algebra" data-cat="cat-algebra" data-name="Algebra" data-count="17 games">
+                <span class="category-name">Algebra <span class="cat-count">17 games</span></span>
                 <svg class="category-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </button>
         </h2>
@@ -404,15 +407,17 @@
             <a class="play-link" href="factoring-polynomials/" aria-label="Play Factoring Polynomials">Play &rarr;</a>
         </div>
 
+        <div class="card">
+            <h3 class="game-name">Fractions</h3>
+            <div class="game-desc">Simplify, multiply, divide, and add or subtract fractions, step by step.</div>
+            <a class="play-link" href="fractions/" aria-label="Play Fractions">Play &rarr;</a>
+        </div>
+
         <div class="card pending">
             <h3 class="game-name">Rational Expressions</h3>
             <div class="game-desc">Simplify, multiply, divide, and add or subtract rational expressions.</div>
             <span class="soon-link">Coming Soon</span>
         </div>
-
-        <!-- Reserved slot for a future game. Empty on purpose and silent to
-             screen readers, so it is not announced as a blank item. -->
-        <div class="card pending card-blank" aria-hidden="true"></div>
 
                     </div>
             </div>
@@ -421,8 +426,8 @@
 
     <div class="category" id="cat-calculus">
         <h2 class="category-heading">
-            <button type="button" class="section-toggle" aria-expanded="false" aria-controls="body-calculus" data-cat="cat-calculus" data-name="Calculus and Beyond" data-count="5 tools, all coming soon">
-                <span class="category-name">Calculus &amp; Beyond <span class="cat-count">5 games</span></span>
+            <button type="button" class="section-toggle" aria-expanded="false" aria-controls="body-calculus" data-cat="cat-calculus" data-name="Calculus and Beyond" data-count="coming soon">
+                <span class="category-name">Calculus &amp; Beyond <span class="cat-count">Coming soon</span></span>
                 <svg class="category-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </button>
         </h2>
@@ -474,8 +479,8 @@
         <svg class="insignia" viewBox="-28 -26 56 64" aria-hidden="true" focusable="false" role="presentation">
             <defs>
                 <linearGradient id="pr-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#1e3a5f"/>
-                    <stop offset="100%" stop-color="#0d9488"/>
+                    <stop offset="0%" stop-color="#c4b5fd"/>
+                    <stop offset="100%" stop-color="#6ee7b7"/>
                 </linearGradient>
             </defs>
             <path id="pr-path" fill="none" stroke="url(#pr-grad)" stroke-width="1.8"/>
