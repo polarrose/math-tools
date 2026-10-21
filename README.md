@@ -34,6 +34,7 @@ To see all the games, just visit:
 | [Finding the Equation of a Line](equation-of-a-line/) | Writing a line's equation from slope and y-intercept, slope and a point, two points, or a parallel or perpendicular condition |
 | [Factoring Polynomials](factoring-polynomials/) | Factoring out the GCF, grouping, trinomials with leading coefficient 1 or not, difference of squares, sum and difference of cubes, and multi-step problems |
 | [Fractions](fractions/) | Simplifying, multiplying, dividing (with a step-by-step keep-change-flip level), and adding or subtracting with same or different denominators |
+| [Rational Expressions](rational-expressions/) | Simplifying, multiplying and dividing (cancel factors or factor first), and adding or subtracting with same or different denominators |
 
 Each game keeps progress on the student's own device, tracks accuracy per topic,
 and points them toward whichever category they are weakest in.
