@@ -1,0 +1,2295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>Rational Expressions</title>
+<meta name="theme-color" content="#1b2450">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&amp;display=swap" rel="stylesheet">
+<style>
+    /* ===== MIDNIGHT SCHOLAR - navy stage, white card, violet + mint accents ===== */
+    * { box-sizing: border-box; }
+    button, input, select, textarea { font-family: inherit; }
+    body {
+        font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+        background:
+            radial-gradient(900px 500px at 85% -10%, rgba(124, 58, 237, 0.28), transparent 60%),
+            radial-gradient(800px 500px at -10% 110%, rgba(16, 185, 129, 0.18), transparent 55%),
+            linear-gradient(160deg, #141b3d 0%, #1b2450 100%);
+        min-height: 100vh;
+        display: flex; justify-content: center; align-items: flex-start;
+        padding: 16px 12px; margin: 0; color: #1e2a5e;
+    }
+    .card {
+        background: #ffffff; border-radius: 22px; box-shadow: 0 24px 60px rgba(8, 12, 40, 0.55);
+        max-width: 760px; width: 100%; padding: 30px 24px 22px; position: relative; overflow: hidden;
+    }
+    .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981); }
+    h1 { text-align: center; color: #1e2a5e; margin: 4px auto 6px; font-size: 25px; letter-spacing: 0.3px; width: fit-content; max-width: 100%; }
+    h1::after { content: ''; display: block; width: 100%; height: 4px; border-radius: 2px; margin: 8px auto 14px; background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981); }
+    .info { display: flex; justify-content: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+    .info-item { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; background: #eef0fb; color: #2e3d8f; padding: 6px 14px; border-radius: 999px; }
+    .info-item svg { display: block; }
+
+    /* ===== Topic tiles: native radios, Favorite gradient ===== */
+    .cat-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px 12px; padding: 6px 8px; margin: 0; border: none; }
+    .cat-tile { position: relative; display: block; cursor: pointer; }
+    .cat-radio, .lvl-radio { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
+    .tile-face {
+        display: flex; align-items: center; justify-content: center; text-align: center;
+        min-height: 44px; padding: 8px 10px; border-radius: 999px;
+        background: linear-gradient(135deg, #1e3a5f, #0b7a70);
+        color: #ffffff; font-size: 13.5px; font-weight: 800; line-height: 1.2;
+        transition: box-shadow 0.15s, filter 0.15s; -webkit-tap-highlight-color: transparent;
+    }
+    .cat-tile:hover .tile-face { filter: brightness(0.92); }
+    .cat-radio:checked + .tile-face { box-shadow: 0 0 0 3px #ffffff, 0 0 0 6px #059669, 0 6px 14px rgba(16, 185, 129, 0.35); }
+    .cat-radio:focus-visible + .tile-face { outline: 3px solid #7c3aed; outline-offset: 7px; }
+
+    /* ===== Level branch ===== */
+    .level-zone { position: relative; min-height: 8px; margin: -8px 0 0; grid-column: 1 / -1; }
+    .branch { position: absolute; left: 0; top: 0; width: 100%; height: 30px; overflow: visible; pointer-events: none; }
+    .level-row { padding-top: 30px; }
+    .level-group { display: inline-flex; gap: 12px; border: none; margin: 0; padding: 0; }
+    .lvl-tile { position: relative; display: block; cursor: pointer; }
+    .lvl-face {
+        display: flex; align-items: center; justify-content: center; white-space: nowrap;
+        min-height: 44px; padding: 8px 18px; border-radius: 999px;
+        background: #e6e9f6; color: #4a5480; font-size: 13px; font-weight: 800; border: 2px solid transparent;
+        transition: background 0.15s, box-shadow 0.15s, border-color 0.15s; -webkit-tap-highlight-color: transparent;
+    }
+    .lvl-tile:hover .lvl-face { background: #d9def2; }
+    .lvl-radio:checked + .lvl-face { background: linear-gradient(135deg, #6ee7b7, #34d399); color: #064e3b; border-color: #0b7a70; box-shadow: 0 0 0 4px rgba(11, 122, 112, 0.22); }
+    .lvl-radio:focus-visible + .lvl-face { outline: 3px solid #7c3aed; outline-offset: 4px; }
+
+    /* ===== Problem ===== */
+    .instruction { text-align: center; font-size: 14px; font-weight: 800; color: #2e3d8f; margin: 18px 0 10px; }
+    .work {
+        display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 14px 12px;
+        background: #eef0fb; border: 2px solid #c7cdf0; border-radius: 14px;
+        padding: 22px 12px; margin: 0 auto 6px;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace; font-weight: bold; color: #1e2a5e; font-size: 24px;
+    }
+    .work.long { font-size: 21px; }
+    .op, .eq-sign { color: #6d28d9; margin: 0 2px; }
+    sup { font-size: 0.62em; line-height: 0; }
+    .frac { display: inline-flex; flex-direction: column; align-items: stretch; vertical-align: middle; text-align: center; margin: 0 2px; }
+    .frac-num, .frac-den { padding: 3px 8px; white-space: nowrap; }
+    .frac-bar { height: 3px; background: #1e2a5e; border-radius: 2px; margin: 2px 0; }
+    .prob-visual { display: inline-flex; align-items: center; gap: 6px; flex-wrap: nowrap; white-space: nowrap; }
+    .ans-group { display: inline-flex; align-items: center; gap: 8px; }
+    /* A problem too wide for the screen scrolls sideways inside its own box
+       (Ira, 2026-10-14). The row is centred while it fits; when it does not,
+       it starts at the left edge so nothing is cut off. Fractions and the
+       signs between them stay together on one line. */
+    .scroll-x.more-right { -webkit-mask-image: linear-gradient(to right, #000 82%, transparent); mask-image: linear-gradient(to right, #000 82%, transparent); }
+    .scroll-x.more-left { -webkit-mask-image: linear-gradient(to left, #000 82%, transparent); mask-image: linear-gradient(to left, #000 82%, transparent); }
+    .scroll-x.more-left.more-right { -webkit-mask-image: linear-gradient(to right, transparent, #000 14%, #000 86%, transparent); mask-image: linear-gradient(to right, transparent, #000 14%, #000 86%, transparent); }
+    .scroll-x { min-width: 0; max-width: 100%; overflow-x: auto; text-align: center; -webkit-overflow-scrolling: touch; padding: 2px 0 4px; }
+
+    /* Answer fraction: two stacked boxes */
+    .ans-frac { display: inline-flex; flex-direction: column; align-items: stretch; gap: 6px; }
+    .ans-frac .frac-bar { height: 3px; margin: 0; }
+    .den-fixed { text-align: center; padding: 2px 6px; white-space: nowrap; }
+    .ans-box {
+        width: 200px; font-size: 19px; font-weight: bold; text-align: center;
+        padding: 7px 6px; border: 3px solid #7c3aed; border-radius: 12px; color: #1e2a5e;
+        background: #ffffff; font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    }
+    .ans-box.short { width: 150px; }
+    .ans-box.lcd { width: 240px; }
+    .ans-box:focus { outline: none; border-color: #5b21b6; box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.28); }
+    .ans-box:disabled { background: #f3f4f8; color: #5d6798; border-color: #c7cdf0; }
+    .ans-box.field-error {
+        border-color: #6d28d9;
+        background: #f3eefe repeating-linear-gradient(90deg, #6d28d9 0, #6d28d9 5px, rgba(0,0,0,0) 5px, rgba(0,0,0,0) 10px) bottom left / 100% 3px no-repeat;
+    }
+    .ans-box.field-correct, .ans-box.field-correct:disabled { border-color: #047857; color: #065f46; -webkit-text-fill-color: #065f46; opacity: 1; background: #ecfdf5; }
+    .check-mark { display: none; flex-shrink: 0; }
+    .ans-wrap { display: inline-flex; align-items: center; gap: 8px; }
+    .ans-wrap.solved .check-mark { display: inline-block; }
+    .go-btn {
+        display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+        width: 46px; height: 46px; min-width: 46px; padding: 0; border-radius: 12px; color: #ffffff;
+        background: linear-gradient(135deg, #047857, #065f46); box-shadow: 0 4px 12px rgba(4, 120, 87, 0.35);
+    }
+    .go-btn:hover { filter: brightness(1.1); }
+    .work.go-below > .scroll-x { flex: 0 0 100%; }
+    .lcd-label { font-family: 'Nunito', 'Segoe UI', sans-serif; font-size: 17px; font-weight: 800; color: #2e3d8f; }
+
+    /* ===== Stages ===== */
+    .stage { border: 2px solid #c7cdf0; border-radius: 14px; background: #f7f8fd; padding: 12px 12px 16px; margin: 12px auto 0; }
+    .stage-title { font-size: 13.5px; font-weight: 800; color: #2e3d8f; text-align: center; margin: 0 0 10px; }
+    .stage .work { background: transparent; border: none; padding: 4px 6px; margin: 0; font-size: 22px; }
+    .stage .work.long { font-size: 20px; }
+    .stage.locked { border-style: dashed; background: #fafbfe; padding-bottom: 12px; }
+    .stage.locked .stage-title { color: #5d6798; margin-bottom: 4px; }
+    .stage.cleared { border-color: #34d399; background: #ecfdf5; }
+    .lock-note { text-align: center; font-size: 13px; font-weight: 700; color: #3c4569; margin: 0; }
+    .stage-note { text-align: center; font-size: 13px; font-weight: 700; color: #3c4569; margin: 8px 0 0; }
+    .stage.cleared .stage-note { color: #047857; }
+
+    /* ===== Tap-to-cancel chips ===== */
+    .chip {
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace; font-weight: bold; font-size: inherit; color: #1e2a5e;
+        background: #ffffff; border: 2px solid #9aa4d6; border-radius: 10px; padding: 2px 6px; margin: 2px;
+        cursor: pointer; position: relative; min-height: 44px; min-width: 44px;
+        transition: border-color 0.15s, box-shadow 0.15s, opacity 0.2s, background 0.15s;
+    }
+    .chip:hover:not(:disabled) { border-color: #7c3aed; background: #faf8ff; }
+    .chip:focus { outline: 3px solid #7c3aed; outline-offset: 2px; }
+    .chip[aria-pressed="true"] { border-color: #6d28d9; background: #f3eefe; box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.28); }
+    .chip.gone { opacity: 0.6; border-style: dashed; border-color: #9aa4d6; cursor: default; color: #3c4569; }
+    .chip.gone::after { content: ''; position: absolute; left: 4px; right: 4px; top: 50%; height: 3px; background: #6d28d9; transform: rotate(-12deg); border-radius: 2px; }
+    .chip.gone.p2::after { background: #0b7a70; transform: rotate(12deg); }
+    .frac-num .chip, .frac-den .chip { vertical-align: middle; }
+
+    /* Struck factors inside solutions */
+    .x1, .x2 { position: relative; display: inline-block; opacity: 0.65; }
+    .x1::after, .x2::after { content: ''; position: absolute; left: -1px; right: -1px; top: 50%; height: 2.5px; border-radius: 2px; background: #6d28d9; transform: rotate(-12deg); }
+    .x2::after { background: #0b7a70; transform: rotate(12deg); }
+    .paren-hl { color: #6d28d9; }
+
+    /* ===== Keys ===== */
+    .key-row { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 12px 0 2px; }
+    .key-row:empty { margin: 0; }
+    .stage .key-row { margin: 10px 0 0; }
+    /* Phone and tablet keypad: digits plus symbols, under the boxes. */
+    .key-row.pad { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; max-width: 360px; margin: 12px auto 2px; }
+    .key-row.pad:empty { display: none; }
+    .key-row.pad .key-btn { min-width: 0; width: 100%; padding: 10px 0; font-size: 18px; min-height: 46px; }
+    .key-row.pad .key-btn.wide { grid-column: span 2; }
+    .key-btn.del { display: inline-flex; align-items: center; justify-content: center; color: #4b3bbd; background: #ede7fd; }
+
+    /* ===== Buttons ===== */
+    button {
+        border: none; border-radius: 12px; cursor: pointer; font-weight: 800;
+        transition: background 0.2s, filter 0.2s, transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+        -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+    }
+    button:active { transform: scale(0.95); }
+    button:focus { outline: 3px solid #7c3aed; outline-offset: 2px; }
+    .key-btn { touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+    .key-btn { background: #e6e9f6; color: #2e3d8f; padding: 10px 14px; font-size: 16px; min-width: 46px; min-height: 44px; font-family: 'Consolas', 'SF Mono', 'Menlo', monospace; }
+    .key-btn:hover { background: #d9def2; }
+    .submit-row { text-align: center; margin: 16px 0 4px; }
+    .submit-btn { padding: 12px 28px; font-size: 15px; color: #ffffff; min-height: 46px; background: linear-gradient(135deg, #2e3d8f, #4b3bbd); box-shadow: 0 6px 16px rgba(46, 61, 143, 0.35); }
+    .submit-btn:hover { filter: brightness(0.92); }
+    .next-btn { background: linear-gradient(135deg, #047857, #065f46); box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35); }
+    .feedback { text-align: center; margin: 10px auto 2px; line-height: 1.45; max-width: 620px; }
+    .feedback:empty { margin: 0; }
+    .correct { color: #047857; font-size: 20px; font-weight: 800; }
+    .incorrect { color: #1e2a5e; font-size: 17px; font-weight: 700; }
+    .notice { color: #3c4569; font-size: 16px; font-weight: 700; }
+    .feedback .math-in { font-family: 'Consolas', 'SF Mono', 'Menlo', monospace; font-weight: bold; }
+    #next-row { text-align: center; margin: 14px 0 6px; }
+    #next-row:empty { margin: 0; }
+
+    /* ===== Helpers ===== */
+    .helpers { text-align: center; margin: 56px 0 8px; }
+    .help-btn { background: #ede7fd; color: #5b21b6; border: 1.5px solid #8b6fe8; margin: 4px; padding: 11px 16px; font-size: 12.5px; min-height: 44px; }
+    .help-btn:hover { background: #e2d8fb; }
+    .panel { background: #f7f5ff; border: 2px solid #d8ccf7; border-radius: 14px; padding: 15px; margin: 12px 0; color: #2a2550; font-size: 15px; line-height: 1.5; }
+    .panel-title { font-weight: 800; margin-bottom: 6px; }
+    /* Hint text darker and bolder (Ira, 2026-10-20): normal-weight text read too light. */
+    #hint-box { color: #1e2a5e; font-weight: 700; font-size: 16px; }
+    .solution-step { padding: 10px 0 8px; border-top: 1px dashed rgba(0, 0, 0, 0.15); font-weight: 700; }
+    .solution-eq { font-family: 'Consolas', 'SF Mono', 'Menlo', monospace; font-weight: bold; font-size: 17px; margin: 8px 0 2px 18px; color: #1e2a5e; line-height: 1.7; overflow-x: auto; }
+    .solution-eq.prose { font-family: 'Nunito', 'Segoe UI', system-ui, sans-serif; font-weight: 700; font-size: 15px; line-height: 1.8; }
+    .solution-eq .frac-bar { height: 2px; }
+    .eq-row { display: inline-flex; align-items: center; white-space: nowrap; flex-wrap: nowrap; gap: 6px; }
+    .eq-row > .frac { flex-shrink: 0; }
+    .nw { white-space: nowrap; }
+    .solution-eq .frac-num, .solution-eq .frac-den { padding: 1px 6px; }
+    .step-controls { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
+    .steps-left { font-size: 13px; font-weight: 800; color: #3c4569; }
+    .done-line { text-align: center; margin-top: 10px; font-weight: 800; color: #047857; }
+
+    /* ===== Settings, stats ===== */
+    .settings-row { display: flex; justify-content: center; margin-top: 22px; padding-top: 12px; border-top: 1px solid #e6e9f6; }
+    .switch-btn { display: inline-flex; align-items: center; gap: 10px; background: none; border: none; padding: 6px 4px; min-height: 44px; cursor: pointer; color: #4a5480; font-size: 12.5px; font-weight: 800; border-radius: 10px; }
+    .track { position: relative; display: inline-block; width: 42px; height: 24px; flex-shrink: 0; border-radius: 999px; background: #d5d9e8; border: 1px solid #8a93b8; transition: background 0.2s, border-color 0.2s; }
+    .knob { position: absolute; left: 2px; top: 2px; width: 18px; height: 18px; border-radius: 50%; background: #ffffff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); transition: transform 0.2s; }
+    .switch-btn[aria-pressed="true"] .track { background: #10b981; border-color: #0b7a70; }
+    .switch-btn[aria-pressed="true"] .knob { transform: translateX(18px); }
+    .stats-row { text-align: center; margin-top: 8px; }
+    .stats-btn { background: #ede7fd; color: #5b21b6; border: 1.5px solid #8b6fe8; border-radius: 999px; padding: 9px 18px; font-size: 12.5px; min-height: 44px; }
+    .stats-overlay { position: fixed; inset: 0; background: rgba(20, 27, 61, 0.82); display: flex; align-items: center; justify-content: center; z-index: 10000; padding: 16px; }
+    .stats-panel { background: #ffffff; border-radius: 20px; padding: 24px 22px; max-width: 480px; width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 24px 60px rgba(8, 12, 40, 0.55); }
+    .stats-panel:focus { outline: none; }
+    .stats-panel h2 { color: #1e2a5e; font-size: 19px; text-align: center; margin-top: 0; }
+    .stat-group { font-size: 11.5px; font-weight: 800; color: #5d6798; letter-spacing: 0.4px; margin: 16px 0 2px; text-transform: uppercase; }
+    .stat-row { display: flex; align-items: center; gap: 12px; margin: 10px 0; }
+    .stat-cup { flex: 0 0 auto; }
+    .stat-main { flex: 1 1 auto; min-width: 0; }
+    .stat-name { font-size: 13px; font-weight: 800; color: #1e2a5e; margin-bottom: 4px; display: flex; justify-content: space-between; gap: 8px; }
+    .stat-stars { display: inline-flex; align-items: center; gap: 3px; color: #2e3d8f; font-size: 12.5px; white-space: nowrap; }
+    .stat-bar-wrap { background: #e6e9f6; border-radius: 999px; height: 12px; overflow: hidden; }
+    .stat-bar { height: 100%; border-radius: 999px; }
+    .tier-low { background: linear-gradient(90deg, #2e3d8f, #8b96d8); }
+    .tier-mid { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+    .tier-full { background: linear-gradient(90deg, #059669, #34d399); }
+    .stat-num { font-size: 11.5px; color: #5d6798; margin-top: 3px; font-weight: 700; }
+    .best-line { text-align: center; font-size: 13px; font-weight: 800; color: #2e3d8f; margin: 6px 0 4px; }
+    .recommend { background: #f3eefe; border: 2px solid #c4b5fd; border-radius: 12px; padding: 10px; margin-top: 14px; font-size: 13px; font-weight: 700; color: #6d28d9; }
+    .stats-actions { text-align: center; margin-top: 18px; }
+    .close-btn { background: #e6e9f6; color: #2e3d8f; padding: 11px 20px; font-size: 14px; }
+    .close-btn:hover { background: #d9def2; }
+    .reset-btn { background: #4a5480; color: #ffffff; margin-left: 8px; padding: 11px 20px; font-size: 14px; }
+    .reset-btn:hover { background: #3c4569; }
+    .reset-btn.armed { background: #1e2a5e; }
+
+    /* ===== Insignia: 70px rose, 8.5px caption (Ira, 2026-10-13) ===== */
+    .insignia { display: block; margin: 22px auto 4px; width: 70px; opacity: 0.9; }
+    .insignia-caption { text-align: center; font-size: 8.5px; letter-spacing: 1.2px; color: #5d6798; opacity: 0.9; margin-top: 2px; font-weight: 800; }
+
+    /* ===== Confetti ===== */
+    .confetti { position: fixed; opacity: 1; pointer-events: none; z-index: 9999; }
+    @keyframes confetti-fall { 0% { transform: translateY(-20px) rotate(0deg); } 100% { transform: translateY(110vh) rotate(720deg); } }
+    @keyframes confetti-fall-slow { 0% { transform: translateY(-20px) rotate(0deg) scale(1); } 100% { transform: translateY(115vh) rotate(1080deg) scale(0.85); } }
+    .sparkle { position: fixed; width: 20px; height: 20px; border-radius: 50%; pointer-events: none; z-index: 9999; background: radial-gradient(circle, #fff 0%, #ffeb3b 50%, transparent 70%); animation: sparkle 0.5s ease-in-out infinite; }
+    @keyframes sparkle { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.6); } }
+
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+    [hidden] { display: none !important; }
+    @media (prefers-reduced-motion: reduce) {
+        .confetti, .sparkle { display: none !important; }
+        * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+    @media (max-width: 560px) {
+        .cat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 480px) {
+        body { padding: 12px 8px; }
+        .card { padding: 24px 12px 20px; }
+        h1 { font-size: 21px; }
+        .work { font-size: 19px; padding: 14px 6px; gap: 10px 8px; }
+        .work.long { font-size: 16px; }
+        .stage { padding: 10px 6px 14px; }
+        .stage .work { font-size: 17px; }
+        .stage .work.long { font-size: 15px; }
+        .ans-box { width: 160px; max-width: 44vw; font-size: 16px; min-height: 44px; }
+        .ans-box.short { width: 130px; }
+        .ans-box.lcd { width: 220px; max-width: 62vw; }
+        .frac-num, .frac-den { padding: 2px 4px; }
+        .chip { padding: 2px 4px; }
+        .lvl-face { padding: 8px 12px; font-size: 12px; min-height: 44px; }
+        .level-group { gap: 8px; }
+        .solution-eq { margin-left: 4px; font-size: 15px; }
+        .key-row { gap: 6px; }
+        .key-btn { min-width: 42px; padding: 10px 9px; }
+    }
+    /* Small phones: a little tighter so a pair of fractions fits on one line. */
+    @media (max-width: 400px) {
+        .stage .work { font-size: 15px; gap: 8px 6px; }
+        .ans-box { width: 138px; }
+        .ans-box.lcd { width: 196px; }
+        .ans-box.short { width: 108px; font-size: 15px; }
+        .stage .frac-num, .stage .frac-den { padding: 2px 2px; }
+    }
+</style>
+</head>
+<body>
+<main class="card" id="game-card">
+    <h1>Rational Expressions</h1>
+
+    <div class="info">
+        <div class="info-item">Problem: <span id="problemNum">1</span></div>
+        <div class="info-item">Streak: <span id="streak">0</span></div>
+        <div class="info-item" id="stars-chip"></div>
+    </div>
+
+    <div class="cat-grid" id="cat-grid" role="group" aria-label="Topic"></div>
+    <div class="level-zone" id="level-zone">
+        <svg class="branch" id="branch" aria-hidden="true" focusable="false"></svg>
+        <div class="level-row" id="level-row"></div>
+    </div>
+
+    <div class="instruction" id="instruction" aria-hidden="true"></div>
+    <p class="sr-only" id="problem-text"></p>
+    <div id="work-area"></div>
+    <div id="key-home" hidden></div>
+    <div class="key-row" id="key-row" role="group" aria-label="Typing keys"></div>
+
+    <div class="feedback" id="feedback" role="alert" aria-atomic="true"></div>
+    <div class="submit-row" id="submit-row"></div>
+
+    <!-- Polite region: announces each new problem and each step in words. -->
+    <div id="announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+    <div id="next-row"></div>
+
+    <div class="helpers">
+        <button type="button" class="help-btn" id="hint-btn" aria-expanded="false" aria-controls="hint-box">Show Hint</button>
+        <button type="button" class="help-btn" id="solution-btn" aria-expanded="false" aria-controls="solution-box">Show Solution</button>
+        <button type="button" class="help-btn" id="skip-btn">Skip</button>
+    </div>
+    <div class="panel" id="hint-box" hidden></div>
+    <div class="panel" id="solution-box" hidden></div>
+
+    <div class="settings-row">
+        <button type="button" class="switch-btn" id="sw-confetti" aria-pressed="true"><span class="track" aria-hidden="true"><span class="knob"></span></span><span>Confetti celebrations</span></button>
+    </div>
+    <div class="stats-row"><button type="button" class="stats-btn" id="stats-btn">My Stats</button></div>
+
+    <svg class="insignia" viewBox="-28 -26 56 64" aria-hidden="true" focusable="false">
+        <defs>
+            <linearGradient id="pr-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1e3a5f"/>
+                <stop offset="100%" stop-color="#0d9488"/>
+            </linearGradient>
+        </defs>
+        <path id="pr-path" fill="none" stroke="url(#pr-grad)" stroke-width="1.7" stroke-linejoin="round"/>
+    </svg>
+    <div class="insignia-caption" aria-hidden="true">POLAR ROSE STUDIO</div>
+</main>
+
+<div class="stats-overlay" id="stats-overlay" hidden>
+    <div class="stats-panel" id="stats-panel" role="dialog" aria-modal="true" aria-labelledby="stats-heading" tabindex="-1"></div>
+</div>
+
+<script>
+/* =====================================================================
+   Rational Expressions engine -- polynomial math, answer parser, graders,
+   problem generators and worked steps. ES5 only, ASCII-only source.
+   Shared verbatim by the game page and the Node test harness.
+   ===================================================================== */
+
+/* ---------- small helpers ---------- */
+function ri(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { var t = b; b = a % b; a = t; } return a; }
+function nz(min, max) { var v = 0; while (v === 0) v = ri(min, max); return v; }
+function shuffle(a) { var i, j, t; for (i = a.length - 1; i > 0; i--) { j = Math.floor(Math.random() * (i + 1)); t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+
+/* ---------- polynomials: coefficient arrays, index = power of x ---------- */
+function pTrim(p) { var q = p.slice(); while (q.length > 1 && q[q.length - 1] === 0) q.pop(); if (q.length === 0) q = [0]; return q; }
+function pIsZero(p) { p = pTrim(p); return p.length === 1 && p[0] === 0; }
+function pDeg(p) { p = pTrim(p); return pIsZero(p) ? -1 : p.length - 1; }
+function pAdd(a, b) { var n = Math.max(a.length, b.length), r = [], i; for (i = 0; i < n; i++) r.push((a[i] || 0) + (b[i] || 0)); return pTrim(r); }
+function pScale(a, k) { var r = [], i; for (i = 0; i < a.length; i++) r.push(a[i] * k); return pTrim(r); }
+function pSub(a, b) { return pAdd(a, pScale(b, -1)); }
+function pMul(a, b) {
+    var r = [], i, j;
+    for (i = 0; i < a.length + b.length - 1; i++) r.push(0);
+    for (i = 0; i < a.length; i++) for (j = 0; j < b.length; j++) r[i + j] += a[i] * b[j];
+    return pTrim(r);
+}
+function pEq(a, b) { a = pTrim(a); b = pTrim(b); if (a.length !== b.length) return false; for (var i = 0; i < a.length; i++) if (a[i] !== b[i]) return false; return true; }
+function pContent(p) { var g = 0; for (var i = 0; i < p.length; i++) g = gcd(g, p[i]); return g; }
+function pMulAll(list) { var r = [1]; for (var i = 0; i < list.length; i++) r = pMul(r, list[i]); return r; }
+function monoPoly(c, d) { var p = [], i; for (i = 0; i < d; i++) p.push(0); p.push(c); return p; }
+function pDivConst(p, c) { var r = [], i; for (i = 0; i < p.length; i++) r.push(p[i] / c); return pTrim(r); }
+/* Primitive part with a positive leading coefficient. */
+function pPrim(p) {
+    p = pTrim(p);
+    if (pIsZero(p)) return p;
+    var g = pContent(p);
+    if (p[p.length - 1] < 0) g = -g;
+    return pDivConst(p, g);
+}
+/* Pseudo-remainder of a by b, kept primitive so the numbers stay small. */
+function pPrem(a, b) {
+    var r = pTrim(a), db = pDeg(b), lb = b[db], guard = 0;
+    while (!pIsZero(r) && pDeg(r) >= db && guard++ < 50) {
+        var dr = pDeg(r), lr = r[dr];
+        r = pSub(pScale(r, lb), pMul(monoPoly(lr, dr - db), b));
+        if (!pIsZero(r)) r = pPrim(r);
+    }
+    return r;
+}
+/* Greatest common divisor over the rationals, returned primitive. */
+function pGcd(a, b) {
+    a = pPrim(a); b = pPrim(b);
+    if (pIsZero(a)) return b;
+    if (pIsZero(b)) return a;
+    if (pDeg(a) < pDeg(b)) { var t = a; a = b; b = t; }
+    var guard = 0;
+    while (!pIsZero(b) && guard++ < 50) {
+        if (pDeg(b) === 0) return [1];
+        var r = pPrem(a, b);
+        a = b;
+        b = pIsZero(r) ? r : pPrim(r);
+    }
+    return pPrim(a);
+}
+/* Exact division; null when q does not divide p with integer results. */
+function pDivExact(p, q) {
+    p = pTrim(p).slice(); q = pTrim(q);
+    var dq = pDeg(q), lq = q[dq], dp = pDeg(p), out = [], i, j;
+    if (dq < 0) return null;
+    if (dp < dq) return pIsZero(p) ? [0] : null;
+    for (i = 0; i <= dp - dq; i++) out.push(0);
+    for (i = dp - dq; i >= 0; i--) {
+        var c = p[i + dq] / lq;
+        if (c !== Math.round(c)) return null;
+        out[i] = c;
+        for (j = 0; j <= dq; j++) p[i + j] -= c * q[j];
+    }
+    if (!pIsZero(p)) return null;
+    return pTrim(out);
+}
+/* Rational functions n1/d1 and n2/d2 are equal. */
+function ratEq(n1, d1, n2, d2) { return pEq(pMul(n1, d2), pMul(n2, d1)); }
+/* What still cancels between top and bottom: a polynomial factor, or a
+   number. null when the fraction is in lowest terms. */
+function commonFactor(top, bot) {
+    var g = pGcd(top, bot);
+    if (pDeg(g) >= 1) return { poly: g };
+    var c = gcd(pContent(top), pContent(bot));
+    if (c > 1) return { num: c };
+    return null;
+}
+/* Lowest terms with a positive leading coefficient on the bottom. */
+function reduceRat(n, d) {
+    var g = pGcd(n, d);
+    if (pDeg(g) >= 1) { n = pDivExact(n, g); d = pDivExact(d, g); }
+    var c = gcd(pContent(n), pContent(d));
+    if (c > 1) { n = pDivConst(n, c); d = pDivConst(d, c); }
+    if (d[pDeg(d)] < 0) { n = pScale(n, -1); d = pScale(d, -1); }
+    return { n: n, d: d };
+}
+
+/* ---------- display: HTML (entities only) and spoken text ---------- */
+var MINUS = '&#8722;', TIMES = '&times;', DIVIDE = '&divide;';
+function xHTML(d) { if (d === 0) return ''; if (d === 1) return 'x'; return 'x<sup>' + d + '</sup>'; }
+function xSpeech(d) { if (d === 0) return ''; if (d === 1) return 'x'; if (d === 2) return 'x squared'; if (d === 3) return 'x cubed'; return 'x to the power ' + d; }
+function monoAbsHTML(c, d) { c = Math.abs(c); if (d === 0) return String(c); return (c === 1 ? '' : String(c)) + xHTML(d); }
+function monoAbsSpeech(c, d) { c = Math.abs(c); if (d === 0) return String(c); return (c === 1 ? '' : c + ' ') + xSpeech(d); }
+function termsHTML(terms) {
+    var out = '', first = true, i;
+    for (i = 0; i < terms.length; i++) {
+        var c = terms[i][0], d = terms[i][1];
+        if (c === 0) continue;
+        if (first) out += (c < 0 ? MINUS : '') + monoAbsHTML(c, d);
+        else out += (c < 0 ? ' ' + MINUS + ' ' : ' + ') + monoAbsHTML(c, d);
+        first = false;
+    }
+    return first ? '0' : out;
+}
+function termsSpeech(terms) {
+    var out = '', first = true, i;
+    for (i = 0; i < terms.length; i++) {
+        var c = terms[i][0], d = terms[i][1];
+        if (c === 0) continue;
+        if (first) out += (c < 0 ? 'negative ' : '') + monoAbsSpeech(c, d);
+        else out += (c < 0 ? ' minus ' : ' plus ') + monoAbsSpeech(c, d);
+        first = false;
+    }
+    return first ? '0' : out;
+}
+function polyTerms(p) { var t = [], i; p = pTrim(p); for (i = p.length - 1; i >= 0; i--) if (p[i] !== 0) t.push([p[i], i]); return t; }
+function polyTermsAsc(p) { var t = [], i; p = pTrim(p); for (i = 0; i < p.length; i++) if (p[i] !== 0) t.push([p[i], i]); return t; }
+function polyHTML(p) { return termsHTML(polyTerms(p)); }
+function polySpeech(p) { return termsSpeech(polyTerms(p)); }
+function signedNum(n) { return n < 0 ? MINUS + Math.abs(n) : String(n); }
+function signedSpeech(n) { return n < 0 ? 'negative ' + Math.abs(n) : String(n); }
+function isX(p) { p = pTrim(p); return p.length === 2 && p[0] === 0 && p[1] === 1; }
+function isOpp(p) { p = pTrim(p); return p.length === 2 && p[1] === -1; }
+function polyKey(p) { return pTrim(p).join(','); }
+
+/* A linear factor: x + a, or the reversed form m - x. */
+function L(a) { return [a, 1]; }
+function factorHTML(p) { return isOpp(p) ? termsHTML(polyTermsAsc(p)) : polyHTML(p); }
+function factorSpeech(p) { return isOpp(p) ? termsSpeech(polyTermsAsc(p)) : polySpeech(p); }
+
+/* A side of a fraction: a whole number k times a list of linear factors.
+   asc = show the expanded form constant first (used for m - x). */
+function side(k, f, asc) { return { k: k, f: f.slice(), asc: !!asc }; }
+function sidePoly(s) { return pScale(pMulAll(s.f), s.k); }
+function sideIsOne(s) { return s.k === 1 && s.f.length === 0; }
+function sideFactHTML(s, forceParens) {
+    var xs = 0, others = [], i;
+    for (i = 0; i < s.f.length; i++) { if (isX(s.f[i])) xs++; else others.push(s.f[i]); }
+    var front = s.k === 1 ? '' : (s.k === -1 ? MINUS : signedNum(s.k));
+    if (xs) front += (xs === 1 ? 'x' : 'x<sup>' + xs + '</sup>');
+    if (!others.length) return front === '' ? '1' : (front === MINUS ? MINUS + '1' : front);
+    if (others.length === 1 && front === '' && !forceParens) return factorHTML(others[0]);
+    var out = front;
+    for (i = 0; i < others.length; i++) out += '(' + factorHTML(others[i]) + ')';
+    return out;
+}
+function sideFactSpeech(s) {
+    var xs = 0, others = [], i, parts = [];
+    for (i = 0; i < s.f.length; i++) { if (isX(s.f[i])) xs++; else others.push(s.f[i]); }
+    if (s.k !== 1) parts.push(signedSpeech(s.k));
+    if (xs) parts.push(xs === 1 ? 'x' : 'x squared');
+    if (!others.length) return parts.length ? parts.join(' times ') : '1';
+    if (others.length === 1 && !parts.length) return factorSpeech(others[0]);
+    for (i = 0; i < others.length; i++) parts.push('the quantity ' + factorSpeech(others[i]));
+    return parts.join(', times ');
+}
+function sideExpHTML(s) { var p = sidePoly(s); return s.asc ? termsHTML(polyTermsAsc(p)) : polyHTML(p); }
+function sideExpSpeech(s) { var p = sidePoly(s); return s.asc ? termsSpeech(polyTermsAsc(p)) : polySpeech(p); }
+/* Factored form with chosen factors struck through (used in solutions). */
+function sideStrikeHTML(s, strike) {
+    var parts = [], i;
+    if (s.k !== 1) parts.push(s.k === -1 ? MINUS + '1' : signedNum(s.k));
+    for (i = 0; i < s.f.length; i++) {
+        /* A lone factor is shown bare, as in the factored step before it, so
+           the cancel step is no wider than that step. */
+        var lone = s.f.length === 1 && s.k === 1;
+        var key = polyKey(s.f[i]), body = isX(s.f[i]) ? 'x' : (lone ? factorHTML(s.f[i]) : '(' + factorHTML(s.f[i]) + ')');
+        parts.push(strike[key] ? '<span class="' + strike[key] + '">' + body + '</span>' : body);
+    }
+    return parts.length ? parts.join('') : '1';
+}
+
+function fracHTML(t, b) { return '<span class="frac"><span class="frac-num">' + t + '</span><span class="frac-bar"></span><span class="frac-den">' + b + '</span></span>'; }
+function fracSpeech(t, b) { return 'the fraction with numerator ' + t + ', and denominator ' + b; }
+/* A rational result: top only when the bottom is 1. */
+function ratHTML(t, b, bIsOne) { return bIsOne ? t : fracHTML(t, b); }
+function ratSpeech(t, b, bIsOne) { return bIsOne ? t : fracSpeech(t, b); }
+var OP_HTML = { mul: TIMES, div: DIVIDE, add: '+', sub: MINUS };
+var OP_SPEECH = { mul: '; times ', div: '; divided by ', add: '; plus ', sub: '; minus ' };
+function opH(op) { return ' <span class="op">' + OP_HTML[op] + '</span> '; }
+var EQ = ' <span class="eq-sign">=</span> ';
+function step(label, math, speech, prose) { return { label: label, math: math, speech: speech, prose: !!prose }; }
+
+/* ---------- parsing the student's answer (from the Factoring game) ---------- */
+function normalizeInput(s) {
+    s = String(s);
+    s = s.replace(/[\u2212\u2012\u2013\u2014]/g, '-').replace(/[\u00b7\u00d7\u22c5]/g, '*')
+         .replace(/\u00b2/g, '^2').replace(/\u00b3/g, '^3').replace(/\u2074/g, '^4')
+         .replace(/X/g, 'x').replace(/\s+/g, '');
+    return s;
+}
+function tokenize(s) {
+    var toks = [], i = 0, ch;
+    while (i < s.length) {
+        ch = s.charAt(i);
+        if (/[0-9]/.test(ch)) {
+            var j = i; while (j < s.length && /[0-9]/.test(s.charAt(j))) j++;
+            if (s.charAt(j) === '.') return { err: 'decimal' };
+            if (j - i > 6) return { err: 'big' };
+            toks.push({ t: 'num', v: parseInt(s.slice(i, j), 10) }); i = j; continue;
+        }
+        if (ch === '.') return { err: 'decimal' };
+        if (ch === 'x') { toks.push({ t: 'x' }); i++; continue; }
+        if ('+-*^()'.indexOf(ch) !== -1) { toks.push({ t: ch }); i++; continue; }
+        if (ch === '[' || ch === '{') { toks.push({ t: '(' }); i++; continue; }
+        if (ch === ']' || ch === '}') { toks.push({ t: ')' }); i++; continue; }
+        if (ch === '/') return { err: 'slash' };
+        return { err: 'char' };
+    }
+    return { toks: toks };
+}
+function parseAnswer(raw) {
+    var s = normalizeInput(raw);
+    if (s === '') return { ok: false, code: 'empty' };
+    if (/[a-wyz]/i.test(s)) return { ok: false, code: 'letter' };
+    if (/x[0-9]/.test(s)) return { ok: false, code: 'xdigit' };
+    var open = 0, i;
+    for (i = 0; i < s.length; i++) {
+        var c = s.charAt(i);
+        if (c === '(' || c === '[' || c === '{') open++;
+        if (c === ')' || c === ']' || c === '}') { open--; if (open < 0) return { ok: false, code: 'parens' }; }
+    }
+    if (open !== 0) return { ok: false, code: 'parens' };
+    var tk = tokenize(s);
+    if (tk.err) return { ok: false, code: tk.err };
+    var toks = tk.toks, pos = 0;
+    function peek() { return toks[pos]; }
+    function eat(t) { if (toks[pos] && toks[pos].t === t) { pos++; return true; } return false; }
+    function fail() { throw { code: 'syntax' }; }
+    function parseExpr() {
+        var terms = [{ s: 1, n: parseTerm() }];
+        while (peek() && (peek().t === '+' || peek().t === '-')) {
+            var sg = peek().t === '-' ? -1 : 1; pos++;
+            terms.push({ s: sg, n: parseTerm() });
+        }
+        if (terms.length === 1 && terms[0].s === 1) return terms[0].n;
+        return { t: 'add', terms: terms };
+    }
+    function startsAtom(tok) { return tok && (tok.t === 'num' || tok.t === 'x' || tok.t === '('); }
+    function parseTerm() {
+        var fs = [parseUnary()];
+        while (true) {
+            if (peek() && peek().t === '*') { pos++; fs.push(parseUnary()); continue; }
+            if (startsAtom(peek())) {
+                if (peek().t === 'num') fail();
+                fs.push(parsePower()); continue;
+            }
+            break;
+        }
+        return fs.length === 1 ? fs[0] : { t: 'mul', fs: fs };
+    }
+    function parseUnary() {
+        if (eat('-')) return { t: 'neg', a: parseUnary() };
+        if (eat('+')) return parseUnary();
+        return parsePower();
+    }
+    function parsePower() {
+        var base = parseAtom();
+        if (eat('^')) {
+            var e;
+            if (eat('(')) { if (!peek() || peek().t !== 'num') fail(); e = toks[pos++].v; if (!eat(')')) fail(); }
+            else { if (!peek() || peek().t !== 'num') fail(); e = toks[pos++].v; }
+            if (e > 12) throw { code: 'bigpow' };
+            if (peek() && peek().t === '^') fail();
+            return { t: 'pow', b: base, e: e };
+        }
+        return base;
+    }
+    function parseAtom() {
+        var tok = peek();
+        if (!tok) fail();
+        if (tok.t === 'num') { pos++; return { t: 'num', v: tok.v }; }
+        if (tok.t === 'x') { pos++; return { t: 'x' }; }
+        if (tok.t === '(') { pos++; var inner = parseExpr(); if (!eat(')')) fail(); return { t: 'paren', a: inner }; }
+        fail();
+    }
+    try {
+        var ast = parseExpr();
+        if (pos !== toks.length) return { ok: false, code: 'syntax' };
+        return { ok: true, ast: ast };
+    } catch (e) {
+        return { ok: false, code: (e && e.code) || 'syntax' };
+    }
+}
+function astPoly(n) {
+    switch (n.t) {
+        case 'num': return [n.v];
+        case 'x': return [0, 1];
+        case 'paren': return astPoly(n.a);
+        case 'neg': return pScale(astPoly(n.a), -1);
+        case 'add': var r = [0]; for (var i = 0; i < n.terms.length; i++) r = pAdd(r, pScale(astPoly(n.terms[i].n), n.terms[i].s)); return r;
+        case 'mul': var m = [1]; for (var j = 0; j < n.fs.length; j++) m = pMul(m, astPoly(n.fs[j])); return m;
+        case 'pow': var b = astPoly(n.b), out = [1]; for (var k = 0; k < n.e; k++) out = pMul(out, b); return out;
+    }
+    return [0];
+}
+/* The factors the student actually wrote: a number and a list of
+   non-constant factors. */
+function astFactors(n) {
+    var k = 1, list = [];
+    function walk(node, times) {
+        var i, t;
+        switch (node.t) {
+            case 'paren': walk(node.a, times); return;
+            case 'neg': for (t = 0; t < times; t++) k = -k; walk(node.a, times); return;
+            case 'mul': for (i = 0; i < node.fs.length; i++) walk(node.fs[i], times); return;
+            case 'pow': walk(node.b, times * node.e); return;
+            default:
+                var p = astPoly(node);
+                if (pDeg(p) <= 0) { for (t = 0; t < times; t++) k *= p[0]; return; }
+                for (t = 0; t < times; t++) list.push(p);
+        }
+    }
+    walk(n, 1);
+    return { k: k, list: list };
+}
+var PARSE_MSG = {
+    empty: 'Type your answer in the box first.',
+    letter: 'Use x as the variable, with numbers, ^, +, &#8722; and parentheses.',
+    xdigit: 'To write a power, use ^ (like x^2) or the x&#178; key.',
+    parens: 'Check your parentheses: every ( needs a matching ).',
+    decimal: 'Use whole numbers only.',
+    big: 'That number is much bigger than any in this problem. Check what you typed.',
+    bigpow: 'That power is much bigger than any in this problem. Check what you typed.',
+    slash: 'No fraction bar is needed in a box: put the numerator in the top box and the denominator in the bottom box.',
+    char: 'Use only numbers, x, ^, +, &#8722; and parentheses.',
+    syntax: 'I couldn&#39;t read that. Check your signs, powers and parentheses.'
+};
+/* One box. blankOk: an empty box means 1 (a bottom box left blank). */
+function readBox(raw, blankOk) {
+    if (normalizeInput(raw) === '') {
+        if (blankOk) return { ok: true, poly: [1], blank: true };
+        return { ok: false, code: 'empty', msg: PARSE_MSG.empty };
+    }
+    var pr = parseAnswer(raw);
+    if (!pr.ok) return { ok: false, code: pr.code, msg: PARSE_MSG[pr.code] || PARSE_MSG.syntax };
+    return { ok: true, poly: astPoly(pr.ast), ast: pr.ast, blank: false };
+}
+
+/* ---------- grading ---------- */
+function cfHTML(cf) { return cf.poly ? (pDeg(cf.poly) === 1 && !isX(cf.poly) ? '(' + polyHTML(cf.poly) + ')' : polyHTML(cf.poly)) : String(cf.num); }
+function cfSpeech(cf) { return cf.poly ? polySpeech(cf.poly) : String(cf.num); }
+/* The scored final answer. Kinds: read (not an attempt), correct,
+   unsimplified (equal, not lowest terms: coached, no penalty), wrong. */
+function gradeFinal(prob, topStr, botStr) {
+    var t = readBox(topStr, false), b = readBox(botStr, true);
+    if (!t.ok && t.code === 'empty' && b.ok && !b.blank) return { kind: 'read', msg: 'Fill in the numerator too.', focus: 'top' };
+    if (!t.ok) return { kind: 'read', msg: t.code === 'empty' ? 'Type your answer in the boxes first.' : t.msg, focus: 'top' };
+    if (!b.ok) return { kind: 'read', msg: b.msg, focus: 'bot' };
+    if (pIsZero(b.poly)) return { kind: 'read', msg: 'The denominator can never be 0. Check the denominator.', focus: 'bot' };
+    var A = prob.ans;
+    if (ratEq(t.poly, b.poly, A.top, A.bot)) {
+        var cf = commonFactor(t.poly, b.poly);
+        if (cf) return { kind: 'unsimplified', cf: cf };
+        /* A bottom of -1 (or any negative number) is not simplified: the
+           sign belongs on the top. Coached, like any unsimplified form. */
+        if (pDeg(b.poly) === 0 && b.poly[0] < 0) return { kind: 'unsimplified', cf: { sign: true } };
+        return { kind: 'correct' };
+    }
+    /* A blank bottom box on a fraction answer is most likely unfinished. */
+    if (b.blank && pDeg(A.bot) >= 1) {
+        var i;
+        for (i = 0; i < (prob.traps || []).length; i++) if (ratEq(t.poly, b.poly, prob.traps[i].top, prob.traps[i].bot)) return { kind: 'wrong', tip: prob.traps[i].msg };
+        return { kind: 'read', msg: 'Fill in the denominator too. Leave it blank only when the answer has no fraction bar.', focus: 'bot' };
+    }
+    return { kind: 'wrong', tip: diagnose(prob, t.poly, b.poly) };
+}
+function diagnose(prob, tp, bp) {
+    var i, tr = prob.traps || [];
+    for (i = 0; i < tr.length; i++) if (ratEq(tp, bp, tr[i].top, tr[i].bot)) return tr[i].msg;
+    return prob.wrongMsg || 'Not quite. Check each step, or use Show Hint.';
+}
+/* Simplify, step 1: one side typed in factored form. */
+function gradeFactored(target, raw, which) {
+    var r = readBox(raw, false);
+    if (!r.ok) return { kind: 'read', msg: r.code === 'empty' ? 'Type the factored ' + which + ' in its box.' : r.msg };
+    if (!pEq(r.poly, target)) {
+        return { kind: 'wrong', msgHTML: 'Not quite. Multiplying your ' + which + ' back out gives ' + polyHTML(r.poly) + ', not ' + polyHTML(target) + '.',
+            msgSpeech: 'Not quite. Multiplying your ' + which + ' back out gives ' + polySpeech(r.poly) + ', not ' + polySpeech(target) + '.' };
+    }
+    var f = astFactors(r.ast), i;
+    for (i = 0; i < f.list.length; i++) {
+        if (pDeg(f.list[i]) > 1) return { kind: 'partial', msgHTML: 'Right value, but ' + polyHTML(f.list[i]) + ' can still be factored.', msgSpeech: 'Right value, but ' + polySpeech(f.list[i]) + ' can still be factored.' };
+        if (pContent(f.list[i]) > 1) return { kind: 'partial', msgHTML: 'Right value, but ' + polyHTML(f.list[i]) + ' still has a common factor of ' + pContent(f.list[i]) + '. Take it out.', msgSpeech: 'Right value, but ' + polySpeech(f.list[i]) + ' still has a common factor of ' + pContent(f.list[i]) + '. Take it out.' };
+    }
+    return { kind: 'correct' };
+}
+/* A box that must equal one polynomial (any form). */
+function gradePoly(target, raw, label) {
+    var r = readBox(raw, false);
+    if (!r.ok) return { kind: 'read', msg: r.code === 'empty' ? 'Type ' + label + ' in its box.' : r.msg };
+    return pEq(r.poly, target) ? { kind: 'correct' } : { kind: 'wrong', poly: r.poly };
+}
+/* A fraction typed in two boxes that must equal a given fraction. */
+function gradeRatio(top, bot, topStr, botStr) {
+    var t = readBox(topStr, false), b = readBox(botStr, true);
+    if (!t.ok) return { kind: 'read', msg: t.code === 'empty' ? 'Type the numerator in its box.' : t.msg };
+    if (!b.ok) return { kind: 'read', msg: b.msg };
+    if (pIsZero(b.poly)) return { kind: 'read', msg: 'The denominator can never be 0. Check the denominator.' };
+    return ratEq(t.poly, b.poly, top, bot) ? { kind: 'correct' } : { kind: 'wrong', top: t.poly, bot: b.poly };
+}
+
+/* A known wrong answer and the message that names the mistake. Skipped
+   when it equals the answer or an earlier trap. */
+function pushTrap(traps, ans, t, b, msg) {
+    /* A mistake that works out to 0 on top is still a mistake worth naming. */
+    if (pIsZero(b) || ratEq(t, b, ans.top, ans.bot)) return;
+    for (var i = 0; i < traps.length; i++) if (ratEq(t, b, traps[i].top, traps[i].bot)) return;
+    traps.push({ top: t, bot: b, msg: msg });
+}
+
+/* The top a student gets for a - b when the minus reaches only the first
+   (leading) term of b. Works for a linear or a quadratic b (oversight
+   2026-10-14: the old version assumed b was linear, so with an x numerator
+   in Different Denominators it predicted a top nobody types). */
+function minusFirstOnly(a, b) {
+    var d = pDeg(b), first = monoPoly(b[d], d);
+    return pAdd(pSub(a, first), pSub(b, first));
+}
+
+/* ---------- worked-step helpers ---------- */
+function okPair(c, d) { return c !== d && Math.abs(c * d) <= 42 && Math.abs(c + d) <= 13; }
+/* How a side factors, for Show Solution. which: 'top', 'bottom', ... */
+function factorStep(which, s) {
+    var exp = sideExpHTML(s), fac = sideFactHTML(s, false), label, xs = 0, lin = [], i;
+    var expS = sideExpSpeech(s), facS = sideFactSpeech(s);
+    for (i = 0; i < s.f.length; i++) { if (isX(s.f[i])) xs++; else lin.push(s.f[i]); }
+    if (s.f.length === 1 && s.k === 1) return step('The ' + which + ', ' + exp + ', is already factored', exp, 'The ' + which + ' is ' + expS + ', already factored', false);
+    if (s.f.length === 1) label = 'Factor the ' + which + ': take out the common factor ' + s.k;
+    else if (xs) label = 'Factor the ' + which + ': take out the common factor x';
+    else if (lin.length === 2 && lin[0][0] === -lin[1][0]) {
+        var m = Math.abs(lin[0][0]);
+        label = 'Factor the ' + which + ': it is a difference of squares, x<sup>2</sup> ' + MINUS + ' ' + m + '<sup>2</sup> = (x ' + MINUS + ' ' + m + ')(x + ' + m + ')';
+    } else {
+        var c = lin[0][0], d = lin[1][0];
+        label = 'Factor the ' + which + ': find two numbers that multiply to ' + signedNum(c * d) + ' and add to ' + signedNum(c + d) + '. They are ' + signedNum(c) + ' and ' + signedNum(d);
+    }
+    return step(label, exp + EQ + fac, expS + ' equals ' + facS);
+}
+function strikeMap(keys, cls) { var m = {}, i; for (i = 0; i < keys.length; i++) m[keys[i]] = cls ? cls[i] : 'x1'; return m; }
+
+/* ---------- problems ---------- */
+/* Every problem carries:
+     cat, html (the problem), speech, prompt, hint, steps,
+     ans {top, bot, html, speech}, traps [{top, bot, msg}],
+     stages [...] (what the student fills in, in order),
+     plus what each stage needs (factorT, cancel, flip, lcd, rewrite). */
+var CAT_INFO = {
+    simpSteps: { name: 'Simplify: Step by Step', prompt: 'Simplify' },
+    simpFinal: { name: 'Simplify: Final Answer', prompt: 'Simplify' },
+    mulCancel: { name: 'Multiply: Cancel Factors', prompt: 'Multiply' },
+    mulFactor: { name: 'Multiply: Factor First', prompt: 'Multiply and simplify (enter final answer)' },
+    divCancel: { name: 'Divide: Cancel Factors', prompt: 'Divide' },
+    divFactor: { name: 'Divide: Factor First', prompt: 'Divide and simplify (enter final answer)' },
+    asSame: { name: 'Add & Subtract: Same Denominator', prompt: 'Combine, then simplify if you can' },
+    asDiff: { name: 'Add & Subtract: Different Denominators', prompt: 'Combine, then simplify if you can' }
+};
+var STAT_KEYS = ['simpSteps', 'simpFinal', 'mulCancel', 'mulFactor', 'divCancel', 'divFactor', 'asSame', 'asDiff'];
+var CANCEL_TERMS_MSG = 'Careful: only factors cancel, never terms. Crossing out the x<sup>2</sup> in the numerator and denominator is not allowed, because they are added, not multiplied. Factor the numerator and the denominator first.';
+
+function ansFromSides(t, b) {
+    var bOne = sideIsOne(b) || (b.f.length === 0 && b.k === 1);
+    return {
+        top: sidePoly(t), bot: sidePoly(b),
+        html: ratHTML(sideFactHTML(t, false), sideFactHTML(b, false), bOne),
+        speech: ratSpeech(sideFactSpeech(t), sideFactSpeech(b), bOne)
+    };
+}
+function removeKeys(s, keys) {
+    var out = [], i;
+    for (i = 0; i < s.f.length; i++) if (keys.indexOf(polyKey(s.f[i])) === -1) out.push(s.f[i]);
+    return side(s.k, out);
+}
+/* A pair of linear factors for one side, ordered at random (x first). */
+function pairOrder(f) { var o = shuffle(f.slice()); o.sort(function (p, q) { return (isX(q) ? 1 : 0) - (isX(p) ? 1 : 0); }); return o; }
+
+/* ===== Simplify ===== */
+function genSimplify(cat, n) {
+    var finalLevel = cat === 'simpFinal';
+    /* No opposite factors such as (2 - x)/(x - 2): Ira removed them from the
+       game entirely (2026-10-14) so Simplify stays factor, cancel, done. */
+    var shape;
+    if (n === 1) shape = 'gx_dos';
+    else if (n === 2) shape = 'gk_tri';
+    else if (n === 3 || n === 4) shape = 'dos_tri';
+    else if (n === 5) shape = 'tri_tri';
+    else shape = pick(['gx_dos', 'gk_tri', 'dos_tri', 'tri_tri', 'gx_tri', 'gk_dos', 'tri_dos']);
+    var top, bot, common, tries = 0, m, sg, c, d, e, k;
+    while (tries++ < 500) {
+        m = ri(1, 9); sg = pick([1, -1]); c = nz(-8, 8); d = nz(-8, 8); e = nz(-8, 8); k = ri(2, 5);
+        if (shape === 'gx_dos') { common = L(sg * m); top = side(1, [[0, 1], L(sg * m)]); bot = side(1, [L(-m), L(m)]); }
+        else if (shape === 'gk_tri') { if (!okPair(c, d) || c === -d) continue; common = L(c); top = side(k, [L(c)]); bot = side(1, pairOrder([L(c), L(d)])); }
+        else if (shape === 'gx_tri') { if (!okPair(c, d) || c === -d) continue; common = L(c); top = side(1, [[0, 1], L(c)]); bot = side(1, pairOrder([L(c), L(d)])); }
+        else if (shape === 'gk_dos') { if (m > 7) continue; common = L(sg * m); top = side(k, [L(sg * m)]); bot = side(1, [L(-m), L(m)]); }
+        else if (shape === 'dos_tri') {
+            if (m > 7 || d === m || d === -m || !okPair(sg * m, d)) continue;
+            common = L(sg * m); top = side(1, [L(-m), L(m)]); bot = side(1, pairOrder([L(sg * m), L(d)]));
+        } else if (shape === 'tri_dos') {
+            if (m > 7 || e === m || e === -m || !okPair(sg * m, e)) continue;
+            common = L(sg * m); top = side(1, pairOrder([L(sg * m), L(e)])); bot = side(1, [L(-m), L(m)]);
+        } else { /* tri_tri */
+            if (c === d || c === e || d === e || !okPair(c, d) || !okPair(c, e) || c === -d || c === -e) continue;
+            common = L(c); top = side(1, pairOrder([L(c), L(e)])); bot = side(1, pairOrder([L(c), L(d)]));
+        }
+        break;
+    }
+    /* Later on, the simpler side sometimes sits on the bottom. */
+    if (n >= 6 && Math.random() < 0.3) { var tmp = top; top = bot; bot = tmp; }
+    return buildSimplify(cat, top, bot, [polyKey(common)]);
+}
+function buildSimplify(cat, top, bot, cancelKeys) {
+    var tP = sidePoly(top), bP = sidePoly(bot);
+    var at = removeKeys(top, cancelKeys), ab = removeKeys(bot, cancelKeys);
+    var ans = ansFromSides(at, ab);
+    var ckey = cancelKeys[0], cpoly = ckey.split(',').map(Number);
+    var traps = [];
+    if (pDeg(tP) === 2 && pDeg(bP) === 2) {
+        var t2 = pSub(tP, monoPoly(tP[2], 2)), b2 = pSub(bP, monoPoly(bP[2], 2));
+        pushTrap(traps, ans, t2, b2, CANCEL_TERMS_MSG);
+    }
+    var strike = strikeMap(cancelKeys);
+    var steps = [
+        factorStep('numerator', top),
+        factorStep('denominator', bot),
+        step('Cancel the factor that is in both the numerator and the denominator: ' + (isX(cpoly) ? 'x' : '<span class="nw">(' + polyHTML(cpoly) + ')</span>'),
+            fracHTML(sideStrikeHTML(top, strike), sideStrikeHTML(bot, strike)),
+            'Cancel ' + polySpeech(cpoly) + ' from the numerator and the denominator'),
+        step('Write what is left', ans.html, ans.speech)
+    ];
+    return {
+        cat: cat, kind: 'simplify',
+        html: fracHTML(sideExpHTML(top), sideExpHTML(bot)),
+        speech: 'Simplify ' + fracSpeech(sideExpSpeech(top), sideExpSpeech(bot)) + '.',
+        hint: 'Factor the numerator and the denominator completely. Then cancel any factor that is in both. Only factors cancel, never terms.',
+        steps: steps, ans: ans, traps: traps,
+        wrongMsg: 'Not quite. Factor the numerator and the denominator, cancel the factor they share, and write what is left.',
+        factorT: { top: tP, bot: bP },
+        cancel: { fracs: [{ top: top, bot: bot }], ops: [] },
+        stages: cat === 'simpSteps' ? ['factor', 'cancel', 'final'] : ['final'],
+        expr: { fracs: [{ top: tP, bot: bP }], ops: [] }
+    };
+}
+/* ===== Multiply and Divide =====
+   Two fractions T1/B1 and T2/B2 of linear factors. One or two pairs cancel,
+   always across the two fractions. Every other factor appears once. */
+function genMulDiv(cat, n) {
+    var isDiv = cat === 'divCancel' || cat === 'divFactor', factorFirst = cat === 'mulFactor' || cat === 'divFactor';
+    var tries = 0, s;
+    while (tries++ < 3000) {
+        s = tryMulDiv(n, factorFirst);
+        if (s) break;
+    }
+    return buildMulDiv(cat, s, isDiv, factorFirst);
+}
+function tryMulDiv(n, factorFirst) {
+    var used = {}, i;
+    function fresh(allowX) {
+        var a, t = 0;
+        do { a = (allowX && Math.random() < 0.25) ? 0 : nz(-8, 8); t++; } while (used[a] && t < 100);
+        if (used[a]) return null;
+        used[a] = 1; return a;
+    }
+    var pairs = (n <= 2) ? 1 : (Math.random() < 0.55 ? 1 : 2);
+    var T1 = [], B1 = [], T2 = [], B2 = [];
+    var s1 = fresh(false), s2 = fresh(false);
+    if (s1 === null || s2 === null) return null;
+    if (pairs === 2) { T1.push(s1); B2.push(s1); T2.push(s2); B1.push(s2); }
+    else if (Math.random() < 0.5) { T1.push(s1); B2.push(s1); delete used[s2]; }
+    else { T2.push(s1); B1.push(s1); delete used[s2]; }
+    var sides = [T1, B1, T2, B2], xUsed = false;
+    for (i = 0; i < 4; i++) {
+        var want = (n <= 2 && !factorFirst) ? 1 : ri(1, 2);
+        if (want < sides[i].length) want = sides[i].length;
+        while (sides[i].length < want) {
+            var a = fresh(!xUsed && factorFirst);
+            if (a === null) return null;
+            if (a === 0) xUsed = true;
+            sides[i].push(a);
+        }
+    }
+    /* No side may be x alone, and every two-factor side must be a
+       reasonable trinomial, difference of squares or GCF form. */
+    for (i = 0; i < 4; i++) {
+        var sd = sides[i];
+        if (sd.length === 1 && sd[0] === 0) return null;
+        if (sd.length === 2 && sd[0] !== 0 && sd[1] !== 0 && !okPair(sd[0], sd[1])) return null;
+    }
+    var sharedKeys = pairs === 2 ? [s1, s2] : [s1];
+    /* Factor First must give something to factor: a two-factor side or a
+       number in front. Problems 1-2 need one such side, later ones two. */
+    if (factorFirst) {
+        var toFactor = 0;
+        for (i = 0; i < 4; i++) if (sides[i].length === 2) toFactor++;
+        if (toFactor < (n <= 2 ? 1 : 2) && Math.random() < 0.9) { if (toFactor === 0 || n > 2) return null; }
+    }
+    var remT = [], remB = [];
+    for (i = 0; i < T1.concat(T2).length; i++) if (sharedKeys.indexOf(T1.concat(T2)[i]) === -1) remT.push(T1.concat(T2)[i]);
+    for (i = 0; i < B1.concat(B2).length; i++) if (sharedKeys.indexOf(B1.concat(B2)[i]) === -1) remB.push(B1.concat(B2)[i]);
+    if (remT.length + remB.length === 0) return null;
+    /* Keep the answer short: at most two factors a side, three in all. */
+    if (remT.length > 2 || remB.length > 2 || remT.length + remB.length > 3) return null;
+    if (remB.length === 0 && Math.random() < 0.7) return null;
+    /* A plain GCF number on one single-factor side, sometimes. */
+    var ks = [1, 1, 1, 1];
+    if (Math.random() < 0.3) {
+        var cands = [];
+        for (i = 0; i < 4; i++) if (sides[i].length === 1) cands.push(i);
+        if (cands.length) ks[pick(cands)] = ri(2, 5);
+    }
+    function mk(arr, k) { var f = [], j; for (j = 0; j < arr.length; j++) f.push(L(arr[j])); return side(k, arr.length === 2 ? pairOrder(f) : f); }
+    return { T1: mk(T1, ks[0]), B1: mk(B1, ks[1]), T2: mk(T2, ks[2]), B2: mk(B2, ks[3]), shared: sharedKeys };
+}
+function joinSides(a, b) { return side(a.k * b.k, a.f.concat(b.f)); }
+/* Two fractions and the sign between them stay together on one line, like
+   the problem itself; a step too wide for the screen scrolls sideways in its
+   own box instead of dropping the second fraction to a new line. */
+function rowHTML(h) { return '<span class="eq-row">' + h + '</span>'; }
+function buildMulDiv(cat, s, isDiv, factorFirst) {
+    var T1 = s.T1, B1 = s.B1, T2 = s.T2, B2 = s.B2, i;
+    var keys = [], cls = [];
+    for (i = 0; i < s.shared.length; i++) { keys.push(polyKey(L(s.shared[i]))); cls.push(i === 0 ? 'x1' : 'x2'); }
+    var at = removeKeys(joinSides(T1, T2), keys), ab = removeKeys(joinSides(B1, B2), keys);
+    var ans = ansFromSides(at, ab);
+    /* Divide shows F1 / G, where G is the flip of F2. */
+    var Gt = B2, Gb = T2;
+    function show(sd) { return factorFirst ? sideExpHTML(sd) : sideFactHTML(sd, false); }
+    function showS(sd) { return factorFirst ? sideExpSpeech(sd) : sideFactSpeech(sd); }
+    var secT = isDiv ? Gt : T2, secB = isDiv ? Gb : B2, op = isDiv ? 'div' : 'mul';
+    var html = fracHTML(show(T1), show(B1)) + opH(op) + fracHTML(show(secT), show(secB));
+    var speech = fracSpeech(showS(T1), showS(B1)) + OP_SPEECH[op] + fracSpeech(showS(secT), showS(secB));
+    var P = function (sd) { return sidePoly(sd); };
+    var steps = [];
+    if (isDiv) {
+        steps.push(step('Keep the first fraction, change ' + DIVIDE + ' to ' + TIMES + ', and flip the second fraction',
+            rowHTML(fracHTML(show(T1), show(B1)) + opH('mul') + fracHTML(show(T2), show(B2))),
+            fracSpeech(showS(T1), showS(B1)) + ' times ' + fracSpeech(showS(T2), showS(B2))));
+    }
+    if (factorFirst) {
+        steps.push(step('Factor every numerator and every denominator',
+            rowHTML(fracHTML(sideFactHTML(T1, false), sideFactHTML(B1, false)) + opH('mul') + fracHTML(sideFactHTML(T2, false), sideFactHTML(B2, false))),
+            fracSpeech(sideFactSpeech(T1), sideFactSpeech(B1)) + ' times ' + fracSpeech(sideFactSpeech(T2), sideFactSpeech(B2))));
+    }
+    var names = [], namesS = [];
+    for (i = 0; i < keys.length; i++) { names.push('<span class="nw">(' + polyHTML(L(s.shared[i])) + ')</span>'); namesS.push(polySpeech(L(s.shared[i]))); }
+    var strike = strikeMap(keys, cls);
+    steps.push(step('A factor in any numerator cancels the same factor in any denominator. Cancel ' + names.join(' and '),
+        rowHTML(fracHTML(sideStrikeHTML(T1, strike), sideStrikeHTML(B1, strike)) + opH('mul') + fracHTML(sideStrikeHTML(T2, strike), sideStrikeHTML(B2, strike))),
+        'Cancel ' + namesS.join(' and ') + ' from a numerator and a denominator'));
+    steps.push(step('Multiply what is left: numerators together, denominators together', ans.html, ans.speech));
+    var traps = [];
+    function addTrap(t, b, msg) { pushTrap(traps, ans, t, b, msg); }
+    if (isDiv) {
+        addTrap(pMul(P(T1), P(Gt)), pMul(P(B1), P(Gb)), 'Close. That multiplies without flipping. Keep the first fraction, change ' + DIVIDE + ' to ' + TIMES + ', and flip the second one first.');
+        addTrap(pMul(P(B1), P(Gb)), pMul(P(T1), P(Gt)), 'Close. That flips both fractions, or the wrong one. Keep the first fraction as it is and flip only the second.');
+        addTrap(pMul(P(B1), P(Gt)), pMul(P(T1), P(Gb)), 'Close. Keep the first fraction as it is and flip only the second one.');
+    } else {
+        addTrap(pMul(P(T1), P(B2)), pMul(P(B1), P(T2)), 'Good try, but that flips a fraction, which is the rule for dividing. To multiply, go straight across after cancelling.');
+    }
+    var prob = {
+        cat: cat, kind: isDiv ? 'div' : 'mul', html: html,
+        speech: (isDiv ? 'Divide: ' : 'Multiply: ') + speech + '.',
+        hint: (isDiv ? 'Keep the first fraction, change ' + DIVIDE + ' to ' + TIMES + ', and flip the second fraction. Then ' : '') +
+            (factorFirst ? 'Factor every numerator and denominator. ' : '') + 'A factor in any numerator cancels the same factor in any denominator. Then multiply what is left.',
+        steps: steps, ans: ans, traps: traps,
+        wrongMsg: 'Not quite. ' + (isDiv ? 'Flip the second fraction, then ' : '') + (factorFirst ? 'factor everything, ' : '') + 'cancel the factors that match in a numerator and a denominator, and multiply what is left.',
+        cancel: { fracs: [{ top: T1, bot: B1 }, { top: T2, bot: B2 }], ops: ['mul'] },
+        stages: factorFirst ? ['final'] : (isDiv ? ['flip', 'cancel', 'final'] : ['cancel', 'final']),
+        long: true,
+        expr: { fracs: [{ top: P(T1), bot: P(B1) }, { top: P(secT), bot: P(secB) }], ops: [op] }
+    };
+    if (isDiv) prob.flip = { top: P(T2), bot: P(B2), gTop: P(Gt), gBot: P(Gb), f1Top: P(T1), f1Bot: P(B1), T1: T1, B1: B1 };
+    return prob;
+}
+
+/* ===== Add & Subtract, same denominator =====
+   Problems 1-4 never simplify at the end, 5-6 always do, then a mix
+   (Ira, 2026-10-14). Odd problems add and even ones subtract at first. */
+function linNum(two) {
+    if (!two && Math.random() < 0.25) return [ri(1, 9)];
+    return [nz(-9, 9), ri(1, 5)];
+}
+function genSame(n) {
+    var simp = n <= 4 ? false : (n <= 6 ? true : Math.random() < 0.5);
+    var op = n <= 4 ? (n % 2 === 1 ? 'add' : 'sub') : (Math.random() < 0.5 ? 'add' : 'sub');
+    var tries = 0, D, n1, n2, N, a, b, c;
+    while (tries++ < 5000) {
+        a = nz(-8, 8); b = nz(-8, 8);
+        if (simp) {
+            var linD = false;   /* a linear bottom would simplify to a bare number */
+            if (!linD && (a === b || !okPair(a, b))) continue;
+            D = linD ? side(1, [L(a)]) : side(1, pairOrder([L(a), L(b)]));
+            c = pick([1, 1, 2, 2, 3, -1]);
+            N = pScale(L(a), c);
+            n1 = linNum(true);
+            n2 = op === 'add' ? pSub(N, n1) : pSub(n1, N);
+            if (pDeg(n2) < 0) continue;
+            if (pDeg(n2) === 1 && (n2[1] < 1 || n2[0] === 0)) continue;
+            if (pDeg(n2) === 0 && n2[0] < 1) continue;
+            if (Math.abs(n2[0]) > 9 || (n2[1] || 0) > 6) continue;
+        } else {
+            var quadD = n >= 3 && Math.random() < 0.5;
+            if (quadD && (a === b || !okPair(a, b))) continue;
+            D = quadD ? side(1, pairOrder([L(a), L(b)])) : side(1, [L(a)]);
+            n1 = linNum(false);
+            n2 = linNum(op === 'sub' && n <= 4);
+            N = op === 'add' ? pAdd(n1, n2) : pSub(n1, n2);
+            if (pIsZero(N)) continue;
+            if (commonFactor(N, sidePoly(D))) continue;
+            if (Math.abs(N[0]) > 15) continue;
+        }
+        var DP = sidePoly(D);
+        if (commonFactor(n1, DP) || commonFactor(n2, DP)) continue;
+        if (pEq(n1, n2)) continue;
+        break;
+    }
+    var DP2 = sidePoly(D), red = reduceRat(N, DP2);
+    var simplifies = pDeg(red.d) < pDeg(DP2);
+    return buildSame(n, op, D, n1, n2, N, simplifies);
+}
+function buildSame(n, op, D, n1, n2, N, simplifies) {
+    var DP = sidePoly(D), dH = sideExpHTML(D), dS = sideExpSpeech(D);
+    var html = fracHTML(polyHTML(n1), dH) + opH(op) + fracHTML(polyHTML(n2), dH);
+    var speech = fracSpeech(polySpeech(n1), dS) + OP_SPEECH[op] + fracSpeech(polySpeech(n2), dS);
+    var steps = [], sub = op === 'sub', twoTerms = polyTerms(n2).length > 1;
+    var n2H = polyHTML(n2), n2S = polySpeech(n2);
+    var combH = polyHTML(n1) + (sub ? ' <span class="paren-hl">' + MINUS + ' (' + n2H + ')</span>' : ' + ' + (twoTerms || n2[0] < 0 ? '(' + n2H + ')' : n2H));
+    steps.push(step('The denominators are the same, so ' + (sub ? 'subtract' : 'add') + ' the numerators and keep the denominator' +
+        (sub ? '. Put the second numerator in parentheses: the minus belongs to all of it' : ''),
+        fracHTML(combH, dH), polySpeech(n1) + (sub ? ' minus the quantity ' : ' plus ') + n2S + ', over ' + dS));
+    if (sub && twoTerms) {
+        var neg = polyTerms(pScale(n2, -1)), terms = polyTerms(n1).concat(neg);
+        steps.push(step('The minus reaches every term in the parentheses',
+            fracHTML(termsHTML(polyTerms(n1)) + ' <span class="paren-hl">' + termsHTML(neg).replace(/^&#8722;/, MINUS + ' ').replace(/^(\d|x)/, '+ $1') + '</span>', dH),
+            termsSpeech(terms) + ', over ' + dS));
+    }
+    steps.push(step('Combine like terms', fracHTML(polyHTML(N), dH), polySpeech(N) + ', over ' + dS));
+    var ans, traps = [];
+    if (simplifies) {
+        var red = reduceRat(N, DP);
+        /* N = c(x + a) and D has (x + a). */
+        var g = pGcd(N, DP), cN = pDivExact(N, g), rest = removeKeys(D, [polyKey(g)]);
+        var topSide = side(cN[0], [g]);
+        var strike = strikeMap([polyKey(g)]);
+        if (D.f.length > 1) steps.push(factorStep('denominator', D));
+        steps.push(step('Factor the numerator. It shares (' + polyHTML(g) + ') with the denominator, so cancel it',
+            fracHTML(sideStrikeHTML(topSide, strike), sideStrikeHTML(D, strike)),
+            'The numerator is ' + sideFactSpeech(topSide) + '. Cancel ' + polySpeech(g) + ' from the numerator and the denominator.'));
+        ans = ansFromSides(side(cN[0], []), rest);
+        ans.top = red.n; ans.bot = red.d;
+        steps.push(step('Write what is left', ans.html, ans.speech));
+    } else {
+        var bf = sideFactHTML(D, false);
+        steps.push(step('Check: ' + (D.f.length > 1 ? 'the denominator factors as ' + bf + ', and ' : '') + 'the numerator shares no factor with the denominator, so this is the answer',
+            fracHTML(polyHTML(N), bf), polySpeech(N) + ', over ' + sideFactSpeech(D), false));
+        ans = { top: N, bot: DP, html: fracHTML(polyHTML(N), bf), speech: fracSpeech(polySpeech(N), sideFactSpeech(D)) };
+    }
+    function addTrap(t, b, msg) { pushTrap(traps, ans, t, b, msg); }
+    if (sub && twoTerms) addTrap(minusFirstOnly(n1, n2), DP,'Close. The minus must reach every term of the second numerator: ' + MINUS + '(' + n2H + ') changes the sign of both terms.');
+    addTrap(N, pScale(DP, 2), 'Good start on the numerators, but keep the denominator as it is. Don&#39;t add the denominators.');
+    if (simplifies) addTrap(N, DP, 'That is equal, but it is not simplified yet. Factor the numerator: it shares a factor with the denominator.');
+    return {
+        cat: 'asSame', kind: op, html: html,
+        speech: (sub ? 'Subtract: ' : 'Add: ') + speech + '.',
+        hint: 'The denominators match. ' + (sub ? 'Subtract' : 'Add') + ' the numerators and keep the denominator.' +
+            (sub ? ' The minus goes to every term of the second numerator.' : '') + ' Then check whether the answer simplifies.',
+        steps: steps, ans: ans, traps: traps,
+        wrongMsg: 'Not quite. ' + (sub ? 'Subtract every term of the second numerator' : 'Add the numerators') + ' over the same denominator, then check whether it simplifies.',
+        stages: ['final'], simplifies: simplifies,
+        expr: { fracs: [{ top: n1, bot: DP }, { top: n2, bot: DP }], ops: [op] }
+    };
+}
+
+/* ===== Add & Subtract, different denominators =====
+   Type A (the bulk): two different linear denominators. Numerators are
+   numbers for problems 1-3, then one numerator is x for 4-6, then a mix.
+   Type B (from problem 7): a quadratic and one of its own factors, so only
+   one fraction is rewritten. About half of type B ends with a cancel. */
+function genDiff(n) {
+    /* Ramp (Ira, 2026-10-14): 1-2 two linear bottoms with number tops,
+       3-4 one top is x, 5-6 the quadratic type (5 ends without a cancel,
+       6 with one), then half and half. */
+    var type = n <= 4 ? 'A' : (n <= 6 ? 'B' : (Math.random() < 0.5 ? 'A' : 'B'));
+    var op = n <= 2 ? (n === 2 ? 'sub' : 'add') : (Math.random() < 0.5 ? 'add' : 'sub');
+    var tries = 0, r, wantCancel = n === 5 ? false : (n === 6 ? true : Math.random() < 0.5);
+    while (tries++ < 5000) {
+        r = type === 'A' ? tryDiffA(n, op) : tryDiffB(op, wantCancel);
+        if (r) break;
+    }
+    return buildDiff(r, op);
+}
+function tryDiffA(n, op) {
+    var a = nz(-7, 7), b = nz(-7, 7);
+    if (a === b) return null;
+    var useX = n <= 2 ? false : (n <= 4 ? true : Math.random() < 0.5);
+    var n1 = [ri(1, 9)], n2 = [ri(1, 9)];
+    if (useX) { if (Math.random() < 0.5) n1 = [0, 1]; else n2 = [0, 1]; }
+    /* Equal tops on a subtraction make two different mistakes give the same
+       wrong answer, so the feedback could not tell them apart. */
+    if (op === 'sub' && pEq(n1, n2)) return null;
+    var D1 = side(1, [L(a)]), D2 = side(1, [L(b)]), LCD = side(1, [L(a), L(b)]);
+    var R1 = pMul(n1, L(b)), R2 = pMul(n2, L(a));
+    var N = op === 'add' ? pAdd(R1, R2) : pSub(R1, R2);
+    if (pIsZero(N) || commonFactor(N, sidePoly(LCD))) return null;
+    if (pDeg(N) === 0 && N[0] < 0 && Math.random() < 0.7) return null;
+    return { type: 'A', D: [D1, D2], n: [n1, n2], LCD: LCD, miss: [L(b), L(a)], R: [R1, R2], N: N };
+}
+function tryDiffB(op, cancel) {
+    var a = nz(-7, 7), b = nz(-7, 7);
+    if (a === b || !okPair(a, b)) return null;
+    var quadFirst = Math.random() < 0.6;
+    var Q = side(1, pairOrder([L(a), L(b)])), Lin = side(1, [L(a)]);
+    var nq = [ri(1, 9)], nl = [ri(1, 9)];
+    /* For the top to become a multiple of (x + a): adding needs
+       nq = nl(a - b), subtracting needs nq = nl(b - a), in either order. */
+    if (cancel) {
+        nl = [ri(1, 3)];
+        nq = [nl[0] * (op === 'add' ? a - b : b - a)];
+        if (nq[0] < 1 || nq[0] > 12) return null;
+    }
+    /* Equal tops on a subtraction: same rule as type A (oversight
+       2026-10-20). Here n1 - n2 = 0, so "added the denominators" and "kept
+       the tops unchanged" both give 0 on top, and the student who added the
+       denominators was told "that is the right denominator". */
+    if (op === 'sub' && pEq(nq, nl)) return null;
+    var Rq = nq, Rl = pMul(nl, L(b));
+    var D = quadFirst ? [Q, Lin] : [Lin, Q], nn = quadFirst ? [nq, nl] : [nl, nq];
+    var R = quadFirst ? [Rq, Rl] : [Rl, Rq], miss = quadFirst ? [null, L(b)] : [L(b), null];
+    var N = op === 'add' ? pAdd(R[0], R[1]) : pSub(R[0], R[1]);
+    var LCD = Q, cf = commonFactor(N, sidePoly(LCD));
+    if (pIsZero(N)) return null;
+    if (cancel !== !!(cf && cf.poly)) return null;
+    if (cf && cf.num) return null;
+    return { type: 'B', D: D, n: nn, LCD: LCD, miss: miss, R: R, N: N, notLeast: pMul(sidePoly(Q), sidePoly(Lin)) };
+}
+function buildDiff(r, op) {
+    var sub = op === 'sub', i;
+    var LP = sidePoly(r.LCD), lcdH = sideFactHTML(r.LCD, true), lcdS = sideFactSpeech(r.LCD);
+    var dH = [sideExpHTML(r.D[0]), sideExpHTML(r.D[1])], dS = [sideExpSpeech(r.D[0]), sideExpSpeech(r.D[1])];
+    var html = fracHTML(polyHTML(r.n[0]), dH[0]) + opH(op) + fracHTML(polyHTML(r.n[1]), dH[1]);
+    var speech = fracSpeech(polySpeech(r.n[0]), dS[0]) + OP_SPEECH[op] + fracSpeech(polySpeech(r.n[1]), dS[1]);
+    var steps = [];
+    if (r.type === 'A') {
+        steps.push(step('The denominators ' + dH[0] + ' and ' + dH[1] + ' share no factor, so the LCD is their product', 'LCD = ' + lcdH, 'The least common denominator is ' + lcdS, true));
+    } else {
+        var qi = r.D[0].f.length === 2 ? 0 : 1;
+        steps.push(factorStep(qi === 0 ? 'first denominator' : 'second denominator', r.D[qi]));
+        steps.push(step('The other denominator, ' + dH[1 - qi] + ', is already one of those factors. The LCD uses each different factor once', 'LCD = ' + lcdH, 'The least common denominator is ' + lcdS, true));
+    }
+    var which = ['First', 'Second'];
+    for (i = 0; i < 2; i++) {
+        if (!r.miss[i]) {
+            steps.push(step(which[i] + ' fraction: its denominator is already the LCD, so it stays as it is', fracHTML(polyHTML(r.n[i]), lcdH), polySpeech(r.n[i]) + ' over ' + lcdS));
+        } else {
+            var mH = '(' + polyHTML(r.miss[i]) + ')', nH = polyTerms(r.n[i]).length > 1 || isX(r.n[i]) ? (isX(r.n[i]) ? 'x' : '(' + polyHTML(r.n[i]) + ')') : polyHTML(r.n[i]);
+            steps.push(step(which[i] + ' fraction: it is missing ' + mH + '. Multiply its numerator and denominator by ' + mH,
+                fracHTML(nH + mH, lcdH) + EQ + fracHTML(polyHTML(r.R[i]), lcdH),
+                polySpeech(r.n[i]) + ' times ' + polySpeech(r.miss[i]) + ' is ' + polySpeech(r.R[i]) + ', over ' + lcdS));
+        }
+    }
+    var R2H = polyHTML(r.R[1]), twoTerms = polyTerms(r.R[1]).length > 1;
+    var combH = polyHTML(r.R[0]) + (sub ? ' <span class="paren-hl">' + MINUS + ' (' + R2H + ')</span>' : ' + ' + (twoTerms ? '(' + R2H + ')' : R2H));
+    steps.push(step('Now the denominators match. ' + (sub ? 'Subtract the numerators and keep the LCD. Put the second numerator in parentheses: the minus belongs to all of it' : 'Add the numerators and keep the LCD'),
+        fracHTML(combH, lcdH), polySpeech(r.R[0]) + (sub ? ' minus the quantity ' : ' plus ') + polySpeech(r.R[1]) + ', over ' + lcdS));
+    if (sub && twoTerms) {
+        var neg = polyTerms(pScale(r.R[1], -1));
+        steps.push(step('The minus reaches every term in the parentheses',
+            fracHTML(termsHTML(polyTerms(r.R[0])) + ' <span class="paren-hl">' + termsHTML(neg).replace(/^&#8722;/, MINUS + ' ').replace(/^(\d|x)/, '+ $1') + '</span>', lcdH),
+            termsSpeech(polyTerms(r.R[0]).concat(neg)) + ', over ' + lcdS));
+    }
+    steps.push(step('Combine like terms', fracHTML(polyHTML(r.N), lcdH), polySpeech(r.N) + ', over ' + lcdS));
+    var cf = commonFactor(r.N, LP), ans;
+    if (cf && cf.poly) {
+        var g = cf.poly, cN = pDivExact(r.N, g), rest = removeKeys(r.LCD, [polyKey(g)]);
+        var topSide = side(cN[0], [g]), strike = strikeMap([polyKey(g)]);
+        steps.push(step('Factor the numerator. It shares (' + polyHTML(g) + ') with the denominator, so cancel it',
+            fracHTML(sideStrikeHTML(topSide, strike), sideStrikeHTML(r.LCD, strike)),
+            'The numerator is ' + sideFactSpeech(topSide) + '. Cancel ' + polySpeech(g) + ' from the numerator and the denominator.'));
+        ans = ansFromSides(side(cN[0], []), rest);
+        var red = reduceRat(r.N, LP); ans.top = red.n; ans.bot = red.d;
+        steps.push(step('Write what is left', ans.html, ans.speech));
+    } else {
+        steps.push(step('Check: the numerator shares no factor with the denominator, so this is the answer', fracHTML(polyHTML(r.N), lcdH), polySpeech(r.N) + ', over ' + lcdS, false));
+        ans = { top: r.N, bot: LP, html: fracHTML(polyHTML(r.N), lcdH), speech: fracSpeech(polySpeech(r.N), lcdS) };
+    }
+    var traps = [];
+    function addTrap(t, b, msg) { pushTrap(traps, ans, t, b, msg); }
+    var raw = sub ? pSub(r.n[0], r.n[1]) : pAdd(r.n[0], r.n[1]);
+    addTrap(raw, LP, 'Good start: that is the right denominator. Now each numerator has to change too. Multiply each numerator by the factor its denominator was missing.');
+    addTrap(raw, pAdd(sidePoly(r.D[0]), sidePoly(r.D[1])), 'Good try. Fractions need a common denominator first. You can&#39;t add the denominators. Find the LCD.');
+    if (sub && twoTerms) addTrap(minusFirstOnly(r.R[0], r.R[1]), LP,'Close. The minus must reach every term of the second numerator: ' + MINUS + '(' + R2H + ') changes the sign of both terms.');
+    if (cf && cf.poly) addTrap(r.N, LP, 'That is equal, but it is not simplified yet. Factor the numerator: it shares a factor with the denominator.');
+    var rewrite = [];
+    for (i = 0; i < 2; i++) rewrite.push(r.miss[i] ? { expect: r.R[i], orig: r.n[i], miss: r.miss[i] } : null);
+    return {
+        cat: 'asDiff', kind: op, type: r.type, html: html,
+        speech: (sub ? 'Subtract: ' : 'Add: ') + speech + '.',
+        hint: 'Factor the denominators and find the LCD. Multiply each fraction&#39;s numerator and denominator by the factor it is missing. Then ' + (sub ? 'subtract' : 'add') + ' the numerators and check whether it simplifies.',
+        steps: steps, ans: ans, traps: traps,
+        wrongMsg: 'Not quite. Rewrite both fractions over the LCD, ' + lcdH + ', then ' + (sub ? 'subtract' : 'add') + ' the numerators.',
+        lcd: { poly: LP, html: lcdH, speech: lcdS, notLeast: r.notLeast || null, d0: sidePoly(r.D[0]), d1: sidePoly(r.D[1]) },
+        rewrite: rewrite, nums: r.n, op: op,
+        /* Final step (Ira, 2026-10-14): the LCD is given, the student types the
+           combined top; if it then simplifies, a simplify row follows. */
+        combN: r.N, simplifies: !!(cf && cf.poly),
+        stages: ['lcd', 'rewrite', 'final'],
+        expr: { fracs: [{ top: r.n[0], bot: sidePoly(r.D[0]) }, { top: r.n[1], bot: sidePoly(r.D[1]) }], ops: [op] }
+    };
+}
+
+/* ---------- the tap-to-cancel chips ---------- */
+/* One chip per number and per factor. A pair cancels when the same factor
+   sits on a top and on a bottom (any fraction). Returns the chips and how
+   many pairs must be cancelled. */
+function buildChips(prob) {
+    var fr = prob.cancel.fracs, chips = [], i, j, topKeys = {}, botKeys = {}, need = 0;
+    var many = fr.length > 1, ord = ['first', 'second'];
+    for (i = 0; i < fr.length; i++) {
+        var sides = [['top', fr[i].top], ['bottom', fr[i].bot]];
+        for (j = 0; j < 2; j++) {
+            var pos = sides[j][0], sd = sides[j][1], word = pos === 'top' ? 'numerator' : 'denominator', where = (many ? word + ' of the ' + ord[i] + ' fraction' : word), q;
+            if (sd.k !== 1) chips.push({ frac: i, pos: pos, key: 'k' + sd.k + pos, num: true, html: signedNum(sd.k), speech: signedSpeech(sd.k) + ', ' + where, poly: [sd.k] });
+            for (q = 0; q < sd.f.length; q++) {
+                var p = sd.f[q], key = polyKey(p);
+                chips.push({ frac: i, pos: pos, key: key, num: false, html: isX(p) ? 'x' : '(' + factorHTML(p) + ')', speech: factorSpeech(p) + ', ' + where, poly: p });
+                if (pos === 'top') topKeys[key] = 1; else botKeys[key] = 1;
+            }
+        }
+    }
+    for (var k in topKeys) if (botKeys[k]) need++;
+    return { chips: chips, need: need };
+}
+
+function generate(cat, n) {
+    if (cat === 'simpSteps' || cat === 'simpFinal') return genSimplify(cat, n);
+    if (cat === 'asSame') return genSame(n);
+    if (cat === 'asDiff') return genDiff(n);
+    return genMulDiv(cat, n);
+}
+
+</script>
+<script>
+/* =====================================================================
+   Game: topics, stages, tap-to-cancel, grading flow, stats.
+   ===================================================================== */
+var TOPICS = [
+    { id: 'simplify', name: 'Simplify', levels: [{ id: 'simpSteps', name: 'Step by Step' }, { id: 'simpFinal', name: 'Final Answer' }] },
+    { id: 'multiply', name: 'Multiply', levels: [{ id: 'mulCancel', name: 'Cancel Factors' }, { id: 'mulFactor', name: 'Factor First' }] },
+    { id: 'divide', name: 'Divide', levels: [{ id: 'divCancel', name: 'Cancel Factors' }, { id: 'divFactor', name: 'Factor First' }] },
+    { id: 'addsub', name: 'Add &amp; Subtract', speech: 'Add and Subtract', levels: [{ id: 'asSame', name: 'Same Denominator' }, { id: 'asDiff', name: 'Different Denominators' }] }
+];
+var STAR_ROUND = 10;
+var SAVE_KEY = 'rationalGame_v1';
+var CONFETTI_KEY = 'rationalGame_confetti_v1';
+var MAX_COUNT = 1000000;
+
+var currentTopic = 'simplify';
+var levelChoice = { simplify: 'simpSteps', multiply: 'mulCancel', divide: 'divCancel', addsub: 'asSame' };
+var catCount = {};
+var prob = null, pState = null, chipModel = null, chipSel = null, lastBox = null;
+var streak = 0, bestStreak = 0, problemCount = 0;
+var stats = blankStats(), stars = blankCounts(), starProg = blankCounts();
+var confettiEnabled = true;
+var solutionShown = 0;
+var recentProblems = [], RECENT_LIMIT = 8;
+
+function blankStats() { var s = {}, i; for (i = 0; i < STAT_KEYS.length; i++) s[STAT_KEYS[i]] = { c: 0, t: 0 }; return s; }
+function blankCounts() { var s = {}, i; for (i = 0; i < STAT_KEYS.length; i++) s[STAT_KEYS[i]] = 0; return s; }
+function topicById(id) { for (var i = 0; i < TOPICS.length; i++) if (TOPICS[i].id === id) return TOPICS[i]; return TOPICS[0]; }
+function currentCat() { return levelChoice[currentTopic]; }
+function levelName(cat) {
+    for (var i = 0; i < TOPICS.length; i++) for (var j = 0; j < TOPICS[i].levels.length; j++) if (TOPICS[i].levels[j].id === cat) return TOPICS[i].levels[j].name;
+    return '';
+}
+
+/* ---------- safety: one escape choke point, never trust storage ---------- */
+function esc(str) { return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+function safeCount(v, max) {
+    var n = Number(v);
+    if (typeof v === 'boolean' || v === null || v === '' || !isFinite(n) || n < 0) return 0;
+    n = Math.floor(n);
+    return n > max ? max : n;
+}
+function sanitize(data) {
+    var src = (data && typeof data === 'object') ? data : {}, i, k;
+    var st = (src.stats && typeof src.stats === 'object') ? src.stats : {};
+    var sr = (src.stars && typeof src.stars === 'object') ? src.stars : {};
+    var sp = (src.prog && typeof src.prog === 'object') ? src.prog : {};
+    var out = { stats: blankStats(), stars: blankCounts(), prog: blankCounts(), best: safeCount(src.best, MAX_COUNT) };
+    for (i = 0; i < STAT_KEYS.length; i++) {
+        k = STAT_KEYS[i];
+        var v = (st[k] && typeof st[k] === 'object') ? st[k] : {};
+        var t = safeCount(v.t, MAX_COUNT), c = safeCount(v.c, MAX_COUNT);
+        if (c > t) c = t;
+        out.stats[k] = { c: c, t: t };
+        out.stars[k] = safeCount(sr[k], MAX_COUNT);
+        out.prog[k] = safeCount(sp[k], STAR_ROUND - 1);
+    }
+    return out;
+}
+function saveState() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ stats: stats, stars: stars, prog: starProg, best: bestStreak })); } catch (e) { /* storage unavailable */ } }
+function loadState() {
+    try {
+        var raw = localStorage.getItem(SAVE_KEY);
+        if (raw) { var clean = sanitize(JSON.parse(raw)); stats = clean.stats; stars = clean.stars; starProg = clean.prog; bestStreak = clean.best; }
+    } catch (e) { stats = blankStats(); stars = blankCounts(); starProg = blankCounts(); bestStreak = 0; }
+    try { if (localStorage.getItem(CONFETTI_KEY) === '0') confettiEnabled = false; } catch (e2) { /* ignore */ }
+}
+
+/* ---------- words for screen readers ---------- */
+function speakText(html) {
+    return String(html).replace(/<br\s*\/?>/g, '. ')
+        .replace(/<sup>2<\/sup>/g, ' squared').replace(/<sup>(\d+)<\/sup>/g, ' to the power $1')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/&times;/g, ' times ').replace(/&divide;/g, ' divided by ').replace(/&#8722;\s*1\(/g, 'negative 1 times (')
+        /* A minus written straight against a number or x is a sign, read
+           "negative" (multiply to -12, factor out -1). A minus with a space
+           after it is subtraction. */
+        .replace(/&#8722;(?=[0-9x])/g, ' negative ')
+        .replace(/&#8722;/g, ' minus ').replace(/&#178;/g, ' squared').replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, 'and').replace(/&#39;/g, "'").replace(/(\d)x/g, '$1 x').replace(/\s+/g, ' ').trim();
+}
+function dual(html, speech) { return '<span aria-hidden="true">' + html + '</span><span class="sr-only">' + esc(speech) + '</span>'; }
+
+/* ---------- icons ---------- */
+function starSVG(size) {
+    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 20 20" aria-hidden="true" focusable="false">' +
+        '<path d="M10 1.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L10 14.8l-5.2 2.8 1-5.8L1.5 7.7l5.9-.8z" fill="#7c3aed" stroke="#5b21b6" stroke-width="1" stroke-linejoin="round"/></svg>';
+}
+function cupSVG(frac, size) {
+    var f = Math.max(0, Math.min(1, frac)), h = 15 * f, y = 18 - h;
+    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 22 22" aria-hidden="true" focusable="false">' +
+        '<defs><clipPath id="cupclip' + size + '"><path d="M4 3h14l-2 15H6z"/></clipPath></defs>' +
+        '<rect x="0" y="' + y.toFixed(2) + '" width="22" height="' + h.toFixed(2) + '" fill="#10b981" clip-path="url(#cupclip' + size + ')"/>' +
+        '<path d="M4 3h14l-2 15H6z" fill="none" stroke="#2e3d8f" stroke-width="1.6" stroke-linejoin="round"/>' +
+        '<path d="M18 6h1.5a2.5 2.5 0 0 1 0 5H17.4" fill="none" stroke="#2e3d8f" stroke-width="1.6"/></svg>';
+}
+var CHECK_SVG = '<svg class="check-mark" width="26" height="26" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#047857" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+/* ---------- topic and level UI ---------- */
+function buildTopics() {
+    var grid = document.getElementById('cat-grid'), html = '', i;
+    for (i = 0; i < TOPICS.length; i++) {
+        var t = TOPICS[i];
+        html += '<label class="cat-tile"><input type="radio" class="cat-radio" name="topic" value="' + t.id + '"' +
+            (t.id === currentTopic ? ' checked' : '') + (t.speech ? ' aria-label="' + esc(t.speech) + '"' : '') + '>' +
+            '<span class="tile-face"' + (t.speech ? ' aria-hidden="true"' : '') + '>' + t.name + '</span></label>';
+    }
+    var zone = document.getElementById('level-zone');
+    grid.innerHTML = html;
+    /* The level pills live inside the grid, so they can open directly under
+       the row of the chosen topic (Ira, 2026-10-14). */
+    grid.appendChild(zone);
+    var radios = grid.querySelectorAll('.cat-radio');
+    for (i = 0; i < radios.length; i++) radios[i].addEventListener('change', function (e) { setTopic(e.target.value); });
+}
+function buildLevels() {
+    var t = topicById(currentTopic), row = document.getElementById('level-row');
+    var html = '<div class="level-group" id="level-group" role="radiogroup" aria-label="' + esc((t.speech || t.name) + ' level') + '">', i;
+    for (i = 0; i < t.levels.length; i++) {
+        var lv = t.levels[i];
+        html += '<label class="lvl-tile"><input type="radio" class="lvl-radio" name="level" value="' + lv.id + '"' +
+            (lv.id === levelChoice[currentTopic] ? ' checked' : '') + '><span class="lvl-face">' + lv.name + '</span></label>';
+    }
+    row.innerHTML = html + '</div>';
+    var radios = row.querySelectorAll('.lvl-radio');
+    for (i = 0; i < radios.length; i++) radios[i].addEventListener('change', function (e) { setLevel(e.target.value); });
+    drawBranch();
+}
+function num(v) { v = Number(v); return isFinite(v) ? v.toFixed(1) : '0'; }
+/* Order the grid so the level row comes right after the row that holds
+   the chosen topic: below the first row on a phone for Simplify or
+   Multiply, below the second for Divide or Add & Subtract. */
+function placeLevelRow() {
+    var grid = document.getElementById('cat-grid'), zone = document.getElementById('level-zone');
+    var tiles = grid.querySelectorAll('.cat-tile'), cols = getComputedStyle(grid).gridTemplateColumns.split(' ').length || 4, sel = 0, i;
+    for (i = 0; i < tiles.length; i++) { tiles[i].style.order = String(i * 2); if (tiles[i].querySelector('.cat-radio').checked) sel = i; }
+    var lastInRow = Math.min(tiles.length - 1, (Math.floor(sel / cols) + 1) * cols - 1);
+    zone.style.order = String(lastInRow * 2 + 1);
+}
+function drawBranch() {
+    var svg = document.getElementById('branch'), group = document.getElementById('level-group'), zone = document.getElementById('level-zone');
+    if (!group) { svg.innerHTML = ''; return; }
+    var tile = document.querySelector('.cat-radio:checked + .tile-face');
+    if (!tile) return;
+    placeLevelRow();
+    var zr = zone.getBoundingClientRect(), tr = tile.getBoundingClientRect();
+    var tx = tr.left + tr.width / 2 - zr.left;
+    group.style.marginLeft = '0px';
+    var gw = group.getBoundingClientRect().width;
+    var left = Math.max(0, Math.min(zr.width - gw, tx - gw / 2));
+    group.style.marginLeft = left + 'px';
+    var faces = group.querySelectorAll('.lvl-face'), radios = group.querySelectorAll('.lvl-radio');
+    var top = tr.bottom - zr.top, path = '', i;
+    path += '<line x1="' + num(tx) + '" y1="' + num(top) + '" x2="' + num(tx) + '" y2="12" stroke="#0b7a70" stroke-width="2.6" stroke-linecap="round"/>';
+    for (i = 0; i < faces.length; i++) {
+        var fr = faces[i].getBoundingClientRect(), fx = fr.left + fr.width / 2 - zr.left, fy = fr.top - zr.top, on = radios[i].checked;
+        path += '<line x1="' + num(tx) + '" y1="12" x2="' + num(fx) + '" y2="' + num(fy) + '" stroke="' + (on ? '#0b7a70' : '#c7cdf0') + '" stroke-width="' + (on ? 2.6 : 2) + '" stroke-linecap="round"/>';
+    }
+    svg.innerHTML = path;
+}
+function setTopic(id) { retireProblem(false); currentTopic = id; buildLevels(); newProblem(true); }
+function setLevel(id) { retireProblem(false); levelChoice[currentTopic] = id; drawBranch(); newProblem(true); }
+
+/* ---------- problems ---------- */
+/* catCount[cat] = problems finished, skipped or revealed in that level, so
+   the ramps (Same Denominator 1-4, opposites from 6, ...) count only
+   problems the student actually moved past. Looking at another level and
+   coming back does not use one up (oversight 2026-10-14). */
+function retireProblem(always) {
+    if (prob && pState && (always || pState.solved || pState.booked)) catCount[prob.cat] = (catCount[prob.cat] || 0) + 1;
+}
+function newProblem(keepFocus) {
+    var cat = currentCat(), tries = 0, n = (catCount[cat] || 0) + 1;
+    prob = generate(cat, n);
+    while (recentProblems.indexOf(prob.speech) !== -1 && tries < 60) { prob = generate(cat, n); tries++; }
+    recentProblems.push(prob.speech);
+    if (recentProblems.length > RECENT_LIMIT) recentProblems.shift();
+    pState = { booked: false, missed: false, revealed: false, solved: false, stage: 0 };
+    chipModel = null; chipSel = null; lastBox = null;
+    solutionShown = 0;
+    renderProblem(keepFocus);
+}
+function stageType(i) { return prob.stages[i]; }
+function isStaged() { return prob.stages.length > 1; }
+function curStage() { return prob.stages[pState.stage]; }
+
+var STAGE_TITLE = {
+    factor: 'Factor the numerator and the denominator',
+    flip: 'Keep, change, flip',
+    cancel: 'Cancel the matching factors',
+    lcd: 'Find the LCD (least common denominator)',
+    rewrite: 'Rewrite each fraction over the LCD',
+    final: 'Write what is left'
+};
+var STAGE_SPEECH = {
+    factor: 'type the factored numerator and the factored denominator.',
+    flip: 'keep the first fraction, change divide to times, and type the flipped second fraction.',
+    cancel: 'tap a factor in a numerator, then the same factor in a denominator, to cancel them.',
+    lcd: 'type the least common denominator.',
+    rewrite: 'type the new numerator for each fraction that needs one.',
+    final: 'type what is left, numerator and denominator.'
+};
+function stageTitle(i) {
+    var t = stageType(i), s = STAGE_TITLE[t];
+    if (t === 'final' && prob.cat === 'asDiff') s = 'Combine the numerators and simplify';
+    return 'Step ' + (i + 1) + ': ' + s;
+}
+
+/* Answer boxes: a stacked pair (top over bottom), or one box. */
+function boxHTML(id, label, cls) {
+    return '<label class="sr-only" for="' + id + '">' + esc(label) + '</label>' +
+        '<input type="text" class="ans-box' + (cls ? ' ' + cls : '') + '" id="' + id + '"' + (TOUCH ? ' inputmode="none"' : '') + ' autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" maxlength="40">';
+}
+function pairHTML(prefix, label, blankNote) {
+    return '<span class="ans-wrap" id="' + prefix + '-wrap"><span class="ans-frac">' +
+        boxHTML(prefix + '-num', label + ', numerator') + '<span class="frac-bar" aria-hidden="true"></span>' +
+        boxHTML(prefix + '-den', label + ', denominator' + (blankNote ? ' (leave blank if there is no fraction bar)' : '')) +
+        '</span>' + CHECK_SVG + '</span>';
+}
+/* Small dark-green check arrow beside the boxes on a guided step, so the
+   student never has to scroll past the keypad to check (Ira, 2026-10-14).
+   Reusable: any step can add goBtnHTML(i); wireStage hooks it up. The last
+   step keeps the wide Check button at the bottom. */
+var GO_SVG = '<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h12M12.5 6.5 18 12l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+function goBtnHTML(i) { return '<button type="button" class="go-btn" id="go' + i + '" aria-label="Check step ' + (i + 1) + '">' + GO_SVG + '</button>'; }
+function stageInner(i) {
+    var t = stageType(i), longCls = prob.long ? ' long' : '';
+    if (t === 'factor') return '<div class="work"><span class="eq-sign" aria-hidden="true">=</span>' + pairHTML('fac', 'Step ' + (i + 1) + ', factored') + goBtnHTML(i) + '</div>';
+    if (t === 'flip') {
+        var f = prob.flip;
+        return '<div class="work' + longCls + '"><div class="scroll-x"><span class="eq-row"><span class="prob-visual" aria-hidden="true">' + fracHTML(sideFactHTML(f.T1, false), sideFactHTML(f.B1, false)) + opH('mul') + '</span>' +
+            pairHTML('flip', 'Step ' + (i + 1) + ', the flipped second fraction') + '</span></div>' + goBtnHTML(i) + '</div>';
+    }
+    if (t === 'cancel') return '<div class="work' + longCls + '"><div class="scroll-x"><span class="prob-visual" id="chip-area">' + chipsHTML() + '</span></div></div>' +
+        '<p class="stage-note" id="cancel-note">Tap a factor in a numerator, then the same factor in a denominator.</p>';
+    if (t === 'lcd') return '<div class="work"><span class="lcd-label">LCD =</span><span class="ans-wrap" id="lcd-wrap">' + boxHTML('lcd-box', 'Step ' + (i + 1) + ', the LCD', 'lcd') + CHECK_SVG + '</span>' + goBtnHTML(i) + '</div>';
+    if (t === 'rewrite') {
+        var h = '<div class="work"><div class="scroll-x"><span class="eq-row">', j, rw;
+        for (j = 0; j < 2; j++) {
+            rw = prob.rewrite[j];
+            if (j === 1) h += '<span aria-hidden="true">' + opH(prob.op) + '</span>';
+            if (!rw) h += '<span aria-hidden="true">' + fracHTML(polyHTML(prob.nums[j]), prob.lcd.html) + '</span>';
+            else h += '<span class="ans-wrap" id="rw' + j + '-wrap"><span class="ans-frac">' + boxHTML('rw' + j + '-box', 'Step ' + (i + 1) + ', new numerator of the ' + (j ? 'second' : 'first') + ' fraction, over ' + prob.lcd.speech, 'short') +
+                '<span class="frac-bar" aria-hidden="true"></span><span class="den-fixed" aria-hidden="true">' + prob.lcd.html + '</span></span>' + CHECK_SVG + '</span>';
+        }
+        var need = (prob.rewrite[0] ? 1 : 0) + (prob.rewrite[1] ? 1 : 0);
+        return h + '</span></div>' + goBtnHTML(i) + '</div><p class="stage-note">' + (need === 2 ? 'Multiply each numerator by the factor its denominator is missing.' : 'One fraction already has the LCD. Rewrite the other one.') + '</p>';
+    }
+    if (prob.cat === 'asDiff') {
+        /* The LCD is given; only the combined top is typed. */
+        return '<div class="work"><span class="eq-sign" aria-hidden="true">=</span><span class="ans-wrap" id="comb-wrap"><span class="ans-frac">' +
+            boxHTML('comb-box', 'Step ' + (i + 1) + ', the combined numerator, over ' + prob.lcd.speech, 'lcd') +
+            '<span class="frac-bar" aria-hidden="true"></span><span class="den-fixed" aria-hidden="true">' + prob.lcd.html + '</span></span>' + CHECK_SVG + '</span></div>' +
+            '<p class="stage-note" id="comb-note">The denominator is the LCD. Type the numerator.</p><div id="simp-row"></div>';
+    }
+    return '<div class="work"><span class="eq-sign" aria-hidden="true">=</span>' + pairHTML('ans', 'Step ' + (i + 1) + ', your answer', true) + '</div>';
+}
+function renderProblem(keepFocus) {
+    var info = CAT_INFO[prob.cat];
+    document.getElementById('instruction').textContent = info.prompt;
+    document.getElementById('problem-text').textContent = prob.speech;
+    homeKeys();
+    var area = document.getElementById('work-area'), html = '', i, longCls = prob.long ? ' long' : '';
+    if (!isStaged()) {
+        html = '<div class="work' + longCls + '"><div class="scroll-x"><span class="prob-visual" aria-hidden="true">' + prob.html + '</span></div>' +
+            '<span class="ans-group"><span class="eq-sign" aria-hidden="true">=</span>' + pairHTML('ans', 'Your answer', true) + '</span></div>';
+    } else {
+        /* Multiply, Cancel Factors: the chips are the problem itself. */
+        if (stageType(0) !== 'cancel') html += '<div class="work' + longCls + '"><div class="scroll-x"><span class="prob-visual" aria-hidden="true">' + prob.html + '</span></div></div>';
+        for (i = 0; i < prob.stages.length; i++) {
+            html += '<div class="stage' + (i ? ' locked' : '') + '" id="stage' + i + '"><p class="stage-title">' + stageTitle(i) + '</p>' +
+                (i ? '<p class="lock-note">Opens after step ' + i + '</p>' : stageInner(0)) + '</div>';
+        }
+    }
+    area.innerHTML = html;
+    wireStage(0);
+    buildKeys();
+    scrollCues();
+    updateSubmit();
+    document.getElementById('next-row').innerHTML = '';
+    setFeedback('', '');
+    closePanel('hint'); closePanel('solution');
+    updateDisplay();
+    if (!keepFocus) focusStage();
+    var t = topicById(currentTopic);
+    announce('Problem ' + (problemCount + 1) + '. ' + (t.speech || t.name) + ', ' + levelName(prob.cat) + '. ' + prob.speech +
+        (isStaged() ? ' Step 1: ' + STAGE_SPEECH[stageType(0)] : ''));
+}
+/* A soft fade on the side of a scrolling problem that has more to see. */
+function scrollCues() {
+    var boxes = document.querySelectorAll('#work-area .scroll-x'), i, rows = document.querySelectorAll('#work-area .work.go-below');
+    /* If the green arrow is what makes a row too wide, the arrow moves to
+       the line below instead of the row scrolling. */
+    for (i = 0; i < rows.length; i++) rows[i].classList.remove('go-below');
+    for (i = 0; i < boxes.length; i++) {
+        var p = boxes[i].parentNode;
+        if (p.querySelector(':scope > .go-btn') && boxes[i].scrollWidth > boxes[i].clientWidth + 1) p.classList.add('go-below');
+    }
+    for (i = 0; i < boxes.length; i++) {
+        var b = boxes[i], over = b.scrollWidth > b.clientWidth + 1;
+        b.classList.toggle('more-right', over && b.scrollLeft + b.clientWidth < b.scrollWidth - 2);
+        b.classList.toggle('more-left', over && b.scrollLeft > 2);
+        if (!b.getAttribute('data-cue')) { b.setAttribute('data-cue', '1'); b.addEventListener('scroll', scrollCues); }
+    }
+}
+function wireStage(i) {
+    var t = stageType(i), go = document.getElementById('go' + i);
+    if (go) go.addEventListener('click', checkAnswer);
+    if (t === 'cancel') { wireChips(); return; }
+    var ids = boxIds(t), j;
+    for (j = 0; j < ids.length; j++) wireBox(ids[j], ids);
+}
+function boxIds(t) {
+    if (t === 'factor') return ['fac-num', 'fac-den'];
+    if (t === 'flip') return ['flip-num', 'flip-den'];
+    if (t === 'lcd') return ['lcd-box'];
+    if (t === 'rewrite') { var r = []; if (prob.rewrite[0]) r.push('rw0-box'); if (prob.rewrite[1]) r.push('rw1-box'); return r; }
+    if (t === 'cancel') return [];
+    if (prob.cat === 'asDiff' && !pState.combined) return ['comb-box'];
+    return ['ans-num', 'ans-den'];
+}
+function focusStage() {
+    var t = curStage();
+    if (t === 'cancel') { var c = document.querySelector('.chip:not(:disabled)'); if (c) c.focus(); return; }
+    var ids = boxIds(t), j;
+    for (j = 0; j < ids.length; j++) { var el = document.getElementById(ids[j]); if (el && !el.disabled) { el.focus(); return; } }
+}
+function wireBox(id, group) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('focus', function () { lastBox = el; placeKeys(el); });
+    el.addEventListener('input', function () { markBox(id, false); });
+    el.addEventListener('keydown', function (e) {
+        var idx = group.indexOf(id);
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            /* Enter in a top box with its bottom still empty moves down. */
+            if (/-num$/.test(id) && el.value !== '' && group[idx + 1] && document.getElementById(group[idx + 1]).value === '') document.getElementById(group[idx + 1]).focus();
+            else checkAnswer();
+        } else if (e.key === 'ArrowDown' && /-num$/.test(id) && group[idx + 1]) { e.preventDefault(); document.getElementById(group[idx + 1]).focus(); }
+        else if (e.key === 'ArrowUp' && /-den$/.test(id) && idx > 0) { e.preventDefault(); document.getElementById(group[idx - 1]).focus(); }
+    });
+}
+function markBox(id, bad) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('field-error', !!bad);
+    if (bad) el.setAttribute('aria-invalid', 'true'); else el.removeAttribute('aria-invalid');
+}
+function markBoxOk(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    markBox(id, false);
+    el.classList.add('field-correct'); el.disabled = true;
+}
+function markWrapSolved(wrapId) { var w = document.getElementById(wrapId); if (w) w.classList.add('solved'); }
+
+/* ---------- typing keys ----------
+   The keypad sits right under the boxes being typed in (Ira, 2026-10-14).
+   On a phone or tablet it is the only keyboard: the boxes are
+   inputmode="none" so the phone's own keyboard never covers the problem,
+   and the keypad adds the digits and a delete key. On a computer the
+   student types normally and the keypad keeps just the symbol keys. */
+var TOUCH = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+var K = {
+    '(': ['(', 'Open parenthesis'], ')': [')', 'Close parenthesis'], 'x': ['x', 'x'], 'x^2': ['x<sup>2</sup>', 'x squared'],
+    '+': ['+', 'Plus'], '-': ['&#8722;', 'Minus'], 'BS': ['<svg width="22" height="16" viewBox="0 0 22 16" aria-hidden="true" focusable="false"><path d="M7 1.5h12.5v13H7L1.5 8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M10.5 5l5 6M15.5 5l-5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>', 'Delete']
+};
+var DESK_KEYS = ['(', ')', 'x', 'x^2', '+', '-'];
+var TOUCH_KEYS = ['7', '8', '9', '(', ')', 'BS', '4', '5', '6', '+', '-', 'x^2', '1', '2', '3', '0', 'x'];
+/* The feedback line and the keypad travel together: feedback right under
+   the boxes being typed in, keypad under the feedback (Ira, 2026-10-14),
+   so a message is never hidden below the keypad and step boxes. */
+function homeKeys() {
+    var row = document.getElementById('key-row'), home = document.getElementById('key-home'), fb = document.getElementById('feedback');
+    if (row && home && row.previousElementSibling !== home) home.insertAdjacentElement('afterend', row);
+    if (fb && row && fb.previousElementSibling !== row) row.insertAdjacentElement('afterend', fb);
+}
+/* Put the feedback, then the keypad, directly below the row that holds this box. */
+function placeKeys(box) {
+    var row = document.getElementById('key-row'), fb = document.getElementById('feedback'), work = box && box.closest ? box.closest('.work') : null;
+    if (!row || !fb || !work) return;
+    if (work.nextElementSibling !== fb) work.insertAdjacentElement('afterend', fb);
+    if (fb.nextElementSibling !== row) fb.insertAdjacentElement('afterend', row);
+}
+/* Tap-to-cancel has no keypad: its messages go right under the chips. */
+function placeFeedbackAt(work) {
+    var fb = document.getElementById('feedback');
+    if (fb && work && work.nextElementSibling !== fb) work.insertAdjacentElement('afterend', fb);
+}
+function buildKeys() {
+    var row = document.getElementById('key-row'), html = '', i, list = TOUCH ? TOUCH_KEYS : DESK_KEYS;
+    row.className = 'key-row' + (TOUCH ? ' pad' : '');
+    if (curStage() === 'cancel' || pState.solved) {
+        row.innerHTML = ''; homeKeys();
+        if (!pState.solved) { var cw = document.getElementById('chip-area'); if (cw) placeFeedbackAt(cw.closest('.work')); }
+        return;
+    }
+    for (i = 0; i < list.length; i++) {
+        var k = list[i], face = K[k] ? K[k][0] : k, label = K[k] ? K[k][1] : k;
+        html += '<button type="button" class="key-btn' + (k === 'x' && TOUCH ? ' wide' : '') + (k === 'BS' ? ' del' : '') + '" data-ins="' + esc(k) + '" aria-label="' + esc(label) + '">' + face + '</button>';
+    }
+    row.innerHTML = html;
+    var keys = row.querySelectorAll('.key-btn');
+    for (i = 0; i < keys.length; i++) {
+        /* Keep focus (and the caret) in the answer box while a key is pressed. */
+        /* A key acts the moment it is pressed. Cancelling the touch start keeps
+           focus and the caret in the box and stops a quick double tap from
+           zooming the page (pinch zoom still works: it starts off the keys).
+           Click only handles the keyboard (Enter or Space on a focused key). */
+        keys[i].addEventListener('mousedown', function (e) { e.preventDefault(); });
+        keys[i].addEventListener('touchstart', function (e) { e.preventDefault(); }, { passive: false });
+        keys[i].addEventListener('pointerdown', function (e) {
+            e.preventDefault();
+            var k = this.getAttribute('data-ins');
+            insertAtCursor(k);
+            if (k === 'BS') startDeleteRepeat();
+        });
+        keys[i].addEventListener('pointerup', stopDeleteRepeat);
+        keys[i].addEventListener('pointercancel', stopDeleteRepeat);
+        keys[i].addEventListener('pointerleave', stopDeleteRepeat);
+        keys[i].addEventListener('contextmenu', function (e) { e.preventDefault(); });
+        keys[i].addEventListener('click', function (e) { if (e.detail === 0) insertAtCursor(this.getAttribute('data-ins')); });
+    }
+    var ids = boxIds(curStage()), j;
+    for (j = 0; j < ids.length; j++) { var b = document.getElementById(ids[j]); if (b && !b.disabled) { placeKeys(b); break; } }
+}
+/* Holding Delete keeps deleting, faster the longer it is held (Ira,
+   2026-10-17): a pause first so a single tap deletes one character, then a
+   steady repeat that speeds up, until release or the box is empty. */
+var delTimer = null;
+function startDeleteRepeat() {
+    stopDeleteRepeat();
+    var started = Date.now();
+    function tick() {
+        var el = lastBox && !lastBox.disabled && document.body.contains(lastBox) ? lastBox : null;
+        if (!el || el.value === '') { stopDeleteRepeat(); return; }
+        insertAtCursor('BS');
+        var held = Date.now() - started;
+        delTimer = setTimeout(tick, held > 1500 ? 35 : (held > 900 ? 60 : 110));
+    }
+    delTimer = setTimeout(tick, 450);
+}
+function stopDeleteRepeat() { if (delTimer) { clearTimeout(delTimer); delTimer = null; } }
+function insertAtCursor(txt) {
+    var el = lastBox && !lastBox.disabled && document.body.contains(lastBox) ? lastBox : null;
+    if (!el) { var ids = boxIds(curStage()), j; for (j = 0; j < ids.length; j++) { var b = document.getElementById(ids[j]); if (b && !b.disabled) { el = b; break; } } }
+    if (!el) return;
+    var s = (typeof el.selectionStart === 'number') ? el.selectionStart : el.value.length;
+    var e = (typeof el.selectionEnd === 'number') ? el.selectionEnd : el.value.length;
+    if (txt === 'BS') {
+        if (s === e && s > 0) s--;
+        el.value = el.value.slice(0, s) + el.value.slice(e);
+        el.focus();
+        try { el.setSelectionRange(s, s); } catch (err) { /* ignore */ }
+        keepCaretInView(el);
+        markBox(el.id, false);
+        return;
+    }
+    if (txt === 'x^2' && s === e && s > 0 && el.value.charAt(s - 1).toLowerCase() === 'x') txt = '^2';
+    if (el.value.length - (e - s) + txt.length > 40) return;
+    el.value = el.value.slice(0, s) + txt + el.value.slice(e);
+    el.focus();
+    try { el.setSelectionRange(s + txt.length, s + txt.length); } catch (err) { /* ignore */ }
+    keepCaretInView(el);
+    markBox(el.id, false);
+}
+/* A long entry must never hide what was just typed (Ira, 2026-10-17): when
+   the caret is at the end, scroll the box all the way right. */
+function keepCaretInView(el) {
+    if (el.selectionStart === el.value.length) el.scrollLeft = el.scrollWidth;
+}
+
+/* ---------- tap-to-cancel ---------- */
+function chipsHTML() {
+    chipModel = buildChips(prob);
+    chipModel.gone = 0;
+    var fr = prob.cancel.fracs, html = '', i, j, c;
+    for (i = 0; i < fr.length; i++) {
+        var top = '', bot = '';
+        for (j = 0; j < chipModel.chips.length; j++) {
+            c = chipModel.chips[j];
+            if (c.frac !== i) continue;
+            var b = '<button type="button" class="chip" data-i="' + j + '" aria-pressed="false" aria-label="' + esc(c.speech) + '">' + c.html + '</button>';
+            if (c.pos === 'top') top += b; else bot += b;
+        }
+        if (i) html += '<span aria-hidden="true">' + opH(prob.cancel.ops[i - 1]) + '</span>';
+        html += fracHTML(top || '1', bot || '1');
+    }
+    return html;
+}
+function wireChips() {
+    var chips = document.querySelectorAll('.chip'), i;
+    for (i = 0; i < chips.length; i++) chips[i].addEventListener('click', onChip);
+}
+function onChip(e) {
+    if (pState.solved && !isStaged()) return;
+    var b = e.currentTarget, c = chipModel.chips[Number(b.getAttribute('data-i'))];
+    if (b.disabled || c.gone) return;
+    if (!chipSel || chipSel.b === b || chipSel.c.pos === c.pos) {
+        if (chipSel) chipSel.b.setAttribute('aria-pressed', 'false');
+        if (chipSel && chipSel.b === b) { chipSel = null; return; }
+        chipSel = { b: b, c: c };
+        b.setAttribute('aria-pressed', 'true');
+        setFeedback('', '');
+        setNote('Now tap the same factor on ' + (c.pos === 'top' ? 'a denominator.' : 'a numerator.'));
+        return;
+    }
+    var a = chipSel;
+    a.b.setAttribute('aria-pressed', 'false');
+    chipSel = null;
+    if (!a.c.num && !c.num && a.c.key === c.key) {
+        chipModel.gone++;
+        var cls = chipModel.gone === 1 ? 'p1' : 'p2', pair = [a, { b: b, c: c }], k;
+        for (k = 0; k < 2; k++) {
+            pair[k].c.gone = true;
+            pair[k].b.classList.add('gone', cls);
+            pair[k].b.disabled = true;
+            pair[k].b.setAttribute('aria-label', pair[k].c.speech + ', cancelled');
+        }
+        var left = chipModel.need - chipModel.gone;
+        var said = speakText(c.html) + ' cancelled from the numerator and the denominator.';
+        if (left <= 0) { announce(said); stageDone(); return; }
+        setNote('Nice. ' + left + (left === 1 ? ' more pair cancels.' : ' more pairs cancel.'));
+        announce(said + ' ' + left + (left === 1 ? ' more pair cancels.' : ' more pairs cancel.'));
+        var nxt = document.querySelector('.chip:not(:disabled)'); if (nxt) nxt.focus();
+        return;
+    }
+    /* A wrong pair is coached, never scored. */
+    var msg = (a.c.num || c.num) ? 'A number on its own can only cancel the same number. Look for a factor in parentheses that appears in a numerator and a denominator.'
+        : 'Those are not the same factor. Look for one that is exactly the same in a numerator and a denominator.';
+    setFeedback(msg, 'incorrect');
+    setNote('Tap a factor in a numerator, then the same factor in a denominator.');
+    b.focus();
+}
+function setNote(t) { var n = document.getElementById('cancel-note'); if (n) n.textContent = t; }
+
+/* ---------- live regions ---------- */
+function announce(text) {
+    var el = document.getElementById('announcer');
+    el.textContent = '';
+    setTimeout(function () { el.textContent = text; }, 60);
+}
+function setFeedback(html, cls) {
+    var fb = document.getElementById('feedback');
+    fb.className = 'feedback' + (cls ? ' ' + cls : '');
+    fb.innerHTML = html;
+    if (html) revealFeedback();
+}
+function revealFeedback() {
+    var fb = document.getElementById('feedback');
+    var r = fb.getBoundingClientRect(), vh = window.innerHeight || document.documentElement.clientHeight;
+    if (r.bottom > vh - 8 || r.top < 0) {
+        try { fb.scrollIntoView({ block: 'center', behavior: prefersReducedMotion() ? 'auto' : 'smooth' }); } catch (e) { fb.scrollIntoView(false); }
+    }
+}
+function sayHTML(html) { setFeedback(dual(html, speakText(html)), 'incorrect'); }
+function sayNotice(html) { setFeedback(dual(html, speakText(html)), 'notice'); }
+
+/* ---------- checking ---------- */
+var SUCCESS = ['Correct!', 'Great work!', 'Exactly right!', "That's it!", 'Nicely done!'];
+function checkAnswer() {
+    if (!prob || pState.solved) return;
+    var t = curStage();
+    if (t === 'factor') return checkFactor();
+    if (t === 'flip') return checkFlip();
+    if (t === 'cancel') {
+        var left = chipModel.need - chipModel.gone;
+        sayNotice('Tap the matching factors to cancel them first. ' + left + (left === 1 ? ' pair is' : ' pairs are') + ' left.');
+        return;
+    }
+    if (t === 'lcd') return checkLcd();
+    if (t === 'rewrite') return checkRewrite();
+    return checkFinal();
+}
+function val(id) { var el = document.getElementById(id); return el ? el.value : ''; }
+function checkFactor() {
+    var parts = [['fac-num', prob.factorT.top, 'numerator'], ['fac-den', prob.factorT.bot, 'denominator']], i;
+    for (i = 0; i < 2; i++) {
+        var el = document.getElementById(parts[i][0]);
+        if (el.disabled) continue;
+        var g = gradeFactored(parts[i][1], el.value, parts[i][2]);
+        if (g.kind === 'correct') { markBoxOk(parts[i][0]); continue; }
+        if (g.kind === 'read') { markBox(parts[i][0], false); sayNotice(g.msg); el.focus(); return; }
+        /* Scaffolding: coached, never scored. */
+        markBox(parts[i][0], g.kind === 'wrong');
+        setFeedback(dual(g.msgHTML, g.msgSpeech), 'incorrect');
+        el.focus(); el.select();
+        return;
+    }
+    markWrapSolved('fac-wrap');
+    stageDone();
+}
+function checkFlip() {
+    var f = prob.flip, g = gradeRatio(f.top, f.bot, val('flip-num'), val('flip-den'));
+    if (g.kind === 'read') { sayNotice(g.msg); return; }
+    if (g.kind === 'wrong') {
+        var msg = 'Not quite. Flip the second fraction: its numerator and denominator trade places.';
+        if (ratEq(g.top, g.bot, f.gTop, f.gBot)) msg = 'Good start. Now flip it: the numerator and denominator of the second fraction trade places.';
+        else if (ratEq(g.top, g.bot, f.f1Bot, f.f1Top)) msg = 'Close. Keep the first fraction as it is and flip the second one instead.';
+        markBox('flip-num', true); markBox('flip-den', true);
+        sayHTML(msg);
+        document.getElementById('flip-num').focus();
+        return;
+    }
+    markBoxOk('flip-num'); markBoxOk('flip-den'); markWrapSolved('flip-wrap');
+    stageDone();
+}
+function checkLcd() {
+    var L = prob.lcd, g = gradePoly(L.poly, val('lcd-box'), 'the LCD');
+    if (g.kind === 'read') { sayNotice(g.msg); return; }
+    if (g.kind === 'wrong') {
+        /* Two tries before the LCD is shown (Ira, 2026-10-17). The first wrong
+           try gets a hint only; the second also shows the LCD. Coached, never
+           scored. */
+        pState.lcdMiss = (pState.lcdMiss || 0) + 1;
+        var quad = pDeg(L.d0) === 2 ? 'first' : (pDeg(L.d1) === 2 ? 'second' : null);
+        var msg;
+        if (L.notLeast && pEq(g.poly, L.notLeast)) msg = 'That is a common denominator, but not the least one. Did you factor the ' + quad + ' denominator first? Factor it, and the LCD uses each different factor once.';
+        else if (quad) msg = 'Not quite. Factor the ' + quad + ' denominator first. The LCD uses each different factor once.';
+        else if (pDeg(g.poly) === 1) msg = 'Not quite. The LCD has to contain every factor of both denominators.';
+        else msg = 'Not quite. The denominators share no factor, so the LCD uses each of them once.';
+        if (pState.lcdMiss >= 2) msg += ' The LCD is ' + L.html + '.';
+        markBox('lcd-box', true);
+        sayHTML(msg);
+        document.getElementById('lcd-box').focus();
+        return;
+    }
+    markBoxOk('lcd-box'); markWrapSolved('lcd-wrap');
+    stageDone();
+}
+function checkRewrite() {
+    var j;
+    for (j = 0; j < 2; j++) {
+        var rw = prob.rewrite[j], id = 'rw' + j + '-box', el = document.getElementById(id);
+        if (!rw || el.disabled) continue;
+        var g = gradePoly(rw.expect, el.value, 'the new numerator');
+        if (g.kind === 'correct') { markBoxOk(id); markWrapSolved('rw' + j + '-wrap'); continue; }
+        if (g.kind === 'read') { sayNotice(g.msg); el.focus(); return; }
+        var o = polyHTML(rw.orig), m = '(' + polyHTML(rw.miss) + ')';
+        var msg = pEq(g.poly, rw.orig) ? 'The denominator changed, so the numerator must change too: multiply ' + o + ' by ' + m + '.'
+            : 'Not quite. Multiply the numerator of the ' + (j ? 'second' : 'first') + ' fraction, ' + o + ', by ' + m + '.';
+        markBox(id, true);
+        sayHTML(msg);
+        el.focus(); el.select();
+        return;
+    }
+    stageDone();
+}
+function checkCombine() {
+    var el = document.getElementById('comb-box'), r = readBox(el.value, false);
+    if (!r.ok) { markBox('comb-box', false); sayNotice(r.code === 'empty' ? 'Type the combined numerator in its box.' : r.msg); el.focus(); return; }
+    if (!pEq(r.poly, prob.combN)) {
+        /* Scored like any final answer: a wrong try breaks the streak only. */
+        markBox('comb-box', true);
+        pState.missed = true; streak = 0; updateDisplay(); saveState();
+        sayHTML(diagnose(prob, r.poly, prob.lcd.poly));
+        el.focus(); el.select();
+        return;
+    }
+    markBoxOk('comb-box'); markWrapSolved('comb-wrap');
+    if (!prob.simplifies) { finishSolved([]); return; }
+    pState.combined = true;
+    var cn = document.getElementById('comb-note'); if (cn) cn.parentNode.removeChild(cn);
+    var row = document.getElementById('simp-row');
+    row.innerHTML = '<p class="stage-note">Now simplify: the numerator and the denominator share a factor.</p>' +
+        '<div class="work"><span class="eq-sign" aria-hidden="true">=</span>' + pairHTML('ans', 'Step ' + (pState.stage + 1) + ', the simplified answer', true) + '</div>';
+    wireBox('ans-num', ['ans-num', 'ans-den']); wireBox('ans-den', ['ans-num', 'ans-den']);
+    buildKeys();
+    setFeedback(dual('Right numerator! Now simplify.', 'Right numerator. Now simplify: the numerator and the denominator share a factor. Type the simplified answer.'), 'correct');
+    document.getElementById('ans-num').focus();
+}
+function checkFinal() {
+    if (prob.cat === 'asDiff' && !pState.combined) return checkCombine();
+    var n = document.getElementById('ans-num'), d = document.getElementById('ans-den');
+    var res = gradeFinal(prob, n.value, d.value);
+    if (res.kind === 'read') {
+        markBox('ans-num', false); markBox('ans-den', false);
+        sayNotice(res.msg);
+        (res.focus === 'bot' ? d : n).focus();
+        return;
+    }
+    if (res.kind === 'unsimplified') {
+        /* Equal to the answer, just not in lowest terms: coach, no penalty. */
+        markBox('ans-num', false); markBox('ans-den', false);
+        var cf = res.cf;
+        if (cf.sign) sayHTML('Good work, that is equal to the answer. Now simplify it: the denominator is a negative number, so move the minus sign to the numerator.');
+        else sayHTML('Good work, that is equal to the answer. Now simplify it: the numerator and denominator still share ' +
+            (cf.poly ? 'the factor ' + cfHTML(cf) : 'a factor of ' + cf.num) + '.');
+        n.focus();
+        return;
+    }
+    if (res.kind === 'wrong') {
+        /* Accuracy option A (Ira, 2026-10-13): a wrong try books nothing; it
+           only breaks the streak. The problem is recorded once, when finished. */
+        markBox('ans-num', true); markBox('ans-den', true);
+        pState.missed = true;
+        streak = 0;
+        updateDisplay(); saveState();
+        sayHTML(res.tip);
+        n.focus(); n.select();
+        return;
+    }
+    markBox('ans-num', false); markBox('ans-den', false);
+    finishSolved(['ans-num', 'ans-den']);
+}
+/* The problem is finished correctly: book it once, celebrate, lock up. */
+function finishSolved(ids) {
+    pState.solved = true;
+    var firstTry = !pState.missed && !pState.revealed, earnedStar = false;
+    if (!pState.booked) {
+        pState.booked = true;
+        stats[prob.cat].t++;
+        if (!pState.revealed) {
+            stats[prob.cat].c++;
+            starProg[prob.cat]++;
+            if (starProg[prob.cat] >= STAR_ROUND) { starProg[prob.cat] = 0; stars[prob.cat]++; earnedStar = true; }
+        }
+    }
+    var msg = pick(SUCCESS);
+    if (firstTry) {
+        streak++;
+        if (streak > bestStreak) bestStreak = streak;
+        celebrate(streak);
+    }
+    if (earnedStar) {
+        msg += ' You earned a star!';
+        if (confettiEnabled && confettiTierFor(streak) < 2) createConfetti(100, 2);
+    }
+    saveState();
+    updateDisplay();
+    for (var q = 0; q < ids.length; q++) markBoxOk(ids[q]);
+    if (ids.length) markWrapSolved('ans-wrap');
+    if (isStaged()) document.getElementById('stage' + pState.stage).classList.add('cleared');
+    setFeedback(esc(msg), 'correct');
+    lockAndShowNext();
+}
+/* The wide Check button belongs to the last step only; guided steps use
+   the arrow beside their boxes. */
+function updateSubmit() {
+    var row = document.getElementById('submit-row');
+    if (pState.solved || curStage() !== 'final') { row.innerHTML = ''; return; }
+    if (document.getElementById('submit-btn')) return;
+    row.innerHTML = '<button type="button" class="submit-btn" id="submit-btn">Check</button>';
+    document.getElementById('submit-btn').addEventListener('click', checkAnswer);
+}
+/* A scaffolding step is finished: open the next one. */
+function stageDone() {
+    var i = pState.stage, box = document.getElementById('stage' + i);
+    box.classList.add('cleared');
+    var go = document.getElementById('go' + i);
+    if (go) go.parentNode.removeChild(go);
+    if (stageType(i) === 'cancel') setNote('All cancelled.');
+    pState.stage = i + 1;
+    var nb = document.getElementById('stage' + (i + 1));
+    nb.classList.remove('locked');
+    nb.innerHTML = '<p class="stage-title">' + stageTitle(i + 1) + '</p>' + stageInner(i + 1);
+    wireStage(i + 1);
+    buildKeys();
+    updateSubmit();
+    scrollCues();
+    var nextSay = (stageType(i + 1) === 'final' && prob.cat === 'asDiff') ? 'the denominator is the LCD; type the combined numerator.' : STAGE_SPEECH[stageType(i + 1)];
+    setFeedback(dual('Step ' + (i + 1) + ' done!', 'Step ' + (i + 1) + ' done. Step ' + (i + 2) + ': ' + nextSay), 'correct');
+    focusStage();
+}
+function lockAndShowNext() {
+    document.getElementById('submit-row').innerHTML = '';
+    document.getElementById('key-row').innerHTML = '';
+    homeKeys();
+    var row = document.getElementById('next-row');
+    row.innerHTML = '<button type="button" class="submit-btn next-btn" id="next-btn">Next Problem <svg width="14" height="12" viewBox="0 0 14 12" aria-hidden="true" focusable="false" style="vertical-align:-1px;margin-left:4px"><path d="M1 6h11M7.5 1.5 12 6l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
+    var nb = document.getElementById('next-btn');
+    /* A held Enter would press this at once and wipe the message before it
+       is seen or announced, so activations in the first 300 ms are ignored. */
+    var armedAt = Date.now() + 300;
+    nb.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.repeat) e.preventDefault(); });
+    nb.addEventListener('click', function () { if (Date.now() < armedAt) return; nextProblem(); });
+    nb.focus();
+}
+function nextProblem() { retireProblem(true); problemCount++; newProblem(); }
+
+/* ---------- reveals: Show Solution withholds credit and ends the streak;
+   Hint and Skip are free ---------- */
+function chargeReveal() {
+    if (!pState.booked) { pState.booked = true; stats[prob.cat].t++; }
+    pState.revealed = true;
+    streak = 0; updateDisplay(); saveState();
+}
+function closePanel(name) { document.getElementById(name + '-box').hidden = true; document.getElementById(name + '-btn').setAttribute('aria-expanded', 'false'); }
+function openPanel(name) { document.getElementById(name + '-box').hidden = false; document.getElementById(name + '-btn').setAttribute('aria-expanded', 'true'); }
+function toggleHint() {
+    var box = document.getElementById('hint-box');
+    if (!box.hidden) { closePanel('hint'); return; }
+    box.innerHTML = '<div class="panel-title">Hint</div>' + dual(prob.hint, speakText(prob.hint));
+    openPanel('hint');
+}
+function toggleSolution() {
+    var box = document.getElementById('solution-box');
+    if (!box.hidden) { closePanel('solution'); return; }
+    if (!pState.solved) chargeReveal();
+    if (solutionShown < 1) solutionShown = 1;
+    renderSolution();
+    openPanel('solution');
+}
+function stepHTML(s, n) {
+    return '<div class="solution-step"><div>' + dual('<b>' + n + '.</b> ' + s.label + ':', n + '. ' + speakText(s.label) + '.') + '</div>' +
+        '<div class="solution-eq' + (s.prose ? ' prose' : '') + '" role="img" aria-label="' + esc(s.speech) + '">' + s.math + '</div></div>';
+}
+function renderSolution() {
+    var box = document.getElementById('solution-box'), steps = prob.steps, total = steps.length;
+    var shown = Math.min(solutionShown, total), html = '<div class="panel-title">Step-by-Step Solution</div>', i;
+    for (i = 0; i < shown; i++) html += stepHTML(steps[i], i + 1);
+    if (shown < total) {
+        var left = total - shown;
+        html += '<div class="step-controls"><button type="button" class="submit-btn" id="next-step-btn">Next Step</button>' +
+            '<span class="steps-left">' + left + (left === 1 ? ' step left' : ' steps left') + '</span></div>';
+    } else html += '<div class="done-line">That is the complete solution. Try the next one yourself!</div>';
+    box.innerHTML = html;
+    var nb = document.getElementById('next-step-btn');
+    if (nb) nb.addEventListener('click', function () {
+        solutionShown++;
+        renderSolution();
+        var again = document.getElementById('next-step-btn');
+        if (again) again.focus();
+        else { var eqs = box.querySelectorAll('.solution-eq'); if (eqs.length) { eqs[eqs.length - 1].setAttribute('tabindex', '-1'); eqs[eqs.length - 1].focus(); } }
+    });
+}
+function skipProblem() { retireProblem(true); problemCount++; newProblem(); }
+
+/* ---------- header chips ---------- */
+function updateDisplay() {
+    document.getElementById('problemNum').textContent = String(problemCount + 1);
+    document.getElementById('streak').textContent = String(streak);
+    var cat = currentCat(), s = safeCount(stars[cat], MAX_COUNT), p = safeCount(starProg[cat], STAR_ROUND - 1);
+    document.getElementById('stars-chip').innerHTML =
+        starSVG(15) + '<span aria-hidden="true">' + s + '</span>' +
+        '<span style="width:6px" aria-hidden="true"></span>' + cupSVG(p / STAR_ROUND, 18) + '<span aria-hidden="true">' + p + '/' + STAR_ROUND + '</span>' +
+        '<span class="sr-only">Stars in this level: ' + s + '. ' + p + ' of ' + STAR_ROUND + ' toward the next star.</span>';
+}
+
+/* ---------- confetti (design system: palette and fall speeds) ---------- */
+function prefersReducedMotion() { return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+function confettiTierFor(s) { if (s < 3) return 0; if (s % 10 === 0) return 3; if (s % 5 === 0) return 2; if (s % 5 === 3) return 1; return 0; }
+function celebrate(s) {
+    if (!confettiEnabled) return;
+    var tier = confettiTierFor(s);
+    if (tier === 1) createConfetti(50, 1); else if (tier === 2) createConfetti(100, 2); else if (tier === 3) createConfetti(200, 3);
+}
+function createConfetti(count, tier) {
+    if (prefersReducedMotion()) return;
+    /* Orange and red are allowed in confetti only (design system): confetti
+       never shares the screen with a wrong-answer message. */
+    var colors = ['#7c3aed', '#22c55e', '#2e3d8f', '#ef4444', '#f59e0b', '#ffeb3b', '#0d9488', '#a78bfa'];
+    var massive = tier === 3, i;
+    for (i = 0; i < count; i++) {
+        var piece = document.createElement('div');
+        piece.className = 'confetti';
+        piece.setAttribute('aria-hidden', 'true');
+        var base = tier === 1 ? 7 + Math.random() * 5 : (tier === 2 ? 10 + Math.random() * 7 : 11 + Math.random() * 9);
+        var color = colors[Math.floor(Math.random() * colors.length)], shape = Math.floor(Math.random() * 4);
+        if (shape === 0) { piece.style.width = base + 'px'; piece.style.height = base + 'px'; piece.style.background = color; piece.style.borderRadius = '50%'; }
+        else if (shape === 1) { piece.style.width = base + 'px'; piece.style.height = base + 'px'; piece.style.background = color; piece.style.borderRadius = '2px'; }
+        else if (shape === 2) { piece.style.width = Math.max(4, base * 0.35) + 'px'; piece.style.height = (base * 1.7) + 'px'; piece.style.background = color; piece.style.borderRadius = '2px'; }
+        else { piece.style.width = '0'; piece.style.height = '0'; piece.style.borderLeft = (base * 0.6) + 'px solid transparent'; piece.style.borderRight = (base * 0.6) + 'px solid transparent'; piece.style.borderBottom = base + 'px solid ' + color; }
+        piece.style.left = (Math.random() * 100) + '%';
+        piece.style.top = '-20px';
+        var dur = tier === 1 ? 1.3 + Math.random() * 0.8 : (tier === 2 ? 1.6 + Math.random() * 1.2 : 2.0 + Math.random() * 1.6);
+        piece.style.animation = (massive ? 'confetti-fall-slow' : 'confetti-fall') + ' ' + dur + 's ease-out forwards';
+        piece.style.animationDelay = (Math.random() * (massive ? 0.8 : 0.4)) + 's';
+        document.body.appendChild(piece);
+        setTimeout((function (el) { return function () { if (el.parentNode) el.parentNode.removeChild(el); }; })(piece), massive ? 5000 : 3800);
+    }
+    if (massive) {
+        for (i = 0; i < 15; i++) {
+            var sp = document.createElement('div');
+            sp.className = 'sparkle'; sp.setAttribute('aria-hidden', 'true');
+            sp.style.left = (Math.random() * 90 + 5) + '%'; sp.style.top = (Math.random() * 55 + 10) + 'vh';
+            sp.style.animationDelay = (Math.random() * 0.5) + 's';
+            document.body.appendChild(sp);
+            setTimeout((function (el) { return function () { if (el.parentNode) el.parentNode.removeChild(el); }; })(sp), 3500);
+        }
+    }
+}
+
+/* ---------- stats ---------- */
+function pct(s) { return s.t > 0 ? Math.round((s.c / s.t) * 100) : 0; }
+function showStats() {
+    var clean = sanitize({ stats: stats, stars: stars, prog: starProg, best: bestStreak });
+    var html = '<h2 id="stats-heading">My Stats</h2><div class="best-line">Best streak: ' + clean.best + '</div>', i, j;
+    for (i = 0; i < TOPICS.length; i++) {
+        var t = TOPICS[i];
+        html += '<div class="stat-group">' + t.name + '</div>';
+        for (j = 0; j < t.levels.length; j++) {
+            var k = t.levels[j].id, s = clean.stats[k], p = pct(s), st = clean.stars[k], pr = clean.prog[k];
+            var tier = (p >= 90 && s.t >= 5) ? 'tier-full' : (p >= 60 ? 'tier-mid' : 'tier-low');
+            html += '<div class="stat-row"><div class="stat-cup">' + cupSVG(pr / STAR_ROUND, 30) + '</div><div class="stat-main">' +
+                '<div class="stat-name"><span>' + t.levels[j].name + '</span><span class="stat-stars">' + starSVG(14) + '<span aria-hidden="true">' + st + '</span></span></div>' +
+                '<div class="stat-bar-wrap" aria-hidden="true"><div class="stat-bar ' + tier + '" style="width:' + p + '%"></div></div>' +
+                '<div class="stat-num">' + (s.t > 0 ? s.c + ' right out of ' + s.t + ' (' + p + '%)' : 'not tried yet') + ' &middot; next star ' + pr + '/' + STAR_ROUND + '</div>' +
+                '<span class="sr-only">' + st + (st === 1 ? ' star' : ' stars') + '.</span></div></div>';
+        }
+    }
+    var weakest = null, wp = 101;
+    for (i = 0; i < STAT_KEYS.length; i++) {
+        var s2 = clean.stats[STAT_KEYS[i]];
+        if (s2.t >= 3 && pct(s2) < 80 && pct(s2) < wp) { wp = pct(s2); weakest = STAT_KEYS[i]; }
+    }
+    if (weakest) html += '<div class="recommend">Practice next: ' + esc(CAT_INFO[weakest].name) + ' (' + wp + '%)</div>';
+    html += '<div class="stats-actions"><button type="button" class="close-btn" id="close-stats">Close</button><button type="button" class="reset-btn" id="reset-btn">Reset Progress</button></div>';
+    var panel = document.getElementById('stats-panel');
+    panel.innerHTML = html;
+    document.getElementById('stats-overlay').hidden = false;
+    document.getElementById('close-stats').addEventListener('click', hideStats);
+    document.getElementById('reset-btn').addEventListener('click', resetProgress);
+    panel.focus();
+}
+function hideStats() { document.getElementById('stats-overlay').hidden = true; disarmReset(); document.getElementById('stats-btn').focus(); }
+var resetConfirming = false, resetTimer = null;
+function disarmReset() {
+    if (resetTimer) { clearTimeout(resetTimer); resetTimer = null; }
+    resetConfirming = false;
+    var b = document.getElementById('reset-btn');
+    if (b) { b.textContent = 'Reset Progress'; b.className = 'reset-btn'; }
+}
+function resetProgress() {
+    if (!resetConfirming) {
+        resetConfirming = true;
+        var b = document.getElementById('reset-btn');
+        b.textContent = 'Tap again to confirm'; b.className = 'reset-btn armed';
+        announce('Tap Reset Progress again within 3.5 seconds to erase your stats and stars.');
+        resetTimer = setTimeout(disarmReset, 3500);
+        return;
+    }
+    disarmReset();
+    stats = blankStats(); stars = blankCounts(); starProg = blankCounts(); bestStreak = 0;
+    problemCount = 0; streak = 0;
+    updateDisplay(); saveState(); showStats();
+    announce('Progress cleared.');
+}
+
+/* ---------- insignia ---------- */
+function drawInsignia() {
+    var d = '', steps = 240, i, t, r;
+    for (i = 0; i <= steps; i++) {
+        t = (i / steps) * 4 * Math.PI; r = 2 * Math.cos(1.5 * t);
+        d += (i === 0 ? 'M ' : 'L ') + (r * Math.cos(t) * 12).toFixed(2) + ' ' + (r * Math.sin(t) * 12).toFixed(2) + ' ';
+    }
+    document.getElementById('pr-path').setAttribute('d', d.trim());
+}
+
+/* ---------- wiring ---------- */
+function setSwitch(btn, on) { btn.setAttribute('aria-pressed', on ? 'true' : 'false'); }
+function init() {
+    loadState();
+    drawInsignia();
+    buildTopics();
+    buildLevels();
+    setSwitch(document.getElementById('sw-confetti'), confettiEnabled);
+    document.getElementById('sw-confetti').addEventListener('click', function () {
+        confettiEnabled = !confettiEnabled;
+        setSwitch(this, confettiEnabled);
+        try { localStorage.setItem(CONFETTI_KEY, confettiEnabled ? '1' : '0'); } catch (e) { /* ignore */ }
+        if (confettiEnabled) createConfetti(40, 1);
+    });
+    document.getElementById('hint-btn').addEventListener('click', toggleHint);
+    document.getElementById('solution-btn').addEventListener('click', toggleSolution);
+    document.getElementById('skip-btn').addEventListener('click', skipProblem);
+    document.getElementById('stats-btn').addEventListener('click', showStats);
+    document.getElementById('stats-overlay').addEventListener('click', function (e) { if (e.target === this) hideStats(); });
+    document.addEventListener('keydown', function (e) {
+        if (document.getElementById('stats-overlay').hidden) return;
+        if (e.key === 'Escape') { hideStats(); return; }
+        if (e.key === 'Tab') {
+            var f = document.getElementById('stats-panel').querySelectorAll('button');
+            if (!f.length) return;
+            var first = f[0], last = f[f.length - 1], act = document.activeElement;
+            if (e.shiftKey && (act === first || act === document.getElementById('stats-panel'))) { e.preventDefault(); last.focus(); }
+            else if (!e.shiftKey && act === last) { e.preventDefault(); first.focus(); }
+        }
+    });
+    window.addEventListener('resize', function () { drawBranch(); scrollCues(); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { drawBranch(); scrollCues(); });
+    newProblem();
+}
+init();
+
+</script>
+</body>
+</html>
