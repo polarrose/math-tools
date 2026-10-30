@@ -1,0 +1,2391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>Solving Rational Equations</title>
+<meta name="theme-color" content="#1b2450">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&amp;display=swap" rel="stylesheet">
+<style>
+    /* ===== MIDNIGHT SCHOLAR - navy stage, white card, violet + mint accents ===== */
+    * { box-sizing: border-box; }
+    button, input, select, textarea { font-family: inherit; }
+    body {
+        font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+        background:
+            radial-gradient(900px 500px at 85% -10%, rgba(124, 58, 237, 0.28), transparent 60%),
+            radial-gradient(800px 500px at -10% 110%, rgba(16, 185, 129, 0.18), transparent 55%),
+            linear-gradient(160deg, #141b3d 0%, #1b2450 100%);
+        min-height: 100vh;
+        display: flex; justify-content: center; align-items: flex-start;
+        padding: 16px 12px; margin: 0; color: #1e2a5e;
+    }
+    .card {
+        background: #ffffff; border-radius: 22px; box-shadow: 0 24px 60px rgba(8, 12, 40, 0.55);
+        max-width: 760px; width: 100%; padding: 30px 24px 22px; position: relative; overflow: hidden;
+    }
+    .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981); }
+    h1 { text-align: center; color: #1e2a5e; margin: 4px auto 6px; font-size: 25px; letter-spacing: 0.3px; width: fit-content; max-width: 100%; }
+    h1::after { content: ''; display: block; width: 100%; height: 4px; border-radius: 2px; margin: 8px auto 14px; background: linear-gradient(90deg, #2e3d8f, #7c3aed, #10b981); }
+    .info { display: flex; justify-content: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+    .info-item { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; background: #eef0fb; color: #2e3d8f; padding: 6px 14px; border-radius: 999px; }
+    .info-item svg { display: block; }
+
+    /* ===== Level tiles and section pills: native radios ===== */
+    .tile-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; max-width: 640px; margin: 0 auto; padding: 6px 4px; border: none; }
+    .tile { position: relative; display: block; cursor: pointer; }
+    .tile-radio, .pill-radio { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
+    .tile-face {
+        display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+        min-height: 52px; padding: 8px 10px; border-radius: 999px;
+        background-color: #15505f; background-image: linear-gradient(135deg, #1e3a5f, #0b7a70);
+        color: #ffffff; font-size: 14px; font-weight: 800; line-height: 1.2;
+        transition: box-shadow 0.15s, filter 0.15s; -webkit-tap-highlight-color: transparent;
+    }
+    .tile-face small { display: block; font-size: 11.5px; font-weight: 700; opacity: 0.9; }
+    .tile:hover .tile-face { filter: brightness(0.92); }
+    .tile-radio:checked + .tile-face { box-shadow: 0 0 0 3px #ffffff, 0 0 0 6px #059669, 0 6px 14px rgba(16, 185, 129, 0.35); }
+    .tile-radio:focus-visible + .tile-face { outline: 3px solid #7c3aed; outline-offset: 7px; }
+    .pill-zone { margin: 16px 0 0; padding-top: 14px; border-top: 2px solid #e6e9f6; }
+    .pill-zone:empty { display: none; }
+    .pill-cap { text-align: center; margin: 0 0 8px; font-size: 12px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; color: #3c4569; }
+    .pill-group { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; border: none; margin: 0; padding: 0; }
+    .pill { position: relative; display: block; cursor: pointer; }
+    .pill-face {
+        display: flex; align-items: center; justify-content: center; white-space: nowrap;
+        min-height: 44px; padding: 8px 16px; border-radius: 999px;
+        background: #e6e9f6; color: #4a5480; font-size: 13px; font-weight: 800; border: 2px solid transparent;
+        transition: background 0.15s, box-shadow 0.15s, border-color 0.15s; -webkit-tap-highlight-color: transparent;
+    }
+    .pill:hover .pill-face { background: #d9def2; }
+    .pill-radio:checked + .pill-face { background: linear-gradient(135deg, #6ee7b7, #34d399); color: #064e3b; border-color: #0b7a70; box-shadow: 0 0 0 4px rgba(11, 122, 112, 0.22); }
+    .pill-radio:focus-visible + .pill-face { outline: 3px solid #7c3aed; outline-offset: 4px; }
+    .pm { font-family: 'Consolas', 'SF Mono', 'Menlo', monospace; font-weight: bold; font-size: 13.5px; }
+    .pm sup { font-size: 0.7em; }
+    .and { margin: 0 7px; }
+
+    /* ===== Problem ===== */
+    .instruction { text-align: center; font-size: 15px; font-weight: 800; color: #2e3d8f; margin: 20px 0 10px; }
+    .work {
+        display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px 10px;
+        background: #eef0fb; border: 2px solid #c7cdf0; border-radius: 14px;
+        padding: 22px 12px; margin: 0 auto 6px;
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace; font-weight: bold; color: #1e2a5e; font-size: 24px;
+    }
+    .op, .eq-sign { color: #6d28d9; margin: 0 2px; }
+    sup { font-size: 0.62em; line-height: 0; }
+    .frac { display: inline-flex; flex-direction: column; align-items: stretch; vertical-align: middle; text-align: center; margin: 0 2px; }
+    .frac-num, .frac-den { padding: 3px 8px; white-space: nowrap; }
+    .frac-bar { height: 3px; background: #1e2a5e; border-radius: 2px; margin: 2px 0; }
+    .eq-row { display: inline-block; white-space: nowrap; }
+    .eq-row > *:not(sup) { vertical-align: middle; }
+    .eq-row > .ans-box { margin: 0 3px; }
+    .eq-row > .op, .eq-row > .eq-sign { margin: 0 4px; }
+    .nw { white-space: nowrap; }
+    .scroll-x { min-width: 0; max-width: 100%; overflow-x: auto; text-align: center; -webkit-overflow-scrolling: touch; padding: 2px 0 4px; }
+    .scroll-x.more-right { -webkit-mask-image: linear-gradient(to right, #000 82%, transparent); mask-image: linear-gradient(to right, #000 82%, transparent); }
+    .scroll-x.more-left { -webkit-mask-image: linear-gradient(to left, #000 82%, transparent); mask-image: linear-gradient(to left, #000 82%, transparent); }
+    .scroll-x.more-left.more-right { -webkit-mask-image: linear-gradient(to right, transparent, #000 14%, #000 86%, transparent); mask-image: linear-gradient(to right, transparent, #000 14%, #000 86%, transparent); }
+
+    /* ===== Stages ===== */
+    .stage { border: 2px solid #c7cdf0; border-radius: 14px; background: #f7f8fd; padding: 12px 12px 16px; margin: 12px auto 0; }
+    .stage-title { font-size: 14px; font-weight: 800; color: #2e3d8f; text-align: center; margin: 0 0 10px; }
+    .stage .work { background: transparent; border: none; padding: 4px 6px; margin: 0; font-size: 21px; }
+    .stage.locked { border-style: dashed; background: #fafbfe; padding-bottom: 12px; }
+    .stage.locked .stage-title { color: #5d6798; margin-bottom: 4px; }
+    .stage.cleared { border-color: #34d399; background: #ecfdf5; }
+    .lock-note { text-align: center; font-size: 13px; font-weight: 700; color: #3c4569; margin: 0; }
+    .stage-note { text-align: center; font-size: 13.5px; font-weight: 700; color: #3c4569; margin: 8px 0 0; }
+    .stage.cleared .stage-note { color: #047857; }
+    .lbl { font-family: 'Nunito', 'Segoe UI', sans-serif; font-size: 17px; font-weight: 800; color: #2e3d8f; }
+    .multline { color: #1e2a5e; }
+    .mul { color: #0b7a70; }
+    .side-line { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 2px; }
+    .cancel-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 4px; font-family: 'Consolas', 'SF Mono', 'Menlo', monospace; font-weight: bold; font-size: 18px; color: #1e2a5e; }
+    .cancel-row .op { margin: 0 2px; }
+    /* Numerator as tall as the chip denominator, so the fraction bar sits level with the dot and the chips. */
+    .cancel-row .frac-num, .cancel-row .frac-den { min-height: 50px; display: flex; align-items: center; justify-content: center; }
+    .side-lbl { font-family: 'Nunito', 'Segoe UI', sans-serif; font-size: 12.5px; font-weight: 800; color: #3c4569; text-transform: uppercase; letter-spacing: 0.4px; }
+    .side-line .scroll-x { font-family: 'Consolas', 'SF Mono', 'Menlo', monospace; font-weight: bold; font-size: 20px; color: #1e2a5e; }
+    .term-group { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+
+    /* Answer boxes */
+    .ans-box {
+        width: 96px; font-size: 18px; font-weight: bold; text-align: center; min-height: 46px;
+        padding: 7px 6px; border: 3px solid #7c3aed; border-radius: 12px; color: #1e2a5e;
+        background: #ffffff; font-family: 'Consolas', 'SF Mono', 'Menlo', monospace;
+    }
+    .ans-box.w { width: 180px; }
+    .ans-box.s { width: 76px; }
+    .ans-box.m { width: 130px; }
+    .ans-box.pair { width: 180px; }
+    .work.one-line { flex-wrap: nowrap; gap: 8px; }
+    .ans-box:focus { outline: none; border-color: #5b21b6; box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.28); }
+    .ans-box:disabled { background: #f3f4f8; color: #5d6798; border-color: #c7cdf0; }
+    .ans-box.field-error {
+        border-color: #6d28d9;
+        background: #f3eefe repeating-linear-gradient(90deg, #6d28d9 0, #6d28d9 5px, rgba(0,0,0,0) 5px, rgba(0,0,0,0) 10px) bottom left / 100% 3px no-repeat;
+    }
+    .ans-box.field-correct, .ans-box.field-correct:disabled { border-color: #047857; color: #065f46; -webkit-text-fill-color: #065f46; opacity: 1; background: #ecfdf5; }
+    .check-mark { display: none; flex-shrink: 0; }
+    .ans-wrap { display: inline-flex; align-items: center; gap: 8px; }
+    .stage.cleared .check-mark { display: inline-block; }
+    .go-btn {
+        display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+        width: 46px; height: 46px; min-width: 46px; padding: 0; border-radius: 12px; color: #ffffff;
+        background: linear-gradient(135deg, #047857, #065f46); box-shadow: 0 4px 12px rgba(4, 120, 87, 0.35);
+    }
+    .go-btn:hover { filter: brightness(1.1); }
+
+    /* Choice buttons (Yes / No, Keep / Throw out, No solution) */
+    .question { text-align: center; font-size: 16px; font-weight: 800; color: #1e2a5e; margin: 4px 0 10px; }
+    .choice-row { display: flex; flex-direction: column; gap: 10px; max-width: 440px; margin: 4px auto 0; }
+    .choice { border: 2px solid #8b6fe8; background: #fff; color: #2e3d8f; border-radius: 14px; padding: 12px 16px; font-size: 16px; font-weight: 800; min-height: 50px; text-align: left; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .choice .tag { font-size: 13px; font-weight: 700; color: #4a5480; display: block; }
+    .choice:hover:not(:disabled) { background: #faf8ff; }
+    .choice[aria-pressed="true"] { background: #f3eefe; border-color: #6d28d9; }
+    .choice.right, .choice.right:disabled { background: #ecfdf5; border-color: #047857; color: #065f46; }
+    .choice[aria-disabled="true"], .kt[aria-disabled="true"], .nosol[aria-disabled="true"] { cursor: default; }
+    .choice.faded { opacity: 0.6; text-decoration: line-through; }
+    .kt-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 2px solid #8b6fe8; background: #fff; border-radius: 14px; padding: 8px 10px 8px 16px; font-size: 17px; font-weight: 800; color: #1e2a5e; }
+    .kt-row .val { font-family: 'Consolas', 'SF Mono', 'Menlo', monospace; }
+    .kt-btns { display: flex; gap: 6px; }
+    .kt { border: 2px solid transparent; background: #e6e9f6; color: #4a5480; border-radius: 999px; padding: 8px 14px; font-size: 13.5px; font-weight: 800; min-height: 44px; }
+    .kt[aria-pressed="true"] { background: linear-gradient(135deg, #6ee7b7, #34d399); color: #064e3b; border-color: #0b7a70; }
+        .nosol { border: 2px solid #8b6fe8; background: #fff; color: #5b21b6; border-radius: 12px; padding: 10px 18px; font-size: 14.5px; font-weight: 800; min-height: 46px; }
+    .nosol[aria-pressed="true"] { background: linear-gradient(135deg, #6ee7b7, #34d399); color: #064e3b; border-color: #0b7a70; }
+    .final-box { display: flex; justify-content: center; margin: 14px auto 0; padding: 14px; border: 2px solid #34d399; background: #ecfdf5; border-radius: 14px; font-size: 21px; font-weight: 800; color: #047857; font-family: 'Consolas', 'SF Mono', 'Menlo', monospace; }
+
+    /* ===== Tap-to-cancel chips ===== */
+    .chip {
+        font-family: 'Consolas', 'SF Mono', 'Menlo', monospace; font-weight: bold; font-size: inherit; color: #1e2a5e;
+        background: #ffffff; border: 2px solid #9aa4d6; border-radius: 10px; padding: 2px 6px; margin: 2px 1px;
+        cursor: pointer; position: relative; min-height: 44px; min-width: 44px; white-space: nowrap;
+        transition: border-color 0.15s, box-shadow 0.15s, opacity 0.2s, background 0.15s;
+    }
+    .chip.mulchip { color: #0b6b62; }
+    .chip:hover:not(:disabled) { border-color: #7c3aed; background: #faf8ff; }
+    .chip[aria-pressed="true"] { border-color: #6d28d9; background: #f3eefe; box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.28); }
+    .chip.gone { opacity: 0.6; border-style: dashed; border-color: #9aa4d6; cursor: default; color: #3c4569; }
+    .chip.gone::after { content: ''; position: absolute; left: 4px; right: 4px; top: 50%; height: 3px; background: #6d28d9; transform: rotate(-12deg); border-radius: 2px; }
+    .chip.gone.p2::after { background: #0b7a70; transform: rotate(12deg); }
+    .chip.gone.p3::after { background: #2e3d8f; transform: rotate(-6deg); }
+    .chip-static { padding: 0 3px; }
+
+    /* ===== Keys ===== */
+    .key-row { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 12px 0 2px; }
+    .key-row:empty { margin: 0; }
+    .stage .key-row { margin: 10px 0 0; }
+    .key-row.pad { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; max-width: 360px; margin: 12px auto 2px; }
+    .key-row.pad:empty { display: none; }
+    .key-row.pad .key-btn { min-width: 0; width: 100%; padding: 10px 0; font-size: 18px; min-height: 46px; }
+    .key-btn.del { display: inline-flex; align-items: center; justify-content: center; color: #4b3bbd; background: #ede7fd; }
+
+    /* ===== Buttons ===== */
+    button {
+        border: none; border-radius: 12px; cursor: pointer; font-weight: 800;
+        transition: background 0.2s, filter 0.2s, transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+        -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+    }
+    button:active { transform: scale(0.97); }
+    button:focus { outline: 3px solid #7c3aed; outline-offset: 2px; }
+    .key-btn { touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+    .key-btn { background: #e6e9f6; color: #2e3d8f; padding: 10px 14px; font-size: 16px; min-width: 46px; min-height: 44px; font-family: 'Consolas', 'SF Mono', 'Menlo', monospace; }
+    .key-btn:hover { background: #d9def2; }
+    .submit-row { text-align: center; margin: 16px 0 4px; }
+    .submit-row:empty { margin: 0; }
+    .submit-btn { padding: 12px 28px; font-size: 15px; color: #ffffff; min-height: 46px; background: linear-gradient(135deg, #2e3d8f, #4b3bbd); box-shadow: 0 6px 16px rgba(46, 61, 143, 0.35); }
+    .submit-btn:hover { filter: brightness(0.92); }
+    .next-btn { background: linear-gradient(135deg, #047857, #065f46); box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35); }
+    .feedback { text-align: center; margin: 10px auto 2px; line-height: 1.45; max-width: 620px; }
+    .feedback:empty { margin: 0; }
+    .correct { color: #047857; font-size: 20px; font-weight: 800; }
+    .incorrect { color: #1e2a5e; font-size: 16.5px; font-weight: 700; background: #f3eefe; border: 2px solid #c4b5fd; border-radius: 12px; padding: 10px 14px; }
+    .notice { color: #3c4569; font-size: 16px; font-weight: 700; }
+    #next-row { text-align: center; margin: 14px 0 6px; }
+    #next-row:empty { margin: 0; }
+
+    /* ===== Helpers ===== */
+    .helpers { text-align: center; margin: 48px 0 8px; }
+    .help-btn { background: #ede7fd; color: #5b21b6; border: 1.5px solid #8b6fe8; margin: 4px; padding: 11px 16px; font-size: 12.5px; min-height: 44px; }
+    .help-btn:hover { background: #e2d8fb; }
+    .panel { background: #f7f5ff; border: 2px solid #d8ccf7; border-radius: 14px; padding: 15px; margin: 12px 0; color: #2a2550; font-size: 15px; line-height: 1.5; }
+    .panel-title { font-weight: 800; margin-bottom: 6px; }
+    #hint-box { color: #1e2a5e; font-weight: 700; font-size: 16px; }
+    .solution-step { padding: 10px 0 8px; border-top: 1px dashed rgba(0, 0, 0, 0.15); font-weight: 700; color: #2f3757; font-size: 15px; }
+    .solution-eq { font-family: 'Consolas', 'SF Mono', 'Menlo', monospace; font-weight: bold; font-size: 17px; margin: 8px 0 2px 18px; color: #1e2a5e; line-height: 1.7; overflow-x: auto; }
+    .solution-eq.prose { font-family: 'Nunito', 'Segoe UI', system-ui, sans-serif; font-weight: 700; font-size: 15px; line-height: 1.8; }
+    .solution-eq .frac-bar { height: 2px; }
+    .solution-eq .frac-num, .solution-eq .frac-den { padding: 1px 6px; }
+    .step-controls { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
+    .steps-left { font-size: 13px; font-weight: 800; color: #3c4569; }
+    .done-line { text-align: center; margin-top: 10px; font-weight: 800; color: #047857; }
+    .alt-btn { display: block; margin: 14px auto 2px; border-radius: 999px; font-weight: 800; padding: 10px 18px; font-size: 13.5px; min-height: 44px; color: #fff; background: linear-gradient(135deg, #1e3a5f, #0d9488); }
+    .alt-panel { margin-top: 12px; border-top: 3px solid #0d9488; padding-top: 10px; }
+    .alt-title { font-weight: 800; color: #0b6b62; }
+
+    /* ===== Settings, stats ===== */
+    .settings-row { display: flex; justify-content: center; margin-top: 22px; padding-top: 12px; border-top: 1px solid #e6e9f6; }
+    .switch-btn { display: inline-flex; align-items: center; gap: 10px; background: none; border: none; padding: 6px 4px; min-height: 44px; cursor: pointer; color: #4a5480; font-size: 12.5px; font-weight: 800; border-radius: 10px; }
+    .track { position: relative; display: inline-block; width: 42px; height: 24px; flex-shrink: 0; border-radius: 999px; background: #d5d9e8; border: 1px solid #8a93b8; transition: background 0.2s, border-color 0.2s; }
+    .knob { position: absolute; left: 2px; top: 2px; width: 18px; height: 18px; border-radius: 50%; background: #ffffff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); transition: transform 0.2s; }
+    .switch-btn[aria-pressed="true"] .track { background: #10b981; border-color: #0b7a70; }
+    .switch-btn[aria-pressed="true"] .knob { transform: translateX(18px); }
+    .stats-row { text-align: center; margin-top: 8px; }
+    .stats-btn { background: #ede7fd; color: #5b21b6; border: 1.5px solid #8b6fe8; border-radius: 999px; padding: 9px 18px; font-size: 12.5px; min-height: 44px; }
+    .stats-overlay { position: fixed; inset: 0; background: rgba(20, 27, 61, 0.82); display: flex; align-items: center; justify-content: center; z-index: 10000; padding: 16px; }
+    .stats-panel { background: #ffffff; border-radius: 20px; padding: 24px 22px; max-width: 480px; width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 24px 60px rgba(8, 12, 40, 0.55); }
+    .stats-panel:focus { outline: none; }
+    .stats-panel h2 { color: #1e2a5e; font-size: 19px; text-align: center; margin-top: 0; }
+    .stat-group { font-size: 11.5px; font-weight: 800; color: #5d6798; letter-spacing: 0.4px; margin: 16px 0 2px; text-transform: uppercase; }
+    .stat-row { display: flex; align-items: center; gap: 12px; margin: 10px 0; }
+    .stat-cup { flex: 0 0 auto; }
+    .stat-main { flex: 1 1 auto; min-width: 0; }
+    .stat-name { font-size: 13px; font-weight: 800; color: #1e2a5e; margin-bottom: 4px; display: flex; justify-content: space-between; gap: 8px; }
+    .stat-stars { display: inline-flex; align-items: center; gap: 3px; color: #2e3d8f; font-size: 12.5px; white-space: nowrap; }
+    .stat-bar-wrap { background: #e6e9f6; border-radius: 999px; height: 12px; overflow: hidden; }
+    .stat-bar { height: 100%; border-radius: 999px; }
+    .tier-low { background: linear-gradient(90deg, #2e3d8f, #8b96d8); }
+    .tier-mid { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+    .tier-full { background: linear-gradient(90deg, #059669, #34d399); }
+    .stat-num { font-size: 11.5px; color: #5d6798; margin-top: 3px; font-weight: 700; }
+    .best-line { text-align: center; font-size: 13px; font-weight: 800; color: #2e3d8f; margin: 6px 0 4px; }
+    .recommend { background: #f3eefe; border: 2px solid #c4b5fd; border-radius: 12px; padding: 10px; margin-top: 14px; font-size: 13px; font-weight: 700; color: #6d28d9; }
+    .stats-actions { text-align: center; margin-top: 18px; }
+    .close-btn { background: #e6e9f6; color: #2e3d8f; padding: 11px 20px; font-size: 14px; }
+    .close-btn:hover { background: #d9def2; }
+    .reset-btn { background: #4a5480; color: #ffffff; margin-left: 8px; padding: 11px 20px; font-size: 14px; }
+    .reset-btn:hover { background: #3c4569; }
+    .reset-btn.armed { background: #1e2a5e; }
+
+    /* ===== Insignia: 70px rose, 8.5px caption ===== */
+    .insignia { display: block; margin: 22px auto 4px; width: 70px; opacity: 0.9; }
+    .insignia-caption { text-align: center; font-size: 8.5px; letter-spacing: 1.2px; color: #5d6798; opacity: 0.9; margin-top: 2px; font-weight: 800; }
+
+    /* ===== Confetti ===== */
+    .confetti { position: fixed; opacity: 1; pointer-events: none; z-index: 9999; }
+    @keyframes confetti-fall { 0% { transform: translateY(-20px) rotate(0deg); } 100% { transform: translateY(110vh) rotate(720deg); } }
+    @keyframes confetti-fall-slow { 0% { transform: translateY(-20px) rotate(0deg) scale(1); } 100% { transform: translateY(115vh) rotate(1080deg) scale(0.85); } }
+    .sparkle { position: fixed; width: 20px; height: 20px; border-radius: 50%; pointer-events: none; z-index: 9999; background: radial-gradient(circle, #fff 0%, #ffeb3b 50%, transparent 70%); animation: sparkle 0.5s ease-in-out infinite; }
+    @keyframes sparkle { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.6); } }
+
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+    [hidden] { display: none !important; }
+    @media (prefers-reduced-motion: reduce) {
+        .confetti, .sparkle { display: none !important; }
+        * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+    @media (max-width: 480px) {
+        body { padding: 12px 8px; }
+        .card { padding: 24px 12px 20px; }
+        h1 { font-size: 21px; }
+        .tile-grid { gap: 8px; padding: 6px 0; }
+        .tile-face { font-size: 13.5px; padding: 8px 6px; min-height: 58px; border-radius: 22px; }
+        .tile-face small { font-size: 11px; }
+        .work { font-size: 20px; padding: 16px 6px; gap: 10px 8px; }
+        .stage { padding: 10px 6px 14px; }
+        .stage .work { font-size: 17px; }
+        .ans-box { width: 84px; font-size: 16px; }
+        .ans-box.w { width: 150px; }
+        .ans-box.s { width: 66px; }
+        .ans-box.m { width: 104px; }
+        .ans-box.pair { width: 108px; min-width: 0; flex: 0 1 108px; }
+        .work.one-line { gap: 6px; padding: 4px 0; }
+        .work.one-line .ans-wrap { min-width: 0; }
+        .frac-num, .frac-den { padding: 2px 4px; }
+        .pill-face { padding: 8px 12px; font-size: 12px; }
+        .pm { font-size: 12.5px; }
+        .cancel-row { font-size: 14px; gap: 6px 2px; }
+        .chip { padding: 2px 3px; min-width: 40px; }
+        .cancel-row .frac-num, .cancel-row .frac-den { padding: 2px 1px; }
+        .solution-eq { margin-left: 4px; font-size: 15px; }
+        .key-row { gap: 6px; }
+        .key-btn { min-width: 42px; padding: 10px 9px; }
+        .kt-row { padding: 8px 8px 8px 12px; font-size: 16px; }
+        .kt { padding: 8px 10px; font-size: 13px; }
+    }
+</style>
+</head>
+<body>
+<main class="card" id="game-card">
+    <h1>Solving Rational Equations</h1>
+
+    <div class="info">
+        <div class="info-item">Problem: <span id="problemNum">1</span></div>
+        <div class="info-item">Streak: <span id="streak">0</span></div>
+        <div class="info-item" id="stars-chip"></div>
+    </div>
+
+    <div class="tile-grid" id="tile-grid" role="radiogroup" aria-label="Level"></div>
+    <div class="pill-zone" id="pill-zone"></div>
+
+    <div class="instruction" id="instruction" aria-hidden="true">Solve for x</div>
+    <p class="sr-only" id="problem-text"></p>
+    <div id="work-area"></div>
+    <div id="key-home" hidden></div>
+    <div class="key-row" id="key-row" role="group" aria-label="Typing keys"></div>
+
+    <div class="feedback" id="feedback" role="alert" aria-atomic="true"></div>
+    <div class="submit-row" id="submit-row"></div>
+
+    <div id="announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+    <div id="next-row"></div>
+
+    <div class="helpers">
+        <button type="button" class="help-btn" id="hint-btn" aria-expanded="false" aria-controls="hint-box">Show Hint</button>
+        <button type="button" class="help-btn" id="solution-btn" aria-expanded="false" aria-controls="solution-box">Show Solution</button>
+        <button type="button" class="help-btn" id="skip-btn">Skip</button>
+    </div>
+    <div class="panel" id="hint-box" hidden></div>
+    <div class="panel" id="solution-box" hidden></div>
+
+    <div class="settings-row">
+        <button type="button" class="switch-btn" id="sw-confetti" aria-pressed="true"><span class="track" aria-hidden="true"><span class="knob"></span></span><span>Confetti celebrations</span></button>
+    </div>
+    <div class="stats-row"><button type="button" class="stats-btn" id="stats-btn">My Stats</button></div>
+
+    <svg class="insignia" viewBox="-28 -26 56 64" aria-hidden="true" focusable="false">
+        <defs>
+            <linearGradient id="pr-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1e3a5f"/>
+                <stop offset="100%" stop-color="#0d9488"/>
+            </linearGradient>
+        </defs>
+        <path id="pr-path" fill="none" stroke="url(#pr-grad)" stroke-width="1.7" stroke-linejoin="round"/>
+    </svg>
+    <div class="insignia-caption" aria-hidden="true">POLAR ROSE STUDIO</div>
+</main>
+
+<div class="stats-overlay" id="stats-overlay" hidden>
+    <div class="stats-panel" id="stats-panel" role="dialog" aria-modal="true" aria-labelledby="stats-heading" tabindex="-1"></div>
+</div>
+
+<script>
+/* =====================================================================
+   Solving Rational Equations engine -- polynomial math, answer parsers,
+   problem generators, guided stages and worked steps.
+   ES5 only, ASCII-only source. Shared by the game page and the Node tests.
+   ===================================================================== */
+
+/* ---------- small helpers ---------- */
+function ri(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { var t = b; b = a % b; a = t; } return a; }
+function lcm(a, b) { return Math.abs(a * b) / gcd(a, b); }
+function nz(min, max) { var v = 0; while (v === 0) v = ri(min, max); return v; }
+function isInt(v) { return typeof v === 'number' && isFinite(v) && Math.abs(v - Math.round(v)) < 1e-9; }
+
+/* ---------- polynomials: coefficient arrays, index = power of x ---------- */
+function pTrim(p) { var q = p.slice(); while (q.length > 1 && q[q.length - 1] === 0) q.pop(); if (q.length === 0) q = [0]; return q; }
+function pIsZero(p) { p = pTrim(p); return p.length === 1 && p[0] === 0; }
+function pDeg(p) { p = pTrim(p); return pIsZero(p) ? -1 : p.length - 1; }
+function pAdd(a, b) { var n = Math.max(a.length, b.length), r = [], i; for (i = 0; i < n; i++) r.push((a[i] || 0) + (b[i] || 0)); return pTrim(r); }
+function pScale(a, k) { var r = [], i; for (i = 0; i < a.length; i++) r.push(a[i] * k); return pTrim(r); }
+function pSub(a, b) { return pAdd(a, pScale(b, -1)); }
+function pMul(a, b) {
+    var r = [], i, j;
+    for (i = 0; i < a.length + b.length - 1; i++) r.push(0);
+    for (i = 0; i < a.length; i++) for (j = 0; j < b.length; j++) r[i + j] += a[i] * b[j];
+    return pTrim(r);
+}
+function pMulAll(list) { var r = [1]; for (var i = 0; i < list.length; i++) r = pMul(r, list[i]); return r; }
+function pEq(a, b) { a = pTrim(a); b = pTrim(b); if (a.length !== b.length) return false; for (var i = 0; i < a.length; i++) if (a[i] !== b[i]) return false; return true; }
+function pEval(p, x) { var s = 0, i; for (i = p.length - 1; i >= 0; i--) s = s * x + p[i]; return s; }
+function pContent(p) { var g = 0; for (var i = 0; i < p.length; i++) g = gcd(g, p[i]); return g; }
+function polyKey(p) { return pTrim(p).join(','); }
+/* p is a nonzero multiple of q (same roots, same degree). */
+function pIsMultiple(p, q) {
+    p = pTrim(p); q = pTrim(q);
+    if (pIsZero(p) || pIsZero(q) || p.length !== q.length) return 0;
+    var lp = p[p.length - 1], lq = q[q.length - 1];
+    for (var i = 0; i < p.length; i++) if (p[i] * lq !== q[i] * lp) return 0;
+    return lp / lq;
+}
+function L(a) { return [a, 1]; }
+function isX(p) { p = pTrim(p); return p.length === 2 && p[0] === 0 && p[1] === 1; }
+
+/* Integer roots of a polynomial of degree 1 or 2; null if not all integer. */
+function intRoots(p) {
+    p = pTrim(p);
+    var d = pDeg(p);
+    if (d === 1) { var r = -p[0] / p[1]; return isInt(r) ? [Math.round(r)] : null; }
+    if (d === 2) {
+        var a = p[2], b = p[1], c = p[0], D = b * b - 4 * a * c;
+        if (D < 0) return null;
+        var s = Math.round(Math.sqrt(D));
+        if (s * s !== D) return null;
+        var r1 = (-b - s) / (2 * a), r2 = (-b + s) / (2 * a);
+        if (!isInt(r1) || !isInt(r2)) return null;
+        r1 = Math.round(r1); r2 = Math.round(r2);
+        if (r1 === r2) return null;
+        return r1 < r2 ? [r1, r2] : [r2, r1];
+    }
+    return null;
+}
+
+/* ---------- display (HTML entities only) and speech ---------- */
+var MINUS = '&#8722;', NE = '&ne;', DOT = '&middot;';
+function xHTML(d) { if (d === 0) return ''; if (d === 1) return 'x'; return 'x<sup>' + d + '</sup>'; }
+function xSpeech(d) { if (d === 0) return ''; if (d === 1) return 'x'; if (d === 2) return 'x squared'; return 'x to the power ' + d; }
+function monoAbsHTML(c, d) { c = Math.abs(c); if (d === 0) return String(c); return (c === 1 ? '' : String(c)) + xHTML(d); }
+function monoAbsSpeech(c, d) { c = Math.abs(c); if (d === 0) return String(c); return (c === 1 ? '' : c + ' ') + xSpeech(d); }
+function polyTerms(p, asc) { var t = [], i; p = pTrim(p); if (asc) { for (i = 0; i < p.length; i++) if (p[i] !== 0) t.push([p[i], i]); } else { for (i = p.length - 1; i >= 0; i--) if (p[i] !== 0) t.push([p[i], i]); } return t; }
+function polyHTML(p, asc) {
+    var terms = polyTerms(p, asc), out = '', i;
+    for (i = 0; i < terms.length; i++) {
+        var c = terms[i][0], d = terms[i][1];
+        if (i === 0) out += (c < 0 ? MINUS : '') + monoAbsHTML(c, d);
+        else out += (c < 0 ? ' ' + MINUS + ' ' : ' + ') + monoAbsHTML(c, d);
+    }
+    return out || '0';
+}
+function polySpeech(p, asc) {
+    var terms = polyTerms(p, asc), out = '', i;
+    for (i = 0; i < terms.length; i++) {
+        var c = terms[i][0], d = terms[i][1];
+        if (i === 0) out += (c < 0 ? 'negative ' : '') + monoAbsSpeech(c, d);
+        else out += (c < 0 ? ' minus ' : ' plus ') + monoAbsSpeech(c, d);
+    }
+    return out || '0';
+}
+function numHTML(n) { return n < 0 ? MINUS + Math.abs(n) : String(n); }
+function numSpeech(n) { return n < 0 ? 'negative ' + Math.abs(n) : String(n); }
+function nTerms(p) { return polyTerms(p).length; }
+function fracHTML(t, b) { return '<span class="frac"><span class="frac-num">' + t + '</span><span class="frac-bar"></span><span class="frac-den">' + b + '</span></span>'; }
+function fracSpeech(t, b) { return 'the fraction ' + t + ', over ' + b; }
+function opHTML(s) { return ' <span class="op">' + (s < 0 ? MINUS : '+') + '</span> '; }
+var EQ = ' <span class="eq-sign">=</span> ';
+function row(h) { return '<span class="eq-row">' + h + '</span>'; }
+/* A factor written in parentheses when it has two terms. */
+function parenHTML(p) { return nTerms(p) > 1 ? '(' + polyHTML(p) + ')' : polyHTML(p); }
+function parenSpeech(p) { return nTerms(p) > 1 ? 'the quantity ' + polySpeech(p) : polySpeech(p); }
+/* A list of numbers and factors written as one product: 2(x + 1), x(x + 3), (x + 2)(x + 3). */
+function productHTML(k, factors) {
+    var xs = 0, others = [], i, out;
+    for (i = 0; i < factors.length; i++) { if (isX(factors[i])) xs++; else if (pDeg(factors[i]) === 0) k *= factors[i][0]; else others.push(factors[i]); }
+    out = (k === 1 && (xs || others.length)) ? '' : (k === -1 && (xs || others.length) ? MINUS : numHTML(k));
+    if (xs) out += xs === 1 ? 'x' : 'x<sup>' + xs + '</sup>';
+    if (others.length === 1 && out === '') return polyHTML(others[0], others[0].asc);
+    for (i = 0; i < others.length; i++) out += '(' + polyHTML(others[i], others[i].asc) + ')';
+    return out;
+}
+function productSpeech(k, factors) {
+    var parts = [], xs = 0, i, others = [];
+    for (i = 0; i < factors.length; i++) { if (isX(factors[i])) xs++; else if (pDeg(factors[i]) === 0) k *= factors[i][0]; else others.push(factors[i]); }
+    if (k !== 1 || (!xs && !others.length)) parts.push(numSpeech(k));
+    if (xs) parts.push(xs === 1 ? 'x' : 'x squared');
+    if (others.length === 1 && !parts.length) return polySpeech(others[0]);
+    for (i = 0; i < others.length; i++) parts.push('the quantity ' + polySpeech(others[i], others[i].asc));
+    return parts.join(' times ');
+}
+
+/* ---------- terms and equations ----------
+   term: { s: +1/-1, n: numerator poly, asc: show numerator constant first,
+           k: number in the denominator, f: [linear denominator factors],
+           exp: show the denominator expanded (the quadratic type) } */
+function T(s, n, k, f, opts) { opts = opts || {}; return { s: s, n: n, k: k || 1, f: f || [], asc: !!opts.asc, exp: !!opts.exp }; }
+function isFrac(t) { return t.k > 1 || t.f.length > 0; }
+function denPoly(t) { return pScale(pMulAll(t.f), t.k); }
+function denHTML(t) { return t.exp ? polyHTML(denPoly(t)) : productHTML(t.k, t.f); }
+function denSpeech(t) { return t.exp ? polySpeech(denPoly(t)) : productSpeech(t.k, t.f); }
+function termHTML(t) { var n = polyHTML(t.n, t.asc); return isFrac(t) ? fracHTML(n, denHTML(t)) : n; }
+function termSpeech(t) { var n = polySpeech(t.n, t.asc); return isFrac(t) ? fracSpeech(n, denSpeech(t)) : n; }
+function sideHTML(side) { var h = '', i; for (i = 0; i < side.length; i++) h += (i ? opHTML(side[i].s) : '') + termHTML(side[i]); return h; }
+function sideSpeech(side) { var h = '', i; for (i = 0; i < side.length; i++) h += (i ? (side[i].s < 0 ? '; minus ' : '; plus ') : '') + termSpeech(side[i]); return h; }
+function eqHTML(eq) { return row(sideHTML(eq.L) + EQ + sideHTML(eq.R)); }
+function eqSpeech(eq) { return sideSpeech(eq.L) + '; equals ' + sideSpeech(eq.R); }
+function allTerms(eq) { return eq.L.concat(eq.R); }
+
+/* LCD: least common multiple of the numbers, every different factor once. */
+function lcdOf(eq) {
+    var k = 1, f = [], seen = {}, ts = allTerms(eq), i, j;
+    for (i = 0; i < ts.length; i++) {
+        k = lcm(k, ts[i].k);
+        for (j = 0; j < ts[i].f.length; j++) { var key = polyKey(ts[i].f[j]); if (!seen[key]) { seen[key] = 1; f.push(ts[i].f[j]); } }
+    }
+    /* x first, then the others in the order they appear. */
+    f.sort(function (a, b) { return (isX(b) ? 1 : 0) - (isX(a) ? 1 : 0); });
+    return { k: k, f: f, poly: pScale(pMulAll(f), k) };
+}
+/* What a term's denominator is missing from the LCD. */
+function missing(t, lcd) {
+    var out = [], i, have = {};
+    for (i = 0; i < t.f.length; i++) have[polyKey(t.f[i])] = 1;
+    for (i = 0; i < lcd.f.length; i++) if (!have[polyKey(lcd.f[i])]) out.push(lcd.f[i]);
+    return { k: lcd.k / t.k, f: out };
+}
+/* LCD times a term (sign left off: the sign stays on the operator). */
+function product(t, lcd) { var m = missing(t, lcd); return pMul(t.n, pScale(pMulAll(m.f), m.k)); }
+function productFactHTML(t, lcd) {
+    var m = missing(t, lcd), k = m.k, list = m.f.slice();
+    if (pDeg(t.n) === 0) k *= t.n[0];
+    else if (isX(t.n)) list.unshift(t.n);
+    else if (nTerms(t.n) === 1) { k *= t.n[pDeg(t.n)]; list.unshift(polyTermsX(t.n)); }
+    else { var nn = t.n.slice(); nn.asc = t.asc; list.push(nn); }
+    var h = productHTML(k, list);
+    return h;
+}
+function productFactSpeech(t, lcd) {
+    var m = missing(t, lcd), k = m.k, list = m.f.slice();
+    if (pDeg(t.n) === 0) k *= t.n[0];
+    else if (isX(t.n)) list.unshift(t.n);
+    else if (nTerms(t.n) === 1) { k *= t.n[pDeg(t.n)]; list.unshift(polyTermsX(t.n)); }
+    else list.push(t.n);
+    return productSpeech(k, list);
+}
+/* a monomial c x^d with the number taken off: x^d */
+function polyTermsX(p) { var d = pDeg(p), r = [], i; for (i = 0; i < d; i++) r.push(0); r.push(1); return r; }
+function sideSum(side, lcd) { var s = [0], i; for (i = 0; i < side.length; i++) s = pAdd(s, pScale(product(side[i], lcd), side[i].s)); return s; }
+function sideProductsHTML(side, lcd, fact) {
+    var h = '', i;
+    for (i = 0; i < side.length; i++) {
+        var ph = fact ? productFactHTML(side[i], lcd) : polyHTML(product(side[i], lcd));
+        /* After a minus sign, a sum keeps its parentheses: x(x - 2) - (x + 3). */
+        if (i && side[i].s < 0 && nTerms(product(side[i], lcd)) > 1 && !/\)$/.test(ph)) ph = '(' + ph + ')';
+        h += (i ? opHTML(side[i].s) : '') + ph;
+    }
+    return h;
+}
+function sideProductsSpeech(side, lcd, fact) {
+    var h = '', i;
+    for (i = 0; i < side.length; i++) {
+        var ps = fact ? productFactSpeech(side[i], lcd) : polySpeech(product(side[i], lcd));
+        if (i && side[i].s < 0 && nTerms(product(side[i], lcd)) > 1 && !/^the quantity|times/.test(ps)) ps = 'the quantity ' + ps;
+        h += (i ? (side[i].s < 0 ? ' minus ' : ' plus ') : '') + ps;
+    }
+    return h;
+}
+/* Every value that makes some denominator 0. */
+function excludedOf(eq) {
+    var out = [], seen = {}, ts = allTerms(eq), i, j;
+    for (i = 0; i < ts.length; i++) for (j = 0; j < ts[i].f.length; j++) {
+        var v = -ts[i].f[j][0];
+        if (!seen[v]) { seen[v] = 1; out.push(v); }
+    }
+    return out.sort(function (a, b) { return a - b; });
+}
+function zeroFactorOf(eq, v) {
+    var ts = allTerms(eq), i, j;
+    for (i = 0; i < ts.length; i++) for (j = 0; j < ts[i].f.length; j++) if (-ts[i].f[j][0] === v) return ts[i].f[j];
+    return null;
+}
+function crossable(eq) { return eq.L.length === 1 && eq.R.length === 1 && (isFrac(eq.L[0]) || isFrac(eq.R[0])); }
+/* Cross-multiplying: left numerator times right denominator, and so on. */
+/* numerator times the other side's denominator, written out: x * 1, 6 * 2, 18 * 1, 6 * x */
+function dotted(n, other) { var d = isFrac(other) ? denHTML(other) : '1', nh = polyHTML(n); if (nTerms(n) > 1) nh = '(' + nh + ')'; if (isFrac(other) && (other.f.length > 1 || (other.f.length === 1 && !isX(other.f[0])))) d = '(' + d + ')'; return nh + ' ' + DOT + ' ' + d; }
+function dottedS(n, other) { return (nTerms(n) > 1 ? 'the quantity ' : '') + polySpeech(n) + ' times ' + (isFrac(other) ? denSpeech(other) : '1'); }
+function crossSides(eq) {
+    var a = eq.L[0], b = eq.R[0];
+    b.ascN = a.asc; a.ascN = b.asc;
+    return { L: pMul(a.n, denPoly(b)), R: pMul(b.n, denPoly(a)),
+        LH: crossFactHTML(b, a.n), RH: crossFactHTML(a, b.n),
+        LS: crossFactSpeech(b, a.n), RS: crossFactSpeech(a, b.n) };
+}
+function crossList(t, n) {
+    var k = t.k, list = t.f.slice();
+    if (pDeg(n) === 0) k *= n[0];
+    else if (isX(n)) list.unshift(n);
+    else if (nTerms(n) === 1) { k *= n[pDeg(n)]; list.unshift(polyTermsX(n)); }
+    else { var nn = n.slice(); nn.asc = !!t.ascN; list.push(nn); }
+    return { k: k, list: list };
+}
+function crossFactHTML(t, n) { var c = crossList(t, n); return productHTML(c.k, c.list); }
+function crossFactSpeech(t, n) { var c = crossList(t, n); return productSpeech(c.k, c.list); }
+
+/* ---------- the student's typing: one expression in x ---------- */
+function normalizeInput(s) {
+    return String(s).replace(/[\u2212\u2012\u2013\u2014]/g, '-').replace(/[\u00b7\u00d7\u22c5]/g, '*')
+        .replace(/\u00b2/g, '^2').replace(/X/g, 'x').replace(/\s+/g, '');
+}
+var PARSE_MSG = {
+    empty: 'Type your answer in the box first.',
+    letter: 'Use x as the variable, with numbers, ^, +, &#8722; and parentheses.',
+    xdigit: 'To write a power, use ^ (like x^2) or the x&#178; key.',
+    parens: 'Check your parentheses: every ( needs a matching ).',
+    decimal: 'Use whole numbers only.',
+    big: 'That number is much bigger than any in this problem. Check what you typed.',
+    slash: 'No fraction bar is needed here. The denominators are gone after multiplying by the LCD.',
+    comma: 'Type one expression in this box, with no commas.',
+    eq: 'Type only one side in each box. The = sign is already there.',
+    char: 'Use only numbers, x, ^, +, &#8722; and parentheses.',
+    syntax: 'I couldn&#39;t read that. Check your signs, powers and parentheses.'
+};
+function parseExpr(raw) {
+    var s = normalizeInput(raw);
+    if (s === '') return { ok: false, code: 'empty' };
+    if (/[a-wyz]/i.test(s)) return { ok: false, code: 'letter' };
+    if (/x[0-9]/.test(s)) return { ok: false, code: 'xdigit' };
+    if (s.indexOf(',') !== -1) return { ok: false, code: 'comma' };
+    if (s.indexOf('=') !== -1) return { ok: false, code: 'eq' };
+    if (s.indexOf('/') !== -1) return { ok: false, code: 'slash' };
+    if (s.indexOf('.') !== -1) return { ok: false, code: 'decimal' };
+    var toks = [], i = 0, ch, open = 0;
+    while (i < s.length) {
+        ch = s.charAt(i);
+        if (/[0-9]/.test(ch)) { var j = i; while (j < s.length && /[0-9]/.test(s.charAt(j))) j++; if (j - i > 5) return { ok: false, code: 'big' }; toks.push({ t: 'num', v: parseInt(s.slice(i, j), 10) }); i = j; continue; }
+        if (ch === 'x') { toks.push({ t: 'x' }); i++; continue; }
+        if (ch === '[' || ch === '{') ch = '(';
+        if (ch === ']' || ch === '}') ch = ')';
+        if ('+-*^()'.indexOf(ch) !== -1) {
+            if (ch === '(') open++;
+            if (ch === ')') { open--; if (open < 0) return { ok: false, code: 'parens' }; }
+            toks.push({ t: ch }); i++; continue;
+        }
+        return { ok: false, code: 'char' };
+    }
+    if (open !== 0) return { ok: false, code: 'parens' };
+    var pos = 0;
+    function peek() { return toks[pos]; }
+    function eat(t) { if (toks[pos] && toks[pos].t === t) { pos++; return true; } return false; }
+    function fail() { throw { code: 'syntax' }; }
+    function expr() {
+        var terms = [{ s: 1, n: term() }];
+        while (peek() && (peek().t === '+' || peek().t === '-')) { var sg = peek().t === '-' ? -1 : 1; pos++; terms.push({ s: sg, n: term() }); }
+        return terms.length === 1 && terms[0].s === 1 ? terms[0].n : { t: 'add', terms: terms };
+    }
+    function startsAtom(tk) { return tk && (tk.t === 'num' || tk.t === 'x' || tk.t === '('); }
+    function term() {
+        var fs = [unary()];
+        while (true) {
+            if (peek() && peek().t === '*') { pos++; fs.push(unary()); continue; }
+            if (startsAtom(peek())) { if (peek().t === 'num') fail(); fs.push(power()); continue; }
+            break;
+        }
+        return fs.length === 1 ? fs[0] : { t: 'mul', fs: fs };
+    }
+    function unary() { if (eat('-')) return { t: 'neg', a: unary() }; if (eat('+')) return unary(); return power(); }
+    function power() {
+        var base = atom();
+        if (eat('^')) {
+            if (!peek() || peek().t !== 'num') fail();
+            var e = toks[pos++].v;
+            if (e > 6) fail();
+            return { t: 'pow', b: base, e: e };
+        }
+        return base;
+    }
+    function atom() {
+        var tk = peek();
+        if (!tk) fail();
+        if (tk.t === 'num') { pos++; return { t: 'num', v: tk.v }; }
+        if (tk.t === 'x') { pos++; return { t: 'x' }; }
+        if (tk.t === '(') { pos++; var inner = expr(); if (!eat(')')) fail(); return { t: 'paren', a: inner }; }
+        fail();
+    }
+    try {
+        var ast = expr();
+        if (pos !== toks.length) return { ok: false, code: 'syntax' };
+        return { ok: true, ast: ast, poly: astPoly(ast) };
+    } catch (e) { return { ok: false, code: (e && e.code) || 'syntax' }; }
+}
+function astPoly(n) {
+    var r, i;
+    switch (n.t) {
+        case 'num': return [n.v];
+        case 'x': return [0, 1];
+        case 'paren': return astPoly(n.a);
+        case 'neg': return pScale(astPoly(n.a), -1);
+        case 'add': r = [0]; for (i = 0; i < n.terms.length; i++) r = pAdd(r, pScale(astPoly(n.terms[i].n), n.terms[i].s)); return r;
+        case 'mul': r = [1]; for (i = 0; i < n.fs.length; i++) r = pMul(r, astPoly(n.fs[i])); return r;
+        case 'pow': var b = astPoly(n.b), out = [1]; for (i = 0; i < n.e; i++) out = pMul(out, b); return out;
+    }
+    return [0];
+}
+/* The non-constant factors the student wrote (for "is it factored?"). */
+function astFactorCount(n) {
+    var count = 0;
+    function walk(node, times) {
+        var i;
+        switch (node.t) {
+            case 'paren': walk(node.a, times); return;
+            case 'neg': walk(node.a, times); return;
+            case 'mul': for (i = 0; i < node.fs.length; i++) walk(node.fs[i], times); return;
+            case 'pow': walk(node.b, times * node.e); return;
+            default: if (pDeg(astPoly(node)) >= 1) count += times;
+        }
+    }
+    walk(n, 1);
+    return count;
+}
+/* A box that must hold one expression equal to a polynomial. */
+function readPoly(raw) {
+    var r = parseExpr(raw);
+    if (!r.ok) return { ok: false, code: r.code, msg: PARSE_MSG[r.code] || PARSE_MSG.syntax };
+    return r;
+}
+/* A list of values: "2", "-3", "1, 4", "x = 1, x = 4", "1 or 4". */
+function readList(raw) {
+    var s = String(raw).replace(/[\u2212\u2012\u2013\u2014]/g, '-').replace(/X/g, 'x').trim();
+    if (s === '') return { ok: false, msg: 'Type your answer in the box first.' };
+    s = s.replace(/\s+(or|and)\s+/gi, ',').replace(/;/g, ',');
+    var parts = s.split(','), vals = [], i;
+    for (i = 0; i < parts.length; i++) {
+        var p = parts[i].replace(/\s+/g, '').replace(/^x=/, '');
+        if (p === '') { if (i === parts.length - 1 && i > 0) continue; return { ok: false, msg: 'Put one number between each pair of commas.' }; }
+        if (/^[+-]?\d+$/.test(p)) { vals.push(parseInt(p, 10)); continue; }
+        var m = /^([+-]?\d+)\/([+-]?\d+)$/.exec(p);
+        if (m) {
+            var d = parseInt(m[2], 10);
+            if (d === 0) return { ok: false, msg: 'A fraction can never have 0 in the denominator.' };
+            vals.push(parseInt(m[1], 10) / d); continue;
+        }
+        if (/x/.test(p)) return { ok: false, msg: 'Type only the number for x, like 3 or &#8722;2.' };
+        if (/\./.test(p)) return { ok: false, msg: 'Every answer in this game is a whole number. Check your work.' };
+        return { ok: false, msg: 'Type numbers only. If there is more than one answer, separate them with a comma.' };
+    }
+    if (!vals.length) return { ok: false, msg: 'Type your answer in the box first.' };
+    return { ok: true, vals: vals };
+}
+function sameSet(a, b) {
+    var x = uniq(a), y = uniq(b), i;
+    if (x.length !== y.length) return false;
+    for (i = 0; i < x.length; i++) if (y.indexOf(x[i]) === -1) return false;
+    return true;
+}
+function uniq(a) { var out = [], i; for (i = 0; i < a.length; i++) if (out.indexOf(a[i]) === -1) out.push(a[i]); return out; }
+function listHTML(vals) {
+    if (!vals.length) return 'No solution';
+    var i, out = [];
+    for (i = 0; i < vals.length; i++) out.push('x = ' + numHTML(vals[i]));
+    return out.join(' or ');
+}
+function listSpeech(vals) {
+    if (!vals.length) return 'No solution';
+    var i, out = [];
+    for (i = 0; i < vals.length; i++) out.push('x equals ' + numSpeech(vals[i]));
+    return out.join(', or ');
+}
+
+/* ---------- problem generators ----------
+   Sections (stat keys):
+     l1lcd, l1cross, l1choose       Level 1, numbers on the bottom
+     l2x, l2one, l2two, l2quad      Level 2, x on the bottom
+     mixed                          everything, no steps */
+var CAT_INFO = {
+    l1lcd: { name: 'Clear with LCD', group: 'Level 1' },
+    l1cross: { name: 'Cross-Multiply', group: 'Level 1' },
+    l1choose: { name: 'Choose Method', group: 'Level 1' },
+    l2x: { name: 'x', speech: 'Denominator x', group: 'Level 2' },
+    l2one: { name: 'One linear factor', group: 'Level 2' },
+    l2two: { name: 'Two linear factors', group: 'Level 2' },
+    l2quad: { name: 'Quadratic', group: 'Level 2' },
+    mixed: { name: 'Mixed', group: 'Mixed' }
+};
+var STAT_KEYS = ['l1lcd', 'l1cross', 'l1choose', 'l2x', 'l2one', 'l2two', 'l2quad', 'mixed'];
+var X = [0, 1], ONE = [1];
+
+/* Level 1, Clear with LCD */
+/* Denominator pairs by how their LCD works (Ira, 2026-10-27): the product,
+   the larger one, or neither (they share a factor). */
+var LCD_PAIRS = {
+    prod: [[2, 3], [2, 5], [3, 4], [3, 5], [4, 5], [5, 6], [2, 7], [3, 7]],
+    divides: [[2, 4], [2, 6], [3, 6], [4, 8], [2, 8], [3, 9], [5, 10]],
+    share: [[4, 6], [6, 8], [6, 9], [4, 10], [6, 10], [8, 12]]
+};
+function lcdPair(type) { var pr = pick(LCD_PAIRS[type]); return Math.random() < 0.5 ? pr : [pr[1], pr[0]]; }
+function lcdType(n) {
+    if (n === 3) return 'prod';
+    if (n === 4) return 'divides';
+    if (n === 5) return 'share';
+    var r = Math.random();
+    return r < 0.4 ? 'prod' : (r < 0.75 ? 'divides' : 'share');
+}
+function tplL1Lcd(kindFull) {
+    var parts = String(kindFull).split('|'), kind = parts[0];
+    var p = ri(2, 9), q = ri(2, 9), a, b, c, x;
+    if (parts[1]) { var pq = lcdPair(parts[1]); p = pq[0]; q = pq[1]; }
+    if (kind === 'A') { c = nz(-6, 9); return { L: [T(1, X, p)], R: [T(1, [p * c])] }; }
+    if (kind === 'B') { a = ri(2, 5); if (gcd(a, p) !== 1) return null; x = p * nz(-4, 6); return { L: [T(1, [0, a], p)], R: [T(1, [a * x / p])] }; }
+    if (p === q || (!parts[1] && (p > 6 || q > 6))) return null;
+    if (kind === 'C') { var s = pick([1, 1, -1]); x = lcm(p, q) * nz(-3, 4); c = x / p + s * x / q; if (!c) return null; return { L: [T(1, X, p), T(s, X, q)], R: [T(1, [c])] }; }
+    if (kind === 'D') { a = ri(2, 3); b = pick([1, 2, 3]); var s2 = pick([1, -1]); if (gcd(a, p) !== 1 || gcd(b, q) !== 1) return null; x = lcm(p, q) * nz(-3, 3); c = a * x / p + s2 * b * x / q; if (!c) return null; return { L: [T(1, [0, a], p), T(s2, [0, b], q)], R: [T(1, [c])] }; }
+    if (kind === 'E') { x = lcm(p, q) * nz(-3, 4); c = x / q - x / p; if (!c) return null; return { L: [T(1, X, p), T(c > 0 ? 1 : -1, [Math.abs(c)])], R: [T(1, X, q)] }; }
+    if (kind === 'F') { b = nz(-7, 9); x = nz(-12, 15); c = (x + b) / p + x / q; if (!isInt(c) || !c) return null; return { L: [T(1, [b, 1], p), T(1, X, q)], R: [T(1, [c])] }; }
+    return null;
+}
+/* Level 1, Cross-Multiply */
+function tplL1Cross(kind) {
+    var p = ri(2, 9), q = ri(2, 9), a, b, b2, a1, a2;
+    if (p === q) return null;
+    if (kind === 'A') { a = ri(1, 9); if (a % q === 0 || gcd(a, q) !== 1) return null; return { L: [T(1, X, p)], R: [T(1, [a], q)] }; }
+    if (kind === 'B') { b = nz(-9, 9); return { L: [T(1, X, p)], R: [T(1, [b, 1], q)] }; }
+    if (kind === 'Z') { return { L: [T(1, X, p)], R: [T(1, X, q)] }; }
+    if (kind === 'D') { b = nz(-9, 9); b2 = nz(-9, 9); if (b === b2) return null; return { L: [T(1, [b, 1], p)], R: [T(1, [b2, 1], q)] }; }
+    if (kind === 'E') { a1 = ri(1, 3); a2 = ri(1, 3); b = nz(-9, 9); b2 = nz(-9, 9); if (a1 === 1 && a2 === 1) return null; if (gcd(gcd(a1, Math.abs(b)), p) > 1 || gcd(gcd(a2, Math.abs(b2)), q) > 1) return null; return { L: [T(1, [b, a1], p)], R: [T(1, [b2, a2], q)] }; }
+    return null;
+}
+/* Level 2, denominator x */
+function tplL2x(kind) {
+    var a, b, c, x, p, q, r1, r2;
+    if (kind === 'X1') { x = nz(-6, 9); c = ri(2, 6); return { L: [T(1, [c * x], 1, [X])], R: [T(1, [c])] }; }
+    if (kind === 'X1b') { x = nz(-6, 9); q = ri(2, 5); b = ri(1, 9); if (gcd(b, q) !== 1 || (q * 0 + b * x) % q !== 0) return null; a = b * x / q; if (!isInt(a) || !a) return null; return { L: [T(1, [a], 1, [X])], R: [T(1, [b], q)] }; }
+    if (kind === 'X2') { x = nz(-6, 9); b = ri(1, 5); a = ri(1, 9); c = a + b * x; if (!c || c === a) return null; return { L: [T(1, [a], 1, [X]), T(1, [b])], R: [T(1, [c], 1, [X])] }; }
+    if (kind === 'X3') {
+        p = ri(2, 5); q = ri(2, 8); if (p === q) return null; x = nz(-6, 12); a = ri(1, 6); b = ri(1, 5);
+        /* a/x + b/p = c/q  ->  c = q(a/x + b/p) */
+        c = q * (a / x + b / p); if (!isInt(c) || !c) return null;
+        if (gcd(b, p) !== 1 || gcd(Math.abs(c), q) !== 1) return null;
+        return { L: [T(1, [a], 1, [X]), T(1, [b], p)], R: [T(1, [c], q)] };
+    }
+    if (kind === 'X4') {
+        r1 = ri(1, 6); r2 = ri(1, 8); if (r1 >= r2) return null; p = pick([2, 3]); if ((r1 * r2) % p !== 0) return null;
+        q = r1 * r2 / p; c = r1 + r2;
+        /* (c - x)/p = q/x  ->  cx - x^2 = pq  ->  x^2 - cx + pq = 0 */
+        return { L: [T(1, [c, -1], p, [], { asc: true })], R: [T(1, [q], 1, [X])] };
+    }
+    if (kind === 'X5') {
+        r1 = nz(-5, 6); r2 = nz(-5, 8); if (r1 >= r2) return null; a = r1 * r2; b = r1 + r2;
+        /* x + a/x = b  ->  x^2 - bx + a = 0 */
+        if (a === 0 || b === 0) return null;
+        return { L: [T(1, X), T(a > 0 ? 1 : -1, [Math.abs(a)], 1, [X])], R: [T(1, [b])] };
+    }
+    return null;
+}
+/* Level 2, one binomial x + a */
+function tplL2one(kind) {
+    var a = nz(-6, 6), b, c, d, k, q, x, e;
+    var D = [L(a)];
+    if (kind === 'O1') { x = nz(-6, 9); if (x === -a) return null; d = ri(2, 5); c = d * (x + a); if (c <= 0 || c > 40) return null; return { L: [T(1, [c], 1, D)], R: [T(1, [d])] }; }
+    if (kind === 'O2') { x = nz(-6, 9); if (x === -a) return null; d = ri(1, 6); q = ri(2, 5); if (gcd(d, q) !== 1) return null; c = d * (x + a) / q; if (!isInt(c) || c <= 0 || c > 30) return null; return { L: [T(1, [c], 1, D)], R: [T(1, [d], q)] }; }
+    if (kind === 'O3') { x = nz(-6, 9); if (x === -a) return null; b = ri(1, 9); k = pick([1, 2, 3]); c = b + k * (x + a); if (c <= 0 || c === b) return null; return { L: [T(1, [b], 1, D), T(1, [k])], R: [T(1, [c], 1, D)] }; }
+    if (kind === 'O4') {
+        /* (x + e)/(x + a) + k = c/(x + a) with the only candidate x = -a */
+        e = ri(-6, 6); k = pick([1, 2]); c = e - a; if (c <= 0) return null;
+        return { L: [T(1, [e, 1], 1, D), T(1, [k])], R: [T(1, [c], 1, D)] };
+    }
+    return null;
+}
+/* Level 2, two distinct linear factors */
+function tplL2two(kind) {
+    var a = nz(-6, 6), b = nz(-6, 6), c, d, e, k;
+    if (a === b) return null;
+    var A = L(a), B = L(b);
+    if (kind === 'T1') { c = ri(1, 9); d = ri(1, 9); if (c === d) return null; return { L: [T(1, [c], 1, [A])], R: [T(1, [d], 1, [B])] }; }
+    if (kind === 'T2') { e = ri(-6, 6); c = ri(1, 9); return { L: [T(1, [e, 1], 1, [A])], R: [T(1, [c], 1, [B])] }; }
+    if (kind === 'T3') { e = nz(-6, 9); if (e === a) return null; d = ri(1, 9); return { L: [T(1, [e, 1], 1, [A])], R: [T(1, ONE), T(1, [d], 1, [B])] }; }
+    if (kind === 'T4') { c = ri(1, 9); d = ri(1, 9); return { L: [T(1, X, 1, [A])], R: [T(1, [c], 1, [A]), T(1, [d], 1, [B])] }; }
+    if (kind === 'T5') { c = ri(1, 9); d = ri(1, 9); k = ri(2, 3); return { L: [T(1, [c], 1, [A]), T(1, [d], 1, [B])], R: [T(1, [k])] }; }
+    /* Keep-one, throw-one-out shapes (Ira approved 2026-10-27). r is usually
+       chosen so x = -a is a candidate; it is then thrown out. */
+    var r = Math.random() < 0.75 ? a * (a - b) : ri(1, 30), p = ri(1, 9);
+    if (kind === 'T6') { if (r <= 0 || r > 40) return null; return { L: [T(1, X, 1, [A]), T(1, [p], 1, [B])], R: [T(1, [r], 1, [A, B])] }; }
+    if (kind === 'T7') { if (r <= 0 || r > 40) return null; return { L: [T(1, X, 1, [A]), T(-1, [p], 1, [B])], R: [T(1, [r], 1, [A, B])] }; }
+    if (kind === 'T8') { k = pick([1, 1, 2]); if (r <= 0 || r > 40) return null; return { L: [T(1, X, 1, [A]), T(1, [k])], R: [T(1, [r], 1, [A, B])] }; }
+    return null;
+}
+/* Level 2, a quadratic denominator that factors, next to one of its factors */
+function tplL2quad(kind) {
+    var a = nz(-6, 6), b = nz(-6, 6), c, d, e, f, g;
+    if (a === b || a === -b) return null;
+    var Q = [L(a), L(b)], A = L(a), B = L(b);
+    if (kind === 'Q1') { e = ri(1, 3); f = ri(-6, 9); d = ri(1, 6); if (e === d) return null; if (f === e * a || f === e * b) return null; return { L: [T(1, [f, e], 1, Q, { exp: true })], R: [T(1, [d], 1, [B])] }; }
+    if (kind === 'Q2') { c = ri(1, 12); d = ri(1, 6); g = ri(1, 6); if (d === g) return null; return { L: [T(1, [c], 1, Q, { exp: true }), T(1, [d], 1, [B])], R: [T(1, [g], 1, [A])] }; }
+    if (kind === 'Q3') {
+        /* c/Q + d/(x + b) = g/(x + a) with the only candidate x = -b */
+        d = ri(1, 6); g = ri(1, 6); if (d === g) return null;
+        c = g * (b - a) - d * (b - a);
+        /* c + d(x + a) = g(x + b) at x = -b:  c + d(a - b) = 0  ->  c = d(b - a) */
+        c = d * (b - a); if (c <= 0 || c > 30) return null;
+        return { L: [T(1, [c], 1, Q, { exp: true }), T(1, [d], 1, [B])], R: [T(1, [g], 1, [A])] };
+    }
+    return null;
+}
+
+/* Analyse an equation: LCD, cleared polynomial, candidates, excluded, valid. */
+function analyse(eq) {
+    var lcd = lcdOf(eq), left = sideSum(eq.L, lcd), right = sideSum(eq.R, lcd), P = pSub(left, right);
+    var deg = pDeg(P), roots = deg >= 1 ? intRoots(P) : null;
+    var ex = excludedOf(eq), valid = [], i;
+    if (roots) for (i = 0; i < roots.length; i++) if (ex.indexOf(roots[i]) === -1) valid.push(roots[i]);
+    return { lcd: lcd, left: left, right: right, P: P, deg: deg, roots: roots, excluded: ex, valid: valid };
+}
+function okEq(eq, want) {
+    if (!eq) return null;
+    var an = analyse(eq), i;
+    if (!an.roots) return null;
+    if (want.deg && an.deg !== want.deg) return null;
+    for (i = 0; i < an.roots.length; i++) if (Math.abs(an.roots[i]) > (want.max || 40)) return null;
+    for (i = 0; i < an.P.length; i++) if (Math.abs(an.P[i]) > (want.coef || 200)) return null;
+    var bad = an.roots.length - an.valid.length;
+    if (want.valid === 'all' && bad) return null;
+    if (want.valid === 'none' && an.valid.length) return null;
+    if (want.valid === 'some' && (!bad || !an.valid.length)) return null;
+    if (want.valid !== 'none' && !an.valid.length) return null;
+    /* No term that already simplifies (a common factor between top and bottom). */
+    var ts = allTerms(eq);
+    for (i = 0; i < ts.length; i++) {
+        var t = ts[i], j;
+        for (j = 0; j < t.f.length; j++) if (pDeg(t.n) >= 0 && pEval(t.n, -t.f[j][0]) === 0 && pDeg(t.n) >= 1) return null;
+        if (t.k > 1 && pDeg(t.n) >= 0 && gcd(pContent(t.n), t.k) > 1) return null;
+    }
+    return an;
+}
+function gen(tplFn, kind, want) {
+    var tries = 0, eq, an;
+    while (tries++ < 4000) { eq = tplFn(kind); an = okEq(eq, want); if (an) return { eq: eq, an: an, kind: kind }; }
+    return null;
+}
+
+/* Which template and what kind of answer, by section and problem number. */
+/* The four keep-one, throw-one-out shapes take turns. */
+var ONE_OUT = ['T4', 'T6', 'T7', 'T8'], oneOutTurn = 0;
+function nextOneOut() { var k = ONE_OUT[oneOutTurn % ONE_OUT.length]; oneOutTurn++; return k; }
+function planFor(cat, n, opts) {
+    opts = opts || {};
+    var r = Math.random();
+    if (cat === 'l1lcd') {
+        var k1 = n === 1 ? 'A' : n === 2 ? 'B' : n <= 5 ? 'C' : pick(['B', 'C', 'C', 'D', 'E', 'F']);
+        if (k1 !== 'A' && k1 !== 'B') k1 += '|' + lcdType(n);
+        return { fn: tplL1Lcd, kind: k1, want: { deg: 1, valid: 'all', max: 40 }, method: 'lcd' };
+    }
+    if (cat === 'l1cross') {
+        var k2 = n === 1 ? 'A' : n === 2 ? 'B' : n === 3 ? 'Z' : n === 4 ? 'D' : (r < 0.1 ? 'Z' : pick(['A', 'B', 'D', 'D', 'E', 'E']));
+        return { fn: tplL1Cross, kind: k2, want: { deg: 1, valid: 'all', max: 40 }, method: 'cross' };
+    }
+    if (cat === 'l1choose') {
+        if (Math.random() < 0.5) return { fn: tplL1Cross, kind: pick(['A', 'B', 'D', 'E']), want: { deg: 1, valid: 'all', max: 40 }, method: 'cross' };
+        return { fn: tplL1Lcd, kind: pick(['C', 'D', 'E', 'F']) + '|' + lcdType(99), want: { deg: 1, valid: 'all', max: 40 }, method: 'lcd' };
+    }
+    if (cat === 'l2x') {
+        var k3 = n === 1 ? 'X1' : n === 2 ? 'X2' : n === 3 ? 'X1b' : n === 4 ? 'X3' : n === 5 ? 'X4' : n === 6 ? 'X5' : pick(['X1', 'X1b', 'X2', 'X3', 'X4', 'X4', 'X5']);
+        var quad3 = k3 === 'X4' || k3 === 'X5';
+        return { fn: tplL2x, kind: k3, want: { deg: quad3 ? 2 : 1, valid: 'all', max: 12 }, method: crossKinds[k3] ? 'cross' : 'lcd' };
+    }
+    if (cat === 'l2one') {
+        var k4 = n === 1 ? 'O1' : n === 2 ? 'O3' : n === 3 ? 'O4' : n === 4 ? 'O2' : (r < 0.25 ? 'O4' : pick(['O1', 'O2', 'O3', 'O3']));
+        return { fn: tplL2one, kind: k4, want: { deg: 1, valid: k4 === 'O4' ? 'none' : 'all', max: 12 }, method: crossKinds[k4] ? 'cross' : 'lcd' };
+    }
+    if (cat === 'l2two') {
+        var k5, v5 = 'all', d5;
+        if (n === 1) { k5 = 'T1'; d5 = 1; }
+        else if (n === 2) { k5 = 'T3'; d5 = 1; }
+        else if (n === 3) { k5 = 'T4'; d5 = 2; }
+        else if (n === 5 && !opts.oneOut) { k5 = 'T2'; d5 = 2; }
+        else if (n === 4 || n === 6 || opts.oneOut || Math.random() < 1 / 3) { k5 = nextOneOut(); d5 = 2; v5 = 'some'; }
+        else {
+            k5 = pick(['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8']);
+            d5 = (k5 === 'T1' || k5 === 'T3') ? 1 : 2;
+        }
+        return { fn: tplL2two, kind: k5, want: { deg: d5, valid: v5, max: k5 === 'T8' ? 9 : 12, coef: 120 }, method: crossKinds[k5] ? 'cross' : 'lcd' };
+    }
+    if (cat === 'l2quad') {
+        var k6 = n === 1 ? 'Q1' : n === 2 ? 'Q2' : n === 3 ? 'Q3' : (r < 0.2 ? 'Q3' : pick(['Q1', 'Q2', 'Q2']));
+        return { fn: tplL2quad, kind: k6, want: { deg: 1, valid: k6 === 'Q3' ? 'none' : 'all', max: 12 }, method: 'lcd' };
+    }
+    return null;
+}
+/* A fraction equal to a plain number (6/x = 3, 30/(x + 2) = 5) uses the LCD (Ira, 2026-10-27). */
+var crossKinds = { X1b: 1, X4: 1, O2: 1, T1: 1, T2: 1 };
+var MIX_EARLY = ['l1lcd', 'l1cross', 'l2x', 'l2one', 'l2x', 'l2one'];
+var MIX_FROM = ['l1lcd', 'l1cross', 'l2x', 'l2one', 'l2two', 'l2quad', 'l2two', 'l2x'];
+
+function generate(cat, n) {
+    var level = cat === 'mixed' ? 3 : (cat.charAt(1) === '1' ? 1 : 2);
+    var src = cat, plan, g, tries = 0;
+    /* Mixed: about 1 in 6 is a keep-one, throw-one-out problem (this share plus
+       the ones the x - 2 and x + 3 picks bring in). */
+    /* Two linear factors and quadratic denominators wait until problem 6 (Ira, 2026-10-27). */
+    var early = cat === 'mixed' && n <= 5;
+    var oneOut = cat === 'mixed' && !early && Math.random() < 1 / 11;
+    if (cat === 'mixed') src = oneOut ? 'l2two' : pick(early ? MIX_EARLY : MIX_FROM);
+    while (tries++ < 50) {
+        plan = planFor(src, cat === 'mixed' ? 7 + ri(0, 5) : n, { oneOut: oneOut });
+        g = gen(plan.fn, plan.kind, plan.want);
+        if (g) break;
+    }
+    return buildProblem(cat, src, level, g.eq, g.an, plan.method, g.kind);
+}
+
+/* ---------- worked steps ---------- */
+function step(label, math, speech, prose) { return { label: label, math: math, speech: speech, prose: !!prose }; }
+function zeroTarget(P) { P = pTrim(P); return P[P.length - 1] < 0 ? pScale(P, -1) : P; }
+function factoredHTML(roots, lead) {
+    var out = lead === 1 ? '' : numHTML(lead), i;
+    for (i = 0; i < roots.length; i++) out += '(' + polyHTML(L(-roots[i])) + ')';
+    return out;
+}
+function factoredSpeech(roots, lead) {
+    var parts = lead === 1 ? [] : [numSpeech(lead)], i;
+    for (i = 0; i < roots.length; i++) parts.push('the quantity ' + polySpeech(L(-roots[i])));
+    return parts.join(' times ');
+}
+function exHTML(ex) { var i, out = []; for (i = 0; i < ex.length; i++) out.push('x ' + NE + ' ' + numHTML(ex[i])); return out.join(' and '); }
+function exSpeech(ex) { var i, out = []; for (i = 0; i < ex.length; i++) out.push('x is not ' + numSpeech(ex[i])); return out.join(', and '); }
+/* What the student sees, without markup (to spot a step that repeats the one before). */
+function seen(h) { return String(h).replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim(); }
+/* x = a number (either side). */
+function solvedForm(l, r) { return (pEq(l, [0, 1]) && pDeg(r) <= 0) || (pEq(r, [0, 1]) && pDeg(l) <= 0); }
+/* From a cleared equation left = right to the answer(s). */
+function solveSteps(prob, left, right) {
+    var steps = [], an = prob.an;
+    if (an.deg === 1 && solvedForm(left, right)) {
+        /* already x = a number */
+    } else if (an.deg === 1) {
+        var P = pSub(left, right), a = P[1], b = -P[0];
+        /* Already "a x = b" (on either side): no Collect step, go straight to dividing. */
+        var lone = (pTrim(left).length === 2 && left[0] === 0 && pDeg(right) <= 0) || (pTrim(right).length === 2 && right[0] === 0 && pDeg(left) <= 0);
+        if (lone) { a = pDeg(left) === 1 ? left[1] : right[1]; b = pDeg(left) === 1 ? (right[0] || 0) : (left[0] || 0); }
+        /* x terms always collected on the left, even when negative: -2x = 12 (Ira, 2026-10-27). */
+        if (!lone) steps.push(step('Collect the x terms on one side and the numbers on the other', row(polyHTML([0, a]) + EQ + numHTML(b)), polySpeech([0, a]) + ' equals ' + numSpeech(b)));
+        if (a !== 1) steps.push(step('Divide both sides by ' + numHTML(a), row('x' + EQ + numHTML(an.roots[0])), 'x equals ' + numSpeech(an.roots[0])));
+    } else {
+        var P0 = pTrim(pSub(left, right)), Z = zeroTarget(P0), lead = Z[2];
+        /* A negative x squared term: move everything to the left first, then
+           multiply both sides by -1 as its own step (Ira, 2026-10-27). */
+        if (P0[2] < 0) {
+            steps.push(step('Move everything to the left side', row(polyHTML(P0) + EQ + '0'), polySpeech(P0) + ' equals 0'));
+            steps.push(step('Multiply both sides by ' + MINUS + '1 so the x<sup>2</sup> term is positive', row(polyHTML(Z) + EQ + '0'), polySpeech(Z) + ' equals 0'));
+        } else steps.push(step('Move everything to one side', row(polyHTML(Z) + EQ + '0'), polySpeech(Z) + ' equals 0'));
+        steps.push(step('Factor', row(factoredHTML(an.roots, lead) + EQ + '0'), factoredSpeech(an.roots, lead) + ' equals 0'));
+        steps.push(step('Set each factor equal to 0', row('x = ' + numHTML(an.roots[0]) + ' &nbsp;or&nbsp; x = ' + numHTML(an.roots[1])), 'x equals ' + numSpeech(an.roots[0]) + ', or x equals ' + numSpeech(an.roots[1])));
+    }
+    /* The check step only when some denominator has an x (not for Mixed problems with numbers only). */
+    if (an.excluded.length) {
+        var i, lines = [], sp = [];
+        for (i = 0; i < an.roots.length; i++) {
+            var r = an.roots[i];
+            if (an.excluded.indexOf(r) !== -1) {
+                var f = zeroFactorOf(prob.eq, r);
+                lines.push('x = ' + numHTML(r) + ' makes ' + polyHTML(f) + ' equal 0. Throw it out.');
+                sp.push('x equals ' + numSpeech(r) + ' makes ' + polySpeech(f) + ' equal 0. Throw it out.');
+            } else {
+                lines.push('x = ' + numHTML(r) + ' keeps every denominator nonzero. Keep it.');
+                sp.push('x equals ' + numSpeech(r) + ' keeps every denominator nonzero. Keep it.');
+            }
+        }
+        steps.push(step('Check each answer against the values x can never be', lines.join('<br>'), sp.join(' '), true));
+    }
+    /* "The answer" only when it adds something: an answer was thrown out, or
+       there are two answers. Otherwise the step before already shows x = ...
+       (Ira, 2026-10-27). */
+    if (an.valid.length !== an.roots.length || an.valid.length > 1)
+        steps.push(step(an.valid.length ? 'The answer' : 'Every answer was thrown out', '<b>' + listHTML(an.valid) + '</b>', listSpeech(an.valid), !an.valid.length));
+    return steps;
+}
+function lcdSteps(prob) {
+    var an = prob.an, eq = prob.eq, lcd = an.lcd, steps = [];
+    if (prob.factorDen) steps.push(step('Factor the denominator', row(polyHTML(prob.factorDen.poly) + EQ + productHTML(1, prob.factorDen.f)), polySpeech(prob.factorDen.poly) + ' equals ' + productSpeech(1, prob.factorDen.f)));
+    if (an.excluded.length) steps.push(step('x can never be a value that makes a denominator 0', exHTML(an.excluded), exSpeech(an.excluded)));
+    steps.push(step('Find the LCD', 'LCD = ' + productHTML(lcd.k, lcd.f), 'The LCD is ' + productSpeech(lcd.k, lcd.f), true));
+    steps.push(step('Multiply every term by the LCD. Each denominator cancels', row(sideProductsHTML(eq.L, lcd, true) + EQ + sideProductsHTML(eq.R, lcd, true)),
+        sideProductsSpeech(eq.L, lcd, true) + ' equals ' + sideProductsSpeech(eq.R, lcd, true)));
+    var lh = polyHTML(an.left), rh = polyHTML(an.right);
+    var factH = sideProductsHTML(eq.L, lcd, true) + '|' + sideProductsHTML(eq.R, lcd, true);
+    if (seen(factH) !== seen(lh + '|' + rh)) steps.push(step(/\(/.test(factH) ? 'Multiply out and combine like terms' : 'Combine like terms', row(lh + EQ + rh), polySpeech(an.left) + ' equals ' + polySpeech(an.right)));
+    return steps.concat(solveSteps(prob, an.left, an.right));
+}
+function crossSteps(prob) {
+    var an = prob.an, c = crossSides(prob.eq), steps = [];
+    if (prob.factorDen) steps.push(step('Factor the denominator', row(polyHTML(prob.factorDen.poly) + EQ + productHTML(1, prob.factorDen.f)), polySpeech(prob.factorDen.poly) + ' equals ' + productSpeech(1, prob.factorDen.f)));
+    if (an.excluded.length) steps.push(step('x can never be a value that makes a denominator 0', exHTML(an.excluded), exSpeech(an.excluded)));
+    /* A side that is just a number gets written over 1 first: x/3 = 12/1 (Ira, 2026-10-27). */
+    var A0 = prob.eq.L[0], B0 = prob.eq.R[0], lone = !isFrac(A0) ? A0 : (!isFrac(B0) ? B0 : null);
+    if (lone) {
+        var over1 = function (t) { return t === lone ? fracHTML(polyHTML(t.n, t.asc), '1') : termHTML(t); };
+        var over1S = function (t) { return t === lone ? fracSpeech(polySpeech(t.n, t.asc), '1') : termSpeech(t); };
+        steps.push(step('Write ' + polyHTML(lone.n) + ' as a fraction', row(over1(A0) + EQ + over1(B0)), over1S(A0) + ' equals ' + over1S(B0)));
+    }
+    steps.push(step((lone ? 'Now there is' : 'There is') + ' exactly one fraction on each side, so cross-multiply: multiply each numerator by the denominator diagonally across the = sign', lone ? row(dotted(A0.n, B0) + EQ + dotted(B0.n, A0)) : row(c.LH + EQ + c.RH), lone ? dottedS(A0.n, B0) + ' equals ' + dottedS(B0.n, A0) : c.LS + ' equals ' + c.RS));
+    /* With a "/1", show the multiplication before simplifying: x * 1 = 6 * 2, then x = 12. */
+    if (lone) steps.push(step('Multiply', row(polyHTML(c.L) + EQ + polyHTML(c.R)), polySpeech(c.L) + ' equals ' + polySpeech(c.R)));
+    if (!lone && seen(polyHTML(c.L) + '|' + polyHTML(c.R)) !== seen(c.LH + '|' + c.RH)) steps.push(step('Multiply out', row(polyHTML(c.L) + EQ + polyHTML(c.R)), polySpeech(c.L) + ' equals ' + polySpeech(c.R)));
+    /* Cross-multiplying can give a different (but equivalent) cleared equation. */
+    var P = pSub(c.L, c.R), roots = intRoots(P), copy = { level: prob.level, eq: prob.eq, an: {} }, k;
+    for (k in an) copy.an[k] = an[k];
+    copy.an.deg = pDeg(P);
+    if (roots) {
+        copy.an.roots = roots;
+        copy.an.valid = [];
+        for (k = 0; k < roots.length; k++) if (an.excluded.indexOf(roots[k]) === -1) copy.an.valid.push(roots[k]);
+    }
+    return steps.concat(solveSteps(copy, c.L, c.R));
+}
+
+/* ---------- one problem ---------- */
+var STAGE_TITLE = {
+    choose: 'Step 1: Which method?',
+    factorDen: 'Factor the denominator',
+    never: 'What can x never be?',
+    lcd: 'Find the LCD',
+    terms: 'Multiply every term by the LCD',
+    cancel: 'Multiply both sides by the LCD and cancel',
+    left: 'What is left on each side?',
+    cross: 'Cross-multiply',
+    solve: 'Solve for x',
+    zero: 'Move everything to one side',
+    factorSolve: 'Factor and solve',
+    check: 'Check each answer',
+    final: 'Your answer'
+};
+function buildProblem(cat, src, level, eq, an, method, kind) {
+    var prob = { cat: cat, src: src, level: level, eq: eq, an: an, method: method, kind: kind };
+    prob.html = eqHTML(eq);
+    prob.speech = eqSpeech(eq);
+    prob.answer = an.valid.slice();
+    /* the quadratic type: which term has the expanded quadratic denominator */
+    var ts = allTerms(eq), i;
+    for (i = 0; i < ts.length; i++) if (ts[i].exp) prob.factorDen = { poly: denPoly(ts[i]), f: ts[i].f };
+    prob.cancelStep = (src === 'l2two' || src === 'l2quad') && method === 'lcd';
+    prob.crossable = crossable(eq);
+    if (method === 'cross') prob.cross = crossSides(eq);
+    /* Worked steps: the section's own method first; the other one as "Another method". */
+    prob.steps = method === 'cross' ? crossSteps(prob) : lcdSteps(prob);
+    prob.altSteps = null;
+    if (prob.crossable) {
+        prob.altSteps = method === 'cross' ? lcdSteps(prob) : crossSteps(prob);
+        prob.altName = method === 'cross' ? 'Clear with the LCD' : 'Cross-multiply';
+    }
+    /* Guided stages. */
+    var st = [];
+    if (cat === 'mixed') st = ['final'];
+    else {
+        if (cat === 'l1choose') st.push('choose');
+        if (prob.factorDen) st.push('factorDen');
+        if (level === 2) st.push('never');
+        if (method === 'cross') st.push('cross');
+        else { st.push('lcd'); if (prob.cancelStep) { st.push('cancel'); st.push('left'); } else st.push('terms'); }
+        if (method === 'cross') prob.solveP = pSub(prob.cross.L, prob.cross.R);
+        else prob.solveP = an.P;
+        /* Already x = a number after clearing: nothing left to solve. */
+        var cl = method === 'cross' ? prob.cross : (eq.L.length === 1 && eq.R.length === 1 ? { L: an.left, R: an.right } : { L: [0, 2], R: [0] });
+        if (pDeg(prob.solveP) === 2) { st.push('zero'); st.push('factorSolve'); }
+        else if (!solvedForm(cl.L, cl.R)) st.push('solve');
+        if (level === 2) st.push('check');
+    }
+    prob.stages = st;
+    prob.candidates = intRoots(prob.solveP || an.P) || an.roots;
+    prob.zero = prob.solveP ? zeroTarget(prob.solveP) : null;
+    prob.hint = hintFor(prob);
+    return prob;
+}
+function hintFor(prob) {
+    if (prob.cat === 'mixed') return 'If there is exactly one fraction on each side, you can cross-multiply. Otherwise multiply every term by the LCD. Then check that no answer makes a denominator 0.';
+    if (prob.method === 'cross') return 'Exactly one fraction on each side, so cross-multiply: multiply each numerator by the denominator diagonally across the = sign (a/b = c/d gives a &middot; d = c &middot; b), then solve.' + (prob.level === 2 ? ' Throw out any answer that makes a denominator 0.' : '');
+    return 'Find the LCD of all the denominators. Multiply every term by it, so every fraction is cleared, then solve.' + (prob.level === 2 ? ' Throw out any answer that makes a denominator 0.' : '');
+}
+
+/* ---------- grading helpers used by the game ---------- */
+/* The excluded values the student typed (one or two boxes, any order). */
+function gradeNever(prob, raws) {
+    var ex = prob.an.excluded, vals = [], i;
+    for (i = 0; i < raws.length; i++) {
+        var r = readList(raws[i]);
+        if (!r.ok) return { kind: 'read', msg: r.msg, box: i };
+        if (r.vals.length !== 1) return { kind: 'read', msg: 'Type one number in each box.', box: i };
+        vals.push(r.vals[0]);
+    }
+    if (uniq(vals).length !== vals.length) return { kind: 'wrong', msg: 'Each box needs a different value.', box: 1 };
+    for (i = 0; i < vals.length; i++) {
+        if (ex.indexOf(vals[i]) === -1) {
+            if (ex.indexOf(-vals[i]) !== -1) {
+                var f = zeroFactorOf(prob.eq, -vals[i]);
+                return { kind: 'wrong', msg: 'Check the sign. ' + polyHTML(f) + ' = 0 when x = ' + numHTML(-vals[i]) + ', not ' + numHTML(vals[i]) + '.', box: i };
+            }
+            return { kind: 'wrong', msg: 'x = ' + numHTML(vals[i]) + ' does not make any denominator 0. Set each denominator with an x equal to 0 and solve.', box: i };
+        }
+    }
+    return { kind: 'correct' };
+}
+function gradeLcd(prob, raw) {
+    var lcd = prob.an.lcd, r = readPoly(raw);
+    if (!r.ok) return { kind: 'read', msg: r.code === 'empty' ? 'Type the LCD in its box.' : r.msg };
+    if (pEq(r.poly, lcd.poly)) return { kind: 'correct' };
+    var m = pIsMultiple(r.poly, lcd.poly);
+    if (m && isInt(m) && m > 1) return { kind: 'wrong', msg: 'That is a common denominator, but not the least one. Use the smallest number every denominator divides into.' };
+    /* a polynomial multiple: some factor used twice */
+    var ok = true, i, ts = allTerms(prob.eq);
+    for (i = 0; i < ts.length; i++) if (!isMultipleOf(r.poly, denPoly(ts[i]))) ok = false;
+    if (ok && pDeg(r.poly) > pDeg(lcd.poly)) return { kind: 'wrong', msg: 'That works as a common denominator, but it is not the least one. The LCD is the product of all the distinct linear factors, each used once.' };
+    if (pDeg(lcd.poly) === 0) return { kind: 'wrong', msg: 'Not quite. The LCD is the smallest number that every denominator divides into.' };
+    return { kind: 'wrong', msg: 'Not quite. The LCD is the product of all the distinct linear factors' + (lcd.k > 1 ? ', times the LCD of the numbers.' : '.') };
+}
+/* q divides p evenly (integer coefficients). */
+function isMultipleOf(p, q) {
+    p = pTrim(p).slice(); q = pTrim(q);
+    var dq = pDeg(q), dp = pDeg(p), i, j;
+    if (dq < 0 || dp < dq) return false;
+    for (i = dp - dq; i >= 0; i--) {
+        var c = p[i + dq] / q[dq];
+        if (!isInt(c)) return false;
+        for (j = 0; j <= dq; j++) p[i + j] -= c * q[j];
+    }
+    return pIsZero(p);
+}
+/* One product box: LCD times one term. */
+function gradeProduct(prob, t, raw) {
+    var r = readPoly(raw), want = product(t, prob.an.lcd);
+    if (!r.ok) return { kind: 'read', msg: r.code === 'empty' ? 'Fill in every box.' : r.msg };
+    if (pEq(r.poly, want)) return { kind: 'correct' };
+    if (pEq(r.poly, pScale(want, -1))) return { kind: 'wrong', msg: 'Check the sign. The + or &#8722; in front of this term is already shown, so type the product without it.' };
+    if (pEq(r.poly, t.n)) return { kind: 'wrong', msg: 'Multiply this term by the LCD too. Its denominator cancels, but the numerator gets multiplied by whatever is left of the LCD.' };
+    if (pEq(r.poly, pMul(t.n, prob.an.lcd.poly))) return { kind: 'wrong', msg: 'Almost. The denominator ' + denHTML(t) + ' cancels with part of the LCD, so only the rest of the LCD multiplies the numerator.' };
+    return { kind: 'wrong', msg: 'Not quite. Multiply the LCD by this term. Its denominator cancels with part of the LCD.' };
+}
+/* Two sides of a cleared equation (either order). */
+function gradeSides(L0, R0, rawL, rawR, label) {
+    var a = readPoly(rawL), b = readPoly(rawR);
+    if (!a.ok) return { kind: 'read', msg: a.code === 'empty' ? 'Fill in both sides.' : a.msg, box: 0 };
+    if (!b.ok) return { kind: 'read', msg: b.code === 'empty' ? 'Fill in both sides.' : b.msg, box: 1 };
+    if ((pEq(a.poly, L0) && pEq(b.poly, R0)) || (pEq(a.poly, R0) && pEq(b.poly, L0))) return { kind: 'correct' };
+    if (pEq(a.poly, L0) || pEq(a.poly, R0)) return { kind: 'wrong', box: 1, msg: 'The left side is right. Check the right side.' };
+    if (pEq(b.poly, L0) || pEq(b.poly, R0)) return { kind: 'wrong', box: 0, msg: 'The right side is right. Check the left side.' };
+    return { kind: 'wrong', box: 0, msg: label };
+}
+function gradeCross(prob, rawL, rawR) {
+    var c = prob.cross, g = gradeSides(c.L, c.R, rawL, rawR, 'Not quite. Multiply each numerator by the denominator diagonally across the = sign.');
+    if (g.kind === 'wrong') {
+        var a = readPoly(rawL), b = readPoly(rawR), A = prob.eq.L[0], B = prob.eq.R[0];
+        if (a.ok && b.ok && pEq(pMul(a.poly, pMul(b.poly, [1])), pMul(a.poly, b.poly))) {
+            if ((pEq(a.poly, pMul(A.n, denPoly(A))) || pEq(b.poly, pMul(B.n, denPoly(B))))) g.msg = 'Careful: cross-multiplying goes across the = sign. Multiply each numerator by the denominator on the <b>other</b> side.';
+        }
+    }
+    return g;
+}
+function gradeLeft(prob, rawL, rawR) {
+    return gradeSides(prob.an.left, prob.an.right, rawL, rawR, 'Not quite. After the crossed-out factors are gone, multiply what is left in each term.');
+}
+function gradeZero(prob, raw) {
+    var r = readPoly(raw);
+    if (!r.ok) return { kind: 'read', msg: r.code === 'empty' ? 'Type the left side. The right side is already 0.' : r.msg };
+    var m = pIsMultiple(r.poly, prob.zero);
+    if (m > 0) return { kind: 'correct', poly: r.poly };
+    if (m < 0) return { kind: 'wrong', msg: 'That is right, but make the x<sup>2</sup> term positive first: move every term to the side where x<sup>2</sup> is positive.' };
+    if (pDeg(r.poly) !== 2) return { kind: 'wrong', msg: 'There should be an x<sup>2</sup> term. Move every term to one side so the other side is 0.' };
+    return { kind: 'wrong', msg: 'Not quite. Move every term to one side and combine like terms. Watch the signs when a term changes sides.' };
+}
+function gradeFactorSolve(prob, rawF, rawList) {
+    var r = readPoly(rawF);
+    if (!r.ok) return { kind: 'read', msg: r.code === 'empty' ? 'Type the factored form first.' : r.msg, box: 0 };
+    if (!pIsMultiple(r.poly, prob.zero)) return { kind: 'wrong', box: 0, msg: 'Multiplying your factors back out does not give ' + polyHTML(prob.zero) + '. Find two numbers that multiply to ' + numHTML(prob.zero[0] / prob.zero[2]) + ' and add to ' + numHTML(prob.zero[1] / prob.zero[2]) + '.' };
+    if (astFactorCount(r.ast) < 2) return { kind: 'wrong', box: 0, msg: 'That is equal, but it is not factored yet. Write it as a product of two factors.' };
+    var l = readList(rawList);
+    if (!l.ok) return { kind: 'read', msg: l.msg, box: 1 };
+    if (sameSet(l.vals, prob.candidates)) return { kind: 'correct' };
+    var i;
+    for (i = 0; i < l.vals.length; i++) if (prob.candidates.indexOf(-l.vals[i]) !== -1 && prob.candidates.indexOf(l.vals[i]) === -1) return { kind: 'wrong', box: 1, msg: 'Check the signs. Set each factor equal to 0: x + 4 = 0 gives x = &#8722;4.' };
+    if (l.vals.length < 2) return { kind: 'wrong', box: 1, msg: 'There are two factors, so there are two answers. Separate them with a comma.' };
+    return { kind: 'wrong', box: 1, msg: 'Not quite. Set each factor equal to 0 and solve.' };
+}
+function gradeSolve(prob, raw) {
+    var l = readList(raw);
+    if (!l.ok) return { kind: 'read', msg: l.msg };
+    if (l.vals.length !== 1) return { kind: 'read', msg: 'This equation has one answer. Type just one number.' };
+    if (l.vals[0] === prob.candidates[0]) return { kind: 'correct' };
+    if (l.vals[0] === -prob.candidates[0]) return { kind: 'wrong', msg: 'Check the sign of your answer.' };
+    if (!isInt(l.vals[0])) return { kind: 'wrong', msg: 'Every answer in this game is a whole number. Check your work.' };
+    return { kind: 'wrong', msg: 'Not quite. Put it back into the equation to check. Collect the x terms on one side and the numbers on the other.' };
+}
+/* Keep / Throw out: choice[i] is 'keep' or 'throw' for prob.candidates[i]. */
+function gradeCheck(prob, choice) {
+    var i, ex = prob.an.excluded;
+    for (i = 0; i < prob.candidates.length; i++) if (!choice[i]) return { kind: 'read', msg: 'Choose Keep or Throw out for ' + (prob.candidates.length > 1 ? 'each answer.' : 'your answer.') };
+    for (i = 0; i < prob.candidates.length; i++) {
+        var v = prob.candidates[i], bad = ex.indexOf(v) !== -1;
+        if (bad && choice[i] === 'keep') { var f = zeroFactorOf(prob.eq, v); return { kind: 'wrong', row: i, msg: 'Look back at the values x can never be. x = ' + numHTML(v) + ' makes ' + polyHTML(f) + ' equal 0, so the equation is not defined there. Throw it out.' }; }
+        if (!bad && choice[i] === 'throw') return { kind: 'wrong', row: i, msg: 'x = ' + numHTML(v) + ' does not make any denominator 0, so it is a real answer. Keep it.' };
+    }
+    return { kind: 'correct' };
+}
+/* Mixed: the whole answer. noSol: the No solution button is on. */
+function gradeFinal(prob, raw, noSol) {
+    var ans = prob.answer;
+    if (noSol) return ans.length ? { kind: 'wrong', msg: 'This equation does have a solution. Solve it, then check each answer against the denominators.' } : { kind: 'correct' };
+    var l = readList(raw);
+    if (!l.ok) return { kind: 'read', msg: l.msg };
+    var vals = uniq(l.vals), i;
+    /* A fair warning (free): an answer that makes a denominator of the original equation 0. */
+    for (i = 0; i < vals.length; i++) if (prob.an.excluded.indexOf(vals[i]) !== -1) return { kind: 'warn' };
+    if (sameSet(vals, ans)) return { kind: 'correct' };
+    if (!ans.length) return { kind: 'wrong', msg: 'Not quite. Solve the equation, then check each answer against every denominator.' };
+    var some = false;
+    for (i = 0; i < vals.length; i++) if (ans.indexOf(vals[i]) !== -1) some = true;
+    if (some && vals.length < ans.length) return { kind: 'wrong', msg: 'You found one answer, but there is another. Separate the answers with a comma.' };
+    if (some) return { kind: 'wrong', msg: 'At least one of your answers does not work in the original equation. Check each one.' };
+    return { kind: 'wrong', msg: 'Not quite. Check your work, or use Show Hint.' };
+}
+
+</script>
+<script>
+/* =====================================================================
+   Game: levels, sections, guided stages, tap-to-cancel, grading flow,
+   Show Solution, stats.
+   ===================================================================== */
+var LEVELS = [
+    { id: 'l1', name: 'Level 1', sub: 'Numbers in the denom.', subSpeech: 'Numbers in the denominator', sections: [
+        { id: 'l1lcd', html: 'Clear with LCD', speech: 'Clear with LCD' },
+        { id: 'l1cross', html: 'Cross-Multiply', speech: 'Cross-Multiply' },
+        { id: 'l1choose', html: 'Choose Method', speech: 'Choose Method' }] },
+    { id: 'l2', name: 'Level 2', sub: 'x in the denom.', subSpeech: 'x in the denominator', cap: 'Denominator type', sections: [
+        { id: 'l2x', html: '<span class="pm">x</span>', speech: 'Denominator x' },
+        { id: 'l2one', html: 'One linear factor', speech: 'One linear factor' },
+        { id: 'l2two', html: 'Two linear factors', speech: 'Two linear factors' },
+        { id: 'l2quad', html: 'Quadratic', speech: 'Quadratic' }] },
+    { id: 'mixed', name: 'Mixed', sub: 'No steps, just solve', sections: [{ id: 'mixed', html: 'Mixed', speech: 'Mixed' }] }
+];
+var STAR_ROUND = 10;
+var SAVE_KEY = 'solvingRationalEq_v1';
+var CONFETTI_KEY = 'solvingRationalEq_confetti_v1';
+var MAX_COUNT = 1000000;
+
+var currentLevel = 'l1';
+var sectionChoice = { l1: 'l1lcd', l2: 'l2x', mixed: 'mixed' };
+var catCount = {};
+var prob = null, pState = null, lastBox = null;
+var streak = 0, bestStreak = 0, problemCount = 0;
+var stats = blankStats(), stars = blankCounts(), starProg = blankCounts();
+var confettiEnabled = true;
+var solutionShown = 0, altShown = false;
+var recent = [], RECENT_LIMIT = 8;
+
+function blankStats() { var s = {}, i; for (i = 0; i < STAT_KEYS.length; i++) s[STAT_KEYS[i]] = { c: 0, t: 0 }; return s; }
+function blankCounts() { var s = {}, i; for (i = 0; i < STAT_KEYS.length; i++) s[STAT_KEYS[i]] = 0; return s; }
+function levelById(id) { for (var i = 0; i < LEVELS.length; i++) if (LEVELS[i].id === id) return LEVELS[i]; return LEVELS[0]; }
+function currentCat() { return sectionChoice[currentLevel]; }
+function sectionInfo(cat) {
+    for (var i = 0; i < LEVELS.length; i++) for (var j = 0; j < LEVELS[i].sections.length; j++) if (LEVELS[i].sections[j].id === cat) return { level: LEVELS[i], sec: LEVELS[i].sections[j] };
+    return { level: LEVELS[0], sec: LEVELS[0].sections[0] };
+}
+
+/* ---------- safety: one escape choke point, never trust storage ---------- */
+function esc(str) { return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+function safeCount(v, max) {
+    var n = Number(v);
+    if (typeof v === 'boolean' || v === null || v === '' || !isFinite(n) || n < 0) return 0;
+    n = Math.floor(n);
+    return n > max ? max : n;
+}
+function sanitize(data) {
+    var src = (data && typeof data === 'object') ? data : {}, i, k;
+    var st = (src.stats && typeof src.stats === 'object') ? src.stats : {};
+    var sr = (src.stars && typeof src.stars === 'object') ? src.stars : {};
+    var sp = (src.prog && typeof src.prog === 'object') ? src.prog : {};
+    var out = { stats: blankStats(), stars: blankCounts(), prog: blankCounts(), best: safeCount(src.best, MAX_COUNT) };
+    for (i = 0; i < STAT_KEYS.length; i++) {
+        k = STAT_KEYS[i];
+        var v = (st[k] && typeof st[k] === 'object') ? st[k] : {};
+        var t = safeCount(v.t, MAX_COUNT), c = safeCount(v.c, MAX_COUNT);
+        if (c > t) c = t;
+        out.stats[k] = { c: c, t: t };
+        out.stars[k] = safeCount(sr[k], MAX_COUNT);
+        out.prog[k] = safeCount(sp[k], STAR_ROUND - 1);
+    }
+    return out;
+}
+function saveState() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ stats: stats, stars: stars, prog: starProg, best: bestStreak })); } catch (e) { /* storage unavailable */ } }
+function loadState() {
+    try {
+        var raw = localStorage.getItem(SAVE_KEY);
+        if (raw) { var clean = sanitize(JSON.parse(raw)); stats = clean.stats; stars = clean.stars; starProg = clean.prog; bestStreak = clean.best; }
+    } catch (e) { stats = blankStats(); stars = blankCounts(); starProg = blankCounts(); bestStreak = 0; }
+    try { if (localStorage.getItem(CONFETTI_KEY) === '0') confettiEnabled = false; } catch (e2) { /* ignore */ }
+}
+
+/* ---------- words for screen readers ---------- */
+function speakText(html) {
+    return String(html).replace(/<br\s*\/?>/g, '. ')
+        .replace(/<sup>2<\/sup>/g, ' squared').replace(/<sup>(\d+)<\/sup>/g, ' to the power $1')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/&ne;/g, ' is not ').replace(/&middot;/g, ' times ')
+        .replace(/&#8722;(?=[0-9x])/g, ' negative ')
+        .replace(/&#8722;/g, ' minus ').replace(/&#178;/g, ' squared').replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, 'and').replace(/&#39;/g, "'").replace(/(\d)x/g, '$1 x').replace(/\s+/g, ' ').trim();
+}
+function dual(html, speech) { return '<span aria-hidden="true">' + html + '</span><span class="sr-only">' + esc(speech) + '</span>'; }
+
+/* ---------- icons ---------- */
+function starSVG(size) {
+    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 20 20" aria-hidden="true" focusable="false">' +
+        '<path d="M10 1.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L10 14.8l-5.2 2.8 1-5.8L1.5 7.7l5.9-.8z" fill="#7c3aed" stroke="#5b21b6" stroke-width="1" stroke-linejoin="round"/></svg>';
+}
+function cupSVG(frac, size) {
+    var f = Math.max(0, Math.min(1, frac)), h = 15 * f, y = 18 - h;
+    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 22 22" aria-hidden="true" focusable="false">' +
+        '<defs><clipPath id="cupclip' + size + '"><path d="M4 3h14l-2 15H6z"/></clipPath></defs>' +
+        '<rect x="0" y="' + y.toFixed(2) + '" width="22" height="' + h.toFixed(2) + '" fill="#10b981" clip-path="url(#cupclip' + size + ')"/>' +
+        '<path d="M4 3h14l-2 15H6z" fill="none" stroke="#2e3d8f" stroke-width="1.6" stroke-linejoin="round"/>' +
+        '<path d="M18 6h1.5a2.5 2.5 0 0 1 0 5H17.4" fill="none" stroke="#2e3d8f" stroke-width="1.6"/></svg>';
+}
+var CHECK_SVG = '<svg class="check-mark" width="26" height="26" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#047857" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+var GO_SVG = '<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h12M12.5 6.5 18 12l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+/* ---------- level tiles and section pills ---------- */
+function buildTiles() {
+    var grid = document.getElementById('tile-grid'), html = '', i;
+    for (i = 0; i < LEVELS.length; i++) {
+        var lv = LEVELS[i];
+        html += '<label class="tile"><input type="radio" class="tile-radio" name="level" value="' + lv.id + '"' + (lv.id === currentLevel ? ' checked' : '') +
+            ' aria-label="' + esc(lv.name + ', ' + (lv.subSpeech || lv.sub)) + '"><span class="tile-face" aria-hidden="true">' + lv.name + '<small>' + lv.sub + '</small></span></label>';
+    }
+    grid.innerHTML = html;
+    var radios = grid.querySelectorAll('.tile-radio');
+    for (i = 0; i < radios.length; i++) radios[i].addEventListener('change', function (e) { setLevel(e.target.value); });
+}
+function buildPills() {
+    var lv = levelById(currentLevel), zone = document.getElementById('pill-zone'), i;
+    if (lv.sections.length < 2) { zone.innerHTML = ''; return; }
+    var html = (lv.cap ? '<p class="pill-cap" aria-hidden="true">' + lv.cap + '</p>' : '') +
+        '<div class="pill-group" role="radiogroup" aria-label="' + esc(lv.name + (lv.cap ? ', ' + lv.cap : ', section')) + '">';
+    for (i = 0; i < lv.sections.length; i++) {
+        var s = lv.sections[i];
+        html += '<label class="pill"><input type="radio" class="pill-radio" name="section" value="' + s.id + '"' + (s.id === sectionChoice[currentLevel] ? ' checked' : '') +
+            ' aria-label="' + esc(s.speech) + '"><span class="pill-face" aria-hidden="true">' + s.html + '</span></label>';
+    }
+    zone.innerHTML = html + '</div>';
+    var radios = zone.querySelectorAll('.pill-radio');
+    for (i = 0; i < radios.length; i++) radios[i].addEventListener('change', function (e) { setSection(e.target.value); });
+}
+function setLevel(id) { retireProblem(false); currentLevel = id; buildPills(); newProblem(true); }
+function setSection(id) { retireProblem(false); sectionChoice[currentLevel] = id; newProblem(true); }
+
+/* ---------- problems ---------- */
+/* catCount[cat] = problems finished, skipped or revealed, so the ramps
+   count only problems the student actually moved past. */
+function retireProblem(always) {
+    if (prob && pState && (always || pState.solved || pState.booked)) catCount[prob.cat] = (catCount[prob.cat] || 0) + 1;
+}
+function newProblem(keepFocus) {
+    var cat = currentCat(), tries = 0, n = (catCount[cat] || 0) + 1;
+    prob = generate(cat, n);
+    while (recent.indexOf(prob.speech) !== -1 && tries < 60) { prob = generate(cat, n); tries++; }
+    recent.push(prob.speech);
+    if (recent.length > RECENT_LIMIT) recent.shift();
+    pState = { booked: false, missed: false, revealed: false, solved: false, stage: 0, check: [], noSol: false, chips: null, chipSel: null };
+    lastBox = null;
+    solutionShown = 0; altShown = false;
+    renderProblem(keepFocus);
+}
+function curStage() { return prob.stages[pState.stage]; }
+function isLast(i) { return i === prob.stages.length - 1; }
+var SCORED = { solve: 1, check: 1, final: 1 };
+/* The last step is always the scored one (Check button), whatever it is. */
+function scoredStage(i) { return isLast(i); }
+
+function stageTitle(i) {
+    var t = prob.stages[i];
+    if (prob.cat === 'mixed') return '';
+    if (prob.stages[0] === 'choose' && i > 0 && pState.stage === 0) return 'Step ' + (i + 1);
+    var s = STAGE_TITLE[t];
+    if (t === 'choose') return 'Step 1: Which method?';
+    if (t === 'lcd' && prob.level === 1 && denCount() > 1) s = 'Find the LCD of ' + denList();
+    if (t === 'terms' || t === 'cancel') s = (t === 'cancel' ? 'Multiply both sides by the LCD and cancel' : 'Multiply every term by the LCD');
+    if (t === 'solve' && prob.level === 2) s = 'Solve for x';
+    return 'Step ' + (i + 1) + ': ' + s;
+}
+function denCount() { var ts = allTerms(prob.eq), out = [], i; for (i = 0; i < ts.length; i++) if (isFrac(ts[i]) && out.indexOf(denHTML(ts[i])) === -1) out.push(denHTML(ts[i])); return out.length; }
+function denList() {
+    var ts = allTerms(prob.eq), out = [], i;
+    for (i = 0; i < ts.length; i++) if (isFrac(ts[i])) { var d = denHTML(ts[i]); if (out.indexOf(d) === -1) out.push(d); }
+    return out.length === 2 ? out[0] + ' and ' + out[1] : out.join(', ');
+}
+var STAGE_SPEECH = {
+    choose: 'is there exactly one fraction on each side? Choose Yes or No.',
+    factorDen: 'type the factored form of the quadratic denominator.',
+    never: 'type the values x can never be.',
+    lcd: 'type the least common denominator.',
+    terms: 'multiply every term by the LCD and type what is left of each term.',
+    cancel: 'tap a factor you multiplied by, then the same factor in that term\'s denominator, to cross them out.',
+    left: 'type what is left on the left side and on the right side.',
+    cross: 'multiply each numerator by the denominator diagonally across the equals sign. Type the left side and the right side.',
+    solve: 'type the value of x.',
+    zero: 'move everything to one side and type that side. The other side is 0.',
+    factorSolve: 'type the factored form, then the answers separated by a comma.',
+    check: 'choose Keep or Throw out for each answer.',
+    final: 'type your answer. Separate more than one answer with a comma, or choose No solution.'
+};
+
+/* Boxes */
+/* Touch devices get the full keypad (digits too) and no pop-up keyboard.
+   Any touchscreen counts, not just phones: a tablet or a touchscreen laptop
+   can report a mouse as its main pointer (Ira, 2026-10-26). A finger tap on a
+   box also switches the keypad on, in case the device did not say so. */
+var TOUCH = !!((window.matchMedia && (window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(any-pointer: coarse)').matches)) ||
+    (navigator.maxTouchPoints && navigator.maxTouchPoints > 0));
+function goTouch() {
+    if (TOUCH) return;
+    TOUCH = true;
+    var boxes = document.querySelectorAll('.ans-box'), i;
+    for (i = 0; i < boxes.length; i++) boxes[i].setAttribute('inputmode', 'none');
+    if (prob && pState) buildKeys();
+}
+document.addEventListener('pointerdown', function (e) { if (e.pointerType === 'touch') goTouch(); }, true);
+function boxHTML(id, label, cls) {
+    return '<label class="sr-only" for="' + id + '">' + esc(label) + '</label>' +
+        '<input type="text" class="ans-box' + (cls ? ' ' + cls : '') + '" id="' + id + '"' + (TOUCH ? ' inputmode="none"' : '') + ' autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" maxlength="40">';
+}
+function goBtnHTML(i) { return '<button type="button" class="go-btn" id="go' + i + '" aria-label="Check step ' + (i + 1) + '">' + GO_SVG + '</button>'; }
+function goOrNothing(i) { return scoredStage(i) ? '' : goBtnHTML(i); }
+/* LCD rule for x denominators (Ira, 2026-10-27). No repeated factors in this game. */
+function lcdRule() {
+    return prob.an.lcd.k > 1 ? 'The LCD is the LCD of the numbers times all the distinct linear factors.' : 'The LCD is the product of all the distinct linear factors.';
+}
+/* Numbers and x mixed in the denominators (Ira chose C, 2026-10-27):
+   "What is the smallest expression that x, 2 and 4 all divide into? It needs
+   an x, and its number must be divisible by both 2 and 4." */
+function andList(a) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]; }
+function lcdQuestion() {
+    var ts = allTerms(prob.eq), dens = [], nums = [], fs = [], seen = {}, i, j;
+    for (i = 0; i < ts.length; i++) {
+        if (!isFrac(ts[i])) continue;
+        var d = denHTML(ts[i]); if (dens.indexOf(d) === -1) dens.push(d);
+        if (ts[i].k > 1 && nums.indexOf(ts[i].k) === -1) nums.push(ts[i].k);
+        for (j = 0; j < ts[i].f.length; j++) { var key = polyKey(ts[i].f[j]); if (!seen[key]) { seen[key] = 1; fs.push(isX(ts[i].f[j]) ? 'an x' : '(' + polyHTML(ts[i].f[j]) + ')'); } }
+    }
+    nums.sort(function (a, b) { return a - b; });
+    dens.sort(function (a, b) { var na = /^\d+$/.test(a), nb = /^\d+$/.test(b); if (na !== nb) return na ? 1 : -1; return na ? a - b : 0; });
+    return 'What is the smallest expression that ' + andList(dens) + ' all divide into? It needs ' + andList(fs) + ', and its number must be divisible by ' + (nums.length > 1 ? 'both ' : '') + andList(nums) + '.';
+}
+function lcdMulHTML() {
+    var l = prob.an.lcd, h = productHTML(l.k, l.f);
+    return (l.f.length === 1 && l.k === 1 && !isX(l.f[0])) ? '(' + h + ')' : h;
+}
+function sizeFor(p) { return pDeg(p) <= 0 || (nTerms(p) === 1 && Math.abs(p[pDeg(p)]) < 100) ? 's' : 'w'; }
+
+function stageInner(i) {
+    var t = prob.stages[i], an = prob.an, h, j, n = 'Step ' + (i + 1) + ', ';
+    if (t === 'choose') {
+        return '<p class="question">Is there exactly one fraction on each side?</p><div class="choice-row">' +
+            '<button type="button" class="choice" id="ch-yes" aria-pressed="false"><span>Yes<span class="tag">Cross-multiply</span></span></button>' +
+            '<button type="button" class="choice" id="ch-no" aria-pressed="false"><span>No<span class="tag">Clear with the LCD</span></span></button></div>';
+    }
+    if (t === 'factorDen') {
+        return '<div class="work"><span class="eq-row" aria-hidden="true"><span>' + polyHTML(prob.factorDen.poly) + '</span> <span class="eq-sign">=</span></span>' +
+            '<span class="ans-wrap">' + boxHTML('b' + i + '-0', n + 'factored form of ' + polySpeech(prob.factorDen.poly), 'w') + CHECK_SVG + '</span>' + goOrNothing(i) + '</div>' +
+            '<p class="stage-note">Find two numbers that multiply to ' + numHTML(prob.factorDen.poly[0]) + ' and add to ' + numHTML(prob.factorDen.poly[1]) + '.</p>';
+    }
+    if (t === 'never') {
+        h = '<div class="work">';
+        for (j = 0; j < an.excluded.length; j++) h += (j ? '<span class="lbl">and</span>' : '') + '<span class="lbl" aria-hidden="true">x ' + NE + '</span>' + boxHTML('b' + i + '-' + j, n + 'x is not, value ' + (j + 1) + ' of ' + an.excluded.length, 's');
+        return h + CHECK_SVG + goOrNothing(i) + '</div><p class="stage-note">Set each denominator with an x equal to 0. ' + (an.excluded.length > 1 ? 'There are two values.' : 'There is one value.') + '</p>';
+    }
+    if (t === 'lcd') {
+        return '<div class="work"><span class="lbl" aria-hidden="true">LCD =</span><span class="ans-wrap">' + boxHTML('b' + i + '-0', n + 'the LCD', prob.level === 1 ? 's' : 'w') + CHECK_SVG + '</span>' + goOrNothing(i) + '</div>' +
+            (prob.level === 2 ? '<p class="stage-note">' + lcdRule() + (prob.factorDen ? ' Use the factored denominator.' : '') + '</p>' : '');
+    }
+    if (t === 'terms') {
+        /* A negative number or a sum after the dot goes in parentheses: 6 \u00b7 (\u22126). */
+        var mt = function (tm) { var h = termHTML(tm); return !isFrac(tm) && (nTerms(tm.n) > 1 || polyTerms(tm.n)[0][1] >= 0 && polyTerms(tm.n)[0][0] < 0) ? '(' + h + ')' : h; };
+        var mul = '<span class="mul">' + lcdMulHTML() + '</span>' + DOT;
+        var line = '', boxes = '';
+        for (j = 0; j < prob.eq.L.length; j++) line += (j ? opHTML(prob.eq.L[j].s) : '') + mul + mt(prob.eq.L[j]);
+        line += EQ;
+        for (j = 0; j < prob.eq.R.length; j++) line += (j ? opHTML(prob.eq.R[j].s) : '') + mul + mt(prob.eq.R[j]);
+        var all = allTerms(prob.eq), nl = prob.eq.L.length;
+        for (j = 0; j < all.length; j++) {
+            if (j === nl) boxes += '<span class="eq-sign" aria-hidden="true">=</span>';
+            else if (j && j !== nl) boxes += '<span class="op" aria-hidden="true">' + (all[j].s < 0 ? MINUS : '+') + '</span>';
+            boxes += boxHTML('b' + i + '-' + j, n + 'term ' + (j + 1) + ' of ' + all.length + ', ' + termSpeech(all[j]) + ' times the LCD', sizeFor(product(all[j], an.lcd)) === 'w' ? 'm' : 's');
+        }
+        return '<div class="work"><div class="scroll-x"><span class="eq-row multline" aria-hidden="true">' + line + '</span></div></div>' +
+            '<div class="work">' + boxes + CHECK_SVG + goOrNothing(i) + '</div>' +
+            '<p class="stage-note">Each denominator cancels. Type what is left of each term.</p>';
+    }
+    if (t === 'cancel') return '<div id="chip-area">' + chipsHTML() + '</div><p class="stage-note" id="cancel-note">Tap a factor you multiplied by, then the same factor in that term&#39;s denominator.</p>';
+    if (t === 'left' || t === 'cross') {
+        return '<div class="work one-line"><span class="ans-wrap">' + boxHTML('b' + i + '-0', n + 'left side', 'pair') + '</span><span class="eq-sign" aria-hidden="true">=</span>' +
+            '<span class="ans-wrap">' + boxHTML('b' + i + '-1', n + 'right side', 'pair') + CHECK_SVG + '</span>' + goOrNothing(i) + '</div>' +
+            '<p class="stage-note">' + (t === 'cross' ? 'Multiply each numerator by the denominator diagonally across the = sign.' : 'You can multiply it out or leave it in factored form.') + '</p>';
+    }
+    if (t === 'solve') {
+        return '<div class="work"><span class="lbl" aria-hidden="true">x =</span><span class="ans-wrap">' + boxHTML('b' + i + '-0', n + 'x equals', 's') + CHECK_SVG + '</span>' + goOrNothing(i) + '</div>';
+    }
+    if (t === 'zero') {
+        return '<div class="work"><span class="ans-wrap">' + boxHTML('b' + i + '-0', n + 'one side; the other side is 0', 'w') + '</span><span class="eq-sign" aria-hidden="true">=</span><span aria-hidden="true">0</span>' + CHECK_SVG + goOrNothing(i) + '</div>' +
+            '<p class="stage-note">Keep the x<sup>2</sup> term positive.</p>';
+    }
+    if (t === 'factorSolve') {
+        return '<div class="work"><span class="ans-wrap">' + boxHTML('b' + i + '-0', n + 'factored form of ' + polySpeech(prob.zero) + ', equals 0', 'w') + '</span><span class="eq-sign" aria-hidden="true">=</span><span aria-hidden="true">0</span></div>' +
+            '<div class="work"><span class="lbl" aria-hidden="true">x =</span><span class="ans-wrap">' + boxHTML('b' + i + '-1', n + 'both answers, separated by a comma', 'w') + CHECK_SVG + '</span>' + goOrNothing(i) + '</div>' +
+            '<p class="stage-note">Set each factor equal to 0. Separate the two answers with a comma.</p>';
+    }
+    if (t === 'check') {
+        h = '<p class="stage-note" style="margin:0 0 10px">Remember: ' + exHTML(an.excluded) + '.</p><div class="choice-row">';
+        for (j = 0; j < prob.candidates.length; j++) {
+            var v = prob.candidates[j];
+            h += '<div class="kt-row"><span class="val">x = ' + numHTML(v) + '</span><span class="kt-btns" role="group" aria-label="x equals ' + esc(numSpeech(v)) + '">' +
+                '<button type="button" class="kt" id="kt' + j + '-keep" aria-pressed="false">Keep</button>' +
+                '<button type="button" class="kt" id="kt' + j + '-throw" aria-pressed="false">Throw out</button></span></div>';
+        }
+        return h + '</div>';
+    }
+    /* final (Mixed) */
+    return '<p class="stage-note" style="margin:0 0 6px">If there is more than one answer, separate them with a comma.</p>' +
+        '<div class="work"><span class="lbl" aria-hidden="true">x =</span><span class="ans-wrap">' + boxHTML('b' + i + '-0', 'Your answer. Separate more than one answer with a comma', 'w') + '</span></div>' +
+        '<div style="display:flex;justify-content:center;margin-top:10px"><button type="button" class="nosol" id="nosol-btn" aria-pressed="false">No solution</button></div>';
+}
+
+function renderProblem(keepFocus) {
+    document.getElementById('problem-text').textContent = 'Solve for x: ' + prob.speech + '.';
+    homeKeys();
+    var area = document.getElementById('work-area'), html, i;
+    html = '<div class="work" id="problem-box"><div class="scroll-x"><span aria-hidden="true">' + prob.html + '</span></div></div>';
+    if (prob.cat === 'mixed') html += '<div class="stage" id="stage0" style="border:none;background:transparent;padding:6px 0 0">' + stageInner(0) + '</div>';
+    else for (i = 0; i < prob.stages.length; i++) {
+        html += '<div class="stage' + (i ? ' locked' : '') + '" id="stage' + i + '"><p class="stage-title">' + stageTitle(i) + '</p>' +
+            (i ? '<p class="lock-note">Opens after step ' + i + '</p>' : stageInner(0)) + '</div>';
+    }
+    area.innerHTML = html;
+    fitProblem();
+    wireStage(0);
+    buildKeys();
+    scrollCues();
+    updateSubmit();
+    document.getElementById('next-row').innerHTML = '';
+    setFeedback('', '');
+    closePanel('hint'); closePanel('solution');
+    updateDisplay();
+    if (!keepFocus) focusStage();
+    var info = sectionInfo(prob.cat);
+    announce('Problem ' + (problemCount + 1) + '. ' + info.level.name + (prob.cat === 'mixed' ? '' : ', ' + info.sec.speech) + '. Solve for x: ' + prob.speech + '. ' +
+        (prob.cat === 'mixed' ? STAGE_SPEECH.final : 'Step 1: ' + STAGE_SPEECH[prob.stages[0]]));
+}
+/* A long problem shrinks to fit the screen (down to a readable size) before it scrolls. */
+function fitProblem() {
+    var box = document.getElementById('problem-box');
+    if (!box) return;
+    var inner = box.querySelector('.scroll-x');
+    box.style.fontSize = '';
+    var size = parseFloat(getComputedStyle(box).fontSize);
+    while (inner.scrollWidth > inner.clientWidth + 1 && size > 14) { size -= 1; box.style.fontSize = size + 'px'; }
+}
+function scrollCues() {
+    var boxes = document.querySelectorAll('#work-area .scroll-x'), i;
+    for (i = 0; i < boxes.length; i++) {
+        var b = boxes[i], over = b.scrollWidth > b.clientWidth + 1;
+        b.classList.toggle('more-right', over && b.scrollLeft + b.clientWidth < b.scrollWidth - 2);
+        b.classList.toggle('more-left', over && b.scrollLeft > 2);
+        if (!b.getAttribute('data-cue')) { b.setAttribute('data-cue', '1'); b.addEventListener('scroll', scrollCues); }
+    }
+}
+function boxIds(i) {
+    var t = prob.stages[i], ids = [], j, cnt = 0;
+    if (t === 'never') cnt = prob.an.excluded.length;
+    else if (t === 'terms') cnt = allTerms(prob.eq).length;
+    else if (t === 'left' || t === 'cross' || t === 'factorSolve') cnt = 2;
+    else if (t === 'choose' || t === 'cancel' || t === 'check') cnt = 0;
+    else cnt = 1;
+    for (j = 0; j < cnt; j++) ids.push('b' + i + '-' + j);
+    return ids;
+}
+function wireStage(i) {
+    var t = prob.stages[i], go = document.getElementById('go' + i), j;
+    if (go) go.addEventListener('click', checkAnswer);
+    if (t === 'choose') {
+        document.getElementById('ch-yes').addEventListener('click', function () { pickMethod(true); });
+        document.getElementById('ch-no').addEventListener('click', function () { pickMethod(false); });
+        return;
+    }
+    if (t === 'cancel') { wireChips(); return; }
+    if (t === 'check') {
+        for (j = 0; j < prob.candidates.length; j++) {
+            (function (k) {
+                document.getElementById('kt' + k + '-keep').addEventListener('click', function () { setKeep(k, 'keep'); });
+                document.getElementById('kt' + k + '-throw').addEventListener('click', function () { setKeep(k, 'throw'); });
+            })(j);
+        }
+        return;
+    }
+    if (t === 'final') document.getElementById('nosol-btn').addEventListener('click', toggleNoSol);
+    var ids = boxIds(i);
+    for (j = 0; j < ids.length; j++) wireBox(ids[j], ids);
+}
+function focusStage() {
+    var i = pState.stage, t = prob.stages[i];
+    if (t === 'choose') { document.getElementById('ch-yes').focus(); return; }
+    if (t === 'cancel') { var c = document.querySelector('.chip:not(:disabled)'); if (c) c.focus(); return; }
+    if (t === 'check') { var k = document.getElementById('kt0-keep'); if (k) k.focus(); return; }
+    var ids = boxIds(i), j;
+    for (j = 0; j < ids.length; j++) { var el = document.getElementById(ids[j]); if (el && !el.disabled) { el.focus(); return; } }
+}
+function wireBox(id, group) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('focus', function () { lastBox = el; placeKeys(el); });
+    el.addEventListener('input', function () { markBox(id, false); if (prob.cat === 'mixed' && pState.noSol && el.value !== '') { pState.noSol = false; setNoSol(); } });
+    el.addEventListener('keydown', function (e) {
+        var idx = group.indexOf(id);
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            var next = group[idx + 1] ? document.getElementById(group[idx + 1]) : null;
+            if (el.value !== '' && next && next.value === '') next.focus();
+            else checkAnswer();
+        }
+    });
+}
+function markBox(id, bad) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('field-error', !!bad);
+    if (bad) el.setAttribute('aria-invalid', 'true'); else el.removeAttribute('aria-invalid');
+}
+function markBoxOk(id) { var el = document.getElementById(id); if (!el) return; markBox(id, false); el.classList.add('field-correct'); el.disabled = true; }
+
+/* ---------- typing keys: right under the boxes being typed in ---------- */
+var K = {
+    '(': ['(', 'Open parenthesis'], ')': [')', 'Close parenthesis'], 'x': ['x', 'x'], 'x^2': ['x<sup>2</sup>', 'x squared'],
+    '+': ['+', 'Plus'], '-': ['&#8722;', 'Minus'], ',': [',', 'Comma'],
+    'BS': ['<svg width="22" height="16" viewBox="0 0 22 16" aria-hidden="true" focusable="false"><path d="M7 1.5h12.5v13H7L1.5 8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M10.5 5l5 6M15.5 5l-5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>', 'Delete']
+};
+var DESK_KEYS = ['(', ')', 'x', 'x^2', '+', '-', ','];
+var TOUCH_KEYS = ['7', '8', '9', '(', ')', 'BS', '4', '5', '6', '+', '-', 'x^2', '1', '2', '3', '0', ',', 'x'];
+function homeKeys() {
+    var row = document.getElementById('key-row'), home = document.getElementById('key-home'), fb = document.getElementById('feedback');
+    if (row && home && row.previousElementSibling !== home) home.insertAdjacentElement('afterend', row);
+    if (fb && row && fb.previousElementSibling !== row) row.insertAdjacentElement('afterend', fb);
+}
+/* Feedback right under the row being worked on, keypad under the feedback. */
+function placeKeys(box) {
+    var row = document.getElementById('key-row'), fb = document.getElementById('feedback'), work = box && box.closest ? box.closest('.work') : null;
+    if (!row || !fb || !work) return;
+    var after = work;
+    /* Two-row stages (factor and solve): keep both rows together. */
+    while (after.nextElementSibling && after.nextElementSibling.classList.contains('work')) after = after.nextElementSibling;
+    if (after.nextElementSibling && after.nextElementSibling.classList.contains('stage-note')) after = after.nextElementSibling;
+    if (after.nextElementSibling !== fb) after.insertAdjacentElement('afterend', fb);
+    if (fb.nextElementSibling !== row) fb.insertAdjacentElement('afterend', row);
+}
+function placeFeedbackIn(stageEl) {
+    var fb = document.getElementById('feedback');
+    if (fb && stageEl && fb.parentNode !== stageEl) stageEl.appendChild(fb);
+}
+function needsKeys(i) { var t = prob.stages[i]; return !(t === 'choose' || t === 'cancel' || t === 'check'); }
+function buildKeys() {
+    var row = document.getElementById('key-row'), html = '', i, list = TOUCH ? TOUCH_KEYS : DESK_KEYS;
+    row.className = 'key-row' + (TOUCH ? ' pad' : '');
+    if (pState.solved || !needsKeys(pState.stage)) {
+        row.innerHTML = ''; homeKeys();
+        if (!pState.solved) placeFeedbackIn(document.getElementById('stage' + pState.stage));
+        return;
+    }
+    for (i = 0; i < list.length; i++) {
+        var k = list[i], face = K[k] ? K[k][0] : k, label = K[k] ? K[k][1] : k;
+        html += '<button type="button" class="key-btn' + (k === 'BS' ? ' del' : '') + '" data-ins="' + esc(k) + '" aria-label="' + esc(label) + '">' + face + '</button>';
+    }
+    row.innerHTML = html;
+    var keys = row.querySelectorAll('.key-btn');
+    for (i = 0; i < keys.length; i++) {
+        keys[i].addEventListener('mousedown', function (e) { e.preventDefault(); });
+        keys[i].addEventListener('touchstart', function (e) { e.preventDefault(); }, { passive: false });
+        keys[i].addEventListener('pointerdown', function (e) {
+            e.preventDefault();
+            var k = this.getAttribute('data-ins');
+            insertAtCursor(k);
+            if (k === 'BS') startDeleteRepeat();
+        });
+        keys[i].addEventListener('pointerup', stopDeleteRepeat);
+        keys[i].addEventListener('pointercancel', stopDeleteRepeat);
+        keys[i].addEventListener('pointerleave', stopDeleteRepeat);
+        keys[i].addEventListener('contextmenu', function (e) { e.preventDefault(); });
+        keys[i].addEventListener('click', function (e) { if (e.detail === 0) insertAtCursor(this.getAttribute('data-ins')); });
+    }
+    var ids = boxIds(pState.stage), j;
+    for (j = 0; j < ids.length; j++) { var b = document.getElementById(ids[j]); if (b && !b.disabled) { placeKeys(b); break; } }
+}
+var delTimer = null;
+function startDeleteRepeat() {
+    stopDeleteRepeat();
+    var started = Date.now();
+    function tick() {
+        var el = lastBox && !lastBox.disabled && document.body.contains(lastBox) ? lastBox : null;
+        if (!el || el.value === '') { stopDeleteRepeat(); return; }
+        insertAtCursor('BS');
+        var held = Date.now() - started;
+        delTimer = setTimeout(tick, held > 1500 ? 35 : (held > 900 ? 60 : 110));
+    }
+    delTimer = setTimeout(tick, 450);
+}
+function stopDeleteRepeat() { if (delTimer) { clearTimeout(delTimer); delTimer = null; } }
+function insertAtCursor(txt) {
+    var el = lastBox && !lastBox.disabled && document.body.contains(lastBox) ? lastBox : null;
+    if (!el) { var ids = boxIds(pState.stage), j; for (j = 0; j < ids.length; j++) { var b = document.getElementById(ids[j]); if (b && !b.disabled) { el = b; break; } } }
+    if (!el) return;
+    var s = (typeof el.selectionStart === 'number') ? el.selectionStart : el.value.length;
+    var e = (typeof el.selectionEnd === 'number') ? el.selectionEnd : el.value.length;
+    if (txt === 'BS') {
+        if (s === e && s > 0) s--;
+        el.value = el.value.slice(0, s) + el.value.slice(e);
+        el.focus();
+        try { el.setSelectionRange(s, s); } catch (err) { /* ignore */ }
+        keepCaretInView(el); markBox(el.id, false);
+        return;
+    }
+    if (txt === 'x^2' && s === e && s > 0 && el.value.charAt(s - 1).toLowerCase() === 'x') txt = '^2';
+    if (txt === ',') txt = ', ';
+    if (el.value.length - (e - s) + txt.length > 40) return;
+    el.value = el.value.slice(0, s) + txt + el.value.slice(e);
+    el.focus();
+    try { el.setSelectionRange(s + txt.length, s + txt.length); } catch (err) { /* ignore */ }
+    keepCaretInView(el); markBox(el.id, false);
+    if (prob.cat === 'mixed' && pState.noSol) { pState.noSol = false; setNoSol(); }
+}
+function keepCaretInView(el) { if (el.selectionStart === el.value.length) el.scrollLeft = el.scrollWidth; }
+
+/* ---------- Choose Method ---------- */
+function pickMethod(yes) {
+    if (pState.stage !== 0 || prob.stages[0] !== 'choose') return;
+    var right = (prob.method === 'cross') === yes, b = document.getElementById(yes ? 'ch-yes' : 'ch-no'), other = document.getElementById(yes ? 'ch-no' : 'ch-yes');
+    if (right) {
+        b.classList.add('right'); b.setAttribute('aria-pressed', 'true'); other.classList.add('faded'); other.setAttribute('aria-pressed', 'false');
+        b.setAttribute('aria-disabled', 'true'); other.setAttribute('aria-disabled', 'true');
+        stageDone(prob.method === 'cross' ? 'Yes! One fraction on each side: cross-multiply.' : 'Right! There is more than one term on a side: clear with the LCD.');
+        return;
+    }
+    /* A wrong pick is coached, never scored. */
+    b.setAttribute('aria-pressed', 'true'); other.setAttribute('aria-pressed', 'false');
+    if (yes) sayHTML('Not this time. A side has more than one term (a + or ' + MINUS + ' between terms), so it is not one single fraction. Cross-multiplying only works when each side is exactly one fraction. Try the other method.');
+    else sayHTML('Look again: each side is exactly one fraction, with nothing added or subtracted. That is when cross-multiplying is the quick way. Try the other method.');
+    other.focus();
+}
+
+/* ---------- Keep / Throw out ---------- */
+function setKeep(k, val) {
+    if (pState.solved) return;
+    pState.check[k] = val;
+    document.getElementById('kt' + k + '-keep').setAttribute('aria-pressed', val === 'keep' ? 'true' : 'false');
+    document.getElementById('kt' + k + '-throw').setAttribute('aria-pressed', val === 'throw' ? 'true' : 'false');
+    setFeedback('', '');
+}
+function toggleNoSol() {
+    if (pState.solved) return;
+    pState.noSol = !pState.noSol;
+    if (pState.noSol) { var b = document.getElementById('b0-0'); if (b) { b.value = ''; markBox('b0-0', false); } }
+    setNoSol();
+}
+function setNoSol() { var b = document.getElementById('nosol-btn'); if (b) b.setAttribute('aria-pressed', pState.noSol ? 'true' : 'false'); }
+
+/* ---------- tap-to-cancel: multiply both sides by the LCD and cross out ---------- */
+function chipLabel(p) { return isX(p) ? 'x' : '(' + polyHTML(p) + ')'; }
+function chipsHTML() {
+    var lcd = prob.an.lcd, model = { chips: [], need: 0, gone: 0 }, html = '', sides = [['L', 'Left side'], ['R', 'Right side']], si, j, q;
+    for (si = 0; si < 2; si++) {
+        var side = prob.eq[sides[si][0]], line = '';
+        for (j = 0; j < side.length; j++) {
+            var t = side[j], g = '', where = sides[si][1].toLowerCase() + ', term ' + (j + 1);
+            for (q = 0; q < lcd.f.length; q++) {
+                var idx = model.chips.length;
+                model.chips.push({ side: si, term: j, kind: 'mul', key: polyKey(lcd.f[q]), speech: polySpeech(lcd.f[q]) + ', multiplied in, ' + where });
+                g += '<button type="button" class="chip mulchip" data-i="' + idx + '" aria-pressed="false" aria-label="' + esc(model.chips[idx].speech) + '">' + chipLabel(lcd.f[q]) + '</button>';
+            }
+            g += '<span aria-hidden="true">' + DOT + '</span>';
+            if (isFrac(t)) {
+                var den = '';
+                for (q = 0; q < t.f.length; q++) {
+                    var di = model.chips.length;
+                    model.chips.push({ side: si, term: j, kind: 'den', key: polyKey(t.f[q]), speech: polySpeech(t.f[q]) + ', denominator, ' + where });
+                    den += '<button type="button" class="chip" data-i="' + di + '" aria-pressed="false" aria-label="' + esc(model.chips[di].speech) + '">' + chipLabel(t.f[q]) + '</button>';
+                    model.need++;
+                }
+                if (t.k > 1) den = numHTML(t.k) + den;
+                g += fracHTML('<span class="chip-static">' + polyHTML(t.n, t.asc) + '</span>', den);
+            } else { var lh = polyHTML(t.n, t.asc); if (nTerms(t.n) > 1 || polyTerms(t.n)[0][0] < 0) lh = '(' + lh + ')'; g += '<span class="chip-static">' + lh + '</span>'; }
+            line += (j ? '<span aria-hidden="true">' + opHTML(t.s) + '</span>' : '') + '<span class="term-group">' + g + '</span>';
+        }
+        html += '<div class="side-line"><span class="side-lbl" aria-hidden="true">' + sides[si][1] + '</span><div class="cancel-row" role="group" aria-label="' + sides[si][1] + '">' + line + '</div></div>';
+    }
+    pState.chips = model; pState.chipSel = null;
+    return html;
+}
+function wireChips() {
+    var chips = document.querySelectorAll('#chip-area .chip'), i;
+    for (i = 0; i < chips.length; i++) chips[i].addEventListener('click', onChip);
+}
+function setNote(t) { var n = document.getElementById('cancel-note'); if (n) n.textContent = t; }
+function onChip(e) {
+    var b = e.currentTarget, m = pState.chips, c = m.chips[Number(b.getAttribute('data-i'))], sel = pState.chipSel;
+    if (b.disabled || c.gone) return;
+    if (!sel || sel.b === b || sel.c.kind === c.kind) {
+        if (sel) sel.b.setAttribute('aria-pressed', 'false');
+        if (sel && sel.b === b) { pState.chipSel = null; return; }
+        pState.chipSel = { b: b, c: c };
+        b.setAttribute('aria-pressed', 'true');
+        setFeedback('', '');
+        setNote(c.kind === 'mul' ? 'Now tap the same factor in this term\u2019s denominator.' : 'Now tap the same factor you multiplied this term by.');
+        return;
+    }
+    sel.b.setAttribute('aria-pressed', 'false');
+    pState.chipSel = null;
+    if (sel.c.side === c.side && sel.c.term === c.term && sel.c.key === c.key) {
+        m.gone++;
+        var cls = 'p' + (((m.gone - 1) % 3) + 1), pair = [sel, { b: b, c: c }], k;
+        for (k = 0; k < 2; k++) {
+            pair[k].c.gone = true;
+            pair[k].b.classList.add('gone', cls);
+            pair[k].b.disabled = true;
+            pair[k].b.setAttribute('aria-label', pair[k].c.speech + ', crossed out');
+        }
+        var left = m.need - m.gone;
+        if (left <= 0) { announce('All denominators cancelled.'); stageDone('Every denominator is gone.'); return; }
+        setNote('Nice. ' + left + (left === 1 ? ' more pair to cross out.' : ' more pairs to cross out.'));
+        announce('Crossed out. ' + left + (left === 1 ? ' more pair.' : ' more pairs.'));
+        var nxt = document.querySelector('#chip-area .chip:not(:disabled)'); if (nxt) nxt.focus();
+        return;
+    }
+    /* A wrong pair is coached, never scored. */
+    if (sel.c.side !== c.side || sel.c.term !== c.term) sayHTML('Cancel inside one term at a time: a factor you multiplied that term by, with the same factor in <b>that term&#39;s</b> denominator.');
+    else sayHTML('Those are not the same factor. Look for one that is exactly the same.');
+    setNote('Tap a factor you multiplied by, then the same factor in that term\u2019s denominator.');
+    b.focus();
+}
+
+/* ---------- live regions ---------- */
+function announce(text) {
+    var el = document.getElementById('announcer');
+    el.textContent = '';
+    setTimeout(function () { el.textContent = text; }, 60);
+}
+function setFeedback(html, cls) {
+    var fb = document.getElementById('feedback');
+    fb.className = 'feedback' + (cls ? ' ' + cls : '');
+    fb.innerHTML = html;
+    if (html) revealFeedback();
+}
+function revealFeedback() {
+    var fb = document.getElementById('feedback');
+    var r = fb.getBoundingClientRect(), vh = window.innerHeight || document.documentElement.clientHeight;
+    if (r.bottom > vh - 8 || r.top < 0) {
+        try { fb.scrollIntoView({ block: 'center', behavior: prefersReducedMotion() ? 'auto' : 'smooth' }); } catch (e) { fb.scrollIntoView(false); }
+    }
+}
+function sayHTML(html) { setFeedback(dual(html, speakText(html)), 'incorrect'); }
+function sayNotice(html) { setFeedback(dual(html, speakText(html)), 'notice'); }
+
+/* ---------- checking ---------- */
+var SUCCESS = ['Correct!', 'Great work!', 'Exactly right!', "That's it!", 'Nicely done!'];
+function val(id) { var el = document.getElementById(id); return el ? el.value : ''; }
+function checkAnswer() {
+    if (!prob || pState.solved) return;
+    var i = pState.stage, t = prob.stages[i], ids = boxIds(i), g, j;
+    if (t === 'choose') { sayNotice('Choose Yes or No first.'); return; }
+    if (t === 'cancel') { var left = pState.chips.need - pState.chips.gone; sayNotice('Cross out the matching factors first. ' + left + (left === 1 ? ' pair is' : ' pairs are') + ' left.'); return; }
+    if (t === 'factorDen') {
+        var r = readPoly(val(ids[0]));
+        if (!r.ok) return readFail(r.code === 'empty' ? 'Type the factored denominator.' : r.msg, ids[0]);
+        if (!pEq(r.poly, prob.factorDen.poly)) return coach('Multiplying your factors back out does not give ' + polyHTML(prob.factorDen.poly) + '. Find two numbers that multiply to ' + numHTML(prob.factorDen.poly[0]) + ' and add to ' + numHTML(prob.factorDen.poly[1]) + '.', [ids[0]]);
+        if (astFactorCount(r.ast) < 2) return coach('That is equal, but it is not factored yet. Write it as a product of two factors.', [ids[0]]);
+        return passStage(ids);
+    }
+    if (t === 'never') {
+        var raws = []; for (j = 0; j < ids.length; j++) raws.push(val(ids[j]));
+        g = gradeNever(prob, raws);
+        if (g.kind === 'read') return readFail(g.msg, ids[g.box]);
+        if (g.kind === 'wrong') return coach(g.msg, [ids[g.box]]);
+        return passStage(ids);
+    }
+    if (t === 'lcd') {
+        g = gradeLcd(prob, val(ids[0]));
+        /* Two tries, then the LCD is shown (as in Rational Expressions). */
+        if (g.kind === 'read') return readFail(g.msg, ids[0]);
+        if (g.kind === 'wrong') { pState.lcdMiss = (pState.lcdMiss || 0) + 1; return coach(g.msg + (pState.lcdMiss >= 2 ? ' The LCD is ' + productHTML(prob.an.lcd.k, prob.an.lcd.f) + '.' : ''), [ids[0]]); }
+        return passStage(ids);
+    }
+    if (t === 'terms') {
+        var all = allTerms(prob.eq);
+        for (j = 0; j < all.length; j++) {
+            var el = document.getElementById(ids[j]);
+            if (el.disabled) continue;
+            g = gradeProduct(prob, all[j], el.value);
+            if (g.kind === 'read') return readFail(g.msg, ids[j]);
+            if (g.kind === 'wrong') return (scoredStage(i) ? miss : coach)(g.msg, [ids[j]]);
+            markBoxOk(ids[j]);
+        }
+        return passStage(ids);
+    }
+    if (t === 'left' || t === 'cross') {
+        g = t === 'left' ? gradeLeft(prob, val(ids[0]), val(ids[1])) : gradeCross(prob, val(ids[0]), val(ids[1]));
+        if (g.kind === 'read') return readFail(g.msg, ids[g.box]);
+        if (g.kind === 'wrong') return (scoredStage(i) ? miss : coach)(g.msg, [ids[g.box]]);
+        return passStage(ids);
+    }
+    if (t === 'zero') {
+        g = gradeZero(prob, val(ids[0]));
+        if (g.kind === 'read') return readFail(g.msg, ids[0]);
+        if (g.kind === 'wrong') return coach(g.msg, [ids[0]]);
+        return passStage(ids);
+    }
+    if (t === 'factorSolve') {
+        g = gradeFactorSolve(prob, val(ids[0]), val(ids[1]));
+        if (g.kind === 'read') return readFail(g.msg, ids[g.box]);
+        if (g.kind === 'wrong') return coach(g.msg, [ids[g.box]]);
+        return passStage(ids);
+    }
+    if (t === 'solve') {
+        g = gradeSolve(prob, val(ids[0]));
+        if (g.kind === 'read') return readFail(g.msg, ids[0]);
+        if (g.kind === 'wrong') return scoredStage(i) ? miss(g.msg, [ids[0]]) : coach(g.msg, [ids[0]]);
+        if (scoredStage(i)) { markBoxOk(ids[0]); return finishSolved(); }
+        return passStage(ids);
+    }
+    if (t === 'check') {
+        g = gradeCheck(prob, pState.check);
+        if (g.kind === 'read') { sayNotice(g.msg); return; }
+        if (g.kind === 'wrong') { miss(g.msg, []); var f = document.getElementById('kt' + g.row + '-keep'); if (f) f.focus(); return; }
+        for (j = 0; j < prob.candidates.length; j++) {
+            document.getElementById('kt' + j + '-keep').setAttribute('aria-disabled', 'true');
+            document.getElementById('kt' + j + '-throw').setAttribute('aria-disabled', 'true');
+        }
+        return finishSolved();
+    }
+    if (t === 'final') {
+        g = gradeFinal(prob, val(ids[0]), pState.noSol);
+        if (g.kind === 'read') return readFail(g.msg, ids[0]);
+        if (g.kind === 'warn') {
+            /* A fair warning, free: the streak stays. */
+            markBox(ids[0], true);
+            sayHTML('Check your answers. At least one of them makes a denominator in the <b>original</b> equation equal 0, so the equation is not defined there. Plug each answer into every denominator, and remove any that do not work.');
+            document.getElementById(ids[0]).focus();
+            return;
+        }
+        if (g.kind === 'wrong') return miss(g.msg, pState.noSol ? [] : [ids[0]]);
+        if (!pState.noSol) markBoxOk(ids[0]);
+        document.getElementById('nosol-btn').setAttribute('aria-disabled', 'true');
+        return finishSolved();
+    }
+}
+function readFail(msg, id) {
+    if (id) markBox(id, false);
+    sayNotice(msg);
+    var el = id ? document.getElementById(id) : null;
+    if (el) el.focus();
+}
+/* Guided steps: coached, never scored. */
+function coach(msg, ids) {
+    for (var j = 0; j < ids.length; j++) markBox(ids[j], true);
+    sayHTML(msg);
+    var el = ids.length ? document.getElementById(ids[0]) : null;
+    if (el) { el.focus(); try { el.select(); } catch (e) { /* ignore */ } }
+}
+/* The scored last step. Accuracy option A: a wrong try books nothing; it
+   only breaks the streak. The problem is recorded once, when finished. */
+function miss(msg, ids) {
+    pState.missed = true; streak = 0; updateDisplay(); saveState();
+    coach(msg, ids);
+}
+function passStage(ids) { for (var j = 0; j < ids.length; j++) markBoxOk(ids[j]); if (isLast(pState.stage)) finishSolved(); else stageDone(); }
+function updateSubmit() {
+    var row = document.getElementById('submit-row');
+    if (pState.solved || !scoredStage(pState.stage)) { row.innerHTML = ''; return; }
+    row.innerHTML = '<button type="button" class="submit-btn" id="submit-btn">Check</button>';
+    document.getElementById('submit-btn').addEventListener('click', checkAnswer);
+}
+/* A guided step is finished: open the next one. */
+function stageDone(msg) {
+    var i = pState.stage, box = document.getElementById('stage' + i);
+    box.classList.add('cleared');
+    var go = document.getElementById('go' + i);
+    if (go) go.parentNode.removeChild(go);
+    if (prob.stages[i] === 'cancel') setNote('Every denominator is gone.');
+    pState.stage = i + 1;
+    if (prob.stages[0] === 'choose' && i === 0) {
+        for (var q = 2; q < prob.stages.length; q++) { var lt = document.querySelector('#stage' + q + ' .stage-title'); if (lt) lt.textContent = stageTitle(q); }
+    }
+    var nb = document.getElementById('stage' + (i + 1));
+    nb.classList.remove('locked');
+    nb.innerHTML = '<p class="stage-title">' + stageTitle(i + 1) + '</p>' + stageInner(i + 1);
+    wireStage(i + 1);
+    homeKeys();
+    buildKeys();
+    updateSubmit();
+    scrollCues();
+    if (!document.getElementById('hint-box').hidden) renderHint();
+    var said = msg || ('Step ' + (i + 1) + ' done!');
+    setFeedback(dual(esc(said), said + ' Step ' + (i + 2) + ': ' + STAGE_SPEECH[prob.stages[i + 1]]), 'correct');
+    focusStage();
+}
+function finishSolved() {
+    pState.solved = true;
+    var firstTry = !pState.missed && !pState.revealed, earnedStar = false;
+    if (!pState.booked) {
+        pState.booked = true;
+        stats[prob.cat].t++;
+        if (!pState.revealed) {
+            stats[prob.cat].c++;
+            starProg[prob.cat]++;
+            if (starProg[prob.cat] >= STAR_ROUND) { starProg[prob.cat] = 0; stars[prob.cat]++; earnedStar = true; }
+        }
+    }
+    var msg = pick(SUCCESS);
+    if (firstTry) { streak++; if (streak > bestStreak) bestStreak = streak; celebrate(streak); }
+    if (earnedStar) { msg += ' You earned a star!'; if (confettiEnabled && confettiTierFor(streak) < 2) createConfetti(100, 2); }
+    saveState(); updateDisplay();
+    var st = document.getElementById('stage' + pState.stage);
+    if (st && prob.cat !== 'mixed') st.classList.add('cleared');
+    homeKeys();
+    document.getElementById('key-row').innerHTML = '';
+    /* The answer, in its own green box. */
+    var fin = document.createElement('div');
+    fin.className = 'final-box'; fin.id = 'final-box';
+    fin.innerHTML = dual(listHTML(prob.answer), 'Answer: ' + listSpeech(prob.answer));
+    document.getElementById('work-area').appendChild(fin);
+    var extra = !prob.answer.length && prob.level === 2 ? ' Every answer made a denominator 0, so this equation has no solution.' : '';
+    setFeedback(dual(esc(msg) + (extra ? '<br><span style="font-size:15px;color:#3c4569">' + extra + '</span>' : ''), msg + extra + ' The answer is ' + listSpeech(prob.answer) + '.'), 'correct');
+    lockAndShowNext();
+}
+function lockAndShowNext() {
+    document.getElementById('submit-row').innerHTML = '';
+    var row = document.getElementById('next-row');
+    row.innerHTML = '<button type="button" class="submit-btn next-btn" id="next-btn">Next Problem <svg width="14" height="12" viewBox="0 0 14 12" aria-hidden="true" focusable="false" style="vertical-align:-1px;margin-left:4px"><path d="M1 6h11M7.5 1.5 12 6l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
+    var nb = document.getElementById('next-btn'), armedAt = Date.now() + 300;
+    nb.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.repeat) e.preventDefault(); });
+    nb.addEventListener('click', function () { if (Date.now() < armedAt) return; nextProblem(); });
+    nb.focus();
+}
+function nextProblem() { retireProblem(true); problemCount++; newProblem(); }
+
+/* ---------- reveals: Show Solution withholds credit and ends the streak;
+   Hint and Skip are free ---------- */
+function chargeReveal() {
+    if (!pState.booked) { pState.booked = true; stats[prob.cat].t++; }
+    pState.revealed = true;
+    streak = 0; updateDisplay(); saveState();
+}
+function closePanel(name) { document.getElementById(name + '-box').hidden = true; document.getElementById(name + '-btn').setAttribute('aria-expanded', 'false'); }
+function openPanel(name) { document.getElementById(name + '-box').hidden = false; document.getElementById(name + '-btn').setAttribute('aria-expanded', 'true'); }
+/* The hint matches the step the student is on (Ira, 2026-10-27). */
+function stageHint() {
+    var t = prob.stages[pState.stage], an = prob.an, quad = pDeg(prob.solveP || an.P) === 2;
+    var quadLine = quad ? ' If you end up with an x<sup>2</sup> term, move everything to one side so the other side is 0.' : ' Then solve for x.';
+    var ex = an.excluded.length ? exHTML(an.excluded) : '';
+    switch (t) {
+        case 'choose': return 'Look at each side. If each side is exactly one fraction, with nothing added or subtracted, cross-multiply. If there is a + or ' + MINUS + ' between terms on a side, clear with the LCD.';
+        case 'factorDen': return 'Find two numbers that multiply to ' + numHTML(prob.factorDen.poly[0]) + ' and add to ' + numHTML(prob.factorDen.poly[1]) + '.';
+        case 'never': return 'A denominator can never be 0. Set each denominator that has an x equal to 0 and solve. ' + (an.excluded.length > 1 ? 'Each one gives a value x can never be.' : 'That value is the one x can never be.');
+        case 'lcd': return prob.level === 1 ? 'The LCD is the smallest number that every denominator divides into.' : (prob.an.lcd.k > 1 ? lcdQuestion() : lcdRule() + (prob.factorDen ? ' Use the factored form of the quadratic denominator.' : ''));
+        case 'terms': return 'Multiply each term by the LCD. A denominator cancels with part of the LCD, so multiply its numerator by what is left of the LCD. A term with no denominator gets multiplied by the whole LCD.' + (quad ? ' Keep the products as they are; you will combine them in the next step.' : '');
+        case 'cancel': return 'Every term was multiplied by the LCD. Tap a factor you multiplied by, then the same factor in that term&#39;s denominator, to cross the pair out. Keep going until no denominators are left.';
+        case 'left': return 'Multiply out what is left in each term and combine like terms on each side.' + quadLine;
+        case 'cross': return 'Cross-multiply: multiply each numerator by the denominator diagonally across the = sign. For a/b = c/d, that gives a &middot; d = c &middot; b. Use parentheses around any numerator with two terms.';
+        case 'solve':
+            var parens = prob.method === 'cross' ? /\(/.test(prob.cross.LH + prob.cross.RH) : /\(/.test(sideProductsHTML(prob.eq.L, an.lcd, true) + sideProductsHTML(prob.eq.R, an.lcd, true));
+            return (parens ? 'First multiply out (distribute) the parentheses and combine like terms on each side. Then collect' : 'Collect') + ' the x terms on one side and the numbers on the other, and divide by the number in front of x.';
+        case 'zero': return 'This is a quadratic. Move every term to one side so the other side is 0, and combine like terms. Keep the x<sup>2</sup> term positive.';
+        case 'factorSolve': return 'Find two numbers that multiply to ' + numHTML(prob.zero[0] / prob.zero[2]) + ' and add to ' + numHTML(prob.zero[1] / prob.zero[2]) + '. Write the factors, then set each factor equal to 0.';
+        case 'check': return 'Compare each answer with the values x can never be: ' + ex + '. Throw out any answer that makes a denominator 0, and keep the rest.';
+    }
+    /* Mixed: a hint about this problem (Ira, 2026-10-27). */
+    if (t === 'final') {
+        var solve = an.excluded.length ? ' Then solve, and check that no answer makes a denominator 0.' : ' Then solve.';
+        if (prob.method === 'cross' && !prob.factorDen) {
+            var lone = !isFrac(prob.eq.L[0]) ? prob.eq.L[0] : (!isFrac(prob.eq.R[0]) ? prob.eq.R[0] : null);
+            var asOne = lone ? ' (think of ' + polyHTML(lone.n) + ' as ' + polyHTML(lone.n) + '/1)' : '';
+            return 'There is exactly one fraction on each side' + asOne + ', so you can cross-multiply: multiply each numerator by the denominator diagonally across the = sign.' + solve;
+        }
+        var l = an.lcd, lh = productHTML(l.k, l.f);
+        return 'Clear the fractions with the LCD.' + (prob.factorDen ? ' Factor the quadratic denominator first: ' + polyHTML(prob.factorDen.poly) + ' = ' + productHTML(1, prob.factorDen.f) + '.' : '') +
+            ' The LCD here is ' + lh + '. Multiply every term on both sides by it, so every denominator cancels.' + solve;
+    }
+    return prob.hint;
+}
+function renderHint() {
+    var box = document.getElementById('hint-box'), h = stageHint();
+    box.innerHTML = '<div class="panel-title">Hint' + (prob.cat === 'mixed' ? '' : ' for Step ' + (pState.stage + 1)) + '</div>' + dual(h, speakText(h));
+}
+function toggleHint() {
+    var box = document.getElementById('hint-box');
+    if (!box.hidden) { closePanel('hint'); return; }
+    renderHint();
+    openPanel('hint');
+}
+function toggleSolution() {
+    var box = document.getElementById('solution-box');
+    if (!box.hidden) { closePanel('solution'); return; }
+    if (!pState.solved) chargeReveal();
+    if (solutionShown < 1) solutionShown = 1;
+    renderSolution();
+    openPanel('solution');
+}
+function stepHTML(s, n) {
+    return '<div class="solution-step"><div>' + dual('<b>' + n + '.</b> ' + s.label + ':', n + '. ' + speakText(s.label) + '.') + '</div>' +
+        '<div class="solution-eq' + (s.prose ? ' prose' : '') + '" role="img" aria-label="' + esc(s.speech) + '">' + s.math + '</div></div>';
+}
+function renderSolution() {
+    var box = document.getElementById('solution-box'), steps = prob.steps, total = steps.length;
+    var shown = Math.min(solutionShown, total), html = '<div class="panel-title">Step-by-Step Solution' + (prob.altSteps ? ' (' + (prob.method === 'cross' ? 'cross-multiply' : 'clear with the LCD') + ')' : '') + '</div>', i;
+    for (i = 0; i < shown; i++) html += stepHTML(steps[i], i + 1);
+    if (shown < total) {
+        var left = total - shown;
+        html += '<div class="step-controls"><button type="button" class="submit-btn" id="next-step-btn">Next Step</button>' +
+            '<span class="steps-left">' + left + (left === 1 ? ' step left' : ' steps left') + '</span></div>';
+    } else {
+        if (prob.altSteps) {
+            html += '<button type="button" class="alt-btn" id="alt-btn" aria-expanded="' + (altShown ? 'true' : 'false') + '">' + (altShown ? 'Hide the other method' : 'Another method: ' + prob.altName) + '</button>';
+            if (altShown) {
+                html += '<div class="alt-panel"><div class="alt-title">Another method: ' + prob.altName + '</div>';
+                for (i = 0; i < prob.altSteps.length; i++) html += stepHTML(prob.altSteps[i], i + 1);
+                html += '</div>';
+            }
+        }
+        html += '<div class="done-line">That is the complete solution. Try the next one yourself!</div>';
+    }
+    box.innerHTML = html;
+    var nb = document.getElementById('next-step-btn');
+    if (nb) nb.addEventListener('click', function () {
+        solutionShown++;
+        renderSolution();
+        var again = document.getElementById('next-step-btn');
+        if (again) again.focus();
+        else { var eqs = box.querySelectorAll('.solution-eq'); if (eqs.length) { eqs[eqs.length - 1].setAttribute('tabindex', '-1'); eqs[eqs.length - 1].focus(); } }
+    });
+    var ab = document.getElementById('alt-btn');
+    if (ab) ab.addEventListener('click', function () { altShown = !altShown; renderSolution(); var b2 = document.getElementById('alt-btn'); if (b2) b2.focus(); });
+}
+function skipProblem() { retireProblem(true); problemCount++; newProblem(); }
+
+/* ---------- header chips ---------- */
+function updateDisplay() {
+    document.getElementById('problemNum').textContent = String(problemCount + 1);
+    document.getElementById('streak').textContent = String(streak);
+    var cat = currentCat(), s = safeCount(stars[cat], MAX_COUNT), p = safeCount(starProg[cat], STAR_ROUND - 1);
+    document.getElementById('stars-chip').innerHTML =
+        starSVG(15) + '<span aria-hidden="true">' + s + '</span>' +
+        '<span style="width:6px" aria-hidden="true"></span>' + cupSVG(p / STAR_ROUND, 18) + '<span aria-hidden="true">' + p + '/' + STAR_ROUND + '</span>' +
+        '<span class="sr-only">Stars in this section: ' + s + '. ' + p + ' of ' + STAR_ROUND + ' toward the next star.</span>';
+}
+
+/* ---------- confetti (design system: palette and fall speeds) ---------- */
+function prefersReducedMotion() { return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+function confettiTierFor(s) { if (s < 3) return 0; if (s % 10 === 0) return 3; if (s % 5 === 0) return 2; if (s % 5 === 3) return 1; return 0; }
+function celebrate(s) {
+    if (!confettiEnabled) return;
+    var tier = confettiTierFor(s);
+    if (tier === 1) createConfetti(50, 1); else if (tier === 2) createConfetti(100, 2); else if (tier === 3) createConfetti(200, 3);
+}
+function createConfetti(count, tier) {
+    if (prefersReducedMotion()) return;
+    /* Orange and red are allowed in confetti only (design system). */
+    var colors = ['#7c3aed', '#22c55e', '#2e3d8f', '#ef4444', '#f59e0b', '#ffeb3b', '#0d9488', '#a78bfa'];
+    var massive = tier === 3, i;
+    for (i = 0; i < count; i++) {
+        var piece = document.createElement('div');
+        piece.className = 'confetti';
+        piece.setAttribute('aria-hidden', 'true');
+        var base = tier === 1 ? 7 + Math.random() * 5 : (tier === 2 ? 10 + Math.random() * 7 : 11 + Math.random() * 9);
+        var color = colors[Math.floor(Math.random() * colors.length)], shape = Math.floor(Math.random() * 4);
+        if (shape === 0) { piece.style.width = base + 'px'; piece.style.height = base + 'px'; piece.style.background = color; piece.style.borderRadius = '50%'; }
+        else if (shape === 1) { piece.style.width = base + 'px'; piece.style.height = base + 'px'; piece.style.background = color; piece.style.borderRadius = '2px'; }
+        else if (shape === 2) { piece.style.width = Math.max(4, base * 0.35) + 'px'; piece.style.height = (base * 1.7) + 'px'; piece.style.background = color; piece.style.borderRadius = '2px'; }
+        else { piece.style.width = '0'; piece.style.height = '0'; piece.style.borderLeft = (base * 0.6) + 'px solid transparent'; piece.style.borderRight = (base * 0.6) + 'px solid transparent'; piece.style.borderBottom = base + 'px solid ' + color; }
+        piece.style.left = (Math.random() * 100) + '%';
+        piece.style.top = '-20px';
+        var dur = tier === 1 ? 1.3 + Math.random() * 0.8 : (tier === 2 ? 1.6 + Math.random() * 1.2 : 2.0 + Math.random() * 1.6);
+        piece.style.animation = (massive ? 'confetti-fall-slow' : 'confetti-fall') + ' ' + dur + 's ease-out forwards';
+        piece.style.animationDelay = (Math.random() * (massive ? 0.8 : 0.4)) + 's';
+        document.body.appendChild(piece);
+        setTimeout((function (el) { return function () { if (el.parentNode) el.parentNode.removeChild(el); }; })(piece), massive ? 5000 : 3800);
+    }
+    if (massive) {
+        for (i = 0; i < 15; i++) {
+            var sp = document.createElement('div');
+            sp.className = 'sparkle'; sp.setAttribute('aria-hidden', 'true');
+            sp.style.left = (Math.random() * 90 + 5) + '%'; sp.style.top = (Math.random() * 55 + 10) + 'vh';
+            sp.style.animationDelay = (Math.random() * 0.5) + 's';
+            document.body.appendChild(sp);
+            setTimeout((function (el) { return function () { if (el.parentNode) el.parentNode.removeChild(el); }; })(sp), 3500);
+        }
+    }
+}
+
+/* ---------- stats ---------- */
+function pct(s) { return s.t > 0 ? Math.round((s.c / s.t) * 100) : 0; }
+function showStats() {
+    var clean = sanitize({ stats: stats, stars: stars, prog: starProg, best: bestStreak });
+    var html = '<h2 id="stats-heading">My Stats</h2><div class="best-line">Best streak: ' + clean.best + '</div>', i, j;
+    for (i = 0; i < LEVELS.length; i++) {
+        var lv = LEVELS[i];
+        html += '<div class="stat-group">' + lv.name + (lv.cap ? ' &middot; ' + lv.cap : '') + '</div>';
+        for (j = 0; j < lv.sections.length; j++) {
+            var sec = lv.sections[j], k = sec.id, s = clean.stats[k], p = pct(s), st = clean.stars[k], pr = clean.prog[k];
+            var tier = (p >= 90 && s.t >= 5) ? 'tier-full' : (p >= 60 ? 'tier-mid' : 'tier-low');
+            html += '<div class="stat-row"><div class="stat-cup">' + cupSVG(pr / STAR_ROUND, 30) + '</div><div class="stat-main">' +
+                '<div class="stat-name"><span>' + dual(k === 'mixed' ? 'All types' : sec.html, k === 'mixed' ? 'All types' : sec.speech) + '</span><span class="stat-stars">' + starSVG(14) + '<span aria-hidden="true">' + st + '</span></span></div>' +
+                '<div class="stat-bar-wrap" aria-hidden="true"><div class="stat-bar ' + tier + '" style="width:' + p + '%"></div></div>' +
+                '<div class="stat-num">' + (s.t > 0 ? s.c + ' right out of ' + s.t + ' (' + p + '%)' : 'not tried yet') + ' &middot; next star ' + pr + '/' + STAR_ROUND + '</div>' +
+                '<span class="sr-only">' + st + (st === 1 ? ' star' : ' stars') + '.</span></div></div>';
+        }
+    }
+    var weakest = null, wp = 101;
+    for (i = 0; i < STAT_KEYS.length; i++) {
+        var s2 = clean.stats[STAT_KEYS[i]];
+        if (s2.t >= 3 && pct(s2) < 80 && pct(s2) < wp) { wp = pct(s2); weakest = STAT_KEYS[i]; }
+    }
+    if (weakest) { var wi = sectionInfo(weakest); html += '<div class="recommend">Practice next: ' + wi.level.name + (weakest === 'mixed' ? '' : ', ' + dual(wi.sec.html, wi.sec.speech)) + ' (' + wp + '%)</div>'; }
+    html += '<div class="stats-actions"><button type="button" class="close-btn" id="close-stats">Close</button><button type="button" class="reset-btn" id="reset-btn">Reset Progress</button></div>';
+    var panel = document.getElementById('stats-panel');
+    panel.innerHTML = html;
+    document.getElementById('stats-overlay').hidden = false;
+    document.getElementById('close-stats').addEventListener('click', hideStats);
+    document.getElementById('reset-btn').addEventListener('click', resetProgress);
+    panel.focus();
+}
+function hideStats() { document.getElementById('stats-overlay').hidden = true; disarmReset(); document.getElementById('stats-btn').focus(); }
+var resetConfirming = false, resetTimer = null;
+function disarmReset() {
+    if (resetTimer) { clearTimeout(resetTimer); resetTimer = null; }
+    resetConfirming = false;
+    var b = document.getElementById('reset-btn');
+    if (b) { b.textContent = 'Reset Progress'; b.className = 'reset-btn'; }
+}
+function resetProgress() {
+    if (!resetConfirming) {
+        resetConfirming = true;
+        var b = document.getElementById('reset-btn');
+        b.textContent = 'Tap again to confirm'; b.className = 'reset-btn armed';
+        announce('Tap Reset Progress again within 3.5 seconds to erase your stats and stars.');
+        resetTimer = setTimeout(disarmReset, 3500);
+        return;
+    }
+    disarmReset();
+    stats = blankStats(); stars = blankCounts(); starProg = blankCounts(); bestStreak = 0;
+    problemCount = 0; streak = 0;
+    updateDisplay(); saveState(); showStats();
+    announce('Progress cleared.');
+}
+
+/* ---------- insignia ---------- */
+function drawInsignia() {
+    var d = '', steps = 240, i, t, r;
+    for (i = 0; i <= steps; i++) {
+        t = (i / steps) * 4 * Math.PI; r = 2 * Math.cos(1.5 * t);
+        d += (i === 0 ? 'M ' : 'L ') + (r * Math.cos(t) * 12).toFixed(2) + ' ' + (r * Math.sin(t) * 12).toFixed(2) + ' ';
+    }
+    document.getElementById('pr-path').setAttribute('d', d.trim());
+}
+
+/* ---------- wiring ---------- */
+function setSwitch(btn, on) { btn.setAttribute('aria-pressed', on ? 'true' : 'false'); }
+function init() {
+    loadState();
+    drawInsignia();
+    buildTiles();
+    buildPills();
+    setSwitch(document.getElementById('sw-confetti'), confettiEnabled);
+    document.getElementById('sw-confetti').addEventListener('click', function () {
+        confettiEnabled = !confettiEnabled;
+        setSwitch(this, confettiEnabled);
+        try { localStorage.setItem(CONFETTI_KEY, confettiEnabled ? '1' : '0'); } catch (e) { /* ignore */ }
+        if (confettiEnabled) createConfetti(40, 1);
+    });
+    document.getElementById('hint-btn').addEventListener('click', toggleHint);
+    document.getElementById('solution-btn').addEventListener('click', toggleSolution);
+    document.getElementById('skip-btn').addEventListener('click', skipProblem);
+    document.getElementById('stats-btn').addEventListener('click', showStats);
+    document.getElementById('stats-overlay').addEventListener('click', function (e) { if (e.target === this) hideStats(); });
+    document.addEventListener('keydown', function (e) {
+        if (document.getElementById('stats-overlay').hidden) return;
+        if (e.key === 'Escape') { hideStats(); return; }
+        if (e.key === 'Tab') {
+            var f = document.getElementById('stats-panel').querySelectorAll('button');
+            if (!f.length) return;
+            var first = f[0], last = f[f.length - 1], act = document.activeElement;
+            if (e.shiftKey && (act === first || act === document.getElementById('stats-panel'))) { e.preventDefault(); last.focus(); }
+            else if (!e.shiftKey && act === last) { e.preventDefault(); first.focus(); }
+        }
+    });
+    window.addEventListener('resize', function () { fitProblem(); scrollCues(); });
+    newProblem(true);
+}
+init();
+
+</script>
+</body>
+</html>
