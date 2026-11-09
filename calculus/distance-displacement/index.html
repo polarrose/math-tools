@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Distance &amp; Displacement</title>
+<meta name="description" content="Six interactive problems: from the definite integrals of velocity over each sub-interval, find the integral over the entire interval, the total area, the total distance traveled and the total displacement.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<style>
+/* Layout, after the nth-term activity: a navy header band, a row of problem
+   circles, one problem card at a time, then Previous / insignia / Next. */
+:root {
+    --paper:      #f3eee4;
+    --card:       #fffcf6;
+    --panel:      #fbf8f1;      /* plot, question tiles */
+    --field:      #ffffff;      /* answer boxes, small buttons */
+    --hover:      #eef0f8;
+    --ink:        #1b2552;
+    --ink-2:      #424d57;      /* explanation text: 7.6:1 on the explanation panel (AAA) */
+    --navy:       #1e2a5e;      /* card, plot and button outlines */
+    --navy-mid:   #5a67a8;      /* answer-box outlines (5.6: 3:1 or better) */
+    --band:       #1b2a4a;      /* title band: the nth-term activity's colours */
+    --band-ink:   #f7f6fb;
+    --band-eyebrow: #a5d6a7;   /* on the band in both modes */
+    --band-rule:  #66bb6a;     /* thin green underline under the title */
+    --select:     #e6e9f4;      /* Show/Hide explanation, current problem */
+    --explain:    #eef0f8;
+    --focus:      #2563eb;
+    --glow-a:     rgba(13, 148, 136, 0.10);
+    --glow-b:     rgba(91, 42, 134, 0.10);
+    --shadow:     rgba(31, 43, 51, 0.30);
+
+    /* the region above the axis: its own colour, never the "Correct!" green */
+    --pos-fill:   rgba(13, 148, 136, 0.26);
+    --pos-soft:   #d7efec;
+    --pos-ink:    #0e5a63;
+    /* the region below the axis */
+    --neg-hatch-bg: #ece2f8;
+    --neg-hatch:  #8a5cc4;
+    --neg-soft:   #efe6fa;
+    --neg-ink:    #5b2a86;
+
+    /* right */
+    --green-soft: #dcf1e6;
+    --green-ink:  #17694a;
+    --badge:      #17694a;
+    /* wrong: a bright violet (READ_FIRST 4.17), never orange or brown */
+    --wrong:      #7c3aed;
+    --wrong-soft: #efe7ff;
+
+    /* the four question tiles, matching their explanations */
+    --q0: #1e2a5e; --q1: #17694a; --q2: #5b2a86; --q3: #0e5a63;
+
+    /* graph */
+    --g-grid:  #e6e8f2;
+    --g-axis:  #1e2a5e;
+    --g-label: #4b5862;
+    --g-curve: #1b2552;
+    --g-halo:  #fbf8f1;
+
+    /* studio mark (insignia_snippet.html) */
+    --rose-a: #1e3a5f; --rose-b: #0d9488; --rose-cap: #5d6798;
+
+    --ui:   'Figtree', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+    --head: 'Fraunces', Georgia, 'Times New Roman', serif;
+    --math: 'STIX Two Text', 'Cambria', 'Times New Roman', Georgia, serif;
+    --sym:  'Cambria Math', 'STIX Two Math', 'STIX Two Text', 'Times New Roman', serif;
+}
+/* Dark mode (READ_FIRST 5.9): the same roles, re-valued. Follows the system
+   setting unless data-theme on <html> forces one or the other. */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --paper: #11182a; --card: #182239; --panel: #141d33; --field: #0f1628; --hover: #24304d;
+        --ink: #e7eaf3; --ink-2: #b3b9cc; --navy: #8f9bcf; --navy-mid: #7a86ad;
+        --band: #0b1120; --band-ink: #f2f3f8; --select: #24304d; --explain: #1f2a45; --focus: #9cbcff;
+        --glow-a: rgba(45, 212, 191, 0.07); --glow-b: rgba(183, 148, 246, 0.07); --shadow: rgba(0, 0, 0, 0.5);
+        --pos-fill: rgba(45, 212, 191, 0.24); --pos-soft: #123a3c; --pos-ink: #6ee0d2;
+        --neg-hatch-bg: #2a2147; --neg-hatch: #b794f6; --neg-soft: #2d2350; --neg-ink: #cdb6ff;
+        --green-soft: #18321f; --green-ink: #9bd3a2; --badge: #2e7d4f;
+        --wrong: #c4a8ff; --wrong-soft: #3b2a63;
+        --q0: #9aa6d6; --q1: #81c784; --q2: #c9b4f5; --q3: #6ee0d2;
+        --g-grid: #26314f; --g-axis: #c3c9de; --g-label: #b3b9cc; --g-curve: #e7eaf3; --g-halo: #141d33;
+        --rose-a: #c4b5fd; --rose-b: #6ee7b7; --rose-cap: #a8b0d8;
+        color-scheme: dark;
+    }
+}
+:root[data-theme="dark"] {
+    --paper: #11182a; --card: #182239; --panel: #141d33; --field: #0f1628; --hover: #24304d;
+    --ink: #e7eaf3; --ink-2: #b3b9cc; --navy: #8f9bcf; --navy-mid: #7a86ad;
+    --band: #0b1120; --band-ink: #f2f3f8; --select: #24304d; --explain: #1f2a45; --focus: #9cbcff;
+    --glow-a: rgba(45, 212, 191, 0.07); --glow-b: rgba(183, 148, 246, 0.07); --shadow: rgba(0, 0, 0, 0.5);
+    --pos-fill: rgba(45, 212, 191, 0.24); --pos-soft: #123a3c; --pos-ink: #6ee0d2;
+    --neg-hatch-bg: #2a2147; --neg-hatch: #b794f6; --neg-soft: #2d2350; --neg-ink: #cdb6ff;
+    --green-soft: #18321f; --green-ink: #9bd3a2; --badge: #2e7d4f;
+    --wrong: #c4a8ff; --wrong-soft: #3b2a63;
+    --q0: #9aa6d6; --q1: #81c784; --q2: #c9b4f5; --q3: #6ee0d2;
+    --g-grid: #26314f; --g-axis: #c3c9de; --g-label: #b3b9cc; --g-curve: #e7eaf3; --g-halo: #141d33;
+    --rose-a: #c4b5fd; --rose-b: #6ee7b7; --rose-cap: #a8b0d8;
+    color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+    margin: 0; min-height: 100vh; font-family: var(--ui); color: var(--ink);
+    background:
+        radial-gradient(620px 380px at 8% 0%, var(--glow-a), transparent 70%),
+        radial-gradient(620px 420px at 100% 100%, var(--glow-b), transparent 70%),
+        var(--paper);
+}
+.sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 10px; }
+.wrap {
+    max-width: 1040px; margin: 0 auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* ---------------------------------------------------------------- header band */
+header .wrap { padding-top: 24px; }
+.band {
+    background: var(--band); color: var(--band-ink); border-radius: 14px;
+    padding: 26px clamp(20px, 4vw, 34px) 28px;
+}
+.eyebrow {
+    margin: 0 0 6px; font-size: 13px; font-weight: 800; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--band-eyebrow);
+}
+h1 {
+    margin: 0; font-family: var(--head); font-weight: 650; font-size: clamp(30px, 5vw, 42px);
+    line-height: 1.12; letter-spacing: -.01em;
+}
+h1::after {
+    content: ""; display: block; height: 3px; margin-top: 12px; border-radius: 2px;
+    background: var(--band-rule);
+}
+h1 .amp { color: inherit; }
+.lead { margin: 12px 0 0; font-size: 17px; line-height: 1.5; opacity: .93; max-width: 64ch; }
+
+main .wrap { padding-top: 22px; padding-bottom: 44px; display: flex; flex-direction: column; gap: 18px; }
+
+/* ---------------------------------------------------------------- problem circles */
+.steps { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.steps .label-p { font-weight: 800; margin-right: 6px; font-size: 16px; }
+.step {
+    min-width: 46px; height: 46px; padding: 0 10px; border-radius: 999px;
+    border: 2px solid var(--navy-mid); background: var(--card); color: var(--ink);
+    font: 800 16px var(--ui); cursor: pointer; display: inline-flex; align-items: center;
+    justify-content: center; gap: 4px;
+}
+.step:hover { background: var(--hover); }
+.step[aria-current="step"] { border-color: var(--navy); background: var(--select); box-shadow: 0 0 0 2px var(--navy) inset; }
+.step.ok   { border-color: var(--green-ink); color: var(--green-ink); background: var(--green-soft); }
+.step.miss { border-color: var(--wrong); color: var(--wrong); background: var(--wrong-soft); }
+.step.ok[aria-current="step"]   { box-shadow: 0 0 0 2px var(--green-ink) inset; }
+.step.miss[aria-current="step"] { box-shadow: 0 0 0 2px var(--wrong) inset; }
+
+/* ---------------------------------------------------------------- card */
+.card {
+    background: var(--card); border: 2px solid var(--navy); border-radius: 24px;
+    box-shadow: 0 30px 60px -34px var(--shadow);
+    padding: 26px 32px 30px; min-width: 0;
+}
+.card h2.ptitle { margin: 0 0 16px; font-family: var(--head); font-weight: 650; font-size: 24px; color: var(--navy); }
+
+/* ---------------------------------------------------------------- plot */
+.plot { margin: 0 0 22px; border-radius: 20px; background: var(--panel); border: 1.5px solid var(--navy); padding: 6px 8px 2px; }
+/* graph colours come from tokens, so light and dark both work */
+.g-grid  { stroke: var(--g-grid); }
+.g-axis  { stroke: var(--g-axis); }
+.g-arrow { fill: var(--g-axis); }
+.g-label { fill: var(--g-label); }
+.g-curve { stroke: var(--g-curve); }
+.g-pos   { fill: var(--pos-fill); stroke: var(--pos-ink); }
+.g-neg   { fill: url(#hatch); stroke: var(--neg-ink); }
+.g-hbg   { fill: var(--neg-hatch-bg); }
+.g-hline { stroke: var(--neg-hatch); }
+.g-dot   { fill: var(--card); stroke: var(--g-curve); }
+.g-num   { fill: var(--g-curve); stroke: var(--g-halo); }
+.plot svg { display: block; width: 100%; height: auto; }
+.region { transition: opacity .55s ease; }
+.region.out { opacity: 0; }
+.mark { transition: opacity .45s ease; }
+.mark.out { opacity: 0; }
+.draw { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.draw.go { transition: stroke-dashoffset 1.5s cubic-bezier(.45, .05, .25, 1); stroke-dashoffset: 0; }
+
+/* ---------------------------------------------------------------- math */
+.m  { font-family: var(--math); font-style: italic; }
+.mr { font-family: var(--math); font-style: normal; }
+.int { display: inline-flex; align-items: center; white-space: nowrap; font-family: var(--math); line-height: 1; }
+/* one integral = one unbreakable symbol: sign, stacked limits, body */
+.iterm { display: inline-flex; align-items: center; white-space: nowrap; }
+.int .s { font-family: var(--sym); font-size: 2.15em; line-height: 1; font-style: normal; transform: translateY(-.04em); }
+/* Upper limit up and to the right of the sign's top hook, lower limit down at
+   its foot - the sign leans, so they are offset. */
+.int .lim {
+    display: inline-flex; flex-direction: column; justify-content: space-between;
+    height: 2.15em; font-size: .66em; font-style: normal; margin: 0 1.05em 0 .02em;
+}
+.int .lim .hi { transform: translate(.5em, -.82em); }
+.int .lim .lo { transform: translate(-.06em, .52em); }
+.int .body { font-style: italic; }
+.int .body .d { font-style: normal; }
+
+/* ---------------------------------------------------------------- given */
+.label { margin: 0 0 10px; font-size: 12.5px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.given .label { color: var(--pos-ink); }
+.find .label  { color: var(--neg-ink); }
+.given { margin-bottom: 24px; }
+.chips { display: flex; flex-wrap: wrap; gap: 12px; }
+.chip {
+    display: inline-flex; align-items: center; padding: 12px 22px 12px 18px; border-radius: 16px;
+    font-size: 20px; border: 1.5px solid; min-height: 64px;
+}
+.chip.pos { background: var(--pos-soft); border-color: var(--pos-ink); }
+.chip.neg { background: var(--neg-soft); border-color: var(--neg-ink); }
+.chip .eq { display: inline-flex; align-items: center; gap: .32em; padding-top: .35em; }
+.chip .val { font-family: var(--math); font-weight: 500; }
+
+/* ---------------------------------------------------------------- questions */
+.find { margin-bottom: 18px; }
+.qs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-items: start; }
+.q { background: var(--panel); border: 2px solid var(--q0); border-radius: 18px; padding: 14px 16px 16px; min-width: 0; }
+.q[data-k="0"] { border-color: var(--q0); }
+.q[data-k="1"] { border-color: var(--q1); }
+.q[data-k="2"] { border-color: var(--q2); }
+.q[data-k="3"] { border-color: var(--q3); }
+.q label { display: flex; align-items: center; min-height: 46px; font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.q label .int { font-size: 19px; font-weight: 500; }
+.q .row { display: flex; justify-content: flex-start; align-items: center; flex-wrap: wrap; gap: 10px 14px; }
+.q .ans { display: flex; align-items: center; gap: 8px; }
+.q input {
+    width: 150px; height: 50px; border-radius: 12px; border: 2px solid var(--navy-mid);
+    background: var(--field); font-family: var(--math); font-size: 22px; text-align: center; color: var(--ink);
+}
+.q input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.q input[readonly] { cursor: default; }
+.q .u { font-family: var(--math); font-size: 21px; }
+.q .ctl { display: flex; gap: 8px; }
+.q .minus, .q .qcheck {
+    height: 50px; border-radius: 12px; background: var(--field); color: var(--ink); cursor: pointer; font-weight: 800;
+}
+.q .minus { width: 50px; border: 2px solid var(--navy-mid); font: 700 24px var(--math); }
+.q .qcheck { padding: 0 18px; border: 2px solid var(--navy); font: 800 15px var(--ui); }
+.q .minus:hover, .q .qcheck:hover { background: var(--hover); }
+.q .state { min-height: 28px; margin: 10px 0 0; font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.q .state:focus { outline: none; }
+/* the verdict colours the answer box itself, not the tile */
+.q.right input { background: var(--green-soft); border-color: var(--green-ink); color: var(--green-ink); font-weight: 600; }
+.q.wrong input { background: var(--wrong-soft); border-color: var(--wrong); }
+/* "Correct!" is the moment a student is waiting for: hard to miss */
+.q.right .state { color: var(--green-ink); font-size: 20px; font-weight: 800; }
+.q.right .state::before {
+    content: ''; width: 24px; height: 24px; border-radius: 50%; flex: 0 0 auto;
+    background: var(--badge) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 12.5l4 4 8-9' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/16px no-repeat;
+}
+/* wrong: bright violet, bold and a touch larger, so it is easy to see */
+.q.wrong .state { color: var(--wrong); font-size: 17px; font-weight: 800; }
+
+/* ---------------------------------------------------------------- show explanation */
+details.more { margin-top: 10px; }
+details.more summary {
+    display: inline-flex; align-items: center; gap: 8px; cursor: pointer; list-style: none;
+    font: 700 15px var(--ui); color: var(--ink); background: var(--select);
+    border: 2px solid var(--navy-mid); border-radius: 999px; padding: 6px 16px; min-height: 44px;
+}
+details.more summary::-webkit-details-marker { display: none; }
+details.more summary::before { content: "+"; content: "+" / ""; font-size: 19px; line-height: 1; color: var(--green-ink); font-weight: 800; }
+details.more[open] summary::before { content: "\2212"; content: "\2212" / ""; }
+details.more .when-open { display: none; }
+details.more[open] .when-open { display: inline; }
+details.more[open] .when-closed { display: none; }
+.explain { margin-top: 10px; background: var(--explain); border-radius: 14px; padding: 14px 16px; overflow-x: auto; }
+.explain p { margin: 0 0 8px; font-size: 15px; line-height: 1.55; color: var(--ink-2); }
+.explain p:last-child { margin-bottom: 0; }
+.explain .line { display: flex; align-items: center; flex-wrap: wrap; row-gap: 6px; font-size: 18px; margin: 6px 0 8px; color: var(--ink); }
+.explain .op { font-family: var(--math); margin: 0 .35em; }
+.explain .line.sentence { display: block; font-size: 15px; line-height: 1.55; margin: 10px 0; }
+.explain .line.sentence .int, .explain .line.sentence .op, .explain .line.sentence .mr { font-size: 18px; }
+.explain .line.sentence .int { vertical-align: middle; }
+.explain .means { font-family: var(--ui); font-size: 15px; color: var(--ink-2); }
+@media (prefers-reduced-motion: no-preference) {
+    details.more[open] .explain { animation: rise .25s ease-out; }
+    @keyframes rise { from { transform: translateY(6px); opacity: .6; } to { transform: none; opacity: 1; } }
+}
+
+/* ---------------------------------------------------------------- actions, finish */
+.actions { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: center; }
+.btn { font: 800 15.5px var(--ui); border-radius: 14px; padding: 0 22px; height: 50px; cursor: pointer; border: 2px solid var(--ink); }
+.btn.primary { background: var(--ink); color: var(--card); }
+.btn.primary:hover { opacity: .9; }
+.btn.ghost { background: transparent; color: var(--ink); }
+.btn.ghost:hover { background: var(--hover); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.tally { margin: 0; font-size: 16px; font-weight: 700; color: var(--ink); }
+.tally.good { color: var(--green-ink); }
+.tally:focus { outline: none; }
+.finish { margin-top: 18px; padding-top: 18px; border-top: 2px dashed var(--neg-hatch); display: flex; flex-direction: column; gap: 12px; }
+.finish p { margin: 0; font-size: 16.5px; line-height: 1.5; }
+.finish .win { font-family: var(--head); font-size: 22px; font-weight: 650; color: var(--green-ink); }
+
+/* ---------------------------------------------------------------- nav + insignia */
+.nav { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.studio { display: flex; flex-direction: column; align-items: center; min-width: 0; }
+.nav .btn { white-space: nowrap; flex: 0 0 auto; }
+@media (max-width: 360px) { .nav .btn { padding: 0 12px; } }
+/* Studio mark, from insignia_snippet.html: 70px rose, 8.5px caption
+   (READ_FIRST section 1; PRE_SHIP B1). Decorative, hidden from screen readers. */
+.insignia { display: block; width: 70px; height: auto; }
+.pr-a { stop-color: var(--rose-a); }
+.pr-b { stop-color: var(--rose-b); }
+.insignia-caption { font-size: 8.5px; letter-spacing: 1.2px; font-weight: 800; color: var(--rose-cap); margin-top: 2px; text-align: center; }
+
+/* ---------------------------------------------------------------- narrow */
+@media (max-width: 760px) {
+    .card { padding: 20px 16px 22px; border-radius: 20px; }
+    .qs { grid-template-columns: 1fr; }
+    .q input { width: 96px; }
+    .q .row { gap: 10px; }
+    .q .qcheck { padding: 0 14px; }
+    .chips { gap: 8px; }
+    .chip { font-size: 16px; flex: 1 1 0; min-width: 148px; padding: 9px 10px; min-height: 54px; border-radius: 13px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .region, .mark, .draw.go { transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<header>
+    <div class="wrap">
+        <div class="band">
+            <p class="eyebrow">Net change &middot; Definite integrals</p>
+            <h1>Distance <span class="amp">&amp;</span> Displacement</h1>
+            <p class="lead">Use the integrals of velocity over each sub-interval to find the integral over the entire interval, the total area, the distance traveled and the displacement.</p>
+        </div>
+    </div>
+</header>
+
+<main>
+    <div class="wrap">
+        <nav class="steps" aria-label="Problems">
+            <span class="label-p" aria-hidden="true">Problem</span>
+            <div id="steps" class="steps"></div>
+        </nav>
+
+        <section class="card" id="card" aria-labelledby="ptitle">
+            <h2 class="ptitle" id="ptitle">Problem 1 of 6</h2>
+
+            <p class="sr-only" id="sr-problem" role="status" aria-live="polite" aria-atomic="true"></p>
+
+            <figure class="plot" id="plot" role="img" aria-label="Velocity graph loading." style="margin-left:0;margin-right:0">
+                <svg id="svg" viewBox="0 0 1000 360" aria-hidden="true" focusable="false"></svg>
+            </figure>
+
+            <section class="given" aria-labelledby="givenLbl">
+                <h3 class="label" id="givenLbl">Given</h3>
+                <div class="chips" id="chips"></div>
+            </section>
+
+            <section class="find" aria-labelledby="findLbl">
+                <h3 class="label" id="findLbl">Find</h3>
+                <div class="qs" id="qs"></div>
+            </section>
+
+            <div class="actions">
+                <button type="button" class="btn primary" id="checkAll">Check all</button>
+                <p class="tally" id="tally" tabindex="-1"></p>
+            </div>
+
+            <div class="finish" id="finish" hidden></div>
+        </section>
+
+        <div class="nav">
+            <button class="btn ghost" id="prev" type="button">&larr; Previous</button>
+            <div class="studio" aria-hidden="true">
+                <svg class="insignia" viewBox="-28 -26 56 64" aria-hidden="true" focusable="false" role="presentation">
+                    <defs>
+                        <linearGradient id="pr-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" class="pr-a"/>
+                            <stop offset="100%" class="pr-b"/>
+                        </linearGradient>
+                    </defs>
+                    <path id="pr-path" fill="none" stroke="url(#pr-grad)" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/>
+                </svg>
+                <div class="insignia-caption" aria-hidden="true">POLAR ROSE STUDIO</div>
+            </div>
+            <button class="btn ghost" id="next" type="button">Next &rarr;</button>
+        </div>
+    </div>
+</main>
+
+<script>
+(function () {
+    'use strict';
+
+    /* Six curves. Each is a polynomial (coefficients for t^0, t^1, ...) whose
+       region integrals are exact whole numbers - solved and verified offline in
+       exact arithmetic, with a check that the curve changes sign only at the
+       listed zeros. Smooth everywhere, including at the crossings. */
+    var PRESETS = [
+        { z: [0, 3, 5],    i: [7, -3],     c: [0, 5.76, -2.410888888889, 0.031407407407, 0.044074074074] },
+        { z: [0, 2, 6],    i: [-4, 10],    c: [0, -8.5, 7.020833333333, -1.611111111111, 0.112847222222] },
+        { z: [0, 2, 4, 6], i: [4, -3, 4],  c: [0, 6.708333333333, -2.357638888889, -2.430555555556, 1.38744212963, -0.236979166667, 0.013165509259] },
+        { z: [0, 3, 6],    i: [6, -6],     c: [0, 5.333333333333, -2.666666666667, 0.296296296296, 0] },
+        { z: [0, 4, 6],    i: [8, -3],     c: [0, 1.0, 1.527777777778, -0.768518518519, 0.081018518519] },
+        { z: [0, 2, 5, 6], i: [-3, 5, -2], c: [0, -15.636666666667, 26.888583333333, -18.06637037037, 5.854131944444, -0.89825, 0.051997685185] }
+    ];
+    var MINUS = '\u2212';
+    var N = 240;
+    var $ = function (id) { return document.getElementById(id); };
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function f(p, t) { var v = 0, k; for (k = p.c.length - 1; k >= 0; k--) { v = v * t + p.c[k]; } return v; }
+    function num(v) { return v < 0 ? MINUS + Math.abs(v) : String(v); }
+    function said(v) { return v < 0 ? 'negative ' + Math.abs(v) : String(v); }
+
+    /* ================================================================ graph
+       Fixed axes, never autoscaled. Narrow screens get their own proportions:
+       squeezing the wide drawing into a phone shrank every label to ~8px. */
+    var W = 1000, H = 360, L = 54, R = 30, T = 22, B = 30;
+    var T0 = -0.15, T1 = 6.35, V0 = -5, V1 = 5;
+    var svg = $('svg'), gRegions, gMarks, curve;
+    function sizeFor(width) {
+        if (width < 620) { W = 560; H = 330; L = 40; R = 22; T = 22; B = 26; }
+        else { W = 1000; H = 360; L = 54; R = 30; T = 22; B = 30; }
+        svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    }
+    function gx(t) { return L + (t - T0) / (T1 - T0) * (W - L - R); }
+    function gy(v) { return T + (V1 - v) / (V1 - V0) * (H - T - B); }
+    function samples(p) {
+        var out = [], a = p.z[0], b = p.z[p.z.length - 1], k, t;
+        for (k = 0; k <= N; k++) { t = a + (b - a) * k / N; out.push([gx(t), gy(f(p, t))]); }
+        return out;
+    }
+    function pathOf(pts) {
+        var s = 'M' + pts[0][0].toFixed(1) + ' ' + pts[0][1].toFixed(1), k;
+        for (k = 1; k < pts.length; k++) { s += 'L' + pts[k][0].toFixed(1) + ' ' + pts[k][1].toFixed(1); }
+        return s;
+    }
+    var NS = 'http://www.w3.org/2000/svg';
+    function el(name, attrs, parent) {
+        var e = document.createElementNS(NS, name), k;
+        for (k in attrs) { if (Object.prototype.hasOwnProperty.call(attrs, k)) { e.setAttribute(k, attrs[k]); } }
+        if (parent) { parent.appendChild(e); }
+        return e;
+    }
+    var SERIF = 'STIX Two Text, Cambria, Times New Roman, serif';
+
+    function frame() {
+        while (svg.firstChild) { svg.removeChild(svg.firstChild); }
+        var defs = el('defs', {}, svg);
+        var pat = el('pattern', { id: 'hatch', width: 9, height: 9, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' }, defs);
+        el('rect', { width: 9, height: 9, 'class': 'g-hbg' }, pat);
+        el('line', { x1: 0, y1: 0, x2: 0, y2: 9, 'class': 'g-hline', 'stroke-width': 3 }, pat);
+        var grid = el('g', {}, svg), t, v;
+        for (t = 0; t <= 6; t++) { el('line', { x1: gx(t), y1: T, x2: gx(t), y2: H - B, 'class': 'g-grid', 'stroke-width': 1 }, grid); }
+        for (v = V0; v <= V1; v++) { el('line', { x1: L, y1: gy(v), x2: W - R, y2: gy(v), 'class': 'g-grid', 'stroke-width': 1 }, grid); }
+        gRegions = el('g', {}, svg);
+        el('line', { x1: gx(T0), y1: gy(0), x2: W - R + 6, y2: gy(0), 'class': 'g-axis', 'stroke-width': 2 }, svg);
+        el('path', { d: 'M' + (W - R + 6) + ' ' + gy(0) + 'l-9 -5v10z', 'class': 'g-arrow' }, svg);
+        el('line', { x1: gx(T0), y1: H - B + 4, x2: gx(T0), y2: T - 4, 'class': 'g-axis', 'stroke-width': 2 }, svg);
+        el('path', { d: 'M' + gx(T0) + ' ' + (T - 6) + 'l-5 9h10z', 'class': 'g-arrow' }, svg);
+        /* variables italic, units upright, as in a textbook */
+        var tl = el('text', { x: W - R + 2, y: gy(0) + 26, 'text-anchor': 'end', 'font-family': SERIF, 'font-style': 'italic', 'font-size': 22, 'class': 'g-label' }, svg);
+        el('tspan', {}, tl).textContent = 't';
+        el('tspan', { 'font-style': 'normal', 'font-size': 19 }, tl).textContent = ' (s)';
+        var vl = el('text', { x: gx(T0) + 12, y: T + 12, 'font-family': SERIF, 'font-style': 'italic', 'font-size': 22, 'class': 'g-label' }, svg);
+        el('tspan', {}, vl).textContent = 'v(t)';
+        el('tspan', { 'font-style': 'normal', 'font-size': 19 }, vl).textContent = ' (m/s)';
+        curve = el('path', { d: '', fill: 'none', 'class': 'g-curve', 'stroke-width': 3.6, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, svg);
+        gMarks = el('g', {}, svg);
+    }
+
+    /* Regions drawn from the function itself, not the morphing samples, so
+       what is shaded is exactly what the givens describe. */
+    function paintRegions(p, hidden) {
+        while (gRegions.firstChild) { gRegions.removeChild(gRegions.firstChild); }
+        while (gMarks.firstChild) { gMarks.removeChild(gMarks.firstChild); }
+        var r, k, a, b, t, d, pos;
+        for (r = 0; r < p.i.length; r++) {
+            a = p.z[r]; b = p.z[r + 1]; pos = p.i[r] > 0;
+            d = 'M' + gx(a) + ' ' + gy(0);
+            for (k = 0; k <= 120; k++) { t = a + (b - a) * k / 120; d += 'L' + gx(t).toFixed(1) + ' ' + gy(f(p, t)).toFixed(1); }
+            d += 'L' + gx(b) + ' ' + gy(0) + 'Z';
+            var g = el('g', { 'class': 'region' + (hidden ? ' out' : '') }, gRegions);
+            g.style.transitionDelay = (reduce ? 0 : r * 160) + 'ms';
+            el('path', { d: d, 'class': pos ? 'g-pos' : 'g-neg', 'fill-opacity': pos ? 1 : 0.85,
+                         'stroke-width': 2, 'stroke-opacity': 0.9 }, g);
+        }
+        /* each crossing: a dot on the axis and its time in the empty quadrant
+           beside it, so the number never sits on the curve or in a shaded region */
+        for (k = 0; k < p.z.length; k++) {
+            var beside = k < p.i.length ? p.i[k] : p.i[k - 1];
+            var below = beside > 0;
+            var gm = el('g', { 'class': 'mark' + (hidden ? ' out' : '') }, gMarks);
+            gm.style.transitionDelay = (reduce ? 0 : 200 + k * 90) + 'ms';
+            el('circle', { cx: gx(p.z[k]), cy: gy(0), r: 5.5, 'class': 'g-dot', 'stroke-width': 2.4 }, gm);
+            el('text', { x: gx(p.z[k]) + (k === p.z.length - 1 ? -14 : 14), y: gy(0) + (below ? 30 : -16),
+                         'text-anchor': k === p.z.length - 1 ? 'end' : 'start', 'font-family': SERIF,
+                         'font-size': 24, 'font-weight': 500, 'class': 'g-num', 'paint-order': 'stroke',
+                         'stroke-width': 5 }, gm).textContent = String(p.z[k]);
+        }
+    }
+    function showLayers() { svg.querySelectorAll('.region, .mark').forEach(function (e) { e.classList.remove('out'); }); }
+    function hideLayers() { svg.querySelectorAll('.region, .mark').forEach(function (e) { e.style.transitionDelay = '0ms'; e.classList.add('out'); }); }
+
+    /* Every animation carries a token; anything still running when the
+       student moves on sees a newer token and stops, so a slow animation can
+       never paint an old curve over a new problem. */
+    var token = 0, raf = 0;
+    function ease(x) { return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; }
+    function drawIn(p) {
+        var my = ++token;
+        curve.setAttribute('d', pathOf(samples(p)));
+        paintRegions(p, true);
+        if (reduce) { showLayers(); return; }
+        curve.setAttribute('pathLength', '1');
+        curve.classList.add('draw');
+        void curve.getBoundingClientRect();
+        requestAnimationFrame(function () {
+            if (my !== token) { return; }
+            curve.classList.add('go');
+            setTimeout(function () { if (my === token) { showLayers(); } }, 900);
+            setTimeout(function () { if (my === token) { curve.classList.remove('draw', 'go'); curve.removeAttribute('pathLength'); } }, 1600);
+        });
+    }
+    function morph(from, to) {
+        var my = ++token;
+        cancelAnimationFrame(raf);
+        curve.classList.remove('draw', 'go'); curve.removeAttribute('pathLength');
+        if (reduce) { curve.setAttribute('d', pathOf(samples(to))); paintRegions(to, false); return; }
+        hideLayers();
+        var A = samples(from), Bp = samples(to), start = 0, DUR = 850;
+        setTimeout(function () {
+            if (my !== token) { return; }
+            function step(now) {
+                if (my !== token) { return; }
+                if (!start) { start = now; }
+                var x = Math.min(1, (now - start) / DUR), e = ease(x), pts = [], k;
+                for (k = 0; k <= N; k++) { pts.push([A[k][0] + (Bp[k][0] - A[k][0]) * e, A[k][1] + (Bp[k][1] - A[k][1]) * e]); }
+                curve.setAttribute('d', pathOf(pts));
+                if (x < 1) { raf = requestAnimationFrame(step); }
+                else { paintRegions(to, true); requestAnimationFrame(function () { if (my === token) { showLayers(); } }); }
+            }
+            raf = requestAnimationFrame(step);
+        }, 260);
+    }
+
+    /* ================================================================ maths text
+       Built from elements, so mute to a screen reader: every visual piece is
+       aria-hidden and carries a spoken twin. */
+    function intVis(lo, hi) {
+        return '<span class="int" aria-hidden="true"><span class="iterm"><span class="s">\u222b</span>' +
+               '<span class="lim"><span class="hi">' + hi + '</span><span class="lo">' + lo + '</span></span>' +
+               '<span class="body">v(t)<span class="d">&#8201;d</span>t</span></span></span>';
+    }
+    function intSaid(lo, hi) { return 'the integral from ' + lo + ' to ' + hi + ' of v of t, d t'; }
+    var OP = function (o) { return '<span class="op" aria-hidden="true">' + o + '</span>'; };
+
+    function describe(p) {
+        var parts = [], r, last = p.z.length - 1;
+        for (r = 0; r < p.i.length; r++) {
+            parts.push('the region from t = ' + p.z[r] + ' to t = ' + p.z[r + 1] + ' lies ' + (p.i[r] > 0 ? 'above' : 'below') + ' the t-axis');
+        }
+        return 'A smooth velocity curve, velocity v of t in meters per second against time t in seconds. ' +
+               'It is zero at t = ' + p.z[0] + ' and returns to zero at t = ' + p.z[last] + '. ' +
+               'It crosses the t-axis ' + (p.i.length === 2 ? 'once, at t = ' + p.z[1] : 'twice, at t = ' + p.z[1] + ' and t = ' + p.z[2]) + '. ' +
+               parts.join('; ') + '. The region above the axis is shaded teal and the region below is shaded purple with stripes.';
+    }
+
+    /* ================================================================ questions
+       The four questions in grid order. Two pairs ask for the same number under
+       different names - the integral and the displacement, the area and the
+       distance - and that is deliberate. */
+    function answers(p) {
+        var sum = 0, abs = 0, r;
+        for (r = 0; r < p.i.length; r++) { sum += p.i[r]; abs += Math.abs(p.i[r]); }
+        return [sum, abs, abs, sum];
+    }
+    function names(p) {
+        return ['the integral from ' + p.z[0] + ' to ' + p.z[p.z.length - 1], 'the total area',
+                'the total distance traveled', 'the total displacement'];
+    }
+    var QDEF = [
+        { minus: true,  unit: '' },                        /* integral over the entire interval */
+        { minus: false, unit: '' },                        /* total area: never negative */
+        { minus: false, unit: 'm' },                       /* distance: never negative */
+        { minus: true,  unit: 'm' }                        /* displacement */
+    ];
+    function qLabel(p, k) {
+        var a = p.z[0], b = p.z[p.z.length - 1];
+        if (k === 0) { return intVis(a, b) + '<span class="sr-only">' + intSaid(a, b) + '</span>'; }
+        if (k === 1) { return '<span>Total area enclosed between the curve and the <span class="m">t</span>-axis</span>'; }
+        if (k === 2) { return '<span>Total distance traveled<span class="sr-only">, in meters</span></span>'; }
+        return '<span>Total displacement<span class="sr-only">, in meters</span></span>';
+    }
+
+    /* the worked explanation for one question */
+    function explanation(p, k) {
+        var a = p.z[0], b = p.z[p.z.length - 1], want = answers(p), r, parts = [], said1 = [], terms = [], sizes = [];
+        for (r = 0; r < p.i.length; r++) {
+            parts.push(intVis(p.z[r], p.z[r + 1]));
+            said1.push(intSaid(p.z[r], p.z[r + 1]));
+            terms.push(p.i[r] < 0 ? '(' + num(p.i[r]) + ')' : String(p.i[r]));
+            sizes.push('|' + num(p.i[r]) + '|');
+        }
+        if (k === 0) {
+            return '<p>The integrals over the sub-intervals add up to the integral over the entire interval.</p>' +
+                   '<div class="line" aria-hidden="true">' + intVis(a, b) + OP('=') + parts.join(OP('+')) + '</div>' +
+                   '<div class="line mr" aria-hidden="true">' + OP('=') + terms.join(' + ') + ' = ' + num(want[0]) + '</div>' +
+                   '<p class="sr-only">' + intSaid(a, b) + ' equals ' + said1.join(' plus ') + ', which is ' +
+                       p.i.map(said).join(' plus ') + ', which is ' + said(want[0]) + '.</p>';
+        }
+        if (k === 1) {
+            return '<p>The area of each region is the absolute value of its integral. An integral can be negative. An area cannot.</p>' +
+                   '<div class="line mr" aria-hidden="true">' + sizes.join(' + ') + ' = ' + want[1] + '</div>' +
+                   '<p class="sr-only">The absolute values ' + p.i.map(Math.abs).join(', ') + ' add to ' + want[1] + '.</p>';
+        }
+        if (k === 2) {
+            /* Wording approved by Ira, Nov 8 2026. */
+            var lines = '', spokenLines = [];
+            for (r = 0; r < p.i.length; r++) {
+                lines += '<div class="line sentence" aria-hidden="true">' + intVis(p.z[r], p.z[r + 1]) + OP('=') +
+                         '<span class="mr">' + num(p.i[r]) + '</span> <span class="means">means the object moved ' +
+                         Math.abs(p.i[r]) + ' m in the ' + (p.i[r] > 0 ? 'positive' : 'negative') + ' direction.</span></div>';
+                spokenLines.push(intSaid(p.z[r], p.z[r + 1]) + ' equals ' + said(p.i[r]) + ', which means the object moved ' +
+                                 Math.abs(p.i[r]) + ' meters in the ' + (p.i[r] > 0 ? 'positive' : 'negative') + ' direction.');
+            }
+            return '<p>The integral of <span class="m">v</span>(<span class="m">t</span>) represents directed distance: how far the object moved, with a sign that shows the direction.</p>' +
+                   lines + '<p class="sr-only">' + spokenLines.join(' ') + '</p>' +
+                   '<p>For the total distance traveled, we need to include ' + (p.i.length === 2 ? 'both distances' : 'all three distances') +
+                   ', each counted as positive:</p>' +
+                   '<div class="line mr" aria-hidden="true">Distance = ' + sizes.join(' + ') + ' = ' +
+                       p.i.map(Math.abs).join(' + ') + ' = ' + want[2] + '&nbsp;m</div>' +
+                   '<p class="sr-only">Distance equals ' + p.i.map(Math.abs).join(' plus ') + ', which is ' + want[2] + ' meters.</p>';
+        }
+        return '<p>Displacement is where the object ends up relative to where it started, and that is exactly the integral of velocity over the entire interval.</p>' +
+               '<div class="line" aria-hidden="true"><span class="mr">Displacement</span>' + OP('=') + intVis(a, b) + OP('=') +
+                   '<span class="mr">' + p.i.map(function (v, j) { return v < 0 && j > 0 ? '(' + num(v) + ')' : num(v); }).join(' + ') +
+                   ' = ' + num(want[3]) + '&nbsp;m</span></div>' +
+               '<p class="sr-only">Displacement equals ' + intSaid(a, b) + ', which is ' + p.i.map(said).join(' plus ') +
+                   ', or ' + said(want[3]) + ' meters.</p>' +
+               /* the trip in order (wording approved by Ira, Nov 8 2026) */
+               '<p>The object moved ' + p.i.map(function (v) {
+                   return Math.abs(v) + ' m in the ' + (v > 0 ? 'positive' : 'negative') + ' direction'; }).join(', then ') +
+               (want[3] === 0 ? ', so it ended up back at its initial position, even though it traveled ' + want[2] + ' m.</p>'
+                              : ', so it ended up ' + Math.abs(want[3]) + ' m from its initial position, in the ' +
+                                (want[3] > 0 ? 'positive' : 'negative') + ' direction.</p>');
+    }
+
+    /* ================================================================ state
+       Per problem: what is typed, which parts are done (correct), which were
+       ever missed, the last checked value, and which explanations are open.
+       A problem earns a check mark only if all four were right with no miss;
+       finished with a miss gets an X and the offer to try again from scratch. */
+    var blank = function () {
+        return { val: ['', '', '', ''], done: [false, false, false, false], miss: [false, false, false, false],
+                 chk: [null, null, null, null], open: [false, false, false, false] };
+    };
+    var state = PRESETS.map(blank);
+    var cur = 0, shown = null;
+    var finished = function (i) { return state[i].done.every(Boolean); };
+    var clean = function (i) { return !state[i].miss.some(Boolean); };
+
+    /* unit: the box's own unit ('m' or ''). "10 m" is accepted where the box
+       already shows m; anything else non-numeric is still refused. */
+    function parse(raw, unit) {
+        var s = String(raw).replace(/\u2212/g, '-').replace(/\s+/g, '');
+        if (unit && s.slice(-unit.length) === unit) { s = s.slice(0, -unit.length); }
+        if (!/^[+-]?(\d+(\.\d+)?|\.\d+)$/.test(s)) { return null; }
+        return Number(s);
+    }
+
+    /* ================================================================ render */
+    function stepButtons() {
+        var box = $('steps');
+        box.innerHTML = '';
+        PRESETS.forEach(function (p, i) {
+            var b = document.createElement('button'), mark = '', status = 'not finished yet';
+            b.type = 'button'; b.className = 'step';
+            if (finished(i)) {
+                var ok = clean(i);
+                b.classList.add(ok ? 'ok' : 'miss');
+                mark = ok ? ' \u2713' : ' \u2717';
+                status = ok ? 'all answers correct' : 'finished, try again for a check mark';
+            }
+            b.textContent = (i + 1) + mark;
+            b.setAttribute('aria-label', 'Problem ' + (i + 1) + ', ' + status);
+            if (i === cur) { b.setAttribute('aria-current', 'step'); }
+            b.addEventListener('click', function () { go(i); $('steps').children[i].focus(); });
+            box.appendChild(b);
+        });
+    }
+
+    function tileHTML(p, k) {
+        var s = state[cur], d = QDEF[k], c = s.chk[k], cls = 'q', msg = '';
+        if (s.done[k]) { cls += ' right'; msg = 'Correct!'; }
+        else if (c && !c.ok && c.v === s.val[k]) { cls += ' wrong'; msg = 'Not yet. Try again.'; }
+        var lock = s.done[k];
+        var h = '<div class="' + cls + '" data-k="' + k + '">' +
+            '<label for="a' + k + '">' + qLabel(p, k) + '</label>' +
+            '<div class="row"><span class="ans"><input id="a' + k + '" type="text" inputmode="decimal" autocomplete="off" ' +
+                'aria-describedby="s' + k + '"' + (lock ? ' readonly' : '') + '>' +
+                (d.unit ? '<span class="u" aria-hidden="true">' + d.unit + '</span>' : '') + '</span>';
+        if (!lock) {
+            h += '<span class="ctl">' +
+                 (d.minus ? '<button type="button" class="minus" data-minus="' + k + '" aria-label="Type a minus sign">&#8722;</button>' : '') +
+                 '<button type="button" class="qcheck" data-check="' + k + '" aria-label="Check ' + names(p)[k] + '">Check</button></span>';
+        }
+        h += '</div><p class="state" id="s' + k + '" tabindex="-1">' + msg + '</p>';
+        if (c) {
+            h += '<details class="more" data-ex="' + k + '"' + (s.open[k] ? ' open' : '') + '>' +
+                 '<summary><span class="when-closed">Show explanation</span><span class="when-open">Hide explanation</span></summary>' +
+                 '<div class="explain">' + explanation(p, k) + '</div></details>';
+        }
+        return h + '</div>';
+    }
+
+    function tally() {
+        var s = state[cur], right = s.done.filter(Boolean).length, seen = 0, k;
+        for (k = 0; k < 4; k++) { if (s.done[k] || s.chk[k]) { seen++; } }
+        var t = $('tally');
+        t.textContent = !seen ? '' : (right === 4 ? 'All four correct.' : right + ' of 4 correct so far.');
+        t.className = 'tally' + (right === 4 ? ' good' : '');
+    }
+
+    function finishHTML() {
+        var box = $('finish');
+        if (!finished(cur)) { box.hidden = true; box.innerHTML = ''; return; }
+        box.hidden = false;
+        if (clean(cur)) {
+            box.innerHTML = '<p class="win">All four correct on the first try. <span aria-hidden="true">\u2713</span></p>' +
+                            (cur < PRESETS.length - 1 ? '<p>Go on to Problem ' + (cur + 2) + ' when you are ready.</p>' : '');
+        } else {
+            box.innerHTML = '<p>You found all the right answers. To earn a check mark (<span aria-hidden="true">\u2713</span>) for this problem, try it again from the start.</p>' +
+                            '<div class="actions"><button class="btn ghost" type="button" id="retry">Try this problem again</button></div>';
+            $('retry').addEventListener('click', function () { state[cur] = blank(); renderTiles(); stepButtons(); $('a0').focus(); });
+        }
+    }
+
+    /* Question order. The integral and the total area always come first.
+       Displacement comes before distance on Problems 2, 3 and 5 (Ira, Nov 8),
+       so the answers do not sit in the same boxes every time. The order is
+       fixed, so every student sees the same layout. */
+    var SWAP = [false, true, true, false, true, false];
+    function order(i) { return SWAP[i] ? [0, 1, 3, 2] : [0, 1, 2, 3]; }
+
+    function renderTiles(focusId) {
+        var p = PRESETS[cur], k, html = '';
+        order(cur).forEach(function (k) { html += tileHTML(p, k); });
+        $('qs').innerHTML = html;
+        /* typed text goes back in through .value, never through markup */
+        for (k = 0; k < 4; k++) { $('a' + k).value = state[cur].val[k]; }
+        $('checkAll').disabled = finished(cur);
+        tally();
+        finishHTML();
+        if (focusId) { var f = $(focusId); if (f) { f.focus({ preventScroll: true }); f.scrollIntoView({ block: 'nearest', behavior: reduce ? 'auto' : 'smooth' }); } }
+    }
+
+    function renderGivens(p) {
+        var r, html = '';
+        for (r = 0; r < p.i.length; r++) {
+            /* no region name on a chip: "A2" beside "= -3" reads as a negative area */
+            html += '<div class="chip ' + (p.i[r] > 0 ? 'pos' : 'neg') + '"><span class="eq">' + intVis(p.z[r], p.z[r + 1]) +
+                    '<span class="val" aria-hidden="true">= ' + num(p.i[r]) + '</span></span>' +
+                    '<span class="sr-only">' + intSaid(p.z[r], p.z[r + 1]) + ' equals ' + said(p.i[r]) + '.</span></div>';
+        }
+        $('chips').innerHTML = html;
+        $('plot').setAttribute('aria-label', describe(p));
+    }
+
+    /* ================================================================ checking */
+    function checkOne(k, quiet) {
+        var s = state[cur], v = parse(s.val[k], QDEF[k].unit);
+        if (s.done[k]) { return true; }
+        if (v === null) {
+            if (!quiet) {
+                $('s' + k).textContent = s.val[k].trim() ? 'That is not a number.' : 'Enter a number first.';
+                $('a' + k).focus();
+            }
+            return null;
+        }
+        var ok = v === answers(PRESETS[cur])[k];
+        s.chk[k] = { v: s.val[k], ok: ok };
+        if (ok) { s.done[k] = true; } else { s.miss[k] = true; }
+        return ok;
+    }
+    function afterCheck(focusId) { renderTiles(focusId); stepButtons(); }
+
+    function checkAll() {
+        var s = state[cur], blankAt = -1, any = false;
+        order(cur).forEach(function (k) {   /* in the order shown, so the first blank named is the first one seen */
+            if (s.done[k]) { return; }
+            var r = checkOne(k, true);
+            if (r === null && blankAt < 0) { blankAt = k; }
+            if (r !== null) { any = true; }
+        });
+        afterCheck(null);
+        var t = $('tally');
+        if (blankAt >= 0) { t.textContent = (t.textContent ? t.textContent + ' ' : '') + 'Enter a number for ' + names(PRESETS[cur])[blankAt] + ' too.'; }
+        var g = s.val.map(function (x, j) { return parse(x, QDEF[j].unit); });
+        if (!finished(cur) && g[0] !== null && g[3] !== null && g[0] !== g[3]) {
+            t.textContent += ' Compare the integral and the displacement: should they be different?';
+        } else if (!finished(cur) && g[1] !== null && g[2] !== null && g[1] !== g[2]) {
+            t.textContent += ' Compare the total area and the total distance: should they be different?';
+        }
+        t.focus({ preventScroll: true });
+        void any;
+    }
+
+    /* events are delegated, since the tiles are re-rendered after each check */
+    $('qs').addEventListener('input', function (e) {
+        var inp = e.target; if (!inp.matches('input')) { return; }
+        var k = +inp.id.slice(1), s = state[cur];
+        s.val[k] = inp.value;
+        var tile = inp.closest('.q');
+        if (tile.classList.contains('wrong')) { tile.classList.remove('wrong'); $('s' + k).textContent = ''; }
+    });
+    $('qs').addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' || !e.target.matches('input')) { return; }
+        e.preventDefault();
+        var k = +e.target.id.slice(1);
+        if (checkOne(k) !== null) { afterCheck('s' + k); }
+    });
+    $('qs').addEventListener('click', function (e) {
+        var b = e.target.closest('button'); if (!b) { return; }
+        if (b.dataset.check !== undefined) {
+            var k = +b.dataset.check;
+            if (checkOne(k) !== null) { afterCheck('s' + k); }
+        } else if (b.dataset.minus !== undefined) {
+            var j = +b.dataset.minus, inp = $('a' + j), a = inp.selectionStart, z = inp.selectionEnd;
+            if (typeof a !== 'number') { a = z = inp.value.length; }
+            inp.value = inp.value.slice(0, a) + MINUS + inp.value.slice(z);
+            state[cur].val[j] = inp.value;
+            inp.focus(); try { inp.setSelectionRange(a + 1, a + 1); } catch (x) {}
+        }
+    });
+    $('qs').addEventListener('toggle', function (e) {
+        var d = e.target; if (!d.matches || !d.matches('details[data-ex]')) { return; }
+        state[cur].open[+d.dataset.ex] = d.open;
+    }, true);
+    $('checkAll').addEventListener('click', checkAll);
+
+    /* ================================================================ navigation */
+    function go(i) {
+        var from = shown;
+        cur = i;
+        $('ptitle').textContent = 'Problem ' + (i + 1) + ' of ' + PRESETS.length;
+        renderGivens(PRESETS[i]);
+        renderTiles();
+        stepButtons();
+        $('prev').disabled = i === 0;
+        $('next').disabled = i === PRESETS.length - 1;
+        if (from === null) { drawIn(PRESETS[i]); }
+        else if (from !== i) { morph(PRESETS[from], PRESETS[i]); }
+        shown = i;
+        var p = PRESETS[i];
+        var spoke = 'Problem ' + (i + 1) + ' of ' + PRESETS.length + '. ' + describe(p) +
+            ' The integral over each region is given below the graph. Find the integral from ' + p.z[0] + ' to ' + p.z[p.z.length - 1] +
+            ', the total area enclosed between the curve and the t-axis, the total distance traveled, and the total displacement.';
+        var n = $('sr-problem'); n.textContent = ''; setTimeout(function () { n.textContent = spoke; }, 60);
+    }
+    $('prev').addEventListener('click', function () { if (cur > 0) { go(cur - 1); if ($('prev').disabled) { $('next').focus(); } } });
+    $('next').addEventListener('click', function () { if (cur < PRESETS.length - 1) { go(cur + 1); if ($('next').disabled) { $('prev').focus(); } } });
+
+    /* Studio insignia (insignia_snippet.html): r = 2cos(3t/2), t from 0 to 4pi,
+       240 steps, scaled by 12 for the viewBox. Colours come from tokens. */
+    (function () {
+        var d = '', steps = 240, i, t, r;
+        for (i = 0; i <= steps; i++) {
+            t = (i / steps) * 4 * Math.PI;
+            r = 2 * Math.cos(1.5 * t);
+            d += (i === 0 ? 'M ' : 'L ') + (r * Math.cos(t) * 12).toFixed(2) + ' ' + (r * Math.sin(t) * 12).toFixed(2) + ' ';
+        }
+        $('pr-path').setAttribute('d', d.trim());
+    }());
+
+    /* ================================================================ boot */
+    sizeFor($('plot').clientWidth);
+    frame();
+    go(0);
+
+    /* crossing the phone breakpoint redraws the frame and the current curve, still */
+    var lastWide = $('plot').clientWidth >= 620, rz = 0;
+    window.addEventListener('resize', function () {
+        clearTimeout(rz);
+        rz = setTimeout(function () {
+            var wide = $('plot').clientWidth >= 620;
+            if (wide === lastWide) { return; }
+            lastWide = wide; ++token; cancelAnimationFrame(raf);
+            sizeFor($('plot').clientWidth); frame();
+            curve.setAttribute('d', pathOf(samples(PRESETS[cur])));
+            paintRegions(PRESETS[cur], false);
+        }, 150);
+    });
+}());
+</script>
+</body>
+</html>
