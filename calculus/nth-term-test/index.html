@@ -11,7 +11,7 @@
 <style>
 /* Layout: navy header band, then one problem card at a time; questions on top, worked explanation below. */
 :root {
-  --bg: #F7F6FB;
+  --bg: #E6E9F4;
   --card: #FDFCFF;
   --ink: #1B2A4A;
   --muted: #4A5068;
@@ -29,7 +29,7 @@
   --ser: #8E24AA;
   --ok-bg: #C8E6C9;
   --head: #388E3C;
-  --rose-a: #1e3a5f; --rose-b: #0b7a70; --rose-cap: #5d6798;
+  --rose-a: #1e3a5f; --rose-b: #0b7a70; --rose-cap: #525c8a;
   --serif: ui-serif, Georgia, Cambria, 'Times New Roman', serif;
   --sans: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
 }
@@ -132,6 +132,8 @@ details.more .when-open { display: none; }
 details.more[open] .when-open { display: inline; }
 details.more[open] .when-closed { display: none; }
 details.more .explain { overflow-x: auto; min-width: 0; margin-top: 12px; border-top: 0; background: var(--select); border-radius: 12px; padding: 16px 20px; }
+details.reminder summary { background: var(--card); }
+details.reminder > .explain { background: var(--card); border: 1px solid var(--line); }
 details.reminder .explain h2 { margin: 0; font-family: var(--serif); font-size: 20px; color: var(--green); }
 details.reminder .explain p { line-height: 2; }
 details.more .explain .concl { background: transparent; padding: 0; border-radius: 0; }
