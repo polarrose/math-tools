@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'unsafe-inline'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Convergence of a Sequence vs. Series</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Ten interactive problems: find the limit of the sequence, then decide whether the series converges or diverges.">
+<style>
+/* Layout: navy header band, then one problem card at a time; questions on top, worked explanation below. */
+:root {
+  --bg: #F7F6FB;
+  --card: #FDFCFF;
+  --ink: #1B2A4A;
+  --muted: #4A5068;
+  --line: #D9DBE7;
+  --ctl: #7A84A8;
+  --band: #1B2A4A;
+  --band-ink: #F7F6FB;
+  --band-eyebrow: #A5D6A7;
+  --green: #1B5E20;
+  --green-soft: #E3F1E4;
+  --purple: #7C3AED;
+  --purple-soft: #EFE7FF;
+  --select: #E6E9F4;
+  --focus: #5E3FA3;
+  --ser: #8E24AA;
+  --ok-bg: #C8E6C9;
+  --head: #388E3C;
+  --rose-a: #1e3a5f; --rose-b: #0b7a70; --rose-cap: #5d6798;
+  --serif: ui-serif, Georgia, Cambria, 'Times New Roman', serif;
+  --sans: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11182A; --card: #182239; --ink: #E7EAF3; --muted: #B3B9CC; --line: #2E3A57; --ctl: #7A86AD;
+    --band: #0B1120; --band-ink: #F2F3F8; --band-eyebrow: #A5D6A7;
+    --green: #9BD3A2; --green-soft: #18321F; --purple: #B794F6; --purple-soft: #3B2A63;
+    --select: #24304D; --focus: #C9B8F2; --ser: #E1A6F0; --ok-bg: #1F4A27; --rose-a: #c4b5fd; --rose-b: #6ee7b7; --rose-cap: #a8b0d8; --head: #81C784; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11182A; --card: #182239; --ink: #E7EAF3; --muted: #B3B9CC; --line: #2E3A57; --ctl: #7A86AD;
+  --band: #0B1120; --band-ink: #F2F3F8; --band-eyebrow: #A5D6A7;
+  --green: #9BD3A2; --green-soft: #18321F; --purple: #B794F6; --purple-soft: #3B2A63;
+  --select: #24304D; --focus: #C9B8F2; --ser: #E1A6F0; --ok-bg: #1F4A27; --rose-a: #c4b5fd; --rose-b: #6ee7b7; --rose-cap: #a8b0d8; --head: #81C784; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 18px; line-height: 1.55; }
+.wrap { max-width: 860px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header .wrap { padding-block: 24px 0; }
+header .band { background: var(--band); color: var(--band-ink); border-radius: 14px; padding: 28px clamp(20px, 4vw, 32px); }
+h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(30px, 5vw, 42px); line-height: 1.15; margin: 0; text-wrap: balance; }
+main .wrap { padding-block: 24px 48px; display: flex; flex-direction: column; gap: 20px; }
+
+.steps { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.steps .label { font-weight: 700; margin-right: 6px; }
+.step { min-width: 44px; height: 44px; padding: 0 10px; border-radius: 999px; border: 2px solid var(--ctl); background: var(--card); color: var(--ink); font: 700 16px var(--sans); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
+.step[aria-current="step"] { border-color: var(--ink); background: var(--select); }
+.step.ok { border-color: var(--green); color: var(--green); }
+.step.miss { border-color: var(--purple); color: var(--purple); }
+
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 24px clamp(16px, 4vw, 32px); display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.card h2 { font-family: var(--serif); font-size: 26px; margin: 0; color: var(--head); }
+header h1 { width: fit-content; max-width: 100%; }
+header h1::after { content: ""; display: block; width: 100%; height: 3px; margin-top: 12px; border-radius: 2px; background: #66BB6A; }
+.series { font-size: 22px; overflow-x: auto; }
+fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+legend { font-weight: 700; font-size: 19px; padding: 0; margin-bottom: 4px; }
+.ask { font-size: 20px; overflow-x: auto; }
+.choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.choice { position: relative; }
+.choice input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.choice label { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 10px 14px; border: 2px solid var(--ctl); border-radius: 10px; cursor: pointer; font-size: 19px; background: var(--card); }
+.choice label::before { content: ""; flex: none; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--muted); }
+.choice input:checked + label { border-color: var(--ink); background: var(--select); }
+.choice input:checked + label::before { border-color: var(--ink); background: radial-gradient(var(--ink) 0 45%, transparent 50%); }
+.choice input:focus-visible + label { outline: 3px solid var(--focus); outline-offset: 2px; }
+.choice input:disabled + label { cursor: default; }
+.choice.right label, .choice.right input:checked + label { border-color: var(--green); background: var(--ok-bg); }
+.choice.right input:checked + label::before { border-color: var(--green); background: radial-gradient(var(--green) 0 45%, transparent 50%); }
+.choice.wrong label, .choice.wrong input:checked + label { border-color: var(--purple); background: var(--purple-soft); }
+
+.feedback { font-weight: 700; font-size: 18px; min-height: 1px; }
+.feedback.ok { color: var(--green); }
+.feedback.miss { color: var(--purple); }
+
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+button.btn { font: 700 17px var(--sans); padding: 12px 22px; border-radius: 10px; cursor: pointer; border: 2px solid var(--ink); }
+.btn.primary { background: var(--ink); color: var(--bg); }
+.btn.ghost { background: transparent; color: var(--ink); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+button:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.hint { color: var(--muted); font-size: 16px; margin: 0; }
+
+.explain { border-top: 1px solid var(--line); padding-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+.explain h3 { margin: 0; font-family: var(--serif); font-size: 22px; color: var(--green); }
+.explain p { margin: 0; max-width: 68ch; }
+.explain .disp { font-size: 20px; overflow-x: auto; padding: 2px 0; }
+.explain .concl { background: var(--select); border-radius: 10px; padding: 12px 16px; }
+.explain .note { color: var(--muted); }
+
+.nav { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.studio { display: flex; flex-direction: column; align-items: center; }
+.insignia { display: block; width: 60px; }
+.pr-a { stop-color: var(--rose-a); }
+.pr-b { stop-color: var(--rose-b); }
+.insignia-caption { font-size: 7.5px; letter-spacing: 1px; font-weight: 800; color: var(--rose-cap); margin-top: 2px; white-space: nowrap; }
+mjx-container { color: inherit; }
+.kw-seq { color: var(--head); font-weight: 700; font-size: max(1em, 19px); }
+.kw-ser { color: var(--ser); font-weight: 700; }
+@media (prefers-reduced-motion: no-preference) { .explain { animation: rise .25s ease-out; } @keyframes rise { from { transform: translateY(6px); opacity: .6; } to { transform: none; opacity: 1; } } }
+.stepbox { display: flex; flex-direction: column; gap: 14px; padding-top: 20px; border-top: 1px solid var(--line); }
+.stepbox:first-of-type { border-top: 0; padding-top: 0; }
+.stepbox .explain { border-top: 0; padding-top: 4px; }
+#sb1 .choices, #sb2 fieldset:first-of-type .choices { grid-template-columns: 1fr; max-width: 560px; }
+.feedback { margin: 0; }
+.fbwrap { display: flex; flex-direction: column; gap: 14px; }
+.fbwrap:focus { outline: none; }
+.card h2:focus { outline: none; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+details.more summary { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font: 700 16px var(--sans); color: var(--ink); background: var(--select); border: 2px solid var(--ctl); border-radius: 999px; padding: 6px 16px; min-height: 44px; list-style: none; }
+details.more summary::-webkit-details-marker { display: none; }
+details.more summary::before { content: "+"; content: "+" / ""; font-size: 18px; line-height: 1; color: var(--green); }
+details.more[open] summary::before { content: "\2212"; content: "\2212" / ""; }
+details.more summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+details.more .when-open { display: none; }
+details.more[open] .when-open { display: inline; }
+details.more[open] .when-closed { display: none; }
+details.more .explain { overflow-x: auto; min-width: 0; margin-top: 12px; border-top: 0; background: var(--select); border-radius: 12px; padding: 16px 20px; }
+details.reminder .explain h2 { margin: 0; font-family: var(--serif); font-size: 20px; color: var(--green); }
+details.reminder .explain p { line-height: 2; }
+details.more .explain .concl { background: transparent; padding: 0; border-radius: 0; }
+</style>
+</head>
+<body>
+
+
+<header>
+  <div class="wrap">
+    <div class="band">
+      <h1>Convergence of a Sequence vs. Series</h1>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <nav class="steps" aria-label="Problems">
+      <span class="label" id="stepsLabel">Problem</span>
+      <div id="steps" class="steps"></div>
+    </nav>
+    <details class="more reminder" id="reminder">
+      <summary><span>Reminder: the nth term test</span></summary>
+      <div class="explain">
+        <h2>The nth Term Test for Divergence</h2>
+        <p>If \(\displaystyle\lim_{n\to\infty} a_{n} \neq 0\), then the series \(\displaystyle\sum_{n=1}^{\infty} a_{n}\) diverges.</p>
+        <p>If \(\displaystyle\lim_{n\to\infty} a_{n} = 0\), the test is inconclusive. The series may converge or diverge, so we need another test.</p>
+      </div>
+    </details>
+    <section class="card" id="card" aria-labelledby="probTitle"></section>
+    <p class="sr-only" id="announce" aria-live="polite"></p>
+    <div class="nav">
+      <button class="btn ghost" id="prev" type="button">Previous</button>
+      <div class="studio" aria-hidden="true">
+        <svg class="insignia" viewBox="-28 -26 56 64" focusable="false" role="presentation">
+          <defs>
+            <linearGradient id="pr-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" class="pr-a"/>
+              <stop offset="100%" class="pr-b"/>
+            </linearGradient>
+          </defs>
+          <path id="pr-path" fill="none" stroke="url(#pr-grad)" stroke-width="1.8"/>
+        </svg>
+        <div class="insignia-caption">POLAR ROSE STUDIO</div>
+      </div>
+      <button class="btn ghost" id="next" type="button">Next</button>
+    </div>
+  </div>
+</main>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+  svg: { fontCache: 'global', displayAlign: 'left', displayIndent: '0' },
+  options: { enableMenu: false, enableAssistiveMml: true },
+  startup: { typeset: false }
+};
+</script>
+<!-- MathJax 3.2.2. First choice: the site's own copy in lib/mathjax/ (no outside server).
+     Backup: if that copy is not there (Claude preview, a file opened on a computer,
+     or before lib/mathjax/ is uploaded), load the same pinned version from jsdelivr. -->
+<script src="../lib/mathjax/tex-svg.js"></script>
+<script>
+if (!window.MathJax || !window.MathJax.version) {
+  document.write('<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"><\/script>');
+}
+</script>
+<script>
+const R = String.raw;
+const DNE = 'Does not exist';
+const CONCL = [['conv', 'The series converges'], ['div', 'The series diverges'], ['inc', 'The nth term test is inconclusive']];
+const TESTS = [['p', 'p-series test'], ['geo', 'Geometric series test'], ['alt', 'Alternating series test']];
+const CONV = [['true', 'Converges'], ['false', 'Diverges']];
+
+const PROBLEMS = [
+  {
+    series: R`\sum_{n=1}^{\infty}\left(1+\frac{1}{n}\right)`,
+    term: R`\left(1+\frac{1}{n}\right)`,
+    choices: [R`0`, R`1`, R`2`, R`\infty`], limit: 1, concl: 'div',
+    ex1: [
+      { t: R`As \(n\to\infty\), the fraction \(\frac{1}{n}\to 0\). So the terms get closer and closer to \(1 + 0\):` },
+      { d: R`\lim_{n\to\infty}\left(1+\frac{1}{n}\right) = 1 + 0 = 1` }
+    ],
+    ex2: [ { c: R`Since \(\displaystyle\lim_{n\to\infty}\left(1+\frac{1}{n}\right) = 1 \neq 0\), the given series \(\displaystyle\sum_{n=1}^{\infty}\left(1+\frac{1}{n}\right)\) diverges by the nth term test.` } ]
+  },
+  {
+    series: R`\sum_{n=1}^{\infty}\frac{1}{n}`,
+    term: R`\frac{1}{n}`,
+    choices: [R`0`, R`1`, R`\infty`, DNE], limit: 0, concl: 'inc', test: 'p', conv: false,
+    ex1: [
+      { t: R`The numerator stays \(1\) while the denominator \(n\) grows without bound, so the terms get closer and closer to \(0\):` },
+      { d: R`\lim_{n\to\infty}\frac{1}{n} = 0` }
+    ],
+    ex2: [ { c: R`Since \(\displaystyle\lim_{n\to\infty}\frac{1}{n} = 0\), the nth term test is inconclusive. It cannot tell us whether the given series \(\displaystyle\sum_{n=1}^{\infty}\frac{1}{n}\) converges or diverges, so we need another test.` } ],
+    ex3: [
+      { t: R`The given series \(\displaystyle\sum_{n=1}^{\infty}\frac{1}{n}\) is a p-series with \(p = 1\).` },
+      { c: R`Since \(p \le 1\), the given series \(\displaystyle\sum_{n=1}^{\infty}\frac{1}{n}\) diverges by the p-series test.` },
+      { n: R`[Note: The integral test gives the same result: \(\displaystyle\int_{1}^{\infty}\frac{1}{x}\,dx = \left(\ln x\right)\Big|_{1}^{\infty} = \infty - 0 = \infty\), so the integral and the series both diverge.]` }
+    ]
+  },
+  {
+    series: R`\sum_{n=1}^{\infty}\frac{2n}{3n+1}`,
+    term: R`\frac{2n}{3n+1}`,
+    choices: [R`0`, R`\frac{2}{3}`, R`2`, R`\infty`], limit: 1, concl: 'div',
+    ex1: [
+      { t: R`Divide the top and bottom by \(n\), the highest power of \(n\) in the denominator:` },
+      { d: R`\lim_{n\to\infty}\frac{2n}{3n+1} = \lim_{n\to\infty}\frac{2}{3+\frac{1}{n}} = \frac{2}{3+0} = \frac{2}{3}` },
+      { n: R`[Note: The degrees of the top and bottom are equal, so the limit can also be found by taking the ratio of the leading coefficients, \(\frac{2}{3}\).]` }
+    ],
+    ex2: [ { c: R`Since \(\displaystyle\lim_{n\to\infty}\frac{2n}{3n+1} = \frac{2}{3} \neq 0\), the given series \(\displaystyle\sum_{n=1}^{\infty}\frac{2n}{3n+1}\) diverges by the nth term test.` } ]
+  },
+  {
+    series: R`\sum_{n=1}^{\infty}\frac{1}{n^{2}}`,
+    term: R`\frac{1}{n^{2}}`,
+    choices: [R`0`, R`1`, R`\frac{1}{2}`, R`\infty`], limit: 0, concl: 'inc', test: 'p', conv: true,
+    ex1: [
+      { t: R`The numerator stays \(1\) while the denominator \(n^{2}\) grows without bound, so the terms get closer and closer to \(0\):` },
+      { d: R`\lim_{n\to\infty}\frac{1}{n^{2}} = 0` }
+    ],
+    ex2: [ { c: R`Since \(\displaystyle\lim_{n\to\infty}\frac{1}{n^{2}} = 0\), the nth term test is inconclusive. It cannot tell us whether the given series \(\displaystyle\sum_{n=1}^{\infty}\frac{1}{n^{2}}\) converges or diverges, so we need another test.` } ],
+    ex3: [
+      { t: R`The given series \(\displaystyle\sum_{n=1}^{\infty}\frac{1}{n^{2}}\) is a p-series with \(p = 2\).` },
+      { c: R`Since \(p > 1\), the given series \(\displaystyle\sum_{n=1}^{\infty}\frac{1}{n^{2}}\) converges by the p-series test.` },
+      { n: R`[Note: The integral test gives the same result: \(\displaystyle\int_{1}^{\infty}\frac{1}{x^{2}}\,dx = \left(-\frac{1}{x}\right)\Big|_{1}^{\infty} = 0 - \left(-1\right) = 1\), so the integral and the series both converge.]` },
+      { n: R`[Note: Compare with Problem 2. In both problems the limit of the sequence is \(0\), but \(\sum\frac{1}{n}\) diverges and \(\sum\frac{1}{n^{2}}\) converges. A limit of \(0\) does not decide anything.]` }
+    ]
+  },
+  {
+    series: R`\sum_{n=1}^{\infty}\left(1+\frac{2}{n}\right)^{n}`,
+    term: R`\left(1+\frac{2}{n}\right)^{n}`,
+    choices: [R`1`, R`e`, R`e^{2}`, R`\infty`], limit: 2, concl: 'div',
+    ex1: [
+      { t: R`Plugging in gives the form \(1^{\infty}\), which is indeterminate. Use the important limit from Section 9.1:` },
+      { d: R`\lim_{n\to\infty}\left(1+\frac{a}{n}\right)^{n} = e^{a}` },
+      { t: R`Here \(a = 2\):` },
+      { d: R`\lim_{n\to\infty}\left(1+\frac{2}{n}\right)^{n} = e^{2}` }
+    ],
+    ex2: [ { c: R`Since \(\displaystyle\lim_{n\to\infty}\left(1+\frac{2}{n}\right)^{n} = e^{2} \neq 0\), the given series \(\displaystyle\sum_{n=1}^{\infty}\left(1+\frac{2}{n}\right)^{n}\) diverges by the nth term test.` } ]
+  },
+  {
+    series: R`\sum_{n=1}^{\infty}\left(\frac{1}{3}\right)^{n}`,
+    term: R`\left(\frac{1}{3}\right)^{n}`,
+    choices: [R`0`, R`\frac{1}{3}`, R`\frac{1}{2}`, R`\infty`], limit: 0, concl: 'inc', test: 'geo', conv: true,
+    ex1: [
+      { t: R`Rewrite the power: \(\left(\frac{1}{3}\right)^{n} = \frac{1}{3^{n}}\). The numerator stays \(1\) while the denominator \(3^{n}\) grows without bound, so the terms get closer and closer to \(0\):` },
+      { d: R`\lim_{n\to\infty}\left(\frac{1}{3}\right)^{n} = 0` }
+    ],
+    ex2: [ { c: R`Since \(\displaystyle\lim_{n\to\infty}\left(\frac{1}{3}\right)^{n} = 0\), the nth term test is inconclusive. It cannot tell us whether the given series \(\displaystyle\sum_{n=1}^{\infty}\left(\frac{1}{3}\right)^{n}\) converges or diverges, so we need another test.` } ],
+    ex3: [
+      { t: R`The given series \(\displaystyle\sum_{n=1}^{\infty}\left(\frac{1}{3}\right)^{n}\) is a geometric series with \(r = \frac{1}{3}\). The sum starts at \(n = 1\), so the first term is \(\frac{1}{3}\):` },
+      { d: R`\sum_{n=1}^{\infty}\left(\frac{1}{3}\right)^{n} = \frac{\frac{1}{3}}{1-\frac{1}{3}} = \frac{\frac{1}{3}}{\frac{2}{3}} = \frac{1}{2}` },
+      { c: R`Since \(\left|r\right| < 1\), the given series \(\displaystyle\sum_{n=1}^{\infty}\left(\frac{1}{3}\right)^{n}\) converges to \(\frac{1}{2}\) by the geometric series test.` },
+      { n: R`[Note: The limit of the sequence is \(0\), but the sum of the series is \(\frac{1}{2}\). This tells us that each term gets smaller and smaller and approaches \(0\), but when we add up infinitely many of these terms, the total is \(\frac{1}{2}\). Since the sum is a finite number, the series converges.]` }
+    ]
+  },
+  {
+    series: R`\sum_{n=1}^{\infty}\frac{5}{3n+2}`,
+    term: R`\frac{5}{3n+2}`,
+    choices: [R`0`, R`\frac{5}{3}`, R`5`, R`\infty`], limit: 0, concl: 'inc', test: 'int', conv: false,
+    tests: [['p', 'p-series test'], ['geo', 'Geometric series test'], ['int', 'Integral test']],
+    ex1: [
+      { t: R`Divide the top and bottom by \(n\), the highest power of \(n\) in the denominator:` },
+      { d: R`\lim_{n\to\infty}\frac{5}{3n+2} = \lim_{n\to\infty}\frac{\frac{5}{n}}{3+\frac{2}{n}} = \frac{0}{3+0} = 0` }
+    ],
+    ex2: [ { c: R`Since \(\displaystyle\lim_{n\to\infty}\frac{5}{3n+2} = 0\), the nth term test is inconclusive. It cannot tell us whether the given series \(\displaystyle\sum_{n=1}^{\infty}\frac{5}{3n+2}\) converges or diverges, so we need another test.` } ],
+    ex3: [
+      { t: R`The given series \(\displaystyle\sum_{n=1}^{\infty}\frac{5}{3n+2}\) is not a p-series or a geometric series, so we use the integral test. Let \(f(x) = \frac{5}{3x+2}\). It is positive, continuous and decreasing for \(x \ge 1\).` },
+      { t: R`Let \(u = 3x+2\), \(du = 3\,dx\):` },
+      { d: R`\int\frac{5}{3x+2}\,dx = \frac{5}{3}\int\frac{1}{u}\,du = \frac{5}{3}\ln\left|u\right| = \frac{5}{3}\ln\left(3x+2\right)` },
+      { d: R`\int_{1}^{\infty}\frac{5}{3x+2}\,dx = \left(\frac{5}{3}\ln\left(3x+2\right)\right)\Big|_{1}^{\infty} = \infty - \frac{5}{3}\ln 5 = \infty` },
+      { c: R`Since the integral diverges, the given series \(\displaystyle\sum_{n=1}^{\infty}\frac{5}{3n+2}\) diverges by the integral test.` }
+    ]
+  },
+  {
+    series: R`\sum_{n=1}^{\infty}\frac{5n^{2}}{\left(n^{3}+1\right)^{2}}`,
+    term: R`\frac{5n^{2}}{\left(n^{3}+1\right)^{2}}`,
+    choices: [R`0`, R`1`, R`5`, R`\infty`], limit: 0, concl: 'inc', test: 'int', conv: true,
+    tests: [['p', 'p-series test'], ['geo', 'Geometric series test'], ['int', 'Integral test']],
+    ex1: [
+      { t: R`Expand the denominator: \(\left(n^{3}+1\right)^{2} = n^{6}+2n^{3}+1\). Then divide the top and bottom by \(n^{6}\), the highest power of \(n\) in the denominator:` },
+      { d: R`\lim_{n\to\infty}\frac{5n^{2}}{n^{6}+2n^{3}+1} = \lim_{n\to\infty}\frac{\frac{5}{n^{4}}}{1+\frac{2}{n^{3}}+\frac{1}{n^{6}}} = \frac{0}{1+0+0} = 0` },
+      { n: R`[Note: The degree of the bottom is \(6\) and the degree of the top is \(2\). The bottom grows faster, so the limit is \(0\).]` }
+    ],
+    ex2: [ { c: R`Since \(\displaystyle\lim_{n\to\infty}\frac{5n^{2}}{\left(n^{3}+1\right)^{2}} = 0\), the nth term test is inconclusive. It cannot tell us whether the given series \(\displaystyle\sum_{n=1}^{\infty}\frac{5n^{2}}{\left(n^{3}+1\right)^{2}}\) converges or diverges, so we need another test.` } ],
+    ex3: [
+      { t: R`The given series \(\displaystyle\sum_{n=1}^{\infty}\frac{5n^{2}}{\left(n^{3}+1\right)^{2}}\) is not a p-series or a geometric series, so we use the integral test. Let \(f(x) = \frac{5x^{2}}{\left(x^{3}+1\right)^{2}}\). It is positive, continuous and decreasing for \(x \ge 1\).` },
+      { t: R`Let \(u = x^{3}+1\), \(du = 3x^{2}\,dx\):` },
+      { d: R`\int\frac{5x^{2}}{\left(x^{3}+1\right)^{2}}\,dx = \frac{5}{3}\int u^{-2}\,du = \frac{5}{3}\cdot\frac{u^{-1}}{-1} = -\frac{5}{3u} = -\frac{5}{3\left(x^{3}+1\right)}` },
+      { d: R`\int_{1}^{\infty}\frac{5x^{2}}{\left(x^{3}+1\right)^{2}}\,dx = \left(-\frac{5}{3\left(x^{3}+1\right)}\right)\Big|_{1}^{\infty} = 0 - \left(-\frac{5}{6}\right) = \frac{5}{6}` },
+      { c: R`Since the integral converges, the given series \(\displaystyle\sum_{n=1}^{\infty}\frac{5n^{2}}{\left(n^{3}+1\right)^{2}}\) converges by the integral test.` },
+      { n: R`[Note: The value of the integral, \(\frac{5}{6}\), is not the sum of the series. The integral test only tells us that the series converges.]` }
+    ]
+  },
+  {
+    series: R`\sum_{n=1}^{\infty}\frac{3n^{3}-2n+1}{5n^{3}+n^{2}+4}`,
+    term: R`\frac{3n^{3}-2n+1}{5n^{3}+n^{2}+4}`,
+    choices: [R`0`, R`\frac{3}{5}`, R`3`, R`\infty`], limit: 1, concl: 'div',
+    ex1: [
+      { t: R`Divide the top and bottom by \(n^{3}\), the highest power of \(n\) in the denominator:` },
+      { d: R`\lim_{n\to\infty}\frac{3n^{3}-2n+1}{5n^{3}+n^{2}+4} = \lim_{n\to\infty}\frac{3-\frac{2}{n^{2}}+\frac{1}{n^{3}}}{5+\frac{1}{n}+\frac{4}{n^{3}}} = \frac{3-0+0}{5+0+0} = \frac{3}{5}` },
+      { n: R`[Note: The degrees of the top and bottom are both \(3\), so the limit can also be found by taking the ratio of the leading coefficients, \(\frac{3}{5}\).]` }
+    ],
+    ex2: [ { c: R`Since \(\displaystyle\lim_{n\to\infty}\frac{3n^{3}-2n+1}{5n^{3}+n^{2}+4} = \frac{3}{5} \neq 0\), the given series \(\displaystyle\sum_{n=1}^{\infty}\frac{3n^{3}-2n+1}{5n^{3}+n^{2}+4}\) diverges by the nth term test.` } ]
+  },
+  {
+    series: R`\sum_{n=1}^{\infty}\frac{1}{\sqrt{n^{3}}}`,
+    term: R`\frac{1}{\sqrt{n^{3}}}`,
+    choices: [R`0`, R`1`, R`\frac{3}{2}`, R`\infty`], limit: 0, concl: 'inc', test: 'p', conv: true,
+    ex1: [
+      { t: 'Rewrite the square root as a power:' },
+      { d: R`\frac{1}{\sqrt{n^{3}}} = \frac{1}{n^{3/2}}` },
+      { t: R`The numerator stays \(1\) while the denominator \(n^{3/2}\) grows without bound, so the terms get closer and closer to \(0\):` },
+      { d: R`\lim_{n\to\infty}\frac{1}{\sqrt{n^{3}}} = 0` }
+    ],
+    ex2: [ { c: R`Since \(\displaystyle\lim_{n\to\infty}\frac{1}{\sqrt{n^{3}}} = 0\), the nth term test is inconclusive. It cannot tell us whether the given series \(\displaystyle\sum_{n=1}^{\infty}\frac{1}{\sqrt{n^{3}}}\) converges or diverges, so we need another test.` } ],
+    ex3: [
+      { t: 'Rewrite the square root as a power:' },
+      { d: R`\frac{1}{\sqrt{n^{3}}} = \frac{1}{n^{3/2}}` },
+      { t: R`So the given series \(\displaystyle\sum_{n=1}^{\infty}\frac{1}{\sqrt{n^{3}}}\) is a p-series with \(p = \frac{3}{2}\).` },
+      { c: R`Since \(p = \frac{3}{2} > 1\), the given series \(\displaystyle\sum_{n=1}^{\infty}\frac{1}{\sqrt{n^{3}}}\) converges by the p-series test.` },
+      { n: R`[Note: The integral test gives the same result: \(\displaystyle\int_{1}^{\infty}x^{-3/2}\,dx = \left(-\frac{2}{\sqrt{x}}\right)\Big|_{1}^{\infty} = 0 - \left(-2\right) = 2\), so the integral and the series both converge.]` }
+    ]
+  }
+];
+
+const blank = () => ({ lim: null, concl: null, test: null, conv: null, done: [false, false, false], miss: [false, false, false], chk: [null, null, null] });
+const state = PROBLEMS.map(blank);
+let cur = 0;
+const card = document.getElementById('card');
+const stepsEl = document.getElementById('steps');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+
+const KW = /(sequences?|series)(?![A-Za-z])/gi;
+function highlight(root) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode: n => (n.parentElement.closest('header, mjx-container, button, .kw-seq, .kw-ser, script, style') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT)
+  });
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const text = node.nodeValue;
+    KW.lastIndex = 0;
+    if (!KW.test(text)) return;
+    KW.lastIndex = 0;
+    const frag = document.createDocumentFragment();
+    let last = 0, m;
+    while ((m = KW.exec(text))) {
+      const before = text.slice(Math.max(0, m.index - 14), m.index).toLowerCase();
+      if (/(geometric|alternating) $/i.test(before) || /[A-Za-z-]$/.test(before)) continue;
+      frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+      const span = document.createElement('span');
+      span.className = /^seq/i.test(m[1]) ? 'kw-seq' : 'kw-ser';
+      span.textContent = m[1];
+      frag.appendChild(span);
+      last = m.index + m[1].length;
+    }
+    frag.appendChild(document.createTextNode(text.slice(last)));
+    node.parentNode.replaceChild(frag, node);
+  });
+}
+
+function typeset(el) {
+  highlight(el);
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetClear && MathJax.typesetClear([el]);
+    return MathJax.typesetPromise([el]).catch(() => {});
+  }
+  return Promise.resolve();
+}
+
+const zeroLimit = p => p.concl === 'inc';
+const stepCount = p => (zeroLimit(p) ? 3 : 2);
+const finished = i => state[i].done[stepCount(PROBLEMS[i]) - 1];
+const clean = i => !state[i].miss.some(Boolean);
+
+function stepButtons() {
+  stepsEl.innerHTML = '';
+  PROBLEMS.forEach((p, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'step';
+    let mark = '', status = 'not finished yet';
+    if (finished(i)) {
+      const ok = clean(i);
+      b.classList.add(ok ? 'ok' : 'miss');
+      mark = ok ? ' \u2713' : ' \u2717';
+      status = ok ? 'all answers correct' : 'finished, try again for a check mark';
+    }
+    b.textContent = (i + 1) + mark;
+    b.setAttribute('aria-label', 'Problem ' + (i + 1) + ', ' + status);
+    if (i === cur) b.setAttribute('aria-current', 'step');
+    b.addEventListener('click', () => { go(i); stepsEl.children[i].focus(); });
+    stepsEl.appendChild(b);
+  });
+}
+
+// mark = { val, ok }: the answer that was last checked, and whether it was right.
+// What a screen reader should say for a math answer choice. The label shows
+// typeset math; this gives the input a plain spoken name to go with it.
+const SPOKEN = { '0': '0', '1': '1', '2': '2', '3': '3', '5': '5', '-1': 'negative 1',
+  '\\infty': 'infinity', 'e': 'e', 'e^{2}': 'e squared',
+  '\\frac{1}{2}': '1 half', '\\frac{1}{3}': '1 third', '\\frac{2}{3}': '2 thirds',
+  '\\frac{3}{2}': '3 halves', '\\frac{3}{5}': '3 fifths', '\\frac{5}{3}': '5 thirds' };
+function radios(name, items, chosen, locked, mark) {
+  return '<div class="choices">' + items.map(([v, label]) => {
+    let cls = 'choice';
+    const tex = /^\\\((.*)\\\)$/.exec(label);
+    const spoken = tex ? SPOKEN[tex[1]] : null;
+    if (mark && v === mark.val && v === chosen) cls += mark.ok ? ' right' : ' wrong';
+    return `<div class="${cls}">
+      <input type="radio" name="${name}" id="${name}_${v}" value="${v}" ${chosen === v ? 'checked' : ''} ${locked ? 'disabled' : ''}${spoken ? ` aria-label="${spoken}"` : ''}>
+      <label for="${name}_${v}">${label}</label></div>`;
+  }).join('') + '</div>';
+}
+function explainHTML(items, collapsible) {
+  const open = collapsible ? '<details class="more"><summary><span class="when-closed">Show explanation</span><span class="when-open">Hide explanation</span></summary><div class="explain">' : '<div class="explain"><h3>Explanation</h3>';
+  const close = collapsible ? '</div></details>' : '</div>';
+  return open + items.map(e =>
+    e.d ? `<div class="disp">\\[${e.d}\\]</div>` :
+    e.c ? `<p class="concl"><b>Conclusion:</b> ${e.c}</p>` :
+    e.n ? `<p class="note">${e.n}</p>` : `<p>${e.t}</p>`).join('') + close;
+}
+function fb(ok, label) {
+  return `<p class="feedback ${ok ? 'ok' : 'miss'}">${label ? label + ' ' : ''}${ok ? '<span aria-hidden="true">\u2713</span> Correct.' : '<span aria-hidden="true">\u2717</span> Not quite. Try again.'}</p>`;
+}
+function checkBtn(k) {
+  return `<div class="actions"><button class="btn primary" type="button" data-check="${k}">Check Step ${k + 1}</button></div>`;
+}
+
+function renderProblem(i, focusStep) {
+  const p = PROBLEMS[i], s = state[i];
+  const limItems = p.choices.map((c, k) => [String(k), c === DNE ? c : R`\(${c}\)`]);
+  let html = `<h2 id="probTitle" tabindex="-1">Problem ${i + 1} of ${PROBLEMS.length}</h2>
+    <div class="series">\\[${p.series}\\]</div>`;
+
+  // Step 1
+  const c0 = s.chk[0];
+  const ok0 = c0 && c0.lim === p.limit;
+  html += `<div class="stepbox" id="sb0"><fieldset>
+      <legend>Step 1: What is the limit of the sequence of terms?</legend>
+      <div class="ask">\\[\\lim_{n\\to\\infty} ${p.term} = \\ ?\\]</div>
+      ${radios('lim' + i, limItems, s.lim === null ? null : String(s.lim), s.done[0], c0 && { val: String(c0.lim), ok: ok0 })}
+    </fieldset>`;
+  if (c0) html += '<div class="fbwrap" tabindex="-1">' + fb(ok0) + '</div>' + (s.done[0] ? '' : checkBtn(0)) + explainHTML(p.ex1, true);
+  else html += checkBtn(0);
+  html += '</div>';
+
+  // Step 2
+  if (s.done[0]) {
+    const c1 = s.chk[1];
+    const ok1 = c1 && c1.concl === p.concl;
+    html += `<div class="stepbox" id="sb1"><fieldset>
+        <legend>Step 2: Using the nth term test, what can you conclude about the given series?</legend>
+        <div class="ask">\\[${p.series}\\]</div>
+        ${radios('concl' + i, CONCL, s.concl, s.done[1], c1 && { val: c1.concl, ok: ok1 })}
+      </fieldset>`;
+    if (c1) html += '<div class="fbwrap" tabindex="-1">' + fb(ok1) + '</div>' + (s.done[1] ? '' : checkBtn(1)) + explainHTML(p.ex2, true);
+    else html += checkBtn(1);
+    html += '</div>';
+  }
+
+  // Step 3 (only when the nth term test is inconclusive)
+  if (zeroLimit(p) && s.done[1]) {
+    const c2 = s.chk[2];
+    const okT = c2 && c2.test === p.test, okC = c2 && c2.conv === p.conv;
+    html += `<div class="stepbox" id="sb2"><fieldset>
+        <legend>Step 3: The nth term test is inconclusive. Which test can we use instead?</legend>
+        ${radios('test' + i, p.tests || TESTS, s.test, s.done[2], c2 && { val: c2.test, ok: okT })}
+      </fieldset>
+      <fieldset>
+        <legend>Using that test, does the given series converge or diverge?</legend>
+        <div class="ask">\\[${p.series}\\]</div>
+        ${radios('conv' + i, CONV, s.conv === null ? null : String(s.conv), s.done[2], c2 && { val: String(c2.conv), ok: okC })}
+      </fieldset>`;
+    if (c2) html += '<div class="fbwrap" tabindex="-1">' + fb(okT, 'Which test:') + fb(okC, 'Converge or diverge:') + '</div>' + (s.done[2] ? '' : checkBtn(2)) + explainHTML(p.ex3, true);
+    else html += checkBtn(2);
+    html += '</div>';
+  }
+
+  if (finished(i) && !clean(i)) html += '<p class="hint">You found all the right answers. To earn a check mark (<span aria-hidden="true">\u2713</span>) for this problem, try it again from the start.</p>';
+  if (finished(i)) html += `<div class="actions"><button class="btn ghost" type="button" id="retry">Try this problem again</button></div>`;
+  html += '<p class="hint" id="hint" aria-live="polite"></p>';
+  card.innerHTML = html;
+
+  // Picking a new answer clears the old right/wrong marks in that question.
+  const bind = (name, key, conv) => card.querySelectorAll(`input[name="${name}${i}"]`).forEach(el =>
+    el.addEventListener('change', () => {
+      s[key] = conv(el.value);
+      card.querySelector('#hint').textContent = '';
+      el.closest('.choices').querySelectorAll('.choice').forEach(d => d.classList.remove('right', 'wrong'));
+    }));
+  bind('lim', 'lim', v => +v);
+  bind('concl', 'concl', v => v);
+  bind('test', 'test', v => v);
+  bind('conv', 'conv', v => v === 'true');
+
+  card.querySelectorAll('[data-check]').forEach(b => b.addEventListener('click', () => {
+    const k = +b.dataset.check;
+    const ready = k === 0 ? s.lim !== null : k === 1 ? s.concl !== null : (s.test !== null && s.conv !== null);
+    if (!ready) { card.querySelector('#hint').textContent = k === 2 ? 'Answer both parts of Step 3 first.' : 'Choose an answer first.'; return; }
+    let ok;
+    if (k === 0) { s.chk[0] = { lim: s.lim }; ok = s.lim === p.limit; }
+    else if (k === 1) { s.chk[1] = { concl: s.concl }; ok = s.concl === p.concl; }
+    else { s.chk[2] = { test: s.test, conv: s.conv }; ok = s.test === p.test && s.conv === p.conv; }
+    if (ok) s.done[k] = true; else s.miss[k] = true;
+    renderProblem(i, k);
+    stepButtons();
+  }));
+  const retry = card.querySelector('#retry');
+  if (retry) retry.addEventListener('click', () => { state[i] = blank(); renderProblem(i, 'top'); stepButtons(); });
+
+  typeset(card).then(() => {
+    if (focusStep === undefined) return;
+    const f = card.querySelector(focusStep === 'top' ? '#probTitle' : `#sb${focusStep} .fbwrap`);
+    const calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (f) { f.focus({ preventScroll: true }); f.scrollIntoView({ block: 'nearest', behavior: calm ? 'auto' : 'smooth' }); }
+  });
+}
+
+function go(i) {
+  cur = i;
+  renderProblem(i);
+  stepButtons();
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === PROBLEMS.length - 1;
+}
+function announce(i) {
+  const el = document.getElementById('announce');
+  const status = finished(i) ? (clean(i) ? ', all answers correct' : ', finished') : '';
+  el.textContent = '';
+  requestAnimationFrame(() => { el.textContent = 'Problem ' + (i + 1) + ' of ' + PROBLEMS.length + status; });
+}
+prevBtn.addEventListener('click', () => { if (cur > 0) { go(cur - 1); announce(cur); if (prevBtn.disabled) nextBtn.focus(); } });
+nextBtn.addEventListener('click', () => { if (cur < PROBLEMS.length - 1) { go(cur + 1); announce(cur); if (nextBtn.disabled) prevBtn.focus(); } });
+
+(function rose() {
+  let d = '';
+  for (let i = 0; i <= 240; i++) {
+    const t = (i / 240) * 4 * Math.PI, r = 2 * Math.cos(1.5 * t);
+    d += (i ? 'L ' : 'M ') + (r * Math.cos(t) * 12).toFixed(2) + ' ' + (r * Math.sin(t) * 12).toFixed(2) + ' ';
+  }
+  document.getElementById('pr-path').setAttribute('d', d.trim());
+})();
+
+function start() { typeset(document.getElementById('reminder')); go(0); }
+if (window.MathJax && MathJax.startup && MathJax.startup.promise) MathJax.startup.promise.then(start);
+else start();
+</script>
+
+</body>
+</html>
