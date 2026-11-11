@@ -1,0 +1,1359 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'unsafe-inline'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Visualizing a Sequence vs. a Series</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Graph a sequence and its partial sums side by side to see whether the sequence converges and whether the series converges.">
+<style>
+/* Calculus design standard (2026-11-08): light gray-blue page, rounded navy title box, white cards. */
+:root {
+  --bg: #E6E9F4;
+  --card: #FDFCFF;
+  --ink: #1B2A4A;
+  --muted: #4A5068;
+  --line: #D9DBE7;
+  --ctl: #7A84A8;
+  --band: #1B2A4A;
+  --band-ink: #F7F6FB;
+  --green: #1B5E20;
+  --ok-bg: #C8E6C9;
+  --head: #388E3C;
+  --ser: #8E24AA;
+  --purple: #7C3AED;
+  --purple-soft: #EFE7FF;
+  --select: #E6E9F4;
+  --focus: #5E3FA3;
+  --rose-a: #1e3a5f; --rose-b: #0b7a70; --rose-cap: #525c8a;
+  --serif: ui-serif, Georgia, Cambria, 'Times New Roman', serif;
+  --sans: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11182A; --card: #182239; --ink: #E7EAF3; --muted: #B3B9CC; --line: #2E3A57; --ctl: #7A86AD;
+    --band: #0B1120; --band-ink: #F2F3F8;
+    --green: #9BD3A2; --ok-bg: #1F4A27; --head: #81C784; --ser: #E1A6F0;
+    --purple: #B794F6; --purple-soft: #3B2A63; --select: #24304D; --focus: #C9B8F2;
+    --rose-a: #c4b5fd; --rose-b: #6ee7b7; --rose-cap: #a8b0d8; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11182A; --card: #182239; --ink: #E7EAF3; --muted: #B3B9CC; --line: #2E3A57; --ctl: #7A86AD;
+  --band: #0B1120; --band-ink: #F2F3F8;
+  --green: #9BD3A2; --ok-bg: #1F4A27; --head: #81C784; --ser: #E1A6F0;
+  --purple: #B794F6; --purple-soft: #3B2A63; --select: #24304D; --focus: #C9B8F2;
+  --rose-a: #c4b5fd; --rose-b: #6ee7b7; --rose-cap: #a8b0d8; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 18px; line-height: 1.55; }
+.wrap { max-width: 860px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header .wrap { padding-block: 24px 0; }
+header .band { background: var(--band); color: var(--band-ink); border-radius: 14px; padding: 28px clamp(20px, 4vw, 32px); }
+h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(30px, 5vw, 36px); line-height: 1.15; margin: 0; text-wrap: balance; width: fit-content; max-width: 100%; }
+h1::after { content: ""; display: block; width: 100%; height: 3px; margin-top: 12px; border-radius: 2px; background: #66BB6A; }
+main .wrap { padding-block: 20px 48px; display: flex; flex-direction: column; gap: 20px; }
+.lead { margin: 0; font-size: 20px; }
+
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 24px clamp(16px, 4vw, 32px); display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.card h2 { font-family: var(--serif); font-size: 26px; margin: 0; color: var(--head); }
+.card h2:focus { outline: none; }
+
+/* Sequence picker */
+.picks { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+button.mode { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 8px 14px; border: 2px solid var(--ctl); border-radius: 10px; background: var(--card); color: var(--ink); font: 400 19px var(--sans); cursor: pointer; text-align: left; }
+button.mode::before { content: ""; flex: none; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--muted); }
+button.mode[aria-pressed="true"] { border-color: var(--ink); background: var(--select); }
+button.mode[aria-pressed="true"]::before { border-color: var(--ink); background: radial-gradient(var(--ink) 0 45%, transparent 50%); }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label, .subhead { font-weight: 700; font-size: 18px; }
+select, input[type="text"] { font: 400 18px var(--sans); color: var(--ink); background: var(--card); border: 2px solid var(--ctl); border-radius: 10px; min-height: 48px; padding: 8px 12px; max-width: 100%; }
+select { width: min(100%, 420px); cursor: pointer; }
+.custom { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.custom .pre { font-size: 20px; }
+.custom input { flex: 1 1 220px; min-width: 0; font-family: ui-monospace, Menlo, Consolas, monospace; }
+.custom input[aria-invalid="true"] { border-color: var(--purple); }
+.help { color: var(--muted); font-size: 16px; margin: 0; }
+.err { color: var(--purple); font-weight: 700; font-size: 17px; margin: 0; }
+.err:empty { display: none; }
+.divider { border: 0; border-top: 1px solid var(--line); margin: 4px 0; width: 100%; }
+
+button.btn { font: 700 17px var(--sans); padding: 12px 22px; border-radius: 10px; cursor: pointer; border: 2px solid var(--ink); min-height: 48px; }
+.btn.primary { background: var(--ink); color: var(--bg); }
+button:focus-visible, select:focus-visible, input:focus-visible, summary:focus-visible, .scroll:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+/* Current sequence and slider */
+.current { display: flex; flex-direction: column; gap: 6px; font-size: 20px; }
+.current p { margin: 0; overflow-x: auto; overflow-y: hidden; }
+.slider { display: flex; flex-direction: column; gap: 4px; }
+.slider label { font-weight: 700; }
+input[type="range"] { width: 100%; height: 44px; margin: 0; accent-color: var(--head); cursor: pointer; }
+input[type="range"]:focus-visible { outline-offset: 4px; }
+.slider .ends { display: flex; justify-content: space-between; color: var(--muted); font-size: 15px; }
+
+/* Graph panels */
+.charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(290px, 100%), 1fr)); gap: 16px; }
+.panel { border: 1px solid var(--line); border-radius: 12px; padding: 14px 14px 12px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.panel h3 { margin: 0; font-family: var(--serif); font-size: 21px; color: var(--ink); }
+.verdict { margin: 0; font-size: 18px; min-height: 30px; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }  /* Ira, 2026-11-11: the converges/diverges label on its own line */
+.verdict .m { overflow-x: auto; overflow-y: hidden; max-width: 100%; }
+.tag { display: inline-block; font-weight: 700; font-size: 15px; padding: 2px 12px; border-radius: 999px; border: 1px solid var(--ctl); background: var(--select); color: var(--ink); }
+.tag.conv { background: var(--ok-bg); border-color: var(--green); color: var(--green); }
+.observe { color: var(--muted); font-weight: 700; }
+.plot { margin: 0; }
+.plot > svg { display: block; width: 100%; height: auto; }
+/* Hover, tap or arrow keys on a graph: a ring on the point and a small label with its value. */
+.plotwrap { position: relative; border-radius: 8px; cursor: crosshair; touch-action: pan-y; }
+.plotwrap:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.vtip { position: absolute; z-index: 2; pointer-events: none; max-width: calc(100% - 8px); line-height: 1.45; background: var(--ink); color: var(--card); font: 600 14px var(--sans); padding: 4px 9px; border-radius: 6px; font-variant-numeric: tabular-nums; }
+.ring { fill: none; stroke: var(--ink); stroke-width: 2; }
+/* Side by side on wider screens: the two panels share rows, so heading, verdict, graph,
+   legend and readout start at the same height in both panels. */
+@media (min-width: 760px) {
+  .charts { grid-template-columns: 1fr 1fr; column-gap: 16px; row-gap: 8px; }
+  @supports (grid-template-rows: subgrid) {
+    .panel { display: grid; grid-row: span 5; grid-template-rows: subgrid; gap: 8px; align-items: start; }
+  }
+}
+.readout { margin: 0; font-size: 18px; }
+.legend { margin: 0; font-size: 15px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+.legend svg { flex: none; }
+
+/* SVG graph parts (all colors from tokens, so light and dark both work) */
+.ax { stroke: var(--ink); stroke-width: 1.6; fill: none; }
+.arrowhead { fill: var(--ink); }
+.grid { stroke: var(--line); stroke-width: 1; }
+.tk { stroke: var(--ink); stroke-width: 1.2; }
+.tick { fill: var(--muted); font: 14px var(--sans); }
+.axlab { fill: var(--ink); font: italic 19px var(--serif); }
+.axlab .sub { font-size: 13px; font-style: italic; }
+.seqdot { fill: var(--head); }
+.sumline { stroke: var(--ser); stroke-width: 2.6; fill: none; stroke-linejoin: round; }
+.sumdot { fill: var(--ser); }
+.limline { stroke: var(--ink); stroke-width: 1.6; stroke-dasharray: 7 5; fill: none; }
+.limbg { fill: var(--card); opacity: 0.9; }
+.limlab { fill: var(--ink); font: 700 13px var(--sans); }
+
+/* Table of values */
+.scroll { max-height: 340px; overflow: auto; border: 1px solid var(--line); border-radius: 10px; margin-top: 12px; }
+table { border-collapse: collapse; width: 100%; font-size: 17px; font-variant-numeric: tabular-nums; }
+caption { text-align: left; padding: 10px 12px; color: var(--muted); font-size: 15px; }
+th, td { padding: 6px 12px; text-align: left; border-top: 1px solid var(--line); }
+thead th { position: sticky; top: 0; background: var(--card); border-top: 0; box-shadow: 0 1px 0 var(--line); }
+
+/* Explanation, same pattern as the nth term test activity */
+.prose p { margin: 0; max-width: 68ch; }
+.prompt { font-weight: 700; margin: 0; }
+details.more summary { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font: 700 16px var(--sans); color: var(--ink); background: var(--select); border: 2px solid var(--ctl); border-radius: 10px; padding: 6px 16px; min-height: 44px; list-style: none; }  /* Ira, 2026-11-11: rectangular like the Fill in the answers button */
+details.more summary::-webkit-details-marker { display: none; }
+details.more summary::before { content: "+"; content: "+" / ""; font-size: 18px; line-height: 1; color: var(--green); }
+/* "> summary" so an open outer box (dig deeper) does not flip the label of a closed box inside it */
+details.more[open] > summary::before { content: "\2212"; content: "\2212" / ""; }
+details.more > summary .when-open { display: none; }
+details.more[open] > summary .when-open { display: inline; }
+details.more[open] > summary .when-closed { display: none; }
+.explain { overflow-x: auto; min-width: 0; margin-top: 12px; background: var(--select); border-radius: 12px; padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+.explain h3 { margin: 6px 0 0; font-family: var(--serif); font-size: 21px; color: var(--green); }
+.explain h3:first-child { margin-top: 0; }
+.explain p { margin: 0; max-width: 68ch; }
+.explain .disp { font-size: 20px; overflow-x: auto; overflow-y: hidden; padding: 2px 0; }
+.explain .note { color: var(--muted); }
+.explain ol { margin: 0; padding-left: 1.4em; display: flex; flex-direction: column; gap: 8px; }
+
+/* Let's dig a little deeper: work out the first terms by hand */
+.wbox { margin-top: 12px; background: var(--select); border-radius: 12px; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.wbox p { margin: 0; max-width: 70ch; }
+.wbox .tip { color: var(--muted); font-size: 16px; }
+.wgrid { display: grid; grid-template-columns: 1fr; gap: 18px 40px; }
+@media (min-width: 700px) { .wgrid { grid-template-columns: max-content 1fr; } }
+.wgrid fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.wgrid legend { font-family: var(--serif); font-weight: 700; font-size: 19px; padding: 0; margin-bottom: 4px; }
+/* Labels in one column, boxes in the next, so the boxes line up. */
+.wrows { display: grid; grid-template-columns: max-content minmax(0, 8.5em) 1.4em; column-gap: 10px; row-gap: 10px; align-items: center; }
+.wrow { display: contents; }
+@media (max-width: 540px) {
+  .sums .wrows { grid-template-columns: minmax(0, 8.5em) 1.4em; row-gap: 4px; }
+  .sums .wrow label { grid-column: 1 / -1; margin-top: 8px; }
+  .sums .wrow:first-child label { margin-top: 0; }
+}
+.wrow label { font-size: 19px; }
+.wrow input { width: 100%; min-width: 0; min-height: 44px; padding: 6px 10px; font: 400 18px var(--sans); color: var(--ink); background: var(--card); border: 2px solid var(--ctl); border-radius: 8px; }
+.wrow input.ok { border-color: var(--green); background: var(--ok-bg); }
+.wrow input.miss { border-color: var(--purple); background: var(--purple-soft); }
+.wmark { font-weight: 700; font-size: 18px; min-width: 1em; }
+.wmark.ok { color: var(--green); }
+.wmark.miss { color: var(--purple); }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn.ghost { background: transparent; color: var(--ink); }
+.wfb { display: flex; flex-direction: column; gap: 4px; }
+.wfb:focus { outline: none; }
+.wfb .ok { color: var(--green); font-weight: 700; }
+.wfb .miss { color: var(--purple); font-weight: 700; }
+details.wexp > summary { background: var(--card); }
+details.wexp .explain { background: var(--card); border: 1px solid var(--line); }
+
+.kw-seq { color: var(--head); font-weight: 700; font-size: max(1em, 19px); }
+.kw-ser { color: var(--ser); font-weight: 700; }
+mjx-container { color: inherit; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+.studio { display: flex; flex-direction: column; align-items: center; }
+.insignia { display: block; width: 70px; }
+.pr-a { stop-color: var(--rose-a); }
+.pr-b { stop-color: var(--rose-b); }
+.insignia-caption { font-size: 8.5px; letter-spacing: 1px; font-weight: 800; color: var(--rose-cap); margin-top: 2px; white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="band">
+      <h1>Visualizing a Sequence vs. a Series</h1>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <p class="lead" id="lead">Does the sequence converge? Does the series converge?</p>
+
+    <section class="card" aria-labelledby="pickTitle">
+      <h2 id="pickTitle">Choose a sequence</h2>
+      <div class="picks" role="group" aria-labelledby="pickTitle" id="picks"></div>
+
+      <div class="field">
+        <label for="more">More sequences</label>
+        <select id="more"></select>
+      </div>
+
+      <hr class="divider">
+
+      <div class="field">
+        <label for="customInput" id="customLabel">Or enter your own sequence</label>
+        <div class="custom">
+          <span class="pre" aria-hidden="true">\(a_{n} =\)</span>
+          <input type="text" id="customInput" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="text" aria-describedby="customHelp customErr" placeholder="n/(3n+1)">
+          <button class="btn primary" type="button" id="graphBtn">Graph it</button>
+        </div>
+        <p class="err" id="customErr" role="alert"></p>
+        <p class="help" id="customHelp">This tool works for positive series only. Use n as the variable, for example 1/n^2, n/(3n+1) or (1+1/n)^n. You can use + &minus; * / ^, parentheses, sqrt( ), ln( ), e and pi.</p>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="graphTitle">
+      <h2 id="graphTitle">The graphs</h2>
+      <div class="current" id="current"></div>
+
+      <div class="slider">
+        <label for="nSlider" id="nLabel">Terms up to <i>n</i> = <span id="nOut">12</span></label>
+        <input type="range" id="nSlider" min="10" max="100" step="1" value="12" aria-label="Terms shown" aria-valuetext="up to n = 12">
+        <div class="ends" aria-hidden="true"><span>10</span><span>100</span></div>
+      </div>
+
+      <div class="charts">
+        <div class="panel">
+          <h3>The sequence</h3>
+          <p class="verdict" id="seqVerdict"></p>
+          <div class="plotwrap" tabindex="0" data-kind="seq" role="application" aria-describedby="seqPlot" aria-label="Read the graph of the sequence point by point: use the left and right arrow keys.">
+            <figure class="plot" id="seqPlot" role="img" aria-label=""></figure>
+            <div class="vtip" id="tipSeq" hidden aria-hidden="true"></div>
+          </div>
+          <p class="legend" id="seqLegend"></p>
+          <p class="readout" id="seqRead"></p>
+        </div>
+        <div class="panel">
+          <h3>The series: partial sums</h3>
+          <p class="verdict" id="sumVerdict"></p>
+          <div class="plotwrap" tabindex="0" data-kind="sum" role="application" aria-describedby="sumPlot" aria-label="Read the graph of the partial sums point by point: use the left and right arrow keys.">
+            <figure class="plot" id="sumPlot" role="img" aria-label=""></figure>
+            <div class="vtip" id="tipSum" hidden aria-hidden="true"></div>
+          </div>
+          <p class="legend" id="sumLegend"></p>
+          <p class="readout" id="sumRead"></p>
+        </div>
+      </div>
+
+      <details class="more warm" id="warm">
+        <summary><span>Let's dig a little deeper</span></summary>
+        <div class="wbox">
+          <p id="wIntro"></p>
+          <p class="tip">Type fractions like 1/2 or decimals like 0.5. Decimals rounded to 3 places are fine.</p>
+          <div class="wgrid">
+            <fieldset>
+              <legend>The sequence</legend>
+              <div class="wrows">
+                <div class="wrow"><label for="wa1" id="lwa1"></label><input id="wa1" type="text" inputmode="text" autocomplete="off" spellcheck="false"><span class="wmark" id="ma1" aria-hidden="true"></span></div>
+                <div class="wrow"><label for="wa2" id="lwa2"></label><input id="wa2" type="text" inputmode="text" autocomplete="off" spellcheck="false"><span class="wmark" id="ma2" aria-hidden="true"></span></div>
+                <div class="wrow"><label for="wa3" id="lwa3"></label><input id="wa3" type="text" inputmode="text" autocomplete="off" spellcheck="false"><span class="wmark" id="ma3" aria-hidden="true"></span></div>
+              </div>
+            </fieldset>
+            <fieldset class="sums">
+              <legend>The series: partial sums</legend>
+              <div class="wrows">
+                <div class="wrow"><label for="ws1" id="lws1"></label><input id="ws1" type="text" inputmode="text" autocomplete="off" spellcheck="false"><span class="wmark" id="ms1" aria-hidden="true"></span></div>
+                <div class="wrow"><label for="ws2" id="lws2"></label><input id="ws2" type="text" inputmode="text" autocomplete="off" spellcheck="false"><span class="wmark" id="ms2" aria-hidden="true"></span></div>
+                <div class="wrow"><label for="ws3" id="lws3"></label><input id="ws3" type="text" inputmode="text" autocomplete="off" spellcheck="false"><span class="wmark" id="ms3" aria-hidden="true"></span></div>
+              </div>
+            </fieldset>
+          </div>
+          <p>Then check your answers by hovering over the first three points on each graph above (on a phone, tap them), or press Check.</p>
+          <div class="actions"><button class="btn primary" type="button" id="wCheck">Check</button><button class="btn ghost" type="button" id="wFill">Fill in the answers</button></div>
+          <div class="wfb" id="wfb" tabindex="-1"></div>
+          <details class="more wexp" id="wExp" hidden>
+            <summary><span class="when-closed">Show explanation</span><span class="when-open">Hide explanation</span></summary>
+            <div class="explain" id="wExpBody"></div>
+          </details>
+        </div>
+      </details>
+
+      <details class="more" id="tableBox">
+        <summary><span class="when-closed">Show table of values</span><span class="when-open">Hide table of values</span></summary>
+        <div class="scroll" id="tableScroll" tabindex="0" role="region" aria-label="Table of values"></div>
+      </details>
+    </section>
+
+    <section class="card" aria-labelledby="showTitle">
+      <h2 id="showTitle">What the graphs show</h2>
+      <div class="prose" id="insight"></div>
+      <p class="prompt" id="prompt">Now use an appropriate test to prove whether the series converges or diverges.</p>
+      <details class="more" id="testBox">
+        <summary><span class="when-closed">Show suggested test</span><span class="when-open">Hide suggested test</span></summary>
+        <div class="explain" id="testBody"></div>
+      </details>
+    </section>
+
+    <p class="sr-only" id="announce" aria-live="polite"></p>
+
+    <div class="studio" aria-hidden="true">
+      <svg class="insignia" viewBox="-28 -26 56 64" focusable="false" role="presentation">
+        <defs>
+          <linearGradient id="pr-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" class="pr-a"/>
+            <stop offset="100%" class="pr-b"/>
+          </linearGradient>
+        </defs>
+        <path id="pr-path" fill="none" stroke="url(#pr-grad)" stroke-width="1.8"/>
+      </svg>
+      <div class="insignia-caption">POLAR ROSE STUDIO</div>
+    </div>
+  </div>
+</main>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+  svg: { fontCache: 'global', displayAlign: 'left', displayIndent: '0' },
+  options: { enableMenu: false, enableAssistiveMml: true },
+  startup: { typeset: false }
+};
+</script>
+<!-- MathJax 3.2.2. First choice: the site's own copy in lib/mathjax/ (no outside server).
+     Backup: if that copy is not there (Claude preview, a file opened on a computer,
+     or before lib/mathjax/ is uploaded), load the same pinned version from jsdelivr. -->
+<script src="../lib/mathjax/tex-svg.js"></script>
+<script>
+if (!window.MathJax || !window.MathJax.version) {
+  document.write('<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"><\/script>');
+}
+</script>
+<script>
+'use strict';
+var R = String.raw;
+var NMAX = 100;
+
+/* ------------------------------------------------------------------
+   The sequences. Every series here has positive terms.
+   term: TeX for a_n.  start: first n.  lim: limit of the sequence.
+   sum: sum of the series (Infinity when it diverges).
+   ------------------------------------------------------------------ */
+var SEQS = [
+  { id: 'p1', preset: true, say: '1 over n', term: R`\frac{1}{n}`, start: 1,
+    fn: function (n) { return 1 / n; },
+    lim: 0, limTex: '0', sum: Infinity,
+    shows: R`The terms \(\frac{1}{n}\) get closer and closer to \(0\), but the partial sums keep growing. They grow slowly, and they never level off: after 100 terms the partial sum is only about \(5.19\), and it keeps growing without bound. So the sequence converges to \(0\), but the series diverges.`,
+    shows2: R`[Note: A sequence with limit \(0\) does not guarantee that the series converges.]`,
+    ex: [
+      { h: 'The nth term test' },
+      { t: R`The numerator stays \(1\) while the denominator \(n\) grows without bound, so the terms get closer and closer to \(0\):` },
+      { d: R`\lim_{n\to\infty}\frac{1}{n} = 0` },
+      { c: R`Since \(\displaystyle\lim_{n\to\infty}\frac{1}{n} = 0\), the nth term test is inconclusive. It cannot tell us whether the given series \(\displaystyle\sum_{n=1}^{\infty}\frac{1}{n}\) converges or diverges, so we need another test.` },
+      { h: 'The p-series test' },
+      { t: R`The given series \(\displaystyle\sum_{n=1}^{\infty}\frac{1}{n}\) is a p-series with \(p = 1\).` },
+      { c: R`Since \(p \le 1\), the given series \(\displaystyle\sum_{n=1}^{\infty}\frac{1}{n}\) diverges by the p-series test.` },
+      { n: R`[Note: The integral test gives the same result: \(\displaystyle\int_{1}^{\infty}\frac{1}{x}\,dx = \left(\ln x\right)\Big|_{1}^{\infty} = \infty - 0 = \infty\), so the integral and the series both diverge.]` }
+    ] },
+  { id: 'p2', preset: true, say: '1 over n squared', term: R`\frac{1}{n^{2}}`, start: 1,
+    fn: function (n) { return 1 / (n * n); },
+    lim: 0, limTex: '0', sum: Math.PI * Math.PI / 6, sumTex: R`\frac{\pi^{2}}{6} \approx 1.6449`,
+    sumSay: 'pi squared over 6, about 1.6449', sumLabel: 'S = \u03C0\u00B2/6 \u2248 1.6449',
+    shows: R`The terms get closer and closer to \(0\), and the partial sums level off. They approach the sum of the series, \(\frac{\pi^{2}}{6} \approx 1.6449\), marked by the dashed line. So the sequence converges to \(0\), and the series converges too.`,
+    shows2: R`[Note: Compare with \(\frac{1}{n}\). In both cases the limit of the sequence is \(0\), but \(\sum\frac{1}{n}\) diverges and \(\sum\frac{1}{n^{2}}\) converges.]`,
+    ex: [
+      { h: 'The nth term test' },
+      { t: R`The numerator stays \(1\) while the denominator \(n^{2}\) grows without bound, so the terms get closer and closer to \(0\):` },
+      { d: R`\lim_{n\to\infty}\frac{1}{n^{2}} = 0` },
+      { c: R`Since \(\displaystyle\lim_{n\to\infty}\frac{1}{n^{2}} = 0\), the nth term test is inconclusive. It cannot tell us whether the given series \(\displaystyle\sum_{n=1}^{\infty}\frac{1}{n^{2}}\) converges or diverges, so we need another test.` },
+      { h: 'The p-series test' },
+      { t: R`The given series \(\displaystyle\sum_{n=1}^{\infty}\frac{1}{n^{2}}\) is a p-series with \(p = 2\).` },
+      { c: R`Since \(p = 2 > 1\), the given series \(\displaystyle\sum_{n=1}^{\infty}\frac{1}{n^{2}}\) converges by the p-series test.` },
+      { n: R`[Note: The integral test gives the same result: \(\displaystyle\int_{1}^{\infty}\frac{1}{x^{2}}\,dx = \left(-\frac{1}{x}\right)\Big|_{1}^{\infty} = 0 - \left(-1\right) = 1\), so the integral and the series both converge.]` },
+      { n: R`[Note: The value of the integral, \(1\), is not the sum of the series. The sum of the series is \(\frac{\pi^{2}}{6} \approx 1.6449\).]` }
+    ] },
+  { id: 'geo', preset: true, say: '1 half to the n', term: R`\left(\frac{1}{2}\right)^{n}`, start: 0,
+    fn: function (n) { return Math.pow(0.5, n); },
+    lim: 0, limTex: '0', sum: 2, sumTex: '2', sumSay: '2', sumLabel: 'S = 2',
+    shows: R`Each term is half of the term before it, so the terms get closer and closer to \(0\). The partial sums level off quickly at \(2\), marked by the dashed line. So the sequence converges to \(0\), and the series converges to \(2\).`,
+    ex: [
+      { h: 'The nth term test' },
+      { t: R`Rewrite the power: \(\left(\frac{1}{2}\right)^{n} = \frac{1}{2^{n}}\). The numerator stays \(1\) while the denominator \(2^{n}\) grows without bound, so the terms get closer and closer to \(0\):` },
+      { d: R`\lim_{n\to\infty}\left(\frac{1}{2}\right)^{n} = 0` },
+      { c: R`Since \(\displaystyle\lim_{n\to\infty}\left(\frac{1}{2}\right)^{n} = 0\), the nth term test is inconclusive. It cannot tell us whether the given series \(\displaystyle\sum_{n=0}^{\infty}\left(\frac{1}{2}\right)^{n}\) converges or diverges, so we need another test.` },
+      { h: 'The geometric series test' },
+      { t: R`The given series \(\displaystyle\sum_{n=0}^{\infty}\left(\frac{1}{2}\right)^{n}\) is a geometric series with \(r = \frac{1}{2}\). The sum starts at \(n = 0\), so the first term is \(a = \left(\frac{1}{2}\right)^{0} = 1\):` },
+      { d: R`\sum_{n=0}^{\infty}\left(\frac{1}{2}\right)^{n} = \frac{a}{1-r} = \frac{1}{1-\frac{1}{2}} = \frac{1}{\frac{1}{2}} = 2` },
+      { c: R`Since \(\left|r\right| = \frac{1}{2} < 1\), the given series \(\displaystyle\sum_{n=0}^{\infty}\left(\frac{1}{2}\right)^{n}\) converges to \(2\) by the geometric series test.` }
+    ] },
+  { id: 'r1', preset: true, say: 'n over 2 n plus 1', term: R`\frac{n}{2n+1}`, start: 1,
+    fn: function (n) { return n / (2 * n + 1); },
+    lim: 0.5, limTex: R`\frac{1}{2}`, limSay: '1 half', limLabel: 'L = 1/2', sum: Infinity,
+    shows: R`The terms level off at \(\frac{1}{2}\), marked by the dashed line, not at \(0\). Adding about \(\frac{1}{2}\) again and again makes the partial sums grow without bound. So the sequence converges to \(\frac{1}{2}\), but the series diverges.`,
+    ex: [
+      { h: 'The nth term test' },
+      { t: R`Divide the top and bottom by \(n\), the highest power of \(n\) in the denominator:` },
+      { d: R`\lim_{n\to\infty}\frac{n}{2n+1} = \lim_{n\to\infty}\frac{1}{2+\frac{1}{n}} = \frac{1}{2+0} = \frac{1}{2}` },
+      { n: R`[Note: The degrees of the top and bottom are equal, so the limit can also be found by taking the ratio of the leading coefficients, \(\frac{1}{2}\).]` },
+      { c: R`Since \(\displaystyle\lim_{n\to\infty}\frac{n}{2n+1} = \frac{1}{2} \neq 0\), the given series \(\displaystyle\sum_{n=1}^{\infty}\frac{n}{2n+1}\) diverges by the nth term test.` }
+    ] },
+
+  { id: 'p3', menu: '1/n&sup3;', say: '1 over n cubed', term: R`\frac{1}{n^{3}}`, start: 1,
+    fn: function (n) { return 1 / (n * n * n); },
+    lim: 0, limTex: '0', sum: 1.2020569, sumTex: R`\approx 1.2021`, sumSay: 'about 1.2021', sumLabel: 'S \u2248 1.2021',
+    shows: R`The terms shrink quickly, and the partial sums level off near \(1.2021\), marked by the dashed line. So the sequence converges to \(0\), and the series converges.`,
+    shows2: R`[Note: Compare with \(\frac{1}{n^{2}}\). A larger \(p\) makes the terms shrink faster, so the partial sums level off sooner.]`,
+    ex: [
+      { h: 'The nth term test' },
+      { t: R`The numerator stays \(1\) while the denominator \(n^{3}\) grows without bound, so the terms get closer and closer to \(0\):` },
+      { d: R`\lim_{n\to\infty}\frac{1}{n^{3}} = 0` },
+      { c: R`Since \(\displaystyle\lim_{n\to\infty}\frac{1}{n^{3}} = 0\), the nth term test is inconclusive. It cannot tell us whether the given series \(\displaystyle\sum_{n=1}^{\infty}\frac{1}{n^{3}}\) converges or diverges, so we need another test.` },
+      { h: 'The p-series test' },
+      { t: R`The given series \(\displaystyle\sum_{n=1}^{\infty}\frac{1}{n^{3}}\) is a p-series with \(p = 3\).` },
+      { c: R`Since \(p = 3 > 1\), the given series \(\displaystyle\sum_{n=1}^{\infty}\frac{1}{n^{3}}\) converges by the p-series test.` },
+      { n: R`[Note: The integral test gives the same result: \(\displaystyle\int_{1}^{\infty}\frac{1}{x^{3}}\,dx = \left(-\frac{1}{2x^{2}}\right)\Big|_{1}^{\infty} = 0 - \left(-\frac{1}{2}\right) = \frac{1}{2}\), so the integral and the series both converge.]` },
+      { n: R`[Note: The value of the integral, \(\frac{1}{2}\), is not the sum of the series. The sum of the series is about \(1.2021\).]` }
+    ] },
+  { id: 'p32', menu: '1/n^(3/2)', say: '1 over n to the 3 halves', term: R`\frac{1}{n^{3/2}}`, start: 1,
+    fn: function (n) { return 1 / Math.pow(n, 1.5); },
+    lim: 0, limTex: '0', sum: 2.6123753, sumTex: R`\approx 2.6124`, sumSay: 'about 2.6124', sumLabel: 'S \u2248 2.6124',
+    shows: R`The terms get closer and closer to \(0\), and the series converges to about \(2.6124\), marked by the dashed line. But it converges slowly: even after 100 terms the partial sum is only about \(2.41\), still climbing toward the dashed line.`,
+    shows2: R`[Note: Here \(p = \frac{3}{2}\) is only a little larger than \(1\). The closer \(p\) is to \(1\), the slower the partial sums level off.]`,
+    ex: [
+      { h: 'The nth term test' },
+      { t: R`The numerator stays \(1\) while the denominator \(n^{3/2}\) grows without bound, so the terms get closer and closer to \(0\):` },
+      { d: R`\lim_{n\to\infty}\frac{1}{n^{3/2}} = 0` },
+      { c: R`Since \(\displaystyle\lim_{n\to\infty}\frac{1}{n^{3/2}} = 0\), the nth term test is inconclusive. It cannot tell us whether the given series \(\displaystyle\sum_{n=1}^{\infty}\frac{1}{n^{3/2}}\) converges or diverges, so we need another test.` },
+      { h: 'The p-series test' },
+      { t: R`The given series \(\displaystyle\sum_{n=1}^{\infty}\frac{1}{n^{3/2}}\) is a p-series with \(p = \frac{3}{2}\).` },
+      { c: R`Since \(p = \frac{3}{2} > 1\), the given series \(\displaystyle\sum_{n=1}^{\infty}\frac{1}{n^{3/2}}\) converges by the p-series test.` },
+      { n: R`[Note: The integral test gives the same result: \(\displaystyle\int_{1}^{\infty}x^{-3/2}\,dx = \left(-\frac{2}{\sqrt{x}}\right)\Big|_{1}^{\infty} = 0 - \left(-2\right) = 2\), so the integral and the series both converge.]` },
+      { n: R`[Note: The value of the integral, \(2\), is not the sum of the series. The sum of the series is about \(2.6124\).]` }
+    ] },
+  { id: 'sqrt', menu: '1/&radic;n', say: '1 over the square root of n', term: R`\frac{1}{\sqrt{n}}`, start: 1,
+    fn: function (n) { return 1 / Math.sqrt(n); },
+    lim: 0, limTex: '0', sum: Infinity,
+    shows: R`The terms get closer and closer to \(0\), but more slowly than \(\frac{1}{n}\). The partial sums grow without bound, even faster than the partial sums of \(\sum\frac{1}{n}\). So the sequence converges to \(0\), but the series diverges.`,
+    ex: [
+      { h: 'The nth term test' },
+      { t: R`The numerator stays \(1\) while the denominator \(\sqrt{n}\) grows without bound, so the terms get closer and closer to \(0\):` },
+      { d: R`\lim_{n\to\infty}\frac{1}{\sqrt{n}} = 0` },
+      { c: R`Since \(\displaystyle\lim_{n\to\infty}\frac{1}{\sqrt{n}} = 0\), the nth term test is inconclusive. It cannot tell us whether the given series \(\displaystyle\sum_{n=1}^{\infty}\frac{1}{\sqrt{n}}\) converges or diverges, so we need another test.` },
+      { h: 'The p-series test' },
+      { t: 'Rewrite the square root as a power:' },
+      { d: R`\frac{1}{\sqrt{n}} = \frac{1}{n^{1/2}}` },
+      { t: R`So the given series \(\displaystyle\sum_{n=1}^{\infty}\frac{1}{\sqrt{n}}\) is a p-series with \(p = \frac{1}{2}\).` },
+      { c: R`Since \(p = \frac{1}{2} \le 1\), the given series \(\displaystyle\sum_{n=1}^{\infty}\frac{1}{\sqrt{n}}\) diverges by the p-series test.` },
+      { n: R`[Note: The integral test gives the same result: \(\displaystyle\int_{1}^{\infty}x^{-1/2}\,dx = \left(2\sqrt{x}\right)\Big|_{1}^{\infty} = \infty - 2 = \infty\), so the integral and the series both diverge.]` }
+    ] },
+  { id: 'ln', menu: '1/ln n', say: '1 over the natural log of n', term: R`\frac{1}{\ln n}`, start: 2,
+    fn: function (n) { return 1 / Math.log(n); },
+    lim: 0, limTex: '0', sum: Infinity,
+    shows: R`The terms get closer and closer to \(0\), but very slowly, because \(\ln n\) grows very slowly. The partial sums grow without bound. So the sequence converges to \(0\), but the series diverges.`,
+    shows2: R`[Note: This is another example where a sequence with limit \(0\) does not make the series converge.]`,
+    ex: [
+      { h: 'The nth term test' },
+      { t: R`The numerator stays \(1\) while the denominator \(\ln n\) grows without bound, so the terms get closer and closer to \(0\):` },
+      { d: R`\lim_{n\to\infty}\frac{1}{\ln n} = 0` },
+      { c: R`Since \(\displaystyle\lim_{n\to\infty}\frac{1}{\ln n} = 0\), the nth term test is inconclusive. It cannot tell us whether the given series \(\displaystyle\sum_{n=2}^{\infty}\frac{1}{\ln n}\) converges or diverges, so we need another test.` },
+      { h: 'The direct comparison test' },
+      { t: R`Since \(\ln n < n\), we have:` },
+      { d: R`\frac{1}{\ln n} > \frac{1}{n}` },
+      { t: R`The series \(\displaystyle\sum_{n=2}^{\infty}\frac{1}{n}\) is a p-series with \(p = 1\), so it diverges. The terms of the given series are larger than its terms.` },
+      { c: R`Since \(\frac{1}{\ln n} > \frac{1}{n}\) and \(\displaystyle\sum_{n=2}^{\infty}\frac{1}{n}\) diverges, the given series \(\displaystyle\sum_{n=2}^{\infty}\frac{1}{\ln n}\) diverges by the direct comparison test.` },
+      { n: R`[Note: The given series starts at \(n = 2\) because \(\ln 1 = 0\).]` }
+    ] },
+  { id: 'r2', menu: '(6n + 1)/(2n &minus; 7)', say: '6 n plus 1, over 2 n minus 7', term: R`\frac{6n+1}{2n-7}`, start: 5,
+    fn: function (n) { return (6 * n + 1) / (2 * n - 7); },
+    lim: 3, limTex: '3', limSay: '3', limLabel: 'L = 3', sum: Infinity,
+    shows: R`The terms level off at \(3\), marked by the dashed line, not at \(0\). Adding about \(3\) again and again makes the partial sums grow without bound. So the sequence converges to \(3\), but the series diverges.`,
+    ex: [
+      { h: 'The nth term test' },
+      { t: R`Divide the top and bottom by \(n\), the highest power of \(n\) in the denominator:` },
+      { d: R`\lim_{n\to\infty}\frac{6n+1}{2n-7} = \lim_{n\to\infty}\frac{6+\frac{1}{n}}{2-\frac{7}{n}} = \frac{6+0}{2-0} = 3` },
+      { n: R`[Note: The degrees of the top and bottom are equal, so the limit can also be found by taking the ratio of the leading coefficients, \(\frac{6}{2} = 3\).]` },
+      { c: R`Since \(\displaystyle\lim_{n\to\infty}\frac{6n+1}{2n-7} = 3 \neq 0\), the given series \(\displaystyle\sum_{n=5}^{\infty}\frac{6n+1}{2n-7}\) diverges by the nth term test.` },
+      { n: R`[Note: The given series starts at \(n = 5\). Leaving out the first few terms does not change whether a series converges or diverges.]` }
+    ] },
+  { id: 'e3', menu: '(1 + 3/n)&#8319;', say: '1 plus 3 over n, to the n', term: R`\left(1+\frac{3}{n}\right)^{n}`, start: 1,
+    fn: function (n) { return Math.pow(1 + 3 / n, n); },
+    lim: Math.exp(3), limTex: R`e^{3} \approx 20.09`, limSay: 'e cubed, about 20.09', limLabel: 'L = e\u00B3 \u2248 20.09', sum: Infinity,
+    shows: R`The terms level off near \(e^{3} \approx 20.09\), marked by the dashed line, not at \(0\). The partial sums grow without bound. So the sequence converges to \(e^{3}\), but the series diverges.`,
+    ex: [
+      { h: 'The nth term test' },
+      { t: R`Plugging in gives the form \(1^{\infty}\), which is indeterminate. Use the important limit:` },
+      { d: R`\lim_{n\to\infty}\left(1+\frac{a}{n}\right)^{n} = e^{a}` },
+      { t: R`Here \(a = 3\):` },
+      { d: R`\lim_{n\to\infty}\left(1+\frac{3}{n}\right)^{n} = e^{3} \approx 20.09` },
+      { c: R`Since \(\displaystyle\lim_{n\to\infty}\left(1+\frac{3}{n}\right)^{n} = e^{3} \neq 0\), the given series \(\displaystyle\sum_{n=1}^{\infty}\left(1+\frac{3}{n}\right)^{n}\) diverges by the nth term test.` }
+    ] },
+  { id: 'em2', menu: '(1 &minus; 2/n)&#8319;', say: '1 minus 2 over n, to the n', term: R`\left(1-\frac{2}{n}\right)^{n}`, start: 3,
+    fn: function (n) { return Math.pow(1 - 2 / n, n); },
+    lim: Math.exp(-2), limTex: R`e^{-2} \approx 0.1353`, limSay: 'e to the negative 2, about 0.1353', limLabel: 'L = e\u207B\u00B2 \u2248 0.1353', sum: Infinity,
+    shows: R`The terms level off near \(e^{-2} \approx 0.1353\), marked by the dashed line. This value is small, but it is not \(0\). The partial sums grow without bound. So the sequence converges to \(e^{-2}\), but the series diverges.`,
+    ex: [
+      { h: 'The nth term test' },
+      { t: R`Plugging in gives the form \(1^{\infty}\), which is indeterminate. Use the important limit:` },
+      { d: R`\lim_{n\to\infty}\left(1+\frac{a}{n}\right)^{n} = e^{a}` },
+      { t: R`Here \(a = -2\):` },
+      { d: R`\lim_{n\to\infty}\left(1-\frac{2}{n}\right)^{n} = \lim_{n\to\infty}\left(1+\frac{-2}{n}\right)^{n} = e^{-2} \approx 0.1353` },
+      { c: R`Since \(\displaystyle\lim_{n\to\infty}\left(1-\frac{2}{n}\right)^{n} = e^{-2} \neq 0\), the given series \(\displaystyle\sum_{n=3}^{\infty}\left(1-\frac{2}{n}\right)^{n}\) diverges by the nth term test.` },
+      { n: R`[Note: \(e^{-2} \approx 0.1353\) is small, but it is not \(0\).]` },
+      { n: R`[Note: The given series starts at \(n = 3\), where the terms are positive. Leaving out the first few terms does not change whether a series converges or diverges.]` }
+    ] }
+];
+
+/* Exact a_k as text for the hover label, and the answers for "Let's dig a little deeper":
+   exact fractions, or 4 decimals for the 3/2 power, square root and natural log examples.
+   All checked with exact fractions (2026-11-11). */
+function gcd(x, y) { return y ? gcd(y, x % y) : Math.abs(x); }
+function frac(p, q) { var g = gcd(p, q); p /= g; q /= g; return q === 1 ? String(p) : p + '/' + q; }
+function isWhole(t) { return /^\d+$/.test(t); }
+function sq(k) { var r = Math.round(Math.sqrt(k)); return r * r === k ? r : 0; }
+function powText(b, k) { return k === 1 ? b : (isWhole(b) ? b : '(' + b + ')') + '<sup>' + k + '</sup>'; }
+var EXTRA = {
+  p1: { tt: function (k) { return frac(1, k); },
+    wa: ['1', R`\frac{1}{2}`, R`\frac{1}{3}`], ws: ['1', R`\frac{3}{2}`, R`\frac{11}{6}`], fill: ['1', '1/2', '1/3', '1', '3/2', '11/6'] },
+  p2: { tt: function (k) { return frac(1, k * k); },
+    wa: ['1', R`\frac{1}{4}`, R`\frac{1}{9}`], ws: ['1', R`\frac{5}{4}`, R`\frac{49}{36}`], fill: ['1', '1/4', '1/9', '1', '5/4', '49/36'] },
+  geo: { tt: function (k) { return k <= 10 ? frac(1, Math.pow(2, k)) : '1/2<sup>' + k + '</sup>'; },
+    wa: ['1', R`\frac{1}{2}`, R`\frac{1}{4}`], ws: ['1', R`\frac{3}{2}`, R`\frac{7}{4}`], fill: ['1', '1/2', '1/4', '1', '3/2', '7/4'] },
+  r1: { tt: function (k) { return frac(k, 2 * k + 1); },
+    wa: [R`\frac{1}{3}`, R`\frac{2}{5}`, R`\frac{3}{7}`], ws: [R`\frac{1}{3}`, R`\frac{11}{15}`, R`\frac{122}{105}`], fill: ['1/3', '2/5', '3/7', '1/3', '11/15', '122/105'] },
+  p3: { tt: function (k) { return frac(1, k * k * k); },
+    wa: ['1', R`\frac{1}{8}`, R`\frac{1}{27}`], ws: ['1', R`\frac{9}{8}`, R`\frac{251}{216}`], fill: ['1', '1/8', '1/27', '1', '9/8', '251/216'] },
+  p32: { tt: function (k) { var r = sq(k); return r ? frac(1, r * r * r) : '1/' + k + '<sup>3/2</sup>'; },
+    wa: ['1', R`\frac{1}{2\sqrt{2}} \approx 0.3536`, R`\frac{1}{3\sqrt{3}} \approx 0.1925`], ws: ['1', R`\approx 1.3536`, R`\approx 1.5460`], fill: ['1', '0.3536', '0.1925', '1', '1.3536', '1.5460'] },
+  sqrt: { tt: function (k) { var r = sq(k); return r ? frac(1, r) : '1/&radic;' + k; },
+    wa: ['1', R`\frac{1}{\sqrt{2}} \approx 0.7071`, R`\frac{1}{\sqrt{3}} \approx 0.5774`], ws: ['1', R`\approx 1.7071`, R`\approx 2.2845`], fill: ['1', '0.7071', '0.5774', '1', '1.7071', '2.2845'] },
+  ln: { tt: function (k) { return '1/ln ' + k; },
+    wa: [R`\frac{1}{\ln 2} \approx 1.4427`, R`\frac{1}{\ln 3} \approx 0.9102`, R`\frac{1}{\ln 4} \approx 0.7213`], ws: [R`\approx 1.4427`, R`\approx 2.3529`, R`\approx 3.0743`], fill: ['1.4427', '0.9102', '0.7213', '1.4427', '2.3529', '3.0743'] },
+  r2: { tt: function (k) { return frac(6 * k + 1, 2 * k - 7); },
+    wa: [R`\frac{31}{3}`, R`\frac{37}{5}`, R`\frac{43}{7}`], ws: [R`\frac{31}{3}`, R`\frac{266}{15}`, R`\frac{2507}{105}`], fill: ['31/3', '37/5', '43/7', '31/3', '266/15', '2507/105'] },
+  e3: { tt: function (k) { return powText(frac(k + 3, k), k); },
+    wa: ['4', R`\frac{25}{4}`, '8'], ws: ['4', R`\frac{41}{4}`, R`\frac{73}{4}`], fill: ['4', '25/4', '8', '4', '41/4', '73/4'] },
+  em2: { tt: function (k) { return powText(frac(k - 2, k), k); },
+    wa: [R`\frac{1}{27}`, R`\frac{1}{16}`, R`\frac{243}{3125}`], ws: [R`\frac{1}{27}`, R`\frac{43}{432}`, R`\approx 0.1773`], fill: ['1/27', '1/16', '243/3125', '1/27', '43/432', '0.1773'] }
+};
+SEQS.forEach(function (q) { var x = EXTRA[q.id]; q.tt = x.tt; q.wa = x.wa; q.ws = x.ws; q.fill = x.fill; });
+
+var CUSTOM_SHOWS = R`Look at the graph of the sequence: do the terms level off? At what value? Then look at the partial sums: do they level off, or do they keep growing? Move the slider to 100 terms for a clearer picture.`;
+var CUSTOM_EX = [
+  { h: 'Try these tests in order' },
+  { list: [
+    R`<b>The nth term test.</b> Find \(\displaystyle\lim_{n\to\infty} a_{n}\). If the limit is not \(0\), the series diverges. If the limit is \(0\), the test is inconclusive, so go on to another test.`,
+    R`<b>The p-series test.</b> \(\displaystyle\sum_{n=1}^{\infty}\frac{1}{n^{p}}\) converges if \(p > 1\) and diverges if \(p \le 1\).`,
+    R`<b>The geometric series test.</b> \(\displaystyle\sum_{n=0}^{\infty} a r^{n}\) converges if \(\left|r\right| < 1\) and diverges if \(\left|r\right| \ge 1\).`,
+    R`<b>The integral test.</b> If \(f(x)\) is positive, continuous and decreasing, then \(\displaystyle\sum f(n)\) and \(\displaystyle\int_{1}^{\infty} f(x)\,dx\) both converge or both diverge.`,
+    R`<b>The direct comparison test.</b> Compare the terms with the terms of a series you already know converges or diverges.`
+  ] }
+];
+
+/* ------------------------------------------------------------------
+   A small parser for the "enter your own" box. Supports + - * / ^,
+   parentheses, implicit multiplication (2n, n(n+1)), n!, sqrt, ln,
+   log (natural log), exp, sin, cos, tan, abs, e and pi.
+   Implicit multiplication binds tighter than * and /, so 1/2n = 1/(2n).
+   ------------------------------------------------------------------ */
+var FUNCS = { sqrt: 1, ln: 1, log: 1, exp: 1, sin: 1, cos: 1, tan: 1, abs: 1 };
+var NAMES = ['sqrt', 'exp', 'sin', 'cos', 'tan', 'abs', 'log', 'ln', 'pi', 'n', 'e'];
+function ParseError(msg) { this.message = msg; }
+
+function tokenize(src) {
+  var s = src.replace(/\*\*/g, '^').replace(/\u2212/g, '-').replace(/[\u00D7\u00B7]/g, '*');
+  var out = [], i = 0;
+  while (i < s.length) {
+    var c = s.charAt(i), j;
+    if (c === ' ' || c === '\t') { i++; continue; }
+    if (/[0-9.]/.test(c)) {
+      j = i; while (j < s.length && /[0-9.]/.test(s.charAt(j))) j++;
+      var num = s.slice(i, j);
+      if (!/^(\d+\.?\d*|\.\d+)$/.test(num)) throw new ParseError('"' + num + '" is not a number.');
+      // Ira, 2026-11-11: "1e3" is not read as 1 times e times 3 without a word; ask what was meant.
+      if ((s.charAt(j) === 'e' || s.charAt(j) === 'E') && /[0-9]/.test(s.charAt(j + 1))) {
+        var k2 = j + 1; while (k2 < s.length && /[0-9]/.test(s.charAt(k2))) k2++;
+        throw new ParseError('"' + s.slice(i, k2) + '" is unclear. For ' + String(Number(s.slice(i, k2))) + ', type ' + String(Number(s.slice(i, k2))) + '. For e times ' + s.slice(j + 1, k2) + ', type ' + s.slice(j + 1, k2) + 'e or ' + s.slice(j + 1, k2) + '*e.');
+      }
+      out.push({ t: 'num', v: num }); i = j; continue;
+    }
+    if (/[A-Za-z]/.test(c)) {
+      j = i; while (j < s.length && /[A-Za-z]/.test(s.charAt(j))) j++;
+      var word = s.slice(i, j).toLowerCase(), k = 0;
+      while (k < word.length) {
+        var hit = null;
+        for (var q = 0; q < NAMES.length; q++) {
+          if (word.substr(k, NAMES[q].length) === NAMES[q]) { hit = NAMES[q]; break; }
+        }
+        if (!hit) throw new ParseError('"' + s.slice(i, j) + '" is not recognized. Use n as the variable.');
+        out.push({ t: 'id', v: hit }); k += hit.length;
+      }
+      i = j; continue;
+    }
+    if ('+-*/^()!'.indexOf(c) >= 0) { out.push({ t: c }); i++; continue; }
+    throw new ParseError('The symbol "' + c + '" is not recognized.');
+  }
+  return out;
+}
+
+function parse(src) {
+  var toks = tokenize(src), pos = 0;
+  if (!toks.length) throw new ParseError('Please enter an expression using n.');
+  function peek() { return toks[pos] ? toks[pos].t : null; }
+  function take() { return toks[pos++]; }
+  function need(t) { if (peek() !== t) throw new ParseError(t === ')' ? 'A closing parenthesis ) is missing.' : 'Check the expression.'); pos++; }
+  function startsFactor() { var p = peek(); return p === 'num' || p === 'id' || p === '('; }
+  function expr() {
+    var a = term();
+    while (peek() === '+' || peek() === '-') { var op = take().t; a = { k: op === '+' ? 'add' : 'sub', a: a, b: term() }; }
+    return a;
+  }
+  function term() {
+    var a = implicit();
+    while (peek() === '*' || peek() === '/') { var op = take().t; a = { k: op === '*' ? 'mul' : 'div', a: a, b: implicit() }; }
+    return a;
+  }
+  function implicit() {
+    var a = unary();
+    while (startsFactor()) a = { k: 'mul', a: a, b: power(), imp: true };
+    return a;
+  }
+  function unary() {
+    if (peek() === '-') { take(); return { k: 'neg', a: unary() }; }
+    if (peek() === '+') { take(); return unary(); }
+    return power();
+  }
+  function power() {
+    var b = postfix();
+    if (peek() === '^') { take(); return { k: 'pow', a: b, b: unary() }; }
+    return b;
+  }
+  function postfix() {
+    var a = primary();
+    while (peek() === '!') { take(); a = { k: 'fact', a: a }; }
+    return a;
+  }
+  function primary() {
+    var tk = take();
+    if (!tk) throw new ParseError('The expression ends too soon.');
+    if (tk.t === 'num') return { k: 'num', v: tk.v };
+    if (tk.t === '(') { var e = expr(); need(')'); return e; }
+    if (tk.t === 'id') {
+      if (FUNCS[tk.v]) {
+        var arg;
+        if (peek() === '(') { take(); arg = expr(); need(')'); } else arg = power();
+        return { k: 'fn', f: tk.v === 'log' ? 'ln' : tk.v, a: arg };
+      }
+      if (tk.v === 'n') return { k: 'var' };
+      return { k: 'const', v: tk.v };
+    }
+    throw new ParseError('Check the expression near "' + tk.t + '".');
+  }
+  var tree = expr();
+  if (pos < toks.length) throw new ParseError(peek() === ')' ? 'There is an extra closing parenthesis ).' : 'Check the expression.');
+  return tree;
+}
+
+function factorial(x) {
+  if (x < 0 || Math.floor(x) !== x) return NaN;
+  var r = 1; for (var i = 2; i <= x; i++) { r *= i; if (!isFinite(r)) return Infinity; }
+  return r;
+}
+function evaluate(nd, n) {
+  switch (nd.k) {
+    case 'num': return parseFloat(nd.v);
+    case 'var': return n;
+    case 'const': return nd.v === 'pi' ? Math.PI : Math.E;
+    case 'add': return evaluate(nd.a, n) + evaluate(nd.b, n);
+    case 'sub': return evaluate(nd.a, n) - evaluate(nd.b, n);
+    case 'mul': return evaluate(nd.a, n) * evaluate(nd.b, n);
+    case 'div': return evaluate(nd.a, n) / evaluate(nd.b, n);
+    case 'neg': return -evaluate(nd.a, n);
+    case 'pow': return Math.pow(evaluate(nd.a, n), evaluate(nd.b, n));
+    case 'fact': return factorial(evaluate(nd.a, n));
+    case 'fn':
+      var x = evaluate(nd.a, n);
+      switch (nd.f) {
+        case 'sqrt': return Math.sqrt(x);
+        case 'ln': return Math.log(x);
+        case 'exp': return Math.exp(x);
+        case 'sin': return Math.sin(x);
+        case 'cos': return Math.cos(x);
+        case 'tan': return Math.tan(x);
+        case 'abs': return Math.abs(x);
+      }
+  }
+  return NaN;
+}
+
+/* TeX for a parsed expression, so the student sees how it was read. */
+function toTex(nd) {
+  function w(r) { return '\\left(' + r.s + '\\right)'; }
+  function T(x) {
+    var a, b;
+    switch (x.k) {
+      case 'num': return { s: x.v, p: 5 };
+      case 'var': return { s: 'n', p: 5 };
+      case 'const': return { s: x.v === 'pi' ? '\\pi' : 'e', p: 5 };
+      case 'add': a = T(x.a); b = T(x.b); return { s: a.s + ' + ' + (b.p <= 1 && x.b.k === 'neg' ? w(b) : b.s), p: 1 };
+      case 'sub': a = T(x.a); b = T(x.b); return { s: a.s + ' - ' + (b.p <= 1 ? w(b) : b.s), p: 1 };
+      case 'neg': a = T(x.a); return { s: '-' + (a.p <= 1 ? w(a) : a.s), p: 1 };
+      case 'mul':
+        a = T(x.a); b = T(x.b);
+        var as = a.p < 2 ? w(a) : a.s, bs = b.p < 2 ? w(b) : b.s;
+        var dot = /^[0-9.]/.test(bs) || x.a.k === 'fact' || (x.a.k === 'var' && x.b.k === 'var');
+        return { s: as + (dot ? ' \\cdot ' : ' ') + bs, p: 2 };
+      case 'div': return { s: '\\frac{' + T(x.a).s + '}{' + T(x.b).s + '}', p: 3 };
+      case 'pow':
+        a = T(x.a); b = T(x.b);
+        return { s: (a.p < 5 ? w(a) : a.s) + '^{' + b.s + '}', p: 4 };
+      case 'fact': a = T(x.a); return { s: (a.p < 5 ? w(a) : a.s) + '!', p: 5 };
+      case 'fn':
+        a = T(x.a);
+        if (x.f === 'sqrt') return { s: '\\sqrt{' + a.s + '}', p: 5 };
+        if (x.f === 'abs') return { s: '\\left|' + a.s + '\\right|', p: 5 };
+        if (x.f === 'exp') return { s: 'e^{' + a.s + '}', p: 4 };
+        return { s: '\\' + x.f + (a.p >= 5 ? ' ' + a.s : w(a)), p: 4 };
+    }
+    return { s: '?', p: 5 };
+  }
+  var r = T(nd);
+  return { s: r.s, wrap: r.p <= 1 };
+}
+
+/* ------------------------------------------------------------------
+   State and helpers
+   ------------------------------------------------------------------ */
+var cur = SEQS[0];
+var N = 12;   // Ira, 2026-11-11: open at a small n so students drag the slider to the right
+var data = null;
+var custom = null;
+
+var el = function (id) { return document.getElementById(id); };
+var KW = /(sequences?|series)(?![A-Za-z])/gi;
+function highlight(root) {
+  var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode: function (n) {
+      return n.parentElement.closest('h1, h2, h3, button, label, select, summary, b, svg, mjx-container, .legend, .kw-seq, .kw-ser, script, style') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  var nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(function (node) {
+    var text = node.nodeValue;
+    KW.lastIndex = 0;
+    if (!KW.test(text)) return;
+    KW.lastIndex = 0;
+    var frag = document.createDocumentFragment(), last = 0, m;
+    while ((m = KW.exec(text))) {
+      var before = text.slice(Math.max(0, m.index - 14), m.index).toLowerCase();
+      if (/(geometric|alternating) $/i.test(before) || /[A-Za-z-]$/.test(before)) continue;
+      frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+      var span = document.createElement('span');
+      span.className = /^seq/i.test(m[1]) ? 'kw-seq' : 'kw-ser';
+      span.textContent = m[1];
+      frag.appendChild(span);
+      last = m.index + m[1].length;
+    }
+    frag.appendChild(document.createTextNode(text.slice(last)));
+    node.parentNode.replaceChild(frag, node);
+  });
+}
+function typeset(node) {
+  highlight(node);
+  if (window.MathJax && MathJax.typesetPromise) {
+    if (MathJax.typesetClear) MathJax.typesetClear([node]);
+    return MathJax.typesetPromise([node]).catch(function () {});
+  }
+  return Promise.resolve();
+}
+
+/* Numbers: 4 decimals (2 when large), with an approximately-equal sign when rounded. */
+function fmt(v) {
+  if (!isFinite(v)) return { s: '\u221E', approx: false };
+  var s;
+  if (v !== 0 && Math.abs(v) < 0.0001) {
+    var ex = v.toExponential(2).split('e');
+    return { s: ex[0], exp: parseInt(ex[1], 10), approx: true };
+  }
+  s = Math.abs(v) >= 1000 ? v.toFixed(2) : v.toFixed(4);
+  return { s: s, approx: Math.abs(parseFloat(s) - v) > 1e-12 };
+}
+function numHTML(v) {
+  var f = fmt(v);
+  var body = f.exp !== undefined ? f.s + ' &times; 10<sup>' + (f.exp < 0 ? '&minus;' + (-f.exp) : f.exp) + '</sup>' : f.s;
+  return (f.approx ? '&asymp; ' : '= ') + body;
+}
+function numSay(v) {
+  var f = fmt(v);
+  var body = f.exp !== undefined ? f.s + ' times 10 to the ' + (f.exp < 0 ? 'negative ' + (-f.exp) : f.exp) : f.s;
+  return (f.approx ? 'about ' : '') + body;
+}
+function numTable(v) {
+  var f = fmt(v);
+  return f.exp !== undefined ? f.s + ' &times; 10<sup>' + (f.exp < 0 ? '&minus;' + (-f.exp) : f.exp) + '</sup>' : f.s;
+}
+
+function compute(fn, start) {
+  var ns = [], a = [], S = [], sum = 0;
+  for (var n = start; n <= NMAX; n++) { var v = fn(n); sum += v; ns.push(n); a.push(v); S.push(sum); }
+  return { ns: ns, a: a, S: S };
+}
+
+function termTex(seq) { return seq.term; }
+function wrapped(seq) { return seq.wrap ? '\\left(' + seq.term + '\\right)' : seq.term; }
+function seriesTex(seq) { return '\\sum_{n=' + seq.start + '}^{\\infty} ' + wrapped(seq); }
+function limTex(seq) { return '\\lim_{n\\to\\infty} ' + wrapped(seq); }
+
+/* ------------------------------------------------------------------
+   SVG graphs. Axes with arrows on the positive ends, n at the end of
+   the horizontal axis, a_n or S_n at the top of the vertical axis,
+   tick numbers along the axes. The vertical scale is fixed by the
+   first 100 terms, so moving the slider never rescales it: a diverging
+   series is seen climbing, a converging one levelling off.
+   ------------------------------------------------------------------ */
+var SVGNS = 'http://www.w3.org/2000/svg';
+var GEOM = {};
+var W = 420, H = 300, ML = 54, MR = 30, MT = 34, MB = 32;
+function niceStep(range, target) {
+  var raw = range / target, mag = Math.pow(10, Math.floor(Math.log10(raw))), norm = raw / mag;
+  return (norm < 1.5 ? 1 : norm < 3 ? 2 : norm < 7 ? 5 : 10) * mag;
+}
+function decimalsFor(step) { return Math.max(0, -Math.floor(Math.log10(step) + 1e-9)); }
+function node(tag, attrs, text) {
+  var e = document.createElementNS(SVGNS, tag);
+  for (var k in attrs) e.setAttribute(k, attrs[k]);
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+
+function drawGraph(host, opt) {
+  /* opt: ns, ys, yTop, kind ('dots'|'line'), ylab ('a'|'S'), ref (number or null), refLabel */
+  var svg = node('svg', { viewBox: '0 0 ' + W + ' ' + H, 'aria-hidden': 'true', focusable: 'false' });
+  var start = opt.ns[0], last = opt.ns[opt.ns.length - 1];
+  var x0 = start === 0 ? -0.8 : 0, x1 = last + 1;
+  var yStep = niceStep(opt.yTop, 5), yMax = Math.ceil(opt.yTop / yStep - 1e-9) * yStep;
+  if (yMax <= 0) { yMax = 1; yStep = 0.2; }
+  var pw = W - ML - MR, ph = H - MT - MB;
+  var sx = function (n) { return ML + (n - x0) / (x1 - x0) * pw; };
+  var sy = function (y) { return MT + ph - (y / yMax) * ph; };
+  var ox = sx(0), oy = sy(0);
+  var dec = decimalsFor(yStep);
+  GEOM[host.id] = { x0: x0, x1: x1, yMax: yMax };
+
+  // horizontal grid and y ticks
+  for (var k = 1; k * yStep <= yMax + 1e-9; k++) {
+    var yy = sy(k * yStep);
+    svg.appendChild(node('line', { class: 'grid', x1: ML, x2: W - MR, y1: yy, y2: yy }));
+    svg.appendChild(node('line', { class: 'tk', x1: ox - 4, x2: ox + 4, y1: yy, y2: yy }));
+    svg.appendChild(node('text', { class: 'tick', x: ox - 7, y: yy + 4.5, 'text-anchor': 'end' }, (k * yStep).toFixed(dec)));
+  }
+  // x ticks
+  var steps = [1, 2, 5, 10, 20], xs = 20;
+  for (var q = 0; q < steps.length; q++) { if (Math.floor(last / steps[q]) <= 10) { xs = steps[q]; break; } }
+  for (var t = xs; t <= last; t += xs) {
+    var xx = sx(t);
+    svg.appendChild(node('line', { class: 'tk', x1: xx, x2: xx, y1: oy - 4, y2: oy + 4 }));
+    svg.appendChild(node('text', { class: 'tick', x: xx, y: oy + 19, 'text-anchor': 'middle' }, String(t)));
+  }
+  svg.appendChild(node('text', { class: 'tick', x: ox - 7, y: oy + 17, 'text-anchor': 'end' }, '0'));
+
+  // the data. The sequence is drawn as separate dots, one per n (drawn last,
+  // on top of the dashed line); the partial sums as a connected line.
+  var dotsG = null;
+  if (opt.kind === 'dots') {
+    var rd = Math.max(2.4, Math.min(4.6, 0.36 * (sx(1) - sx(0))));
+    dotsG = node('g', {});
+    opt.ns.forEach(function (n, i) {
+      dotsG.appendChild(node('circle', { class: 'seqdot', cx: sx(n).toFixed(2), cy: sy(Math.min(opt.ys[i], yMax)).toFixed(2), r: rd.toFixed(2) }));
+    });
+  } else {
+    var pts = opt.ns.map(function (n, i) { return sx(n).toFixed(2) + ',' + sy(Math.min(opt.ys[i], yMax)).toFixed(2); }).join(' ');
+    svg.appendChild(node('polyline', { class: 'sumline', points: pts }));
+    if (opt.ns.length <= 50) {
+      opt.ns.forEach(function (n, i) { svg.appendChild(node('circle', { class: 'sumdot', cx: sx(n), cy: sy(Math.min(opt.ys[i], yMax)), r: 2.6 })); });
+    }
+  }
+
+  // dashed reference line: the limit of the sequence or the sum of the series
+  if (opt.ref !== null && opt.ref > 0) {
+    var ry = sy(opt.ref);
+    svg.appendChild(node('line', { class: 'limline', x1: ox, x2: W - MR, y1: ry, y2: ry }));
+    var labY = ry - 8 < MT + 6 ? ry + 18 : ry - 8;
+    var lab = node('text', { class: 'limlab', x: W - MR - 4, y: labY, 'text-anchor': 'end' }, opt.refLabel);
+    var bg = node('rect', { class: 'limbg', x: W - MR - 6 - opt.refLabel.length * 7.6, y: labY - 13, width: opt.refLabel.length * 7.6 + 4, height: 17, rx: 3 });
+    svg.appendChild(bg); svg.appendChild(lab);
+  }
+  if (dotsG) svg.appendChild(dotsG);
+
+  // axes with arrowheads on the positive ends
+  var xEnd = W - MR + 14, yEnd = MT - 16;
+  svg.appendChild(node('line', { class: 'ax', x1: sx(x0), x2: xEnd - 6, y1: oy, y2: oy }));
+  svg.appendChild(node('path', { class: 'arrowhead', d: 'M ' + xEnd + ' ' + oy + ' l -10 -5 l 0 10 z' }));
+  svg.appendChild(node('line', { class: 'ax', x1: ox, x2: ox, y1: oy, y2: yEnd + 6 }));
+  svg.appendChild(node('path', { class: 'arrowhead', d: 'M ' + ox + ' ' + yEnd + ' l -5 10 l 10 0 z' }));
+  svg.appendChild(node('text', { class: 'axlab', x: xEnd + 4, y: oy + 6 }, 'n'));
+  var yl = node('text', { class: 'axlab', x: ox + 10, y: yEnd + 8 });
+  yl.appendChild(node('tspan', {}, opt.ylab));
+  yl.appendChild(node('tspan', { class: 'sub', dy: 5 }, 'n'));
+  svg.appendChild(yl);
+
+  host.innerHTML = '';
+  host.appendChild(svg);
+}
+
+function dashSwatch() {
+  return '<svg width="30" height="10" viewBox="0 0 30 10" aria-hidden="true" focusable="false"><line class="limline" x1="1" x2="29" y1="5" y2="5"/></svg>';
+}
+
+/* ------------------------------------------------------------------
+   Rendering
+   ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------
+   Reading values off the graphs: hover, tap, or arrow keys.
+   Each graph is independent. The sequence label gives the exact term;
+   the series label shows the terms being added: all of them up to four,
+   after that the first three, then ..., then the last one.
+   ------------------------------------------------------------------ */
+var HOVER = { seq: null, sum: null };
+function lastShown() { return cur.start + visibleCount() - 1; }
+function plotFor(kind) { return el(kind === 'seq' ? 'seqPlot' : 'sumPlot'); }
+function tipFor(kind) { return el(kind === 'seq' ? 'tipSeq' : 'tipSum'); }
+function termPiece(j) { return cur.tt ? cur.tt(j) : 'a<sub>' + j + '</sub>'; }
+function sumHTML(k) {
+  var s0 = cur.start, parts = [];
+  if (k - s0 + 1 <= 4) { for (var j = s0; j <= k; j++) parts.push(termPiece(j)); return parts.join(' + '); }
+  return termPiece(s0) + ' + ' + termPiece(s0 + 1) + ' + ' + termPiece(s0 + 2) + ' + &hellip; + ' + termPiece(k);
+}
+function showValue(kind, k) {
+  if (!data) return;
+  k = Math.max(cur.start, Math.min(lastShown(), k));
+  HOVER[kind] = k;
+  var fig = plotFor(kind), tip = tipFor(kind), svg = fig.querySelector('svg'), g = GEOM[fig.id];
+  if (!svg || !g) return;
+  var i = k - cur.start, v = kind === 'seq' ? data.a[i] : data.S[i];
+  var pw = W - ML - MR, ph = H - MT - MB;
+  var x = ML + (k - g.x0) / (g.x1 - g.x0) * pw, y = MT + ph - (Math.min(v, g.yMax) / g.yMax) * ph;
+  var ring = svg.querySelector('.ring');
+  if (!ring) { ring = node('circle', { class: 'ring', r: 6.5 }); svg.appendChild(ring); }
+  ring.setAttribute('cx', x.toFixed(1)); ring.setAttribute('cy', y.toFixed(1));
+  if (kind === 'seq') {
+    var t = cur.tt ? cur.tt(k) : null;
+    tip.innerHTML = 'a<sub>' + k + '</sub> ' + (t === null ? numHTML(v) : '= ' + t + (isWhole(t) ? '' : ' ' + numHTML(v)));
+  } else {
+    var st = sumHTML(k);
+    tip.innerHTML = 'S<sub>' + k + '</sub> = ' + st + (isWhole(st) ? '' : '<br>' + numHTML(v));
+  }
+  tip.hidden = false;
+  // keep the label inside the graph: centred over the point, clamped to the edges, above the point when there is room
+  var box = fig.getBoundingClientRect(), sc = box.width / W;
+  var px = x * sc, py = y * sc, w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.max(4, Math.min(box.width - w - 4, px - w / 2)) + 'px';
+  tip.style.top = (py - h - 12 >= 0 ? py - h - 12 : py + 14) + 'px';
+}
+function hideValue(kind) {
+  (kind ? [kind] : ['seq', 'sum']).forEach(function (kd) {
+    HOVER[kd] = null;
+    tipFor(kd).hidden = true;
+    var r = plotFor(kd).querySelector('.ring');
+    if (r) r.parentNode.removeChild(r);
+  });
+}
+function valueWords(kind, k) {
+  var i = k - cur.start, count = i + 1;
+  return kind === 'seq'
+    ? 'n equals ' + k + '. a sub ' + k + ' equals ' + numSay(data.a[i]) + '.'
+    : 'n equals ' + k + '. S sub ' + k + ', the sum of the first ' + count + (count === 1 ? ' term' : ' terms') + ', equals ' + numSay(data.S[i]) + '.';
+}
+function nearestK(kind, clientX) {
+  var fig = plotFor(kind), svg = fig.querySelector('svg'), g = GEOM[fig.id];
+  if (!svg || !g) return null;
+  var r = svg.getBoundingClientRect();
+  var vx = (clientX - r.left) * (W / r.width);
+  return Math.round(g.x0 + (vx - ML) / (W - ML - MR) * (g.x1 - g.x0));
+}
+function say(text, wait) {
+  clearTimeout(sayTimer);
+  sayTimer = setTimeout(function () { announce(text); }, wait);
+}
+function wireHover() {
+  Array.prototype.forEach.call(document.querySelectorAll('.plotwrap'), function (wrap) {
+    var kind = wrap.dataset.kind;
+    var at = function (ev) { var k = nearestK(kind, ev.clientX); if (k === null || k < cur.start) hideValue(kind); else showValue(kind, k); };
+    wrap.addEventListener('pointermove', at);
+    wrap.addEventListener('pointerdown', at);
+    wrap.addEventListener('pointerleave', function (ev) { if (ev.pointerType === 'mouse' && document.activeElement !== wrap) hideValue(kind); });
+    wrap.addEventListener('focus', function () { showValue(kind, HOVER[kind] !== null ? HOVER[kind] : cur.start); say(valueWords(kind, HOVER[kind]), 200); });
+    wrap.addEventListener('blur', function () { hideValue(kind); });
+    wrap.addEventListener('keydown', function (ev) {
+      var k = HOVER[kind] !== null ? HOVER[kind] : cur.start;
+      if (ev.key === 'ArrowRight' || ev.key === 'ArrowUp') k += 1;
+      else if (ev.key === 'ArrowLeft' || ev.key === 'ArrowDown') k -= 1;
+      else if (ev.key === 'Home') k = cur.start;
+      else if (ev.key === 'End') k = lastShown();
+      else if (ev.key === 'Escape') { hideValue(kind); return; }
+      else return;
+      ev.preventDefault();
+      showValue(kind, k);
+      say(valueWords(kind, HOVER[kind]), 250);
+    });
+  });
+}
+
+/* ------------------------------------------------------------------
+   Let's dig a little deeper: the first three terms and partial sums by hand.
+   ------------------------------------------------------------------ */
+// A small, safe reader for what students type: numbers, + - * / ( ), sqrt( ) and ln( ). No eval.
+function readNumber(src) {
+  var str = String(src).replace(/\u2212/g, '-').replace(/\u221A/g, 'sqrt').replace(/\s+/g, '').toLowerCase();
+  if (!str) return NaN;
+  var i = 0;
+  function peek() { return str.charAt(i); }
+  function expr() { var v = term(); while (peek() === '+' || peek() === '-') { var op = str.charAt(i++), w = term(); v = op === '+' ? v + w : v - w; } return v; }
+  function term() { var v = factor(); while (peek() === '*' || peek() === '/') { var op = str.charAt(i++), w = factor(); v = op === '*' ? v * w : v / w; } return v; }
+  function factor() {
+    var c = peek();
+    if (c === '-') { i++; return -factor(); }
+    if (c === '+') { i++; return factor(); }
+    if (c === '(') { i++; var v = expr(); if (peek() !== ')') throw 0; i++; return v; }
+    if (str.indexOf('sqrt', i) === i) { i += 4; return Math.sqrt(factor()); }
+    if (str.indexOf('ln', i) === i) { i += 2; return Math.log(factor()); }
+    var m = /^(\d+\.?\d*|\.\d+)/.exec(str.slice(i));
+    if (!m) throw 0;
+    i += m[0].length;
+    return parseFloat(m[0]);
+  }
+  try { var v = expr(); return i === str.length ? v : NaN; } catch (err) { return NaN; }
+}
+var W_IDS = ['wa1', 'wa2', 'wa3', 'ws1', 'ws2', 'ws3'];
+var W_SAY = [];
+function eqT(v) { return v.indexOf('\\approx') === 0 ? ' ' + v : ' = ' + v; }
+function warmWant() {
+  var a = [], S = [], sum = 0;
+  for (var j = 0; j < 3; j++) { var v = cur.fn(cur.start + j); a.push(v); sum += v; S.push(sum); }
+  return a.concat(S);
+}
+function clearMarks() {
+  W_IDS.forEach(function (id) {
+    var box = el(id), mk = el('m' + id.slice(1));
+    box.className = ''; box.removeAttribute('aria-invalid');
+    mk.textContent = ''; mk.className = 'wmark';
+  });
+}
+function resetWarm() {
+  var e = cur, s0 = e.start, i1 = s0 + 1, i2 = s0 + 2;
+  W_IDS.forEach(function (id) { el(id).value = ''; });
+  clearMarks();
+  el('wfb').innerHTML = '';
+  el('wExp').hidden = true; el('wExp').open = false;
+  W_SAY = ['a sub ' + s0, 'a sub ' + i1, 'a sub ' + i2, 'S sub ' + s0, 'S sub ' + i1, 'S sub ' + i2];
+  el('wIntro').innerHTML = s0 === 1
+    ? R`Find the first few terms of the sequence and the first few partial sums of the series. Remember: the partial sum \(S_{n}\) adds up the first \(n\) terms of the series.`
+    : 'Find the first few terms of the sequence and the first few partial sums of the series. This series starts at \\(n = ' + s0 + '\\), so the partial sum \\(S_{n}\\) adds up the terms from \\(a_{' + s0 + '}\\) to \\(a_{n}\\).';
+  el('lwa1').innerHTML = '\\(a_{' + s0 + '} =\\)';
+  el('lwa2').innerHTML = '\\(a_{' + i1 + '} =\\)';
+  el('lwa3').innerHTML = '\\(a_{' + i2 + '} =\\)';
+  el('lws1').innerHTML = '\\(S_{' + s0 + '} = a_{' + s0 + '} =\\)';
+  el('lws2').innerHTML = '\\(S_{' + i1 + '} = a_{' + s0 + '} + a_{' + i1 + '} =\\)';
+  el('lws3').innerHTML = '\\(S_{' + i2 + '} = a_{' + s0 + '} + a_{' + i1 + '} + a_{' + i2 + '} =\\)';
+  var rows = ['S_{' + s0 + '} &= a_{' + s0 + '}' + eqT(e.ws[0]),
+              'S_{' + i1 + '} &= S_{' + s0 + '} + a_{' + i1 + '}' + eqT(e.ws[1]),
+              'S_{' + i2 + '} &= S_{' + i1 + '} + a_{' + i2 + '}' + eqT(e.ws[2])].join(' \\\\ ');
+  el('wExpBody').innerHTML =
+    '<p>The terms of the sequence come from \\(a_{n} = ' + termTex(e) + '\\):</p>' +
+    '<div class="disp">\\[a_{' + s0 + '}' + eqT(e.wa[0]) + ', \\qquad a_{' + i1 + '}' + eqT(e.wa[1]) + ', \\qquad a_{' + i2 + '}' + eqT(e.wa[2]) + '\\]</div>' +
+    '<p>The series adds the terms one at a time, so each partial sum is the one before it plus the next term:</p>' +
+    '<div class="disp">\\[\\begin{aligned} ' + rows + ' \\end{aligned}\\]</div>' +
+    '<p class="note">[Note: These are the first three dots on each graph above.]</p>';
+  ['wIntro', 'lwa1', 'lwa2', 'lwa3', 'lws1', 'lws2', 'lws3', 'wExpBody'].forEach(function (id) { typeset(el(id)); });
+}
+function fillWarm() {
+  W_IDS.forEach(function (id, i) { el(id).value = cur.fill[i]; });
+  clearMarks();
+  el('wfb').innerHTML = '<p>The answers are filled in. Hover over the first three points on each graph above to see the same values (on a phone, tap them).</p>';
+  el('wExp').hidden = false;
+  el('wfb').focus();
+}
+function checkWarm() {
+  var want = warmWant(), ok = [], lines = [], blank = false;
+  W_IDS.forEach(function (id, i) {
+    var box = el(id), raw = box.value.trim(), mk = el('m' + id.slice(1));
+    if (!raw) { blank = true; box.className = ''; box.removeAttribute('aria-invalid'); mk.textContent = ''; mk.className = 'wmark'; ok.push(null); return; }
+    var v = readNumber(raw);
+    var good = isFinite(v) && Math.abs(v - want[i]) <= 0.001;   // Ira, 2026-11-11: 3 decimal places, rounded or cut off
+    ok.push(good);
+    box.className = good ? 'ok' : 'miss';
+    if (good) box.removeAttribute('aria-invalid'); else box.setAttribute('aria-invalid', 'true');
+    mk.className = 'wmark ' + (good ? 'ok' : 'miss');
+    mk.textContent = good ? '\u2713' : '\u2717';
+    lines.push(W_SAY[i] + (good ? ': correct.' : ': not quite.'));
+  });
+  var none = ok.every(function (x) { return x === null; });
+  var all = ok.every(function (x) { return x === true; });
+  var html;
+  if (none) html = '<p class="miss">Fill in the boxes first.</p>';
+  else if (all) html = '<p class="ok"><span aria-hidden="true">\u2713</span> All correct. Now look for these values as the first three dots on each graph.</p>';
+  else html = '<p class="miss"><span aria-hidden="true">\u2717</span> Not quite. Check the boxes marked in violet' + (blank ? ', fill in the empty ones,' : '') + ' and try again.</p>';
+  el('wfb').innerHTML = html + (lines.length ? '<p class="sr-only">' + lines.join(' ') + '</p>' : '');
+  if (!none) el('wExp').hidden = false;
+  el('wfb').focus();
+}
+
+function renderStatic() {
+  var s = cur, isCustom = s.id === 'custom';
+  var startList = s.start + ', ' + (s.start + 1) + ', ' + (s.start + 2) + ', \\ldots';
+  el('current').innerHTML =
+    '<p><span class="kw-seq">Sequence:</span> \\(a_{n} = ' + termTex(s) + '\\), for \\(n = ' + startList + '\\)</p>' +
+    '<p><span class="kw-ser">Series:</span> \\(\\displaystyle ' + seriesTex(s) + '\\)</p>';
+
+  if (isCustom) {
+    el('seqVerdict').innerHTML = '<span class="observe">What do you observe?</span>';
+    el('sumVerdict').innerHTML = '<span class="observe">Do the partial sums level off?</span>';
+    el('seqLegend').innerHTML = '';
+    el('sumLegend').innerHTML = '';
+  } else {
+    el('seqVerdict').innerHTML = '<span class="m">\\(\\displaystyle ' + limTex(s) + ' = ' + s.limTex + '\\)</span><span class="tag conv">converges</span>';
+    var conv = isFinite(s.sum);
+    var approxOnly = conv && s.sumTex.indexOf('\\approx') === 0;
+    el('sumVerdict').innerHTML = '<span class="m">\\(\\displaystyle ' + seriesTex(s) + (approxOnly ? ' ' : ' = ') + (conv ? s.sumTex : '\\infty') + '\\)</span>' +
+      (conv ? '<span class="tag conv">converges</span>' : '<span class="tag">diverges</span>');
+    el('seqLegend').innerHTML = s.lim > 0 ? dashSwatch() + '<span>Dashed line: the limit of the sequence, \\(' + s.limTex + '\\)</span>' : '';
+    el('sumLegend').innerHTML = conv ? dashSwatch() + '<span>Dashed line: the sum of the series, ' +
+      (approxOnly ? 'about \\(' + s.sumTex.replace('\\approx', '').trim() + '\\)' : '\\(' + s.sumTex + '\\)') + '</span>' : '';
+  }
+
+  el('insight').innerHTML = '<p>' + (isCustom ? CUSTOM_SHOWS : s.shows) + '</p>' + (s.shows2 ? '<p class="note">' + s.shows2 + '</p>' : '');
+  el('testBody').innerHTML = (isCustom ? CUSTOM_EX : s.ex).map(function (e) {
+    if (e.h) return '<h3>' + e.h + '</h3>';
+    if (e.d) return '<div class="disp">\\[' + e.d + '\\]</div>';
+    if (e.c) return '<p><b>Conclusion:</b> ' + e.c + '</p>';
+    if (e.n) return '<p class="note">' + e.n + '</p>';
+    if (e.list) return '<ol>' + e.list.map(function (li) { return '<li>' + li + '</li>'; }).join('') + '</ol>';
+    return '<p>' + e.t + '</p>';
+  }).join('');
+  el('testBox').open = false;
+
+  ['current', 'seqVerdict', 'sumVerdict', 'seqLegend', 'sumLegend', 'insight', 'testBody'].forEach(function (id) { typeset(el(id)); });
+  highlight(el('prompt'));
+}
+
+function visibleCount() { return N - cur.start + 1; }
+
+function renderGraphs() {
+  hideValue();
+  var s = cur, isCustom = s.id === 'custom', count = visibleCount();
+  var ns = data.ns.slice(0, count), a = data.a.slice(0, count), S = data.S.slice(0, count);
+  var aTop = Math.max.apply(null, data.a.concat(s.lim > 0 && !isCustom ? [s.lim] : [])) * 1.06;
+  var sTop = Math.max(data.S[data.S.length - 1], isFinite(s.sum) && !isCustom ? s.sum : 0) * 1.06;
+
+  drawGraph(el('seqPlot'), { ns: ns, ys: a, yTop: aTop, kind: 'dots', ylab: 'a',
+    ref: isCustom ? null : s.lim, refLabel: s.limLabel || '' });
+  drawGraph(el('sumPlot'), { ns: ns, ys: S, yTop: sTop, kind: 'line', ylab: 'S',
+    ref: (!isCustom && isFinite(s.sum)) ? s.sum : null, refLabel: s.sumLabel || '' });
+
+  var lastN = ns[ns.length - 1], aN = a[a.length - 1], SN = S[S.length - 1];
+  el('seqRead').innerHTML = '<i>a</i><sub>' + lastN + '</sub> ' + numHTML(aN);
+  el('sumRead').innerHTML = '<i>S</i><sub>' + lastN + '</sub> = <i>a</i><sub>' + s.start + '</sub> + &hellip; + <i>a</i><sub>' + lastN + '</sub> ' + numHTML(SN);
+
+  // Text alternatives, rebuilt from the data every time the graphs change.
+  var hi = Math.max.apply(null, a), hiN = ns[a.indexOf(hi)];
+  var seqAlt = 'Graph of the sequence a sub n equals ' + s.say + ', one dot for each n from ' + ns[0] + ' to ' + lastN + '. ' +
+    'a sub ' + ns[0] + ' is ' + numSay(a[0]) + ', and a sub ' + lastN + ' is ' + numSay(aN) + '.' +
+    (hiN !== ns[0] && hiN !== lastN ? ' The highest dot is at n = ' + hiN + ', ' + numSay(hi) + '.' : '') +
+    (!isCustom && s.lim > 0 ? ' A dashed line marks the limit, ' + s.limSay + '.' : '') +
+    (!isCustom && s.lim === 0 ? ' The dots get closer and closer to 0.' : '');
+  var sumAlt = 'Line graph of the partial sums S sub n for n = ' + ns[0] + ' to ' + lastN + '. ' +
+    'S sub ' + ns[0] + ' is ' + numSay(S[0]) + ', and S sub ' + lastN + ' is ' + numSay(SN) + '.' +
+    (isCustom ? '' : isFinite(s.sum) ? ' A dashed line marks the sum of the series, ' + s.sumSay + '. The partial sums level off toward it.'
+      : ' The partial sums keep growing without bound.');
+  el('seqPlot').setAttribute('aria-label', seqAlt);
+  el('sumPlot').setAttribute('aria-label', sumAlt);
+
+  renderTable(ns, a, S);
+}
+
+function renderTable(ns, a, S) {
+  var rows = ns.map(function (n, i) {
+    return '<tr><td>' + n + '</td><td>' + numTable(a[i]) + '</td><td>' + numTable(S[i]) + '</td></tr>';
+  }).join('');
+  el('tableScroll').innerHTML = '<table><caption>The sequence and the partial sums for n = ' + ns[0] + ' to ' + ns[ns.length - 1] + '</caption>' +
+    '<thead><tr><th scope="col"><i>n</i></th><th scope="col"><i>a</i><sub><i>n</i></sub></th><th scope="col"><i>S</i><sub><i>n</i></sub></th></tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
+var sayTimer = null;
+function announce(text) {
+  var a = el('announce');
+  a.textContent = '';
+  requestAnimationFrame(function () { a.textContent = text; });
+}
+function summarySay() {
+  var count = visibleCount(), lastN = data.ns[count - 1];
+  return 'Terms up to n = ' + lastN + '. a sub ' + lastN + ' is ' + numSay(data.a[count - 1]) +
+    '. S sub ' + lastN + ' is ' + numSay(data.S[count - 1]) + '.';
+}
+
+function choose(seq) {
+  cur = seq;
+  data = compute(seq.fn, seq.start);
+  Array.prototype.forEach.call(document.querySelectorAll('button.mode'), function (b) {
+    b.setAttribute('aria-pressed', b.dataset.id === seq.id ? 'true' : 'false');
+  });
+  if (!seq.menu) el('more').value = '';
+  if (seq.id !== 'custom') {
+    el('customErr').textContent = '';
+    el('customInput').removeAttribute('aria-invalid');
+  }
+  renderStatic();
+  renderGraphs();
+  resetWarm();
+}
+
+/* ------------------------------------------------------------------
+   Controls
+   ------------------------------------------------------------------ */
+function buildControls() {
+  var picks = el('picks');
+  SEQS.filter(function (s) { return s.preset; }).forEach(function (s) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'mode';
+    b.dataset.id = s.id;
+    b.setAttribute('aria-pressed', 'false');
+    b.setAttribute('aria-label', 'a sub n equals ' + s.say);
+    b.innerHTML = '<span>\\(a_{n} = ' + s.term + '\\)</span>';
+    b.addEventListener('click', function () { choose(s); announce('Showing a sub n equals ' + s.say + '. ' + summarySay()); });
+    picks.appendChild(b);
+  });
+
+  var sel = el('more');
+  sel.innerHTML = '<option value="">Choose a sequence</option>' + SEQS.filter(function (s) { return s.menu; }).map(function (s) {
+    return '<option value="' + s.id + '">a&#8345; = ' + s.menu + '</option>';
+  }).join('');
+  sel.addEventListener('change', function () {
+    var s = SEQS.filter(function (x) { return x.id === sel.value; })[0];
+    if (!s) return;
+    choose(s);
+    announce('Showing a sub n equals ' + s.say + '. ' + summarySay());
+  });
+
+  var slider = el('nSlider');
+  slider.addEventListener('input', function () {
+    N = parseInt(slider.value, 10);
+    el('nOut').textContent = N;
+    slider.setAttribute('aria-valuetext', 'up to n = ' + N);
+    renderGraphs();
+    clearTimeout(sayTimer);
+    sayTimer = setTimeout(function () { announce(summarySay()); }, 450);
+  });
+
+  el('graphBtn').addEventListener('click', graphCustom);
+  el('customInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); graphCustom(); } });
+  el('customInput').addEventListener('input', function () { el('customErr').textContent = ''; el('customInput').removeAttribute('aria-invalid'); });
+
+  wireHover();
+  el('wCheck').addEventListener('click', checkWarm);
+  el('wFill').addEventListener('click', fillWarm);
+  W_IDS.forEach(function (id) { el(id).addEventListener('keydown', function (ev) { if (ev.key === 'Enter') { ev.preventDefault(); checkWarm(); } }); });
+
+  typeset(el('picks'));
+  typeset(document.querySelector('.custom .pre'));
+  highlight(el('lead'));
+  highlight(el('customHelp'));
+}
+
+function customError(msg) {
+  var e = el('customErr');
+  e.textContent = '';
+  el('customInput').setAttribute('aria-invalid', 'true');
+  requestAnimationFrame(function () { e.textContent = msg; });
+}
+
+function customWarm(fn, start) {
+  var vals = [], sum = 0, j;
+  for (j = 0; j < 3; j++) vals.push(fn(start + j));
+  for (j = 0; j < 3; j++) { sum += vals[j]; vals.push(sum); }
+  var tex = [], fill = [];
+  vals.forEach(function (v) {
+    var f = fmt(v), body = f.s;
+    if (f.exp !== undefined) { body = f.s + ' \\times 10^{' + f.exp + '}'; fill.push(v.toPrecision(4)); }
+    else { if (!f.approx) body = String(parseFloat(f.s)); fill.push(body); }
+    tex.push((f.approx ? '\\approx ' : '') + body);
+  });
+  return { wa: tex.slice(0, 3), ws: tex.slice(3), fill: fill };
+}
+
+function graphCustom() {
+  var raw = el('customInput').value.trim();
+  if (!raw) { customError('Please enter an expression using n.'); return; }
+  var tree;
+  try { tree = parse(raw); } catch (err) {
+    if (err instanceof ParseError) { customError(err.message); return; }
+    throw err;
+  }
+  var fn = function (n) { return evaluate(tree, n); };
+  var start = 0;
+  for (var n = 1; n <= 10; n++) { if (isFinite(fn(n))) { start = n; break; } }
+  if (!start) { customError('The terms are not defined for n = 1 to 10. Try another sequence!'); return; }
+  for (var m = start; m <= NMAX; m++) {
+    var v = fn(m);
+    if (isNaN(v) || !isFinite(v)) { customError('The terms are not defined at n = ' + m + '. Try another sequence!'); return; }
+    if (v < -1e-12) { customError('This tool works for positive series only. Try another sequence!'); return; }
+  }
+  var tx = toTex(tree);
+  var cw = customWarm(fn, start);
+  custom = { id: 'custom', say: raw, term: tx.s, wrap: tx.wrap, start: start, fn: fn, lim: 0, sum: NaN,
+    tt: null, wa: cw.wa, ws: cw.ws, fill: cw.fill };
+  el('customErr').textContent = '';
+  el('customInput').removeAttribute('aria-invalid');
+  el('more').value = '';
+  choose(custom);
+  announce('Showing your sequence, a sub n equals ' + raw + ', starting at n = ' + start + '. ' + summarySay());
+}
+
+(function rose() {
+  var d = '';
+  for (var i = 0; i <= 240; i++) {
+    var t = (i / 240) * 4 * Math.PI, r = 2 * Math.cos(1.5 * t);
+    d += (i ? 'L ' : 'M ') + (r * Math.cos(t) * 12).toFixed(2) + ' ' + (r * Math.sin(t) * 12).toFixed(2) + ' ';
+  }
+  el('pr-path').setAttribute('d', d.trim());
+})();
+
+function start() { buildControls(); choose(SEQS[0]); }
+if (window.MathJax && MathJax.startup && MathJax.startup.promise) MathJax.startup.promise.then(start);
+else start();
+</script>
+
+</body>
+</html>
