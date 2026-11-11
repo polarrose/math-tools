@@ -54,7 +54,7 @@ body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-
 .wrap { max-width: 860px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 header .wrap { padding-block: 24px 0; }
 header .band { background: var(--band); color: var(--band-ink); border-radius: 4px; padding: 28px clamp(20px, 4vw, 32px); box-shadow: -4px 3px 10px rgba(27, 42, 74, 0.22), 0 4px 16px rgba(27, 42, 74, 0.08); } /* slight shadow (Ira, 2026-11-10) */
-h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(30px, 5vw, 36px); line-height: 1.15; margin: 0; text-wrap: balance; }
+h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(28px, 5vw, 30px); /* long title: 30px max so it stays on one line in Georgia on a computer (Ira) */ line-height: 1.15; margin: 0; text-wrap: balance; }
 main .wrap { padding-block: 24px 48px; display: flex; flex-direction: column; gap: 20px; }
 
 .steps { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
