@@ -1,0 +1,952 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'unsafe-inline'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Alternating Series Visualization</title>
+<meta name="description" content="Pick an alternating series, apply the Alternating Series Test, then see the terms and partial sums: when the terms decrease to 0, the zigzag gets smaller and smaller.">
+<style>
+/* Calculus Design Standard (docs/CALCULUS_DESIGN_STANDARD.md), tokens copied from the nth term test activity. */
+:root {
+  --bg: #E6E9F4;
+  --card: #FDFCFF;
+  --ink: #1B2A4A;
+  --muted: #4A5068;
+  --line: #D9DBE7;
+  --ctl: #7A84A8;
+  --band: #1B2A4A;
+  --band-ink: #F7F6FB;
+  --green: #1B5E20;
+  --ok-bg: #C8E6C9;
+  --head: #388E3C;
+  --ser: #8E24AA;
+  --purple: #7C3AED;
+  --purple-soft: #EFE7FF;
+  --select: #E6E9F4;
+  --focus: #5E3FA3;
+  --blue: #1D4ED8;      /* partial sums, and "no" answers (Ira: green and blue, never red) */
+  --blue-soft: #DBEAFE;
+  --rose-a: #1e3a5f; --rose-b: #0b7a70; --rose-cap: #525c8a;
+  --serif: ui-serif, Georgia, Cambria, 'Times New Roman', serif;
+  --sans: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11182A; --card: #182239; --ink: #E7EAF3; --muted: #B3B9CC; --line: #2E3A57; --ctl: #7A86AD;
+    --band: #0B1120; --band-ink: #F2F3F8;
+    --green: #9BD3A2; --ok-bg: #1F4A27; --head: #81C784; --ser: #E1A6F0;
+    --purple: #B794F6; --purple-soft: #3B2A63; --select: #24304D; --focus: #C9B8F2;
+    --blue: #93B4F8; --blue-soft: #1E2F5C;
+    --rose-a: #c4b5fd; --rose-b: #6ee7b7; --rose-cap: #a8b0d8; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11182A; --card: #182239; --ink: #E7EAF3; --muted: #B3B9CC; --line: #2E3A57; --ctl: #7A86AD;
+  --band: #0B1120; --band-ink: #F2F3F8;
+  --green: #9BD3A2; --ok-bg: #1F4A27; --head: #81C784; --ser: #E1A6F0;
+  --purple: #B794F6; --purple-soft: #3B2A63; --select: #24304D; --focus: #C9B8F2;
+  --blue: #93B4F8; --blue-soft: #1E2F5C;
+  --rose-a: #c4b5fd; --rose-b: #6ee7b7; --rose-cap: #a8b0d8; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 18px; line-height: 1.55; }
+.wrap { max-width: 860px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header .wrap { padding-block: 24px 0; }
+header .band { background: var(--band); color: var(--band-ink); border-radius: 14px; padding: 28px clamp(20px, 4vw, 32px); }
+h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(30px, 5vw, 36px); line-height: 1.15; margin: 0; width: fit-content; max-width: 100%; text-wrap: balance; }
+h1::after { content: ""; display: block; width: 100%; height: 3px; margin-top: 12px; border-radius: 2px; background: #66BB6A; }
+main .wrap { padding-block: 24px 48px; display: flex; flex-direction: column; gap: 20px; }
+p { margin: 0; }
+
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 24px clamp(16px, 4vw, 32px); display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.card h2 { font-family: var(--serif); font-size: 26px; margin: 0; color: var(--head); }
+.prompt { font-weight: 700; margin-bottom: 10px; }
+
+/* Example buttons */
+.exrow { display: flex; flex-wrap: wrap; gap: 8px; }
+button { font-family: var(--sans); }
+.ex { flex: 1 1 auto; min-height: 58px; padding: 6px 10px; border: 2px solid var(--ctl); border-radius: 10px; background: var(--card); color: var(--ink); font-weight: 700; font-size: 18px; cursor: pointer; }
+.ex:hover { border-color: var(--ink); }
+.ex.c[aria-pressed="true"] { border-color: var(--green); background: var(--ok-bg); }
+.ex.d[aria-pressed="true"] { border-color: var(--blue); background: var(--blue-soft); }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+/* The story card (Ira, 2026-11-11: graphs first): given series, graphs, the test, why the graph looks this way, dig deeper */
+.given { font-size: 20px; overflow-x: auto; overflow-y: hidden; }
+.given b { font-family: var(--serif); color: var(--head); }
+.step { display: flex; flex-direction: column; gap: 12px; padding-top: 18px; border-top: 1px solid var(--line); min-width: 0; }
+.step h3 { font-family: var(--serif); font-size: 22px; margin: 0; color: var(--head); }
+.checks { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 8px; }
+.checks li { overflow-x: auto; overflow-y: hidden; }
+.checks li > b { margin-left: 0.9em; }  /* Ira: more space between the question and its Yes/No answer */
+.yes { color: var(--green); }
+.no { color: var(--blue); }
+.concl { background: var(--select); border-radius: 10px; padding: 12px 16px; overflow-x: auto; overflow-y: hidden; }
+
+/* Slider and zoom (same look as the Sequence vs. Series Explorer) */
+.slider { display: flex; flex-direction: column; gap: 4px; }
+.slider label { font-weight: 700; }
+input[type="range"] { width: 100%; height: 44px; margin: 0; accent-color: var(--head); cursor: pointer; }
+input[type="range"]:focus-visible { outline-offset: 4px; }
+.slider .ends { display: flex; justify-content: space-between; color: var(--muted); font-size: 15px; }
+.zoom { background: var(--select); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.zoom p { font-weight: 700; }
+.zrow { display: flex; flex-wrap: wrap; gap: 8px; }
+.zb { min-height: 44px; padding: 6px 16px; border: 2px solid var(--ctl); border-radius: 999px; background: var(--card); color: var(--ink); font-weight: 700; font-size: 16px; cursor: pointer; }
+.zb[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--card); }
+
+/* Graph panels */
+.charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(290px, 100%), 1fr)); gap: 16px; }
+.chart { border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.chart h4 { margin: 0; font-family: var(--serif); font-size: 21px; color: var(--ink); }
+.verdict { margin: 0; font-size: 18px; min-height: 30px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.verdict .m { overflow-x: auto; overflow-y: hidden; max-width: 100%; }
+.tag { display: inline-block; font-weight: 700; font-size: 15px; padding: 2px 12px; border-radius: 999px; border: 1px solid var(--ctl); background: var(--select); color: var(--ink); }
+.tag.conv { background: var(--ok-bg); border-color: var(--green); color: var(--green); }
+.chart figure { margin: 0; }
+.plotwrap { position: relative; border-radius: 8px; cursor: crosshair; touch-action: pan-y; }
+.plotwrap:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.vtip { position: absolute; z-index: 2; pointer-events: none; max-width: calc(100% - 8px); line-height: 1.45; background: var(--ink); color: var(--card); font: 600 14px var(--sans); padding: 4px 9px; border-radius: 6px; font-variant-numeric: tabular-nums; }
+.ring { fill: none; stroke: var(--ink); stroke-width: 2; }
+.chart figure > svg { display: block; width: 100%; height: auto; }
+.readout { margin: 0; font-size: 18px; font-variant-numeric: tabular-nums; }
+.chart .cap { color: var(--muted); font-size: 16px; line-height: 1.55; }
+/* Side by side on wider screens: the two panels share rows, so heading, verdict, graph,
+   readout and words start at the same height in both panels. */
+@media (min-width: 760px) {
+  .charts { grid-template-columns: 1fr 1fr; column-gap: 18px; row-gap: 10px; }
+  @supports (grid-template-rows: subgrid) {
+    .chart { display: grid; grid-row: span 5; grid-template-rows: subgrid; gap: 10px; align-items: start; }
+  }
+}
+.explain { background: var(--select); border-radius: 12px; padding: 16px 20px; border-left: 5px solid var(--head); overflow-x: auto; min-width: 0; }
+.explain { display: flex; flex-direction: column; gap: 10px; }
+.explain p { max-width: 70ch; line-height: 1.7; }
+.explain .disp { font-size: 19px; overflow-x: auto; overflow-y: hidden; }
+.explain .note { color: var(--muted); }
+
+/* Graph marks (SVG): green dots for the sequence, magenta partial sums */
+.ax { stroke: var(--ink); stroke-width: 1.6; fill: none; }
+.arrow { fill: var(--ink); }
+.grid { stroke: var(--line); stroke-width: 1; }
+.tick { stroke: var(--ink); stroke-width: 1.2; }
+.tl { fill: var(--muted); font: 14px var(--sans); paint-order: stroke; stroke: var(--card); stroke-width: 4px; stroke-linejoin: round; }
+.al { fill: var(--ink); font: italic 19px var(--serif); }
+.pt-t { fill: var(--head); }
+.ln-s { stroke: var(--ser); stroke-width: 2.4; fill: none; stroke-linejoin: round; }
+.band-s { stroke: var(--ser); stroke-width: 1.6; fill: none; }
+.band-fill { fill: var(--ser); fill-opacity: 0.25; stroke: none; }
+.pt-s { fill: var(--ser); }
+.ref { stroke: var(--ink); stroke-width: 1.6; stroke-dasharray: 7 5; fill: none; }
+
+/* Warm-up: work it out by hand */
+.wbox { margin-top: 12px; background: var(--select); border-radius: 12px; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.wbox p { max-width: 70ch; }
+.wbox .tip { color: var(--muted); font-size: 16px; }
+.wbox .hovernote { font-weight: 400; }
+.wgrid { display: grid; grid-template-columns: 1fr; gap: 18px 40px; }
+@media (min-width: 700px) { .wgrid { grid-template-columns: max-content 1fr; } }
+.wgrid fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.wgrid legend { font-family: var(--serif); font-weight: 700; font-size: 19px; padding: 0; margin-bottom: 4px; }
+/* Labels in one column, boxes in the next: every box starts right after the longest label, so they line up. */
+.wrows { display: grid; grid-template-columns: max-content minmax(0, 8.5em) 1.4em; column-gap: 10px; row-gap: 10px; align-items: center; }
+.wrow { display: contents; }
+/* Phone: the long S labels sit above their boxes */
+@media (max-width: 540px) {
+  .sums .wrows { grid-template-columns: minmax(0, 8.5em) 1.4em; row-gap: 4px; }
+  .sums .wrow label { grid-column: 1 / -1; margin-top: 8px; }
+  .sums .wrow:first-child label { margin-top: 0; }
+}
+.wrow label { font-size: 19px; }
+.wrow input { width: 100%; min-width: 0; min-height: 44px; padding: 6px 10px; font: 400 18px var(--sans); color: var(--ink); background: var(--card); border: 2px solid var(--ctl); border-radius: 8px; }
+.wrow input.ok { border-color: var(--green); background: var(--ok-bg); }
+.wrow input.miss { border-color: var(--purple); background: var(--purple-soft); }
+.wmark { font-weight: 700; font-size: 18px; min-width: 1em; }
+.wmark.ok { color: var(--green); }
+.wmark.miss { color: var(--purple); }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+button.btn { font: 700 17px var(--sans); padding: 12px 22px; border-radius: 10px; cursor: pointer; border: 2px solid var(--ink); min-height: 48px; }
+.btn.primary { background: var(--ink); color: var(--bg); }
+.btn.ghost { background: transparent; color: var(--ink); }
+.wfb { display: flex; flex-direction: column; gap: 4px; font-weight: 400; }
+.wfb:focus { outline: none; }
+.wfb .ok { color: var(--green); }
+.wfb .miss { color: var(--purple); }
+/* "> summary" so an open outer box (the warm-up) does not flip the label of the closed box inside it */
+details.more > summary .when-open { display: none; }
+details.more[open] > summary .when-open { display: inline; }
+details.more[open] > summary .when-closed { display: none; }
+details.wexp summary { background: var(--card); }
+details.wexp .explain { margin-top: 12px; }
+details.warm > summary { background: var(--card); }
+
+/* Reminder (closed at first) */
+details.more summary { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font: 700 16px var(--sans); color: var(--ink); background: var(--card); border: 2px solid var(--ctl); border-radius: 10px;  /* Ira, 2026-11-11: rectangular like the Fill in the answers button */ padding: 6px 16px; min-height: 44px; list-style: none; }
+details.more summary::-webkit-details-marker { display: none; }
+details.more summary::before { content: "+"; content: "+" / ""; font-size: 18px; line-height: 1; color: var(--green); }
+details.more[open] > summary::before { content: "\2212"; content: "\2212" / ""; }
+details.more summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+details.more .box { margin-top: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 20px; display: flex; flex-direction: column; gap: 8px; }
+details.more .box h2 { margin: 0; font-family: var(--serif); font-size: 20px; color: var(--green); }
+details.more .box ol { margin: 0; padding-left: 1.6em; line-height: 2; }
+
+.kw-seq { color: var(--head); font-weight: 700; font-size: max(1em, 19px); }
+.kw-ser { color: var(--ser); font-weight: 700; }
+mjx-container { color: inherit; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+.studio { display: flex; flex-direction: column; align-items: center; }
+.insignia { display: block; width: 70px; }
+.pr-a { stop-color: var(--rose-a); }
+.pr-b { stop-color: var(--rose-b); }
+.insignia-caption { font-size: 8.5px; letter-spacing: 1px; font-weight: 800; color: var(--rose-cap); margin-top: 2px; white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="band">
+      <h1>Alternating Series Visualization</h1>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <details class="more" id="reminder">
+      <summary><span>Reminder: the Alternating Series Test</span></summary>
+      <div class="box hl">
+        <h2>Alternating Series Test (Leibniz's Theorem)</h2>
+        <p>The series \(\displaystyle\sum_{n=1}^{\infty}(-1)^{n}a_{n}\) converges if:</p>
+        <ol>
+          <li>\(a_{n} &gt; 0\)</li>
+          <li>\(a_{n}\) is eventually decreasing</li>
+          <li>\(\displaystyle\lim_{n\to\infty}a_{n} = 0\)</li>
+        </ol>
+        <p>If condition 3 fails, the series diverges by the nth Term Test for Divergence.</p>
+      </div>
+    </details>
+
+    <section class="card" aria-labelledby="pickTitle">
+      <h2 id="pickTitle">Choose an example</h2>
+      <div role="group" aria-labelledby="pConv">
+        <p class="prompt" id="pConv">Select one of the following to see a convergent alternating series:</p>
+        <div class="exrow" id="rowConv"></div>
+      </div>
+      <div role="group" aria-labelledby="pDiv">
+        <p class="prompt" id="pDiv">Select one of the following to see a divergent alternating series:</p>
+        <div class="exrow" id="rowDiv"></div>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="givenLine">
+      <h2 class="sr-only">The given series</h2>
+      <p class="given" id="givenLine"><b>The given series:</b> <span id="givenMath"></span></p>
+
+      <div class="step" role="group" aria-labelledby="s2Title">
+        <h3 id="s2Title">Visualizing the graph of the sequence vs. the graph of the series</h3>
+        <div class="slider">
+          <label for="nSlider" id="nLabel">Terms up to <i>n</i> = <span id="nOut">12</span></label>
+          <input type="range" id="nSlider" min="10" max="100" step="1" value="12" aria-valuetext="up to n = 12">
+          <div class="ends" aria-hidden="true"><span>10</span><span>100</span></div>
+        </div>
+        <div class="zoom" id="zoom" role="group" aria-labelledby="zoomNote" hidden>
+          <p id="zoomNote">This series converges very slowly. Zoom out to see it settle.</p>
+          <div class="zrow">
+            <button type="button" class="zb" data-n="200" aria-pressed="false">n = 200</button>
+            <button type="button" class="zb" data-n="500" aria-pressed="false">n = 500</button>
+            <button type="button" class="zb" data-n="1000" aria-pressed="false">n = 1000</button>
+            <button type="button" class="zb" data-n="0" aria-pressed="false">Reset</button>
+          </div>
+        </div>
+        <div class="charts">
+          <div class="chart">
+            <h4>The sequence</h4>
+            <p class="verdict" id="vTerms"></p>
+            <div class="plotwrap" tabindex="0" data-kind="terms" role="application" aria-describedby="figTerms" aria-label="Read the graph of the sequence point by point: use the left and right arrow keys.">
+              <figure role="img" id="figTerms" aria-label=""></figure>
+              <div class="vtip" id="tipTerms" hidden aria-hidden="true"></div>
+            </div>
+            <p class="readout" id="readTerms"></p>
+            <p class="cap" id="capTerms"></p>
+          </div>
+          <div class="chart">
+            <h4>The series: partial sums</h4>
+            <p class="verdict" id="vSums"></p>
+            <div class="plotwrap" tabindex="0" data-kind="sums" role="application" aria-describedby="figSums" aria-label="Read the graph of the partial sums point by point: use the left and right arrow keys.">
+              <figure role="img" id="figSums" aria-label=""></figure>
+              <div class="vtip" id="tipSums" hidden aria-hidden="true"></div>
+            </div>
+            <p class="readout" id="readSums"></p>
+            <p class="cap" id="capSums"></p>
+          </div>
+        </div>
+        <p class="sr-only" id="readoutSr"></p>
+      </div>
+
+      <div class="step" role="group" aria-labelledby="s1Title">
+        <h3 id="s1Title">What does the Alternating Series Test say about convergence?</h3>
+        <p id="s1Intro"></p>
+        <ul class="checks" id="s1Checks"></ul>
+        <p class="concl hl" id="s1Concl"></p>
+      </div>
+
+      <div class="step" role="group" aria-labelledby="whyTitle">
+        <h3 id="whyTitle">Why the graph looks this way</h3>
+        <div class="explain hl" id="explain"></div>
+      </div>
+
+      <div class="step">
+        <details class="more warm" id="warm" open>
+          <summary><span>Let's dig a little deeper</span></summary>
+          <div class="wbox">
+            <p class="hl">Find the first few terms of the sequence and the first few partial sums of the series. Remember: \(a_{n}\) is the part without the sign, and the partial sum \(S_{n}\) adds up the first \(n\) terms of the series.</p>
+            <p class="tip">Type fractions like 1/2 or decimals like 0.5. Decimals rounded to 3 places are fine.</p>
+            <div class="wgrid">
+              <fieldset>
+                <legend>The sequence</legend>
+                <div class="wrows">
+                <div class="wrow"><label for="wa1">\(a_{1} =\)</label><input id="wa1" type="text" inputmode="text" autocomplete="off" spellcheck="false"><span class="wmark" id="ma1" aria-hidden="true"></span></div>
+                <div class="wrow"><label for="wa2">\(a_{2} =\)</label><input id="wa2" type="text" inputmode="text" autocomplete="off" spellcheck="false"><span class="wmark" id="ma2" aria-hidden="true"></span></div>
+                <div class="wrow"><label for="wa3">\(a_{3} =\)</label><input id="wa3" type="text" inputmode="text" autocomplete="off" spellcheck="false"><span class="wmark" id="ma3" aria-hidden="true"></span></div>
+                </div>
+              </fieldset>
+              <fieldset class="sums">
+                <legend>The series: partial sums</legend>
+                <div class="wrows">
+                <div class="wrow"><label for="ws1">\(S_{1} = -a_{1} =\)</label><input id="ws1" type="text" inputmode="text" autocomplete="off" spellcheck="false"><span class="wmark" id="ms1" aria-hidden="true"></span></div>
+                <div class="wrow"><label for="ws2">\(S_{2} = -a_{1} + a_{2} =\)</label><input id="ws2" type="text" inputmode="text" autocomplete="off" spellcheck="false"><span class="wmark" id="ms2" aria-hidden="true"></span></div>
+                <div class="wrow"><label for="ws3">\(S_{3} = -a_{1} + a_{2} - a_{3} =\)</label><input id="ws3" type="text" inputmode="text" autocomplete="off" spellcheck="false"><span class="wmark" id="ms3" aria-hidden="true"></span></div>
+                </div>
+              </fieldset>
+            </div>
+            <p class="hovernote">Then check your answers by hovering over the first three points on each graph above (on a phone, tap them), or press Check.</p>
+            <div class="actions"><button class="btn primary" type="button" id="wCheck">Check</button><button class="btn ghost" type="button" id="wFill">Fill in the answers</button></div>
+            <div class="wfb" id="wfb" tabindex="-1"></div>
+            <details class="more wexp" id="wExp" hidden>
+              <summary><span class="when-closed">Show explanation</span><span class="when-open">Hide explanation</span></summary>
+              <div class="explain hl" id="wExpBody"></div>
+            </details>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <p class="sr-only" id="announce" aria-live="polite"></p>
+
+    <div class="studio" aria-hidden="true">
+      <svg class="insignia" viewBox="-28 -26 56 64" focusable="false" role="presentation">
+        <defs>
+          <linearGradient id="pr-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" class="pr-a"/>
+            <stop offset="100%" class="pr-b"/>
+          </linearGradient>
+        </defs>
+        <path id="pr-path" fill="none" stroke="url(#pr-grad)" stroke-width="1.8"/>
+      </svg>
+      <div class="insignia-caption">POLAR ROSE STUDIO</div>
+    </div>
+  </div>
+</main>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+  svg: { fontCache: 'global', displayAlign: 'left', displayIndent: '0' },
+  options: { enableMenu: false, enableAssistiveMml: true },
+  startup: { typeset: false }
+};
+</script>
+<!-- MathJax 3.2.2. First choice: the site's own copy in lib/mathjax/ (no outside server).
+     Backup: if that copy is not there (Claude preview, a file opened on a computer,
+     or before lib/mathjax/ is uploaded), load the same pinned version from jsdelivr. -->
+<script src="../lib/mathjax/tex-svg.js"></script>
+<script>
+if (!window.MathJax || !window.MathJax.version) {
+  document.write('<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"><\/script>');
+}
+</script>
+<script>
+const R = String.raw;
+const S = R`\sum_{n=1}^{\infty}`;
+const ALT = R`(-1)^{n}`;
+const SAY = 'negative 1 to the n';
+
+/* Each example.
+   t: a_n in TeX (the part without the sign); p: how it looks inside the series, with parentheses.
+   lim: the limit of a_n (Infinity for n/5). slow: show the zoom-out buttons. sum: exact sum (geometric only).
+   ansT / ansS: short answers under the two graphs. why: the middle of the explanation under the graphs. */
+const EX = [
+  { id: 'harm', group: 'c', an: n => 1 / n, t: R`\frac{1}{n}`, say: '1 over n', lim: 0, slow: false, sum: null,
+    fill: ['1', '1/2', '1/3', '-1', '-1/2', '-5/6'],
+    wa: [R`1`, R`\frac{1}{2}`, R`\frac{1}{3}`], ws: [R`-1`, R`-\frac{1}{2}`, R`-\frac{5}{6}`],
+    capT: R`The terms \(\frac{1}{n}\) get smaller and smaller and approach \(0\).`, capX: R``,
+    why: R`` },
+  { id: 'p2', group: 'c', an: n => 1 / (n * n), t: R`\frac{1}{n^{2}}`, say: '1 over n squared', lim: 0, slow: false, sum: null,
+    fill: ['1', '1/4', '1/9', '-1', '-3/4', '-31/36'],
+    wa: [R`1`, R`\frac{1}{4}`, R`\frac{1}{9}`], ws: [R`-1`, R`-\frac{3}{4}`, R`-\frac{31}{36}`],
+    capT: R`The terms \(\frac{1}{n^{2}}\) get smaller and smaller and approach \(0\) quickly.`, capX: R``,
+    why: R`The terms shrink quickly, so the zigzag closes in quickly.` },
+  { id: 'sqrt', group: 'c', an: n => 1 / Math.sqrt(n), t: R`\frac{1}{\sqrt{n}}`, say: '1 over the square root of n', lim: 0, slow: true, sum: null,
+    fill: ['1', '0.7071', '0.5774', '-1', '-0.2929', '-0.8702'],
+    wa: [R`1`, R`\frac{1}{\sqrt{2}} \approx 0.7071`, R`\frac{1}{\sqrt{3}} \approx 0.5774`], ws: [R`-1`, R`\approx -0.2929`, R`\approx -0.8702`],
+    capT: R`The terms \(\frac{1}{\sqrt{n}}\) get smaller and smaller and approach \(0\), but slowly.`, capX: R``,
+    why: R`The terms shrink slowly, so the zigzag closes in slowly: use the zoom-out buttons to watch it close in.` },
+  { id: 'geo', group: 'c', an: n => Math.pow(0.5, n), t: R`\frac{1}{2^{n}}`, say: '1 over 2 to the n', lim: 0, slow: false, sum: -1 / 3,
+    fill: ['1/2', '1/4', '1/8', '-1/2', '-1/4', '-3/8'],
+    wa: [R`\frac{1}{2}`, R`\frac{1}{4}`, R`\frac{1}{8}`], ws: [R`-\frac{1}{2}`, R`-\frac{1}{4}`, R`-\frac{3}{8}`],
+    capT: R`The terms \(\frac{1}{2^{n}}\) get smaller and smaller and approach \(0\) very quickly.`, capX: R` The dashed line is the sum of the series, \(-\frac{1}{3}\).`,
+    why: R`The terms shrink very rapidly, so the zigzag closes in after just a few steps, around the sum of the series, \(-\frac{1}{3}\) (the dashed line).` },
+  { id: 'ln', group: 'c', an: n => 1 / Math.log(n + 1), t: R`\frac{1}{\ln(n+1)}`, say: '1 over the natural log of n plus 1', lim: 0, slow: true, sum: null,
+    fill: ['1.4427', '0.9102', '0.7213', '-1.4427', '-0.5325', '-1.2538'],
+    wa: [R`\frac{1}{\ln 2} \approx 1.4427`, R`\frac{1}{\ln 3} \approx 0.9102`, R`\frac{1}{\ln 4} \approx 0.7213`], ws: [R`\approx -1.4427`, R`\approx -0.5325`, R`\approx -1.2538`],
+    capT: R`The terms \(\frac{1}{\ln(n+1)}\) get smaller and smaller and approach \(0\), but very slowly.`, capX: R``,
+    why: R`The terms shrink extremely slowly, so the zigzag closes in extremely slowly: use the zoom-out buttons to watch it close in.` },
+  { id: 'const', group: 'd', an: n => 1, t: R`1`, say: '', lim: 1, slow: false, sum: null,
+    fill: ['1', '1', '1', '-1', '0', '-1'],
+    wa: [R`1`, R`1`, R`1`], ws: [R`-1`, R`0`, R`-1`],
+    capT: R`Every term equals \(1\), so the terms do not approach \(0\).`, capS: R`The oscillations stay the same size, since every term we add or subtract is \(1\).`,
+    why: R`Here \(a_{n} = 1\) for every \(n\), so every step is the same size: down \(1\), up \(1\), down \(1\), and so on. The partial sums jump between \(-1\) and \(0\) forever. The zigzag never gets smaller, so the partial sums never approach a unique value, and the series diverges.` },
+  { id: 'grow', group: 'd', an: n => n / (n + 1), t: R`\frac{n}{n+1}`, say: 'n over n plus 1', lim: 1, slow: false, sum: null,
+    fill: ['1/2', '2/3', '3/4', '-1/2', '1/6', '-7/12'],
+    wa: [R`\frac{1}{2}`, R`\frac{2}{3}`, R`\frac{3}{4}`], ws: [R`-\frac{1}{2}`, R`\frac{1}{6}`, R`-\frac{7}{12}`],
+    capT: R`The terms \(\frac{n}{n+1}\) get closer and closer to \(1\), not \(0\).`, capS: R`The oscillations do not get smaller, since the terms we are adding and subtracting get closer to \(1\), not \(0\).`,
+    why: R`Here \(a_{n} = \frac{n}{n+1}\) has a limit of \(1\), not \(0\), so the steps never get small: the partial sums keep stepping about \(1\) down, then about \(1\) up. The zigzag never gets smaller, so the partial sums never approach a unique value, and the series diverges.` },
+  { id: 'linear', group: 'd', an: n => n / 5, t: R`\frac{n}{5}`, say: 'n over 5', lim: Infinity, slow: false, sum: null,
+    fill: ['1/5', '2/5', '3/5', '-1/5', '1/5', '-2/5'],
+    wa: [R`\frac{1}{5}`, R`\frac{2}{5}`, R`\frac{3}{5}`], ws: [R`-\frac{1}{5}`, R`\frac{1}{5}`, R`-\frac{2}{5}`],
+    capT: R`The terms \(\frac{n}{5}\) keep growing without bound.`, capS: R`The oscillations get bigger and bigger, since the terms we are adding and subtracting keep getting bigger.`,
+    why: R`Here \(a_{n} = \frac{n}{5}\) grows without bound, so each step is bigger than the one before it. The partial sums swing farther and farther out and never approach a unique value, so the series diverges.` },
+  { id: 'rat2', group: 'd', an: n => (2 * n + 1) / (n + 3), t: R`\frac{2n+1}{n+3}`, say: '2 n plus 1 over n plus 3', lim: 2, slow: false, sum: null,
+    fill: ['3/4', '1', '7/6', '-3/4', '1/4', '-11/12'],
+    wa: [R`\frac{3}{4}`, R`1`, R`\frac{7}{6}`], ws: [R`-\frac{3}{4}`, R`\frac{1}{4}`, R`-\frac{11}{12}`],
+    capT: R`The terms \(\frac{2n+1}{n+3}\) get closer and closer to \(2\), not \(0\).`, capS: R`The oscillations do not get smaller, since the terms we are adding and subtracting get closer to \(2\), not \(0\).`,
+    why: R`Here \(a_{n} = \frac{2n+1}{n+3}\) has a limit of \(2\), not \(0\), so the steps never get small: the partial sums keep stepping about \(2\) down, then about \(2\) up. The zigzag never gets smaller, so the partial sums never approach a unique value, and the series diverges.` }
+];
+EX.forEach(e => { e.p = e.id === 'const' ? '' : R`\left(${e.t}\right)`; });
+
+const MINUS = '\u2212', TIMES = '\u00d7', CHECK = '\u2713', CROSS = '\u2717';
+const SLIDER_N = 12;   // Ira: open at a small n so students drag the slider to the right
+let cur = EX[0], N = SLIDER_N, zoomN = 0;
+
+const $ = id => document.getElementById(id);
+const slider = $('nSlider');
+
+/* ---------- words and numbers ---------- */
+const limTex = e => e.lim === Infinity ? R`\infty` : String(e.lim);
+const limSay = e => e.lim === Infinity ? 'infinity' : String(e.lim);
+const seriesTex = e => S + ALT + e.p;
+const seriesSay = e => 'the sum from n equals 1 to infinity of ' + SAY + (e.say ? ', times ' + e.say : '');
+function num(x) {           // shown on the page: 4 decimals, true minus, powers of 10 for tiny numbers
+  if (x === 0) return '0';
+  const neg = x < 0, a = Math.abs(x);
+  let s;
+  if (a < 0.0001) {
+    const k = Math.floor(Math.log10(a)), m = a / Math.pow(10, k);
+    s = m.toFixed(2) + ' ' + TIMES + ' 10<sup>' + MINUS + (-k) + '</sup>';
+  } else s = a.toFixed(4);
+  return (neg ? MINUS : '') + s;
+}
+function eqv(x) {           // '= value' when exact to 4 decimals, otherwise 'approximately value'
+  const exact = x === 0 || (Math.abs(x) >= 0.0001 && Math.abs(Number(x.toFixed(4)) - x) < 1e-12);
+  return (exact ? '= ' : '&asymp; ') + num(x);
+}
+function numSay(x) {        // spoken by a screen reader
+  if (x === 0) return '0';
+  const neg = x < 0, a = Math.abs(x);
+  let s;
+  if (a < 0.0001) {
+    const k = Math.floor(Math.log10(a)), m = a / Math.pow(10, k);
+    s = m.toFixed(2) + ' times 10 to the negative ' + (-k);
+  } else s = a.toFixed(4);
+  return (neg ? 'negative ' : '') + s;
+}
+
+/* ---------- "sequence" in green, "series" in magenta (not in the title, headings, buttons or test names) ---------- */
+const KW = /(sequences?|series)(?![A-Za-z])/gi;
+function highlight(root) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode: n => (n.parentElement.closest('h1, h2, h3, b, mjx-container, button, .kw-seq, .kw-ser, script, style') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT)
+  });
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const text = node.nodeValue;
+    KW.lastIndex = 0;
+    if (!KW.test(text)) return;
+    KW.lastIndex = 0;
+    const frag = document.createDocumentFragment();
+    let last = 0, m;
+    while ((m = KW.exec(text))) {
+      const before = text.slice(Math.max(0, m.index - 14), m.index);
+      if (/(geometric|alternating) $/i.test(before) || /[A-Za-z-]$/.test(before)) continue;
+      frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+      const span = document.createElement('span');
+      span.className = /^seq/i.test(m[1]) ? 'kw-seq' : 'kw-ser';
+      span.textContent = m[1];
+      frag.appendChild(span);
+      last = m.index + m[1].length;
+    }
+    frag.appendChild(document.createTextNode(text.slice(last)));
+    node.parentNode.replaceChild(frag, node);
+  });
+}
+function typeset(els) {
+  if (window.MathJax && MathJax.typesetPromise) {
+    if (MathJax.typesetClear) MathJax.typesetClear(els);
+    return MathJax.typesetPromise(els).catch(() => {});
+  }
+  return Promise.resolve();
+}
+
+/* ---------- data ---------- */
+function data(e, n) {
+  const a = [], s = [];
+  let sum = 0;
+  for (let k = 1; k <= n; k++) {
+    const t = e.an(k);
+    a.push(t);
+    sum += (k % 2 === 1 ? -1 : 1) * t;      // (-1)^n: the first term is negative, S1 = -a1
+    s.push(sum);
+  }
+  return { a, s };
+}
+
+/* ---------- graphs (hand-drawn SVG, Ira's graph style: arrows on the positive ends,
+   n at the end of the x-axis, the y label at the top of the y-axis, ticks along the axes) ---------- */
+const W = 420, H = 300, L = 54, Rt = 30, T = 34, B = 32;
+const GEOM = {};      // per graph: the scale last drawn, so hovering can find a point
+function niceStep(range, count) {
+  const raw = range / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / mag;
+  return (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * mag;
+}
+function tickText(v) {
+  const s = String(Number(v.toFixed(6)));
+  return s.charAt(0) === '-' ? MINUS + s.slice(1) : s;
+}
+function chart(kind, vals, n, ref) {
+  let lo = Math.min(0, ...vals), hi = Math.max(0, ...vals);
+  if (ref !== null) { lo = Math.min(lo, ref); hi = Math.max(hi, ref); }
+  if (hi - lo < 1e-9) hi = lo + 1;
+  const pad = (hi - lo) * 0.12;
+  hi += pad; if (lo < 0) lo -= pad;
+  const xMax = n * 1.07;
+  const pw = W - L - Rt, ph = H - T - B;
+  const px = k => L + (k / xMax) * pw;
+  const py = v => T + ((hi - v) / (hi - lo)) * ph;
+  const y0 = py(0);
+  GEOM[kind] = { xMax, lo, hi, n };
+  // When every value is negative, the graph hangs below the n-axis, so the n tick numbers go above it.
+  const above = Math.max(...vals) <= 0;
+  const lblY = above ? y0 - 9 : y0 + 18;
+  const mk = 'ar-' + kind;
+  let g = `<defs><marker id="${mk}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrow" d="M0 0 L10 5 L0 10 z"/></marker></defs>`;
+  const xs = niceStep(n, 5);
+  for (let v = xs; v <= n + 1e-9; v += xs) {
+    const x = px(v);
+    g += `<line class="tick" x1="${x.toFixed(1)}" y1="${(y0 - 4).toFixed(1)}" x2="${x.toFixed(1)}" y2="${(y0 + 4).toFixed(1)}"/>`;
+    g += `<text class="tl" x="${x.toFixed(1)}" y="${lblY.toFixed(1)}" text-anchor="middle">${tickText(v)}</text>`;
+  }
+  const ys = niceStep(hi - lo, 5);
+  for (let v = Math.ceil(lo / ys) * ys; v <= hi - ys * 0.3; v += ys) {
+    if (Math.abs(v) < ys * 1e-6) continue;
+    const y = py(v);
+    g += `<line class="grid" x1="${L}" y1="${y.toFixed(1)}" x2="${W - Rt}" y2="${y.toFixed(1)}"/>`;
+    g += `<line class="tick" x1="${L - 4}" y1="${y.toFixed(1)}" x2="${L + 4}" y2="${y.toFixed(1)}"/>`;
+    g += `<text class="tl" x="${L - 8}" y="${(y + 4.5).toFixed(1)}" text-anchor="end">${tickText(v)}</text>`;
+  }
+  g += `<text class="tl" x="${L - 8}" y="${(above ? y0 - 6 : y0 + 17).toFixed(1)}" text-anchor="end">0</text>`;
+  g += `<line class="ax" x1="${L}" y1="${y0.toFixed(1)}" x2="${W - 8}" y2="${y0.toFixed(1)}" marker-end="url(#${mk})"/>`;
+  g += `<line class="ax" x1="${L}" y1="${H - B}" x2="${L}" y2="${T - 18}" marker-end="url(#${mk})"/>`;
+  g += `<text class="al" x="${W - 4}" y="${(y0 - 8).toFixed(1)}" text-anchor="end">n</text>`;
+  g += `<text class="al" x="${L + 10}" y="${T - 12}">${kind === 'terms' ? 'a' : 'S'}<tspan dy="5" font-size="13">n</tspan></text>`;
+  if (ref !== null) {
+    const yr = py(ref).toFixed(1);
+    g += `<line class="ref" x1="${L}" y1="${yr}" x2="${(W - Rt).toFixed(1)}" y2="${yr}"/>`;
+    g += `<text class="tl" x="${(W - Rt + 2).toFixed(1)}" y="${(+yr - 6).toFixed(1)}" text-anchor="end">${MINUS}1/3</text>`;
+  }
+  if (kind === 'terms') {
+    // A sequence is a list of separate values, so each term a_n is one dot (Ira: dots only, no bars).
+    // With many terms (zoomed out) the dots are smaller so they do not merge into a blob.
+    const r = n <= 40 ? 3.4 : n <= 100 ? 2.6 : n <= 200 ? 1.8 : 1.2;
+    g += vals.map((v, i) => `<circle class="pt-t" cx="${px(i + 1).toFixed(1)}" cy="${py(v).toFixed(1)}" r="${r}"/>`).join('');
+  } else if (n > 200) {
+    // Many terms: the zigzag is too dense to draw line by line. Draw the band it fills instead:
+    // the odd partial sums S1, S3, S5, ... are its bottom edge, the even ones S2, S4, S6, ... its top edge.
+    const top = [], bot = [];
+    vals.forEach((v, i) => ((i % 2 === 0) ? top : bot).push(px(i + 1).toFixed(1) + ',' + py(v).toFixed(1)));
+    g += `<polygon class="band-fill" points="${top.join(' ')} ${bot.slice().reverse().join(' ')}"/>`;
+    g += `<polyline class="band-s" points="${top.join(' ')}"/><polyline class="band-s" points="${bot.join(' ')}"/>`;
+  } else {
+    const pts = vals.map((v, i) => px(i + 1).toFixed(1) + ',' + py(v).toFixed(1)).join(' ');
+    g += `<polyline class="ln-s" points="${pts}"/>`;
+    if (n <= 50) g += vals.map((v, i) => `<circle class="pt-s" cx="${px(i + 1).toFixed(1)}" cy="${py(v).toFixed(1)}" r="2.6"/>`).join('');
+  }
+  return `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true" focusable="false">${g}</svg>`;
+}
+
+/* ---------- text alternatives, regenerated from the data every time ---------- */
+function termsAlt(e, d, n) {
+  const first = numSay(d.a[0]), last = numSay(d.a[n - 1]);
+  let s = 'Graph of the terms a sub n for n from 1 to ' + n + '. ';
+  if (e.id === 'const') s += 'Every term equals 1.';
+  else if (e.lim === 0) s += 'The terms decrease from ' + first + ' to ' + last + ', getting closer to 0.';
+  else s += 'The terms increase from ' + first + ' to ' + last + (e.lim === Infinity ? ' and grow without bound.' : ', getting closer to ' + limSay(e) + ', not 0.');
+  return s;
+}
+function sumsAlt(e, d, n) {
+  const a = d.s[n - 2], b = d.s[n - 1], gap = Math.abs(b - a);
+  let s = 'Graph of the partial sums S sub n for n from 1 to ' + n + '. They oscillate up and down. ';
+  if (e.lim === 0) s += 'The oscillations keep getting smaller: the last two partial sums are ' + numSay(a) + ' and ' + numSay(b) + ', only ' + numSay(gap) + ' apart, closing in on one value.';
+  else if (e.lim === Infinity) s += 'The oscillations keep getting bigger: the last two partial sums are ' + numSay(a) + ' and ' + numSay(b) + '.';
+  else s += 'The oscillations do not get smaller: the last two partial sums are ' + numSay(a) + ' and ' + numSay(b) + ', still about ' + numSay(gap) + ' apart.';
+  if (e.sum !== null) s += ' A dashed line marks the sum of the series, negative 1 third.';
+  return s;
+}
+
+
+/* The explanation under the graphs (Ira, 2026-11-09: general understanding, little arithmetic).
+   Idea: the partial sums are steps on a number line. With a_n decreasing, each new partial sum lands
+   between the two before it; when a_n goes to 0 the zigzag closes in on one value. */
+function explainHTML(e) {
+  const rows = [R`S_{1} &= -a_{1}`, R`S_{2} &= -a_{1} + a_{2}`, R`S_{3} &= -a_{1} + a_{2} - a_{3}`, R`S_{4} &= -a_{1} + a_{2} - a_{3} + a_{4}`].join(R` \\ `);
+  let h = '<p>' + R`Think of the partial sums as steps along the number line. The given series steps down by \(a_{1}\), then up by \(a_{2}\), then down by \(a_{3}\), and so on:` + '</p>' +
+    '<div class="disp">' + R`\[\begin{aligned} ${rows} \\ &\ \ \vdots \end{aligned}\]` + '</div>';
+  if (e.lim === 0) {
+    h += '<p>' + R`Since \(a_{n} = ${e.t}\) is decreasing, each step is shorter than the step before it. On the graph, this is the zigzag getting smaller and smaller.` + '</p>' +
+      '<p>' + R`Since \(a_{n}\) goes to \(0\), the zigzag closes in on one value. The sequence of partial sums approaches a unique value, so the series converges.` + (e.why ? ' ' + e.why : '') + '</p>';
+  } else {
+    h += '<p>' + e.why + '</p>' +
+      '<p class="note">' + R`[Note: For the zigzag to close in on one value, the steps \(a_{n}\) must shrink to \(0\). When \(\displaystyle\lim_{n\to\infty}a_{n} \neq 0\), the series diverges by the nth Term Test for Divergence.]` + '</p>';
+  }
+  return h;
+}
+
+/* ---------- warm-up: a1, a2, a3 and S1, S2, S3 by hand ---------- */
+// A small, safe reader for what students type: numbers, + - * / ( ), sqrt( ) and ln( ). No eval.
+function readNumber(src) {
+  const str = String(src).replace(/\u2212/g, '-').replace(/\u221A/g, 'sqrt').replace(/\s+/g, '').toLowerCase();
+  if (!str) return NaN;
+  let i = 0;
+  const peek = () => str.charAt(i);
+  function expr() { let v = term(); while (peek() === '+' || peek() === '-') { const op = str.charAt(i++); const w = term(); v = op === '+' ? v + w : v - w; } return v; }
+  function term() { let v = factor(); while (peek() === '*' || peek() === '/') { const op = str.charAt(i++); const w = factor(); v = op === '*' ? v * w : v / w; } return v; }
+  function factor() {
+    const c = peek();
+    if (c === '-') { i++; return -factor(); }
+    if (c === '+') { i++; return factor(); }
+    if (c === '(') { i++; const v = expr(); if (peek() !== ')') throw 0; i++; return v; }
+    if (str.startsWith('sqrt', i)) { i += 4; return Math.sqrt(factor()); }
+    if (str.startsWith('ln', i)) { i += 2; return Math.log(factor()); }
+    const m = /^(\d+\.?\d*|\.\d+)/.exec(str.slice(i));
+    if (!m) throw 0;
+    i += m[0].length;
+    return parseFloat(m[0]);
+  }
+  try { const v = expr(); return i === str.length ? v : NaN; } catch (err) { return NaN; }
+}
+const W_IDS = ['wa1', 'wa2', 'wa3', 'ws1', 'ws2', 'ws3'];
+const W_SAY = ['a sub 1', 'a sub 2', 'a sub 3', 'S sub 1', 'S sub 2', 'S sub 3'];
+let wChecked = false;
+function resetWarm() {
+  wChecked = false;
+  W_IDS.forEach(id => { const el = $(id); el.value = ''; el.className = ''; el.removeAttribute('aria-invalid'); $('m' + id.slice(1)).textContent = ''; $('m' + id.slice(1)).className = 'wmark'; });
+  $('wfb').innerHTML = '';
+  $('wExp').hidden = true; $('wExp').open = false;
+  const e = cur;
+  const rows = [R`S_{1} &= -a_{1} = ${e.ws[0]}`, R`S_{2} &= S_{1} + a_{2} = ${e.ws[1]}`, R`S_{3} &= S_{2} - a_{3} = ${e.ws[2]}`].join(R` \\ `);
+  $('wExpBody').innerHTML =
+    '<p>' + R`The terms of the sequence come from \(a_{n} = ${e.t}\), with no sign:` + '</p>' +
+    '<div class="disp">' + R`\[a_{1} = ${e.wa[0]}, \qquad a_{2} = ${e.wa[1]}, \qquad a_{3} = ${e.wa[2]}\]` + '</div>' +
+    '<p>' + R`The series adds the terms \(-a_{1}, +a_{2}, -a_{3}, \ldots\) one at a time, so each partial sum is the one before it plus the next term:` + '</p>' +
+    '<div class="disp">' + R`\[\begin{aligned} ${rows} \end{aligned}\]` + '</div>' +
+    '<p class="note">[Note: These are the first three dots on each graph above.]</p>';
+  highlight($('wExpBody'));
+  return typeset([$('wExpBody')]);
+}
+function fillWarm() {
+  // Ira, 2026-11-11: a button that fills in the six boxes. Exact fractions where the answer is a fraction,
+  // 4-decimal values for the square root and natural log examples.
+  W_IDS.forEach((id, i) => {
+    const el = $(id), mk = $('m' + id.slice(1));
+    el.value = cur.fill[i].replace(/^-/, MINUS);
+    el.className = '';
+    el.removeAttribute('aria-invalid');
+    mk.textContent = ''; mk.className = 'wmark';
+  });
+  $('wfb').innerHTML = '<p>The answers are filled in. Hover over the first three points on each graph above to see the same values (on a phone, tap them).</p>';
+  wChecked = true;
+  $('wExp').hidden = false;
+  $('wfb').focus();
+}
+function checkWarm() {
+  const d = data(cur, 3);
+  const want = d.a.concat(d.s);
+  const ok = [], lines = [];
+  let blank = false;
+  W_IDS.forEach((id, i) => {
+    const el = $(id), raw = el.value.trim(), mk = $('m' + id.slice(1));
+    if (!raw) { blank = true; el.className = ''; mk.textContent = ''; mk.className = 'wmark'; ok.push(null); return; }
+    const v = readNumber(raw);
+    const good = isFinite(v) && Math.abs(v - want[i]) <= 0.005;
+    ok.push(good);
+    el.className = good ? 'ok' : 'miss';
+    if (good) el.removeAttribute('aria-invalid'); else el.setAttribute('aria-invalid', 'true');
+    mk.className = 'wmark ' + (good ? 'ok' : 'miss');
+    mk.textContent = good ? CHECK : CROSS;
+    lines.push(W_SAY[i] + (good ? ': correct.' : ': not quite.'));
+  });
+  const all = ok.every(x => x === true);
+  let html;
+  if (blank && ok.every(x => x === null)) html = '<p class="miss">Fill in the boxes first.</p>';
+  else if (all) html = '<p class="ok"><span aria-hidden="true">' + CHECK + '</span> All correct. Now look for these values as the first three dots on each graph.</p>';
+  else html = '<p class="miss"><span aria-hidden="true">' + CROSS + '</span> Not quite. Check the boxes marked in violet' + (blank ? ', fill in the empty ones,' : '') + ' and try again.</p>';
+  $('wfb').innerHTML = html + '<p class="sr-only">' + lines.join(' ') + '</p>';
+  if (!(blank && ok.every(x => x === null))) { wChecked = true; $('wExp').hidden = false; }
+  $('wfb').focus();
+}
+
+/* ---------- reading values off the graphs (hover, tap, or arrow keys) ----------
+   Each graph is independent (Ira, 2026-11-09). The sequence label gives the exact term;
+   the series label shows which terms are added to get S_k: all of them up to k = 4,
+   after that the first three, then ..., then the last one. */
+const ELL = '\u2026', ROOT = '\u221A';
+function gcd(x, y) { return y ? gcd(y, x % y) : Math.abs(x); }
+function frac(p, q) { const g = gcd(p, q); p /= g; q /= g; return q === 1 ? String(p) : p + '/' + q; }
+function termText(e, k) {        // a_k written exactly, as plain text
+  switch (e.id) {
+    case 'harm': return frac(1, k);
+    case 'p2': return frac(1, k * k);
+    case 'sqrt': { const r = Math.round(Math.sqrt(k)); return r * r === k ? frac(1, r) : '1/' + ROOT + k; }
+    case 'geo': return frac(1, Math.pow(2, k));
+    case 'ln': return '1/ln ' + (k + 1);
+    case 'const': return '1';
+    case 'grow': return frac(k, k + 1);
+    case 'linear': return frac(k, 5);
+    case 'rat2': return frac(2 * k + 1, k + 3);
+  }
+  return '';
+}
+function sumText(e, k) {         // -a_1 + a_2 - a_3 ... written with the actual terms
+  const piece = (j, first) => (j % 2 === 1 ? (first ? MINUS : ' ' + MINUS + ' ') : (first ? '' : ' + ')) + termText(e, j);
+  if (k <= 4) { let t = ''; for (let j = 1; j <= k; j++) t += piece(j, j === 1); return t; }
+  // Ira: always the first three, then ..., then the last one. a_4 is added, so a plus sign comes before the dots.
+  return piece(1, true) + piece(2, false) + piece(3, false) + ' + ' + ELL + piece(k, false);
+}
+const HOVER = { terms: 0, sums: 0 };
+function showValue(kind, k) {
+  if (!lastData) return;
+  k = Math.max(1, Math.min(N, k));
+  HOVER[kind] = k;
+  const g = GEOM[kind], fig = $(kind === 'terms' ? 'figTerms' : 'figSums'), tip = $(kind === 'terms' ? 'tipTerms' : 'tipSums');
+  const svg = fig.querySelector('svg');
+  if (!g || !svg) return;
+  const pw = W - L - Rt, ph = H - T - B;
+  const v = kind === 'terms' ? lastData.a[k - 1] : lastData.s[k - 1];
+  const x = L + (k / g.xMax) * pw, y = T + ((g.hi - v) / (g.hi - g.lo)) * ph;
+  let ring = svg.querySelector('.ring');
+  if (!ring) { ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); ring.setAttribute('class', 'ring'); ring.setAttribute('r', '6.5'); svg.appendChild(ring); }
+  ring.setAttribute('cx', x.toFixed(1)); ring.setAttribute('cy', y.toFixed(1));
+  if (kind === 'terms') {
+    const t = termText(cur, k);
+    tip.innerHTML = 'a<sub>' + k + '</sub> = ' + (/^\d+$/.test(t) ? t : t + ' ' + eqv(v));
+  } else {
+    const st = sumText(cur, k);
+    // A single whole number (S_1 = -1) needs no second line.
+    tip.innerHTML = 'S<sub>' + k + '</sub> = ' + st + (new RegExp('^' + MINUS + '?\\d+$').test(st) ? '' : '<br>' + eqv(v));
+  }
+  tip.hidden = false;
+  // keep the label inside the graph: centre it over the point, clamp to the edges, above the point when there is room
+  const box = fig.getBoundingClientRect(), sc = box.width / W;
+  const px = x * sc, py = y * sc, w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.max(4, Math.min(box.width - w - 4, px - w / 2)) + 'px';
+  tip.style.top = (py - h - 12 >= 0 ? py - h - 12 : py + 14) + 'px';
+}
+function hideValue(kind) {
+  (kind ? [kind] : ['terms', 'sums']).forEach(kd => {
+    HOVER[kd] = 0;
+    const t = $(kd === 'terms' ? 'tipTerms' : 'tipSums'); if (t) t.hidden = true;
+    const r = document.querySelector((kd === 'terms' ? '#figTerms' : '#figSums') + ' .ring'); if (r) r.remove();
+  });
+}
+function valueWords(kind, k) {
+  return kind === 'terms'
+    ? 'n equals ' + k + '. a sub ' + k + ' equals ' + numSay(lastData.a[k - 1]) + '.'
+    : 'n equals ' + k + '. S sub ' + k + ', the sum of the first ' + k + (k === 1 ? ' term' : ' terms') + ', equals ' + numSay(lastData.s[k - 1]) + '.';
+}
+function nearestK(wrap, clientX) {
+  const svg = wrap.querySelector('svg'), g = GEOM[wrap.dataset.kind];
+  if (!svg || !g) return 0;
+  const r = svg.getBoundingClientRect();
+  return Math.round((((clientX - r.left) * (W / r.width) - L) / (W - L - Rt)) * g.xMax);
+}
+document.querySelectorAll('.plotwrap').forEach(wrap => {
+  const kind = wrap.dataset.kind;
+  wrap.addEventListener('pointermove', ev => { const k = nearestK(wrap, ev.clientX); if (k >= 1) showValue(kind, k); else hideValue(kind); });
+  wrap.addEventListener('pointerdown', ev => { const k = nearestK(wrap, ev.clientX); if (k >= 1) showValue(kind, k); });
+  wrap.addEventListener('pointerleave', ev => { if (ev.pointerType === 'mouse' && document.activeElement !== wrap) hideValue(kind); });
+  wrap.addEventListener('focus', () => { showValue(kind, HOVER[kind] || 1); say(valueWords(kind, HOVER[kind]), 200); });
+  wrap.addEventListener('blur', () => hideValue(kind));
+  wrap.addEventListener('keydown', ev => {
+    let k = HOVER[kind] || 1;
+    if (ev.key === 'ArrowRight' || ev.key === 'ArrowUp') k += 1;
+    else if (ev.key === 'ArrowLeft' || ev.key === 'ArrowDown') k -= 1;
+    else if (ev.key === 'Home') k = 1;
+    else if (ev.key === 'End') k = N;
+    else if (ev.key === 'Escape') { hideValue(kind); return; }
+    else return;
+    ev.preventDefault();
+    showValue(kind, k);
+    say(valueWords(kind, HOVER[kind]), 250);
+  });
+});
+
+/* ---------- drawing ---------- */
+let sayTimer = null;
+function say(text, wait) {
+  clearTimeout(sayTimer);
+  sayTimer = setTimeout(() => {
+    const el = $('announce');
+    el.textContent = '';
+    requestAnimationFrame(() => { el.textContent = text; });
+  }, wait);
+}
+function readoutWords(d, n) {
+  return 'n equals ' + n + '. a sub ' + n + ' equals ' + numSay(d.a[n - 1]) + '. Partial sum S sub ' + n + ' equals ' + numSay(d.s[n - 1]) + '.';
+}
+let lastData = null;
+function drawCharts() {
+  const e = cur, n = N, d = data(e, n);
+  lastData = d;
+  hideValue();
+  $('figTerms').innerHTML = chart('terms', d.a, n, null);
+  $('figSums').innerHTML = chart('sums', d.s, n, e.sum);
+  $('figTerms').setAttribute('aria-label', termsAlt(e, d, n));
+  $('figSums').setAttribute('aria-label', sumsAlt(e, d, n));
+  // Readouts under each graph, like the Sequence vs. Series Explorer. (-1)^n: the last term is added when n is even.
+  $('readTerms').innerHTML = '<i>a</i><sub>' + n + '</sub> ' + eqv(d.a[n - 1]);
+  $('readSums').innerHTML = '<i>S</i><sub>' + n + '</sub> = &minus;<i>a</i><sub>1</sub> + <i>a</i><sub>2</sub> &minus; &hellip; ' +
+    (n % 2 === 0 ? '+' : '&minus;') + ' <i>a</i><sub>' + n + '</sub> ' + eqv(d.s[n - 1]);
+  $('readoutSr').textContent = readoutWords(d, n);
+  $('nOut').textContent = String(n);
+  slider.setAttribute('aria-valuetext', 'up to n = ' + n + (zoomN ? ', zoomed out' : ''));
+  return d;
+}
+function drawStory() {
+  const e = cur, conv = e.lim === 0, st = seriesTex(e);
+  const limStmt = e.id === 'const' ? R`\(a_{n} = 1\) for every \(n\), so \(\displaystyle\lim_{n\to\infty}a_{n} = 1 \neq 0\)`
+                                   : R`\(\displaystyle\lim_{n\to\infty}${e.t} = ${limTex(e)}` + (conv ? '' : R` \neq 0`) + R`\)`;
+  $('givenMath').innerHTML = R`\(\displaystyle ${st}\)`;
+  $('s1Intro').innerHTML = R`Here \(a_{n} = ${e.t}\).`;
+  if (conv) {
+    $('s1Checks').innerHTML =
+      '<li>Is ' + R`\(\displaystyle\lim_{n\to\infty}a_{n} = 0\)` + '? <b class="yes">Yes:</b> ' + limStmt + '.</li>' +
+      '<li>Is ' + R`\(a_{n}\)` + ' positive and decreasing? <b class="yes">Yes:</b> ' + R`\(${e.t} &gt; 0\)` + ', and ' + R`\(${e.t}\)` + ' gets smaller as ' + R`\(n\)` + ' grows.</li>';
+    $('s1Concl').innerHTML = '<b>Conclusion:</b> Since ' + R`\(\displaystyle\lim_{n\to\infty}${e.t} = 0\)` + ' and ' + R`\(${e.t}\)` +
+      ' is positive and decreasing, the given series ' + R`\(\displaystyle ${st}\)` + ' converges by the Alternating Series Test.';
+  } else {
+    $('s1Checks').innerHTML =
+      '<li>Is ' + R`\(\displaystyle\lim_{n\to\infty}a_{n} = 0\)` + '? <b class="no">No:</b> ' + limStmt + '.</li>' +
+      '<li>Condition 3 of the Alternating Series Test fails, so we use the nth Term Test for Divergence.</li>';
+    $('s1Concl').innerHTML = '<b>Conclusion:</b> Since ' + (e.id === 'const' ? R`\(\displaystyle\lim_{n\to\infty}a_{n} = 1 \neq 0\)` : limStmt) +
+      ', the given series ' + R`\(\displaystyle ${st}\)` + ' diverges by the nth Term Test for Divergence.';
+  }
+  $('vTerms').innerHTML = '<span class="m">' + R`\(\displaystyle\lim_{n\to\infty}${e.id === 'const' ? 'a_{n}' : e.t} = ${limTex(e)}\)` + '</span>' +
+    (conv ? '<span class="tag conv">converges to 0</span>' : '<span class="tag">does not converge to 0</span>');
+  $('capTerms').innerHTML = e.capT;
+  $('vSums').innerHTML = '<span class="m">' + R`\(\displaystyle ${st}` + (e.sum !== null ? R` = -\frac{1}{3}` : '') + R`\)` + '</span>' +
+    (conv ? '<span class="tag conv">converges</span>' : '<span class="tag">diverges</span>');
+  $('capSums').innerHTML = R`The graph shows the partial sums \(S_{n}\), the running totals. ` +
+    (conv ? R`The oscillations get smaller and smaller, since the terms we are adding and subtracting are getting smaller and smaller.` + e.capX : e.capS);
+  highlight($('capSums'));
+  $('explain').innerHTML = explainHTML(e);
+  highlight($('s1Concl'));
+  highlight($('explain'));
+  $('zoom').hidden = !e.slow;
+  return typeset([$('givenMath'), $('s1Intro'), $('s1Checks'), $('s1Concl'), $('vTerms'), $('capTerms'), $('vSums'), $('capSums'), $('explain')]);
+}
+function setZoomButtons() {
+  document.querySelectorAll('.zb').forEach(b => {
+    const v = +b.dataset.n;
+    b.setAttribute('aria-pressed', String(v === 0 ? (zoomN === 0 && N === SLIDER_N) : v === zoomN));
+  });
+}
+
+function pick(e, btn) {
+  cur = e;
+  zoomN = 0; N = SLIDER_N; slider.value = SLIDER_N;
+  document.querySelectorAll('.ex').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+  setZoomButtons();
+  const d = drawCharts();
+  drawStory();
+  resetWarm();
+  say('The given series: ' + seriesSay(e) + '. The limit of a sub n is ' + limSay(e) + ', so the series ' +
+      (e.lim === 0 ? 'converges by the Alternating Series Test. ' : 'diverges by the nth term test for divergence. ') + readoutWords(d, N), 150);
+}
+
+/* ---------- controls ---------- */
+function buildButtons() {
+  EX.forEach(e => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'ex ' + e.group;
+    b.setAttribute('aria-pressed', 'false');
+    b.setAttribute('aria-label', SAY + (e.say ? ', times ' + e.say : ''));
+    b.innerHTML = '\\(' + ALT + e.p + '\\)';
+    b.addEventListener('click', () => pick(e, b));
+    $(e.group === 'c' ? 'rowConv' : 'rowDiv').appendChild(b);
+  });
+}
+slider.addEventListener('input', () => {
+  zoomN = 0;
+  N = +slider.value;
+  setZoomButtons();
+  const d = drawCharts();
+  say(readoutWords(d, N), 400);
+});
+document.querySelectorAll('.zb').forEach(b => b.addEventListener('click', () => {
+  const v = +b.dataset.n;
+  zoomN = v;
+  N = v || SLIDER_N;
+  slider.value = v ? slider.max : SLIDER_N;
+  setZoomButtons();
+  const d = drawCharts();
+  say((v ? 'Zoomed out to ' + v + ' terms. ' : 'Back to ' + SLIDER_N + ' terms. ') + $('figSums').getAttribute('aria-label') + ' ' + readoutWords(d, N), 150);
+}));
+
+(function rose() {
+  let d = '';
+  for (let i = 0; i <= 240; i++) {
+    const t = (i / 240) * 4 * Math.PI, r = 2 * Math.cos(1.5 * t);
+    d += (i ? 'L ' : 'M ') + (r * Math.cos(t) * 12).toFixed(2) + ' ' + (r * Math.sin(t) * 12).toFixed(2) + ' ';
+  }
+  $('pr-path').setAttribute('d', d.trim());
+})();
+
+function start() {
+  buildButtons();
+  highlight(document.querySelector('#reminder .box'));
+  const first = document.querySelector('.ex');
+  cur = EX[0];
+  document.querySelectorAll('.ex').forEach(b => b.setAttribute('aria-pressed', String(b === first)));
+  setZoomButtons();
+  drawCharts();
+  drawStory();
+  resetWarm();
+  $('wCheck').addEventListener('click', checkWarm);
+  $('wFill').addEventListener('click', fillWarm);
+  W_IDS.forEach(id => $(id).addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); checkWarm(); } }));
+  highlight(document.querySelector('#warm .wbox > p'));
+  typeset([$('reminder'), $('rowConv'), $('rowDiv'), $('warm')]);
+}
+if (window.MathJax && MathJax.startup && MathJax.startup.promise) MathJax.startup.promise.then(start);
+else start();
+</script>
+
+</body>
+</html>
