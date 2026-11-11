@@ -1,0 +1,758 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'unsafe-inline'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Taylor Series Explorer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Add the terms of a Taylor series one at a time and watch the Taylor polynomial follow the graph of the function.">
+<style>
+:root {
+  --bg: #E6E9F4;
+  --card: #FDFCFF;
+  --ink: #1B2A4A;
+  --muted: #4A5068;
+  --line: #D9DBE7;
+  --ctl: #7A84A8;
+  --band: #1B2A4A;
+  --band-ink: #F7F6FB;
+  --green: #1B5E20;
+  --ok-bg: #C8E6C9;
+  --head: #388E3C;
+  --purple: #7C3AED;
+  --select: #E6E9F4;
+  --focus: #5E3FA3;
+  --cf: #2E3D8F;        /* the function: solid curve */
+  --cp: #16A34A;        /* the Taylor polynomial: dashed bright green (3.2:1 on the card) */
+  --axis: #4A5480;
+  --grid: #E3E6F0;
+  --zone: #E6E9F4;      /* interval of convergence band */
+  --rose-a: #1e3a5f; --rose-b: #0b7a70; --rose-cap: #525c8a;
+  --serif: ui-serif, Georgia, Cambria, 'Times New Roman', serif;
+  --sans: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11182A; --card: #182239; --ink: #E7EAF3; --muted: #B3B9CC; --line: #2E3A57; --ctl: #7A86AD;
+    --band: #0B1120; --band-ink: #F2F3F8;
+    --green: #9BD3A2; --ok-bg: #1F4A27; --head: #81C784; --purple: #B794F6;
+    --select: #24304D; --focus: #C9B8F2;
+    --cf: #A9B8F5; --cp: #4ADE80; --axis: #B3B9CC; --grid: #232E49; --zone: #24304D;
+    --rose-a: #c4b5fd; --rose-b: #6ee7b7; --rose-cap: #a8b0d8; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11182A; --card: #182239; --ink: #E7EAF3; --muted: #B3B9CC; --line: #2E3A57; --ctl: #7A86AD;
+  --band: #0B1120; --band-ink: #F2F3F8;
+  --green: #9BD3A2; --ok-bg: #1F4A27; --head: #81C784; --purple: #B794F6;
+  --select: #24304D; --focus: #C9B8F2;
+  --cf: #A9B8F5; --cp: #4ADE80; --axis: #B3B9CC; --grid: #232E49; --zone: #24304D;
+  --rose-a: #c4b5fd; --rose-b: #6ee7b7; --rose-cap: #a8b0d8; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 18px; line-height: 1.55; }
+.wrap { max-width: 860px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header .wrap { padding-block: 24px 0; }
+header .band { background: var(--band); color: var(--band-ink); border-radius: 14px; padding: 28px clamp(20px, 4vw, 32px); }
+h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(30px, 5vw, 36px); line-height: 1.15; margin: 0; text-wrap: balance; width: fit-content; max-width: 100%; }
+h1::after { content: ""; display: block; width: 100%; height: 3px; margin-top: 12px; border-radius: 2px; background: #66BB6A; }
+main .wrap { padding-block: 24px 40px; display: flex; flex-direction: column; gap: 20px; }
+
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 24px clamp(16px, 4vw, 32px); display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.card h2 { font-family: var(--serif); font-size: 26px; line-height: 1.2; margin: 0; color: var(--head); }
+.card p { margin: 0; max-width: 68ch; }
+.sub { font-family: var(--sans); font-weight: 700; font-size: 19px; margin: 0; }
+
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+legend { font-weight: 700; font-size: 19px; padding: 0; margin-bottom: 10px; }
+.choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+.choice { position: relative; }
+.choice input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.choice label { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 8px 14px; border: 2px solid var(--ctl); border-radius: 10px; cursor: pointer; font-size: 19px; background: var(--card); }
+.choice label::before { content: ""; flex: none; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--muted); }
+.choice input:checked + label { border-color: var(--ink); background: var(--select); }
+.choice input:checked + label::before { border-color: var(--ink); background: radial-gradient(var(--ink) 0 45%, transparent 50%); }
+.choice input:focus-visible + label { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: center; font-size: 17px; }
+.legend .item { display: inline-flex; align-items: center; gap: 8px; }
+.legend .item > svg { width: 34px; height: 12px; flex: none; }
+.plot { width: 100%; min-width: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--card); overflow: hidden; }
+.plot svg { display: block; width: 100%; height: auto; }
+.plot .tick { font: 13px var(--sans); fill: var(--muted); }
+.plot .axlab { font: italic 18px var(--serif); fill: var(--ink); }
+.plot .zonelab { font: 12px var(--sans); fill: var(--muted); }
+
+.stage { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.terms { display: grid; grid-template-columns: auto minmax(160px, 1fr) auto; align-items: center; gap: 4px 16px; }
+.terms label { font-weight: 700; font-size: 19px; }
+.terms output { font-size: 17px; color: var(--muted); white-space: nowrap; }
+input[type="range"] { width: 100%; height: 44px; margin: 0; accent-color: var(--head); cursor: pointer; }
+input[type="range"]:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
+
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+button.btn { font: 700 17px var(--sans); padding: 10px 20px; min-height: 44px; border-radius: 10px; cursor: pointer; border: 2px solid var(--ink); -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.btn.primary { background: var(--ink); color: var(--bg); }
+.btn.ghost { background: transparent; color: var(--ink); }
+.btn[aria-disabled="true"] { background: var(--select); color: var(--muted); border-color: var(--ctl); cursor: not-allowed; }
+button:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.formula { border: 1px solid var(--line); border-radius: 12px; padding: 10px 16px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.formula .cap { font-size: 15px; color: var(--muted); margin: 0; }
+.poly { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 4px; font-size: 21px; line-height: 2; }
+.poly .term, .poly .lhs { white-space: nowrap; padding: 0 3px; border: 2px solid transparent; border-radius: 6px; }
+.poly .term.new { background: var(--ok-bg); border-color: var(--green); }
+@media (prefers-reduced-motion: no-preference) {
+  .poly .term.new { animation: arrive .5s ease-out; }
+  @keyframes arrive { from { transform: translateY(-6px); opacity: .3; } to { transform: none; opacity: 1; } }
+}
+
+.info { background: var(--select); border-radius: 12px; padding: 14px 18px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.info .disp { font-size: 20px; overflow-x: auto; }
+.note { color: var(--muted); }
+.info .note { color: var(--ink); }
+
+details.more summary { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font: 700 16px var(--sans); color: var(--ink); background: var(--select); border: 2px solid var(--ctl); border-radius: 999px; padding: 6px 16px; min-height: 44px; list-style: none; }
+details.more summary::-webkit-details-marker { display: none; }
+details.more summary::before { content: "+"; content: "+" / ""; font-size: 18px; line-height: 1; color: var(--green); }
+details.more[open] summary::before { content: "\2212"; content: "\2212" / ""; }
+details.more summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+details.more .when-open { display: none; }
+details.more[open] .when-open { display: inline; }
+details.more[open] .when-closed { display: none; }
+details.more .box { margin-top: 12px; background: var(--select); border-radius: 12px; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; font-size: 17px; }
+th, td { text-align: left; padding: 6px 14px 6px 0; border-bottom: 1px solid var(--ctl); white-space: nowrap; vertical-align: middle; }
+thead th { font-weight: 700; }
+td.num { font-variant-numeric: tabular-nums; }
+
+.studio { display: flex; flex-direction: column; align-items: center; margin-top: 4px; }
+.insignia { display: block; width: 70px; }
+.pr-a { stop-color: var(--rose-a); }
+.pr-b { stop-color: var(--rose-b); }
+.insignia-caption { font-size: 8.5px; letter-spacing: 1px; font-weight: 800; color: var(--rose-cap); margin-top: 2px; white-space: nowrap; }
+mjx-container { color: inherit; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+@media (max-width: 480px) {
+  .poly { font-size: 19px; }
+  .plot .tick { font-size: 12px; }
+}
+@media (max-width: 560px) {
+  .terms { grid-template-columns: auto 1fr; }
+  .terms label { grid-column: 1; grid-row: 1; }
+  .terms output { grid-column: 2; grid-row: 1; justify-self: end; }
+  .terms input[type="range"] { grid-column: 1 / -1; grid-row: 2; }
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .actions button.btn { padding: 8px 10px; }
+  .legend { font-size: 16px; gap: 2px 16px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="band">
+      <h1>Taylor Series Explorer</h1>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <section class="card" aria-labelledby="hFn">
+      <h2 id="hFn">Choose a function</h2>
+      <p>Pick a function, then add the terms of its Taylor series one at a time. Watch how the Taylor polynomial, centered at \(x = 0\), approaches the graph of the function.</p>
+      <fieldset>
+        <legend>Function</legend>
+        <div class="choices" id="fnChoices"></div>
+      </fieldset>
+    </section>
+
+    <section class="card" aria-labelledby="hBuild">
+      <h2 id="hBuild">Build the Taylor polynomial</h2>
+
+      <div class="stage">
+        <div class="legend" id="legend"></div>
+        <div class="plot" id="plot" role="img" aria-label="Graph"></div>
+
+        <div class="terms">
+          <label for="nTerms">Number of terms</label>
+          <input type="range" id="nTerms" min="1" max="16" step="1" value="1">
+          <output id="nOut" for="nTerms" aria-hidden="true"></output>
+        </div>
+        <div class="actions">
+          <button class="btn ghost" type="button" id="remove">Remove term</button>
+          <button class="btn primary" type="button" id="add">Add term</button>
+          <button class="btn ghost" type="button" id="play">Play</button>
+          <button class="btn ghost" type="button" id="reset">Start over</button>
+        </div>
+
+        <div class="formula">
+          <p class="cap">Taylor polynomial (newest term outlined)</p>
+          <div class="poly" id="poly"></div>
+        </div>
+      </div>
+      <p class="note" id="powNote"></p>
+
+      <div class="info" id="info"></div>
+
+      <details class="more" id="coefBox">
+        <summary><span class="when-closed">Show where the coefficients come from</span><span class="when-open">Hide where the coefficients come from</span></summary>
+        <div class="box" id="coef"></div>
+      </details>
+    </section>
+
+    <p class="sr-only" id="announce" aria-live="polite"></p>
+
+    <div class="studio" aria-hidden="true">
+      <svg class="insignia" viewBox="-28 -26 56 64" focusable="false" role="presentation">
+        <defs>
+          <linearGradient id="pr-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" class="pr-a"/>
+            <stop offset="100%" class="pr-b"/>
+          </linearGradient>
+        </defs>
+        <path id="pr-path" fill="none" stroke="url(#pr-grad)" stroke-width="1.8"/>
+      </svg>
+      <div class="insignia-caption">POLAR ROSE STUDIO</div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+  svg: { fontCache: 'global', displayAlign: 'left', displayIndent: '0' },
+  options: { enableMenu: false, enableAssistiveMml: true },
+  startup: { typeset: false }
+};
+</script>
+<!-- MathJax 3.2.2. First choice: the site's own copy in lib/mathjax/ (no outside server).
+     Backup: if that copy is not there (Claude preview, a file opened on a computer,
+     or before lib/mathjax/ is uploaded), load the same pinned version from jsdelivr. -->
+<script src="../lib/mathjax/tex-svg.js"></script>
+<script>
+if (!window.MathJax || !window.MathJax.version) {
+  document.write('<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"><\/script>');
+}
+</script>
+<script>
+'use strict';
+const R = String.raw;
+const MINUS = '\u2212';
+const PI = '\u03C0';
+
+/* ---------- The six functions ----------------------------------------
+   Each Taylor term is { p: power, den: 'fact' | 'int' | 'one', neg }.
+   Its coefficient is (+/-1) / (p!  or  p  or  1). One model drives the
+   graph, the typeset formula, the spoken text and the table.            */
+const FUNCS = [
+  {
+    id: 'exp', tex: R`e^{x}`, say: 'e to the x', max: 16,
+    f: x => Math.exp(x),
+    term: n => ({ p: n, den: 'fact', neg: false }),
+    x: [-4, 4], y: [-5, 25], xStep: 1, yStep: 5,
+    zone: null,
+    sigma: R`e^{x} = \sum_{n=0}^{\infty}\frac{x^{n}}{n!}`,
+    conv: R`The series converges to \(e^{x}\) for every real number \(x\). Radius of convergence: \(R = \infty\).`,
+    deriv: [
+      [R`e^{x}`, R`1`, R`\frac{1}{0!} = 1`],
+      [R`e^{x}`, R`1`, R`\frac{1}{1!} = 1`],
+      [R`e^{x}`, R`1`, R`\frac{1}{2!} = \frac{1}{2}`],
+      [R`e^{x}`, R`1`, R`\frac{1}{3!} = \frac{1}{6}`],
+      [R`e^{x}`, R`1`, R`\frac{1}{4!} = \frac{1}{24}`],
+      [R`e^{x}`, R`1`, R`\frac{1}{5!} = \frac{1}{120}`]
+    ],
+    coefNote: null
+  },
+  {
+    id: 'sin', tex: R`\sin x`, say: 'sine of x', max: 12,
+    f: x => Math.sin(x),
+    term: k => ({ p: 2 * k + 1, den: 'fact', neg: k % 2 === 1 }),
+    x: [-2 * Math.PI - 0.4, 2 * Math.PI + 0.4], y: [-3, 3], xStep: Math.PI, yStep: 1, piTicks: true,
+    zone: null, parity: 'odd',
+    sigma: R`\sin x = \sum_{n=0}^{\infty}\frac{(-1)^{n}\,x^{2n+1}}{(2n+1)!}`,
+    conv: R`The series converges to \(\sin x\) for every real number \(x\). Radius of convergence: \(R = \infty\).`,
+    deriv: [
+      [R`\sin x`, R`0`, R`0`],
+      [R`\cos x`, R`1`, R`\frac{1}{1!} = 1`],
+      [R`-\sin x`, R`0`, R`0`],
+      [R`-\cos x`, R`-1`, R`\frac{-1}{3!} = -\frac{1}{6}`],
+      [R`\sin x`, R`0`, R`0`],
+      [R`\cos x`, R`1`, R`\frac{1}{5!} = \frac{1}{120}`]
+    ],
+    coefNote: R`[Note: The derivatives repeat in a cycle of four, so every even-numbered coefficient is \(0\) and the signs of the others alternate.]`
+  },
+  {
+    id: 'cos', tex: R`\cos x`, say: 'cosine of x', max: 12,
+    f: x => Math.cos(x),
+    term: k => ({ p: 2 * k, den: 'fact', neg: k % 2 === 1 }),
+    x: [-2 * Math.PI - 0.4, 2 * Math.PI + 0.4], y: [-3, 3], xStep: Math.PI, yStep: 1, piTicks: true,
+    zone: null, parity: 'even',
+    sigma: R`\cos x = \sum_{n=0}^{\infty}\frac{(-1)^{n}\,x^{2n}}{(2n)!}`,
+    conv: R`The series converges to \(\cos x\) for every real number \(x\). Radius of convergence: \(R = \infty\).`,
+    deriv: [
+      [R`\cos x`, R`1`, R`\frac{1}{0!} = 1`],
+      [R`-\sin x`, R`0`, R`0`],
+      [R`-\cos x`, R`-1`, R`\frac{-1}{2!} = -\frac{1}{2}`],
+      [R`\sin x`, R`0`, R`0`],
+      [R`\cos x`, R`1`, R`\frac{1}{4!} = \frac{1}{24}`],
+      [R`-\sin x`, R`0`, R`0`]
+    ],
+    coefNote: R`[Note: The derivatives repeat in a cycle of four, so every odd-numbered coefficient is \(0\) and the signs of the others alternate.]`
+  },
+  {
+    id: 'ln', tex: R`\ln(1+x)`, say: 'the natural log of 1 plus x', max: 18,
+    f: x => (x > -1 ? Math.log1p(x) : NaN),
+    term: k => ({ p: k + 1, den: 'int', neg: (k + 1) % 2 === 0 }),
+    x: [-2, 4], y: [-4, 4], xStep: 1, yStep: 1,
+    zone: { a: -1, b: 1, text: R`-1 < x \le 1`, say: 'x greater than negative 1 and less than or equal to 1' },
+    sigma: R`\ln(1+x) = \sum_{n=1}^{\infty}\frac{(-1)^{n+1}\,x^{n}}{n}`,
+    conv: R`The series converges to \(\ln(1+x)\) only for \(-1 < x \le 1\), the shaded band. Radius of convergence: \(R = 1\).`,
+    outside: R`No matter how many terms we add, the Taylor polynomials get closer to \(\ln(1+x)\) only inside this interval. Outside the interval, adding more terms does not help: the polynomials move farther away from the graph, not closer.`,
+    deriv: [
+      [R`\ln(1+x)`, R`0`, R`0`],
+      [R`\frac{1}{1+x}`, R`1`, R`\frac{1}{1!} = 1`],
+      [R`-\frac{1}{(1+x)^{2}}`, R`-1`, R`\frac{-1}{2!} = -\frac{1}{2}`],
+      [R`\frac{2}{(1+x)^{3}}`, R`2`, R`\frac{2}{3!} = \frac{1}{3}`],
+      [R`-\frac{6}{(1+x)^{4}}`, R`-6`, R`\frac{-6}{4!} = -\frac{1}{4}`],
+      [R`\frac{24}{(1+x)^{5}}`, R`24`, R`\frac{24}{5!} = \frac{1}{5}`]
+    ],
+    coefNote: R`[Note: A faster way to get this series: integrate the geometric series \(\frac{1}{1+x} = 1 - x + x^{2} - x^{3} + \cdots\) term by term.]`
+  },
+  {
+    id: 'geo', tex: R`\frac{1}{1-x}`, say: '1 over 1 minus x', max: 16,
+    f: x => (Math.abs(1 - x) < 1e-12 ? NaN : 1 / (1 - x)),
+    term: n => ({ p: n, den: 'one', neg: false }),
+    x: [-3, 3], y: [-6, 6], xStep: 1, yStep: 2,
+    zone: { a: -1, b: 1, text: R`-1 < x < 1`, say: 'x between negative 1 and 1' },
+    sigma: R`\frac{1}{1-x} = \sum_{n=0}^{\infty}x^{n}`,
+    conv: R`The series converges to \(\frac{1}{1-x}\) only for \(-1 < x < 1\), the shaded band. Radius of convergence: \(R = 1\). This is the geometric series with ratio \(r = x\).`,
+    deriv: [
+      [R`\frac{1}{1-x}`, R`1`, R`\frac{1}{0!} = 1`],
+      [R`\frac{1}{(1-x)^{2}}`, R`1`, R`\frac{1}{1!} = 1`],
+      [R`\frac{2}{(1-x)^{3}}`, R`2`, R`\frac{2}{2!} = 1`],
+      [R`\frac{6}{(1-x)^{4}}`, R`6`, R`\frac{6}{3!} = 1`],
+      [R`\frac{24}{(1-x)^{5}}`, R`24`, R`\frac{24}{4!} = 1`],
+      [R`\frac{120}{(1-x)^{6}}`, R`120`, R`\frac{120}{5!} = 1`]
+    ],
+    coefNote: R`[Note: Every coefficient is \(1\), since \(f^{(k)}(0) = k!\).]`
+  },
+  {
+    id: 'atan', tex: R`\arctan x`, say: 'arctangent of x', max: 12,
+    f: x => Math.atan(x),
+    term: k => ({ p: 2 * k + 1, den: 'int', neg: k % 2 === 1 }),
+    x: [-4, 4], y: [-3, 3], xStep: 1, yStep: 1,
+    zone: { a: -1, b: 1, text: R`-1 \le x \le 1`, say: 'x from negative 1 to 1' },
+    parity: 'odd',
+    sigma: R`\arctan x = \sum_{n=0}^{\infty}\frac{(-1)^{n}\,x^{2n+1}}{2n+1}`,
+    conv: R`The series converges to \(\arctan x\) only for \(-1 \le x \le 1\), the shaded band. Radius of convergence: \(R = 1\).`,
+    extra: R`[Note: \(\arctan x\) is defined and smooth for every \(x\), yet its Taylor series still stops working beyond \(\left|x\right| = 1\).]`,
+    deriv: [
+      [R`\arctan x`, R`0`, R`0`],
+      [R`\frac{1}{1+x^{2}}`, R`1`, R`\frac{1}{1!} = 1`],
+      [R`-\frac{2x}{(1+x^{2})^{2}}`, R`0`, R`0`],
+      [R`\frac{6x^{2}-2}{(1+x^{2})^{3}}`, R`-2`, R`\frac{-2}{3!} = -\frac{1}{3}`],
+      [R`\frac{24x(1-x^{2})}{(1+x^{2})^{4}}`, R`0`, R`0`],
+      [R`\frac{24(5x^{4}-10x^{2}+1)}{(1+x^{2})^{5}}`, R`24`, R`\frac{24}{5!} = \frac{1}{5}`]
+    ],
+    coefNote: R`[Note: The derivatives get messy quickly. A faster way: integrate the geometric series \(\frac{1}{1+x^{2}} = 1 - x^{2} + x^{4} - x^{6} + \cdots\) term by term.]`
+  }
+];
+
+/* ---------- Term arithmetic, text and speech ---------- */
+function fact(n) { let r = 1; for (let i = 2; i <= n; i++) r *= i; return r; }
+function coef(t) { const d = t.den === 'fact' ? fact(t.p) : t.den === 'int' ? t.p : 1; return (t.neg ? -1 : 1) / d; }
+function terms(fn, n) { const out = []; for (let k = 0; k < n; k++) out.push(fn.term(k)); return out; }
+function evalP(fn, n, x) { let s = 0; for (let k = 0; k < n; k++) { const t = fn.term(k); s += coef(t) * Math.pow(x, t.p); } return s; }
+function degree(fn, n) { return fn.term(n - 1).p; }
+
+function termTex(t, first) {
+  let body;
+  if (t.p === 0) body = '1';
+  else if (t.p === 1) body = 'x';
+  else if (t.den === 'one') body = 'x^{' + t.p + '}';
+  else body = R`\frac{x^{` + t.p + '}}{' + t.p + (t.den === 'fact' ? '!' : '') + '}';
+  const sign = first ? (t.neg ? '-' : '') : (t.neg ? '{}-' : '{}+');
+  return sign + body;
+}
+function ordinal(n) {
+  const m = n % 100;
+  if (m >= 11 && m <= 13) return n + 'th';
+  return n + (['th', 'st', 'nd', 'rd'][n % 10] || 'th');
+}
+function powSay(p) { return p === 2 ? 'x squared' : p === 3 ? 'x cubed' : 'x to the ' + ordinal(p); }
+function termSay(t, first) {
+  let body;
+  if (t.p === 0) body = '1';
+  else if (t.p === 1) body = 'x';
+  else if (t.den === 'one') body = powSay(t.p);
+  else body = powSay(t.p) + ' over ' + t.p + (t.den === 'fact' ? ' factorial' : '');
+  const sign = first ? (t.neg ? 'negative ' : '') : (t.neg ? 'minus ' : 'plus ');
+  return sign + body;
+}
+
+/* ---------- Numbers ---------- */
+function fmt(v, d) {
+  if (!isFinite(v)) return 'undefined';
+  if (Math.abs(v) < 0.5 * Math.pow(10, -d)) v = 0;           // no negative zero
+  const a = Math.abs(v);
+  let s;
+  if (a >= 1e6) s = v.toExponential(3);
+  else if (a >= 1000) s = v.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  else s = v.toFixed(d);
+  return s.replace('-', MINUS);
+}
+function say(s) { return s.split(MINUS).join('negative ').split(PI).join(' pi'); }
+function xTickText(v, fn) {
+  if (fn.piTicks) {
+    const k = Math.round(v / Math.PI);
+    return k === 0 ? '0' : k === 1 ? PI : k === -1 ? MINUS + PI : (k < 0 ? MINUS : '') + Math.abs(k) + PI;
+  }
+  return fmt(v, 0);
+}
+
+/* ---------- State ---------- */
+let fnIdx = 0;
+let n = 1;
+let shownP = null;          // polynomial y-values currently drawn (for the tween)
+let tween = null;
+let playTimer = null;
+let sayTimer = null;
+let lastChange = '';
+
+const el = id => document.getElementById(id);
+const slider = el('nTerms');
+const btnAdd = el('add'), btnRemove = el('remove'), btnPlay = el('play'), btnReset = el('reset');
+const calm = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- MathJax (optional: the page works without it) ---------- */
+let mjReady = false;
+let mjChain = Promise.resolve();
+function setMath(node, html) {
+  if (mjReady && MathJax.typesetClear) MathJax.typesetClear([node]);
+  node.innerHTML = html;
+  typeset(node);
+}
+function typeset(node) {
+  if (!mjReady) return;
+  mjChain = mjChain.then(() => MathJax.typesetPromise([node])).catch(() => {});
+}
+
+/* ---------- Function choices ---------- */
+function buildChoices() {
+  el('fnChoices').innerHTML = FUNCS.map((f, i) =>
+    `<div class="choice"><input type="radio" name="fn" id="fn_${f.id}" value="${i}"${i === fnIdx ? ' checked' : ''} aria-label="${f.say}">` +
+    `<label for="fn_${f.id}">\\(${f.tex}\\)</label></div>`).join('');
+  el('fnChoices').querySelectorAll('input').forEach(inp => inp.addEventListener('change', () => {
+    stopPlay(true);
+    fnIdx = +inp.value;
+    n = 1;
+    shownP = null;
+    lastChange = 'Function: ' + FUNCS[fnIdx].say + '.';
+    renderFunction();
+    update(false);
+  }));
+}
+
+/* ---------- Static parts for the chosen function ---------- */
+function renderFunction() {
+  const f = FUNCS[fnIdx];
+  slider.max = String(f.max);
+  slider.value = String(n);
+
+  let info = `<p>${f.conv}</p>`;
+  if (f.outside) info += `<p><b>Key idea:</b> ${f.outside}</p>`;
+  info += `<div class="disp">\\[${f.sigma}\\]</div>`;
+  if (f.extra) info += `<p class="note">${f.extra}</p>`;
+  info += R`<p class="note">[Note: A Taylor series centered at \(x = 0\) is also called a Maclaurin series.]</p>`;
+  setMath(el('info'), info);
+
+  const rows = f.deriv.map((r, k) => {
+    const name = k === 0 ? 'f(x)' : k <= 3 ? 'f' + "'".repeat(k) + '(x)' : 'f^{(' + k + ')}(x)';
+    const at0 = k === 0 ? 'f(0)' : k <= 3 ? 'f' + "'".repeat(k) + '(0)' : 'f^{(' + k + ')}(0)';
+    return `<tr><td>\\(${k}\\)</td><td>\\(${name} = ${r[0]}\\)</td><td>\\(${at0} = ${r[1]}\\)</td><td>\\(c_{${k}} = ${r[2]}\\)</td></tr>`;
+  }).join('');
+  let coefHtml = R`<p>Each coefficient comes from a derivative at the center \(x = 0\):</p>
+    <div class="disp scroll">\[c_{k} = \frac{f^{(k)}(0)}{k!}, \qquad P_{n}(x) = \sum_{k=0}^{n} c_{k}\,x^{k}\]</div>`;
+  coefHtml += `<div class="scroll"><table><caption class="sr-only">Derivatives of ${f.say} at 0 and the Taylor coefficients</caption>
+    <thead><tr><th scope="col">\\(k\\)</th><th scope="col">Derivative</th><th scope="col">Value at \\(0\\)</th><th scope="col">Coefficient</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>`;
+  if (f.coefNote) coefHtml += `<p class="note">${f.coefNote}</p>`;
+  setMath(el('coef'), coefHtml);
+
+  zoneItem = f.zone ? `<span class="item"><svg viewBox="0 0 34 12" aria-hidden="true" focusable="false"><rect x="1" y="1" width="32" height="10" rx="2" fill="var(--zone)" stroke="var(--ctl)" stroke-dasharray="3 2"/></svg>shaded: the series converges for \\(${f.zone.text}\\)</span>` : '';
+}
+let zoneItem = '';
+
+/* ---------- Everything that changes with n ---------- */
+function update(animate) {
+  const f = FUNCS[fnIdx];
+  const deg = degree(f, n);
+  slider.value = String(n);
+  const tWord = n === 1 ? '1 term' : n + ' terms';
+  el('nOut').textContent = tWord + ', degree ' + deg;
+  slider.setAttribute('aria-valuetext', tWord + ', degree ' + deg + ' polynomial');
+
+  setAria(btnRemove, n <= 1);
+  setAria(btnAdd, n >= f.max);
+
+  // Legend
+  setMath(el('legend'),
+    `<span class="item"><svg viewBox="0 0 34 12" aria-hidden="true" focusable="false"><line x1="1" y1="6" x2="33" y2="6" stroke="var(--cf)" stroke-width="3"/></svg>solid: \\(y = ${f.tex}\\)</span>` +
+    `<span class="item"><svg viewBox="0 0 34 12" aria-hidden="true" focusable="false"><line x1="1" y1="6" x2="33" y2="6" stroke="var(--cp)" stroke-width="3.5" stroke-dasharray="8 5"/></svg>dashed: \\(y = P_{${deg}}(x)\\)</span>` +
+    zoneItem);
+
+  // Formula, one typeset piece per term so it wraps on a phone
+  const ts = terms(f, n);
+  let html = `<span class="lhs">\\(P_{${deg}}(x) =\\)</span>`;
+  ts.forEach((t, k) => {
+    const isNew = k === n - 1 && n > 1;
+    html += `<span class="term${isNew ? ' new' : ''}">\\(${termTex(t, k === 0)}\\)${isNew ? '<span class="sr-only"> (newest term)</span>' : ''}</span>`;
+  });
+  setMath(el('poly'), html);
+
+  let pn = '';
+  if (f.parity === 'odd') pn = R`[Note: Only odd powers of \(x\) appear, so \(P_{` + deg + R`}(x)\) and \(P_{` + (deg + 1) + R`}(x)\) are the same polynomial.]`;
+  if (f.parity === 'even') pn = R`[Note: Only even powers of \(x\) appear, so \(P_{` + deg + R`}(x)\) and \(P_{` + (deg + 1) + R`}(x)\) are the same polynomial.]`;
+  el('powNote').hidden = !pn;
+  setMath(el('powNote'), pn);
+
+  drawPlot(animate);
+  el('plot').setAttribute('aria-label', describe(f, deg));
+  queueSay(f, deg);
+}
+function setAria(b, off) { b.setAttribute('aria-disabled', off ? 'true' : 'false'); }
+
+function describe(f, deg) {
+  const win = f.piTicks ? 'for x from a little past negative 2 pi to a little past 2 pi'
+    : 'for x from ' + say(fmt(f.x[0], 0)) + ' to ' + say(fmt(f.x[1], 0));
+  let s = 'Graph of y = ' + f.say + ' as a solid curve, and its degree ' + deg +
+    ' Taylor polynomial P sub ' + deg + ' of x, centered at x = 0, as a dashed curve, ' + win + '. ';
+  s += 'The two curves meet at x = 0. ' + closeSay(f, 'long');
+  if (f.zone) s += ' A shaded band marks where the series converges: ' + f.zone.say + '.';
+  return s;
+}
+
+/* Where the dashed curve stays close to the solid one: the stretch around x = 0
+   on which |P(x) - f(x)| < 0.1, read from the same window the graph shows. */
+const CLOSE = 0.1;
+function closeRange(f) {
+  const [x0, x1] = f.x, N = 1200, dx = (x1 - x0) / N;
+  const ok = x => { const y = f.f(x); return isFinite(y) && Math.abs(evalP(f, n, x) - y) < CLOSE; };
+  let lo = 0, hi = 0;
+  while (lo - dx >= x0 && ok(lo - dx)) lo -= dx;
+  while (hi + dx <= x1 && ok(hi + dx)) hi += dx;
+  return { lo, hi, all: lo - dx < x0 && hi + dx > x1 };
+}
+function closeSay(f, form) {
+  const r = closeRange(f);
+  const at = v => say(fmt(v, 1));
+  if (form === 'short')
+    return r.all ? 'Within 0.1 of the curve across the whole graph.'
+      : 'Within 0.1 of the curve from x = ' + at(r.lo) + ' to ' + at(r.hi) + '.';
+  return r.all ? 'P sub ' + degree(f, n) + ' stays within 0.1 of the solid curve across the whole graph.'
+    : 'P sub ' + degree(f, n) + ' stays within 0.1 of the solid curve from x = ' + at(r.lo) + ' to x = ' + at(r.hi) +
+      '; outside that stretch the dashed curve moves away from the solid curve.';
+}
+
+/* ---------- Announcements (debounced, settled values only) ---------- */
+function queueSay(f, deg) {
+  clearTimeout(sayTimer);
+  sayTimer = setTimeout(() => {
+    const ts = terms(f, n);
+    const newest = n > 1 ? ' Newest term: ' + termSay(ts[n - 1], false) + '.' : '';
+    const msg = (lastChange ? lastChange + ' ' : '') + (n === 1 ? '1 term' : n + ' terms') + ', P sub ' + deg + ' of x.' + newest + ' ' + closeSay(f, 'short');
+    lastChange = '';
+    const live = el('announce');
+    live.textContent = '';
+    requestAnimationFrame(() => { live.textContent = msg; });
+  }, 450);
+}
+
+
+/* ---------- The graph ---------- */
+function drawPlot(animate) {
+  const f = FUNCS[fnIdx];
+  const box = el('plot');
+  const W = Math.max(280, Math.round(box.clientWidth || 600));
+  const H = Math.round(Math.min(260, Math.max(190, W * 0.36)));   // short enough that the controls and the terms fit on the same screen
+  const L = 10, Rm = 28, T = 26, B = 10;
+  const [x0, x1] = f.x, [y0, y1] = f.y, span = y1 - y0;
+  const sx = x => L + (x - x0) / (x1 - x0) * (W - L - Rm);
+  const sy = y => T + (y1 - y) / span * (H - T - B);
+  const N = Math.max(300, W);
+  const xs = []; for (let i = 0; i <= N; i++) xs.push(x0 + (x1 - x0) * i / N);
+  const clampY = y => Math.max(y0 - span, Math.min(y1 + span, y));
+
+  const fy = xs.map(x => f.f(x));
+  const target = xs.map(x => clampY(evalP(f, n, x)));
+
+  const path = ys => {
+    let d = '', pen = false;
+    for (let i = 0; i < xs.length; i++) {
+      const y = ys[i];
+      if (!isFinite(y)) { pen = false; continue; }
+      const yc = clampY(y);
+      if (pen && i > 0 && isFinite(ys[i - 1])) {
+        const prev = clampY(ys[i - 1]);
+        if (Math.abs(yc - prev) > 1.5 * span) pen = false;      // jump across an asymptote
+      }
+      d += (pen ? 'L' : 'M') + sx(xs[i]).toFixed(1) + ' ' + sy(yc).toFixed(1) + ' ';
+      pen = true;
+    }
+    return d;
+  };
+
+  // Ticks
+  const ax = sx(0), ay = sy(0);
+  let grid = '', ticks = '';
+  const xt = []; for (let v = Math.ceil(x0 / f.xStep) * f.xStep; v <= x1 + 1e-9; v += f.xStep) if (Math.abs(v) > 1e-9) xt.push(v);
+  const yt = []; for (let v = Math.ceil(y0 / f.yStep) * f.yStep; v <= y1 + 1e-9; v += f.yStep) if (Math.abs(v) > 1e-9) yt.push(v);
+  xt.forEach(v => {
+    const X = sx(v).toFixed(1);
+    grid += `<line x1="${X}" y1="${T}" x2="${X}" y2="${H - B}"/>`;
+    ticks += `<line x1="${X}" y1="${ay - 5}" x2="${X}" y2="${ay + 5}" stroke="var(--axis)" stroke-width="1.5"/>`;
+    if (+X > L + 14 && +X < W - Rm - 10) ticks += `<text class="tick" x="${X}" y="${(ay + 20).toFixed(1)}" text-anchor="middle">${xTickText(v, f)}</text>`;
+  });
+  const thin = (H - T - B) / yt.length < 22;
+  yt.forEach((v, i) => {
+    const Y = sy(v).toFixed(1);
+    grid += `<line x1="${L}" y1="${Y}" x2="${W - Rm}" y2="${Y}"/>`;
+    ticks += `<line x1="${ax - 5}" y1="${Y}" x2="${ax + 5}" y2="${Y}" stroke="var(--axis)" stroke-width="1.5"/>`;
+    if ((!thin || i % 2 === 1) && +Y > T + 8 && +Y < H - B - 6) ticks += `<text class="tick" x="${(ax - 8).toFixed(1)}" y="${(+Y + 4.5).toFixed(1)}" text-anchor="end">${fmt(v, 0)}</text>`;
+  });
+  ticks += `<text class="tick" x="${(ax - 8).toFixed(1)}" y="${(ay + 18).toFixed(1)}" text-anchor="end">0</text>`;
+
+  let zone = '';
+  if (f.zone) {
+    const za = sx(f.zone.a), zb = sx(f.zone.b);
+    zone = `<rect x="${za.toFixed(1)}" y="${T}" width="${(zb - za).toFixed(1)}" height="${H - T - B}" fill="var(--zone)"/>` +
+      `<line x1="${za.toFixed(1)}" y1="${T}" x2="${za.toFixed(1)}" y2="${H - B}" stroke="var(--ctl)" stroke-width="1.5" stroke-dasharray="5 4"/>` +
+      `<line x1="${zb.toFixed(1)}" y1="${T}" x2="${zb.toFixed(1)}" y2="${H - B}" stroke="var(--ctl)" stroke-width="1.5" stroke-dasharray="5 4"/>` +
+      `<text class="zonelab" x="${((za + zb) / 2).toFixed(1)}" y="${T + 16}" text-anchor="middle">converges here</text>`;
+  }
+
+  const f0 = f.f(0);
+  const svgHead = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true" focusable="false">
+    <defs>
+      <clipPath id="clipPlot"><rect x="${L}" y="${T}" width="${W - L - Rm}" height="${H - T - B}"/></clipPath>
+      <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+        <path d="M0 0 L10 5 L0 10 z" fill="var(--axis)"/></marker>
+    </defs>
+    <g clip-path="url(#clipPlot)">${zone}<g stroke="var(--grid)" stroke-width="1">${grid}</g></g>
+    <line x1="${L}" y1="${ay.toFixed(1)}" x2="${W - 12}" y2="${ay.toFixed(1)}" stroke="var(--axis)" stroke-width="1.8" marker-end="url(#arrow)"/>
+    <line x1="${ax.toFixed(1)}" y1="${H - B}" x2="${ax.toFixed(1)}" y2="8" stroke="var(--axis)" stroke-width="1.8" marker-end="url(#arrow)"/>
+    <text class="axlab" x="${W - 8}" y="${(ay - 8).toFixed(1)}" text-anchor="end">x</text>
+    <text class="axlab" x="${(ax + 10).toFixed(1)}" y="20">y</text>
+    ${ticks}
+    <g clip-path="url(#clipPlot)" fill="none" stroke-linejoin="round" stroke-linecap="round">
+      <path d="${path(fy)}" stroke="var(--cf)" stroke-width="3"/>
+      <path id="pPath" stroke="var(--cp)" stroke-width="3.5" stroke-dasharray="10 6"/>
+    </g>
+    <circle cx="${ax.toFixed(1)}" cy="${sy(f0).toFixed(1)}" r="4.5" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/>
+  </svg>`;
+  box.innerHTML = svgHead;
+  const pPath = box.querySelector('#pPath');
+
+  if (tween) { cancelAnimationFrame(tween); tween = null; }
+  const from = shownP && shownP.length === target.length ? shownP : null;
+  if (!animate || !from || calm()) {
+    shownP = target;
+    pPath.setAttribute('d', path(target));
+    return;
+  }
+  const t0 = performance.now(), dur = 450;
+  const step = now => {
+    const u = Math.min(1, (now - t0) / dur), e = u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+    shownP = from.map((y, i) => y + (target[i] - y) * e);
+    pPath.setAttribute('d', path(shownP));
+    tween = u < 1 ? requestAnimationFrame(step) : null;
+  };
+  tween = requestAnimationFrame(step);
+}
+
+/* ---------- Controls ---------- */
+function setN(v, animate, why) {
+  const f = FUNCS[fnIdx];
+  v = Math.max(1, Math.min(f.max, v));
+  if (v === n) return false;
+  n = v;
+  if (why) lastChange = why;
+  update(animate);
+  return true;
+}
+btnAdd.addEventListener('click', () => {
+  stopPlay(true);
+  const f = FUNCS[fnIdx];
+  if (n >= f.max) { flash('All ' + f.max + ' terms are showing. That is as many as this tool draws.'); return; }
+  setN(n + 1, true);
+});
+btnRemove.addEventListener('click', () => {
+  stopPlay(true);
+  if (n <= 1) { flash('Only the first term is showing.'); return; }
+  setN(n - 1, true, 'Removed the last term.');
+});
+btnReset.addEventListener('click', () => {
+  stopPlay(true);
+  if (!setN(1, true, 'Back to the first term.')) flash('Already at the first term.');
+});
+slider.addEventListener('input', () => { stopPlay(true); setN(+slider.value, true); });
+btnPlay.addEventListener('click', () => { if (playTimer) stopPlay(); else startPlay(); });
+
+function startPlay() {
+  const f = FUNCS[fnIdx];
+  if (n >= f.max) { n = 0; setN(1, true, 'Starting from the first term.'); }
+  btnPlay.textContent = 'Pause';
+  playTimer = setInterval(() => {
+    const ff = FUNCS[fnIdx];
+    if (n >= ff.max) { stopPlay(); return; }
+    setN(n + 1, true);
+    if (n >= ff.max) stopPlay();
+  }, 1400);
+}
+function stopPlay(quiet) {
+  if (!playTimer) return;
+  clearInterval(playTimer);
+  playTimer = null;
+  btnPlay.textContent = 'Play';
+  if (!quiet) lastChange = (lastChange ? lastChange + ' ' : '') + 'Paused.';
+}
+function flash(msg) {
+  clearTimeout(sayTimer);
+  const live = el('announce');
+  live.textContent = '';
+  requestAnimationFrame(() => { live.textContent = msg; });
+}
+
+let rsTimer = null;
+window.addEventListener('resize', () => { clearTimeout(rsTimer); rsTimer = setTimeout(() => drawPlot(false), 150); });
+
+/* ---------- Insignia ---------- */
+(function rose() {
+  let d = '';
+  for (let i = 0; i <= 240; i++) {
+    const t = (i / 240) * 4 * Math.PI, r = 2 * Math.cos(1.5 * t);
+    d += (i ? 'L ' : 'M ') + (r * Math.cos(t) * 12).toFixed(2) + ' ' + (r * Math.sin(t) * 12).toFixed(2) + ' ';
+  }
+  el('pr-path').setAttribute('d', d.trim());
+})();
+
+/* ---------- Start ---------- */
+buildChoices();
+renderFunction();
+update(false);
+if (window.MathJax && MathJax.startup && MathJax.startup.promise) {
+  MathJax.startup.promise.then(() => { mjReady = true; typeset(document.querySelector('main')); });
+}
+</script>
+
+</body>
+</html>
