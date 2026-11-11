@@ -19,6 +19,10 @@ Interactive practice activities for Calculus I and Calculus II, by Polar Rose St
 | Determining If a Series Converges or Diverges | Ten problems on the nth term test: find the limit of the sequence, decide what the test says about the series, and choose another test (p-series, geometric series or integral test) when it is inconclusive. | [Open](https://polarrose.github.io/math-tools/calculus/nth-term-test/) |
 | Choosing a Convergence Test | Twelve mixed problems: choose the most appropriate test, find the key value (a limit, p, a ratio, an integral or a sum), then decide whether the series converges or diverges. Covers the nth term, geometric series, p-series, integral, limit comparison, alternating series and ratio tests. | [Open](https://polarrose.github.io/math-tools/calculus/convergence-tests/) |
 
+| Visualizing a Sequence vs. a Series | Graph a sequence and its partial sums side by side to see whether the sequence converges and whether the series converges. Eleven built-in sequences or your own, with a suggested test for each. | [Open](https://polarrose.github.io/math-tools/calculus/sequence-vs-series/) |
+| Alternating Series Visualization | Nine alternating series: apply the Alternating Series Test and watch the zigzag of partial sums close in on one value, or not. | [Open](https://polarrose.github.io/math-tools/calculus/alternating-series/) |
+| Taylor Series Explorer | Six functions: add the terms of the Taylor series one at a time and watch the polynomial approach the function, with the interval of convergence shaded. | [Open](https://polarrose.github.io/math-tools/calculus/taylor-series/) |
+
 ## How the activities work
 
 - Problems are numbered across the top. Each problem is a short series of multiple-choice steps, each with its own Check button.
