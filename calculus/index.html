@@ -16,7 +16,8 @@
 :root {
   --bg: #E6E9F4; --card: #FDFCFF; --ink: #1B2A4A; --muted: #4A5068; --line: #D9DBE7; --ctl: #7A84A8;
   --band: #1B2A4A; --band-ink: #F7F6FB; --green: #1B5E20; --head: #388E3C; --focus: #5E3FA3; --btn-ink: #FDFCFF;
-  --rose-a: #1e3a5f; --rose-b: #0b7a70; --rose-cap: #525c8a;
+  --rose-a: #1e3a5f; --rose-b: #0b7a70; --rose-cap: #7A84A8; --navy: #172E5A;
+  --frame-bg: #F1F3FA; --row-bg: #E8F3E9; --row-hover: #DDEEDF; --row-line: #A6AECB; --box-edge: #2C4A86;
   --serif: ui-serif, Georgia, Cambria, 'Times New Roman', serif;
   --sans: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
 }
@@ -24,13 +25,15 @@
   :root:not([data-theme="light"]) {
     --bg: #11182A; --card: #182239; --ink: #E7EAF3; --muted: #B3B9CC; --line: #2E3A57; --ctl: #7A86AD;
     --band: #0B1120; --band-ink: #F2F3F8; --green: #9BD3A2; --head: #81C784; --focus: #C9B8F2; --btn-ink: #11182A;
-    --rose-a: #c4b5fd; --rose-b: #6ee7b7; --rose-cap: #a8b0d8; color-scheme: dark;
+    --rose-a: #c4b5fd; --rose-b: #6ee7b7; --rose-cap: #a8b0d8; --navy: #C7D2FE;
+    --frame-bg: #182239; --row-bg: #1A3326; --row-hover: #21402F; --row-line: #56628A; --box-edge: #A9B6E8; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #11182A; --card: #182239; --ink: #E7EAF3; --muted: #B3B9CC; --line: #2E3A57; --ctl: #7A86AD;
   --band: #0B1120; --band-ink: #F2F3F8; --green: #9BD3A2; --head: #81C784; --focus: #C9B8F2; --btn-ink: #11182A;
-  --rose-a: #c4b5fd; --rose-b: #6ee7b7; --rose-cap: #a8b0d8; color-scheme: dark;
+  --rose-a: #c4b5fd; --rose-b: #6ee7b7; --rose-cap: #a8b0d8; --navy: #C7D2FE;
+    --frame-bg: #182239; --row-bg: #1A3326; --row-hover: #21402F; --row-line: #56628A; --box-edge: #A9B6E8; color-scheme: dark;
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -40,31 +43,33 @@ body { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: col
 main { flex: 1 0 auto; }
 .wrap { max-width: 860px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 header .wrap { padding-block: 24px 0; }
-.band { background: var(--band); color: var(--band-ink); border-radius: 14px; padding: 28px clamp(20px, 4vw, 32px); }
+.band { background: var(--band); color: var(--band-ink); border-radius: 4px; padding: 28px clamp(20px, 4vw, 32px); }
 h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(30px, 5vw, 36px); line-height: 1.15; margin: 0; }
 h1::after { content: ""; display: block; width: 100%; height: 3px; margin-top: 12px; border-radius: 2px; background: #66BB6A; } /* full width of the title box (Ira) */
 main .wrap { padding-block: 28px 40px; display: flex; flex-direction: column; gap: 32px; }
 section { display: flex; flex-direction: column; gap: 12px; }
-h2 { font-family: var(--serif); font-size: 26px; line-height: 1.2; margin: 0; color: var(--head); }
-.rows { list-style: none; margin: 0; padding: 0; background: var(--card); border: 2px solid var(--ctl); border-radius: 14px; overflow: hidden; box-shadow: 0 4px 14px rgba(27, 42, 74, 0.10); }
-.row { position: relative; display: flex; align-items: center; gap: 18px; padding: 18px 22px; border-top: 1px solid var(--line); }
+h2 { font-family: var(--serif); font-size: 26px; line-height: 1.2; margin: 0; color: var(--ink); } /* navy section headings (Ira, 2026-11-10) */
+.frame { background: var(--frame-bg); border: 2px solid var(--ctl); border-radius: 4px; padding: 24px clamp(16px, 3vw, 28px); display: flex; flex-direction: column; gap: 28px; box-shadow: -4px 2px 8px rgba(27, 42, 74, 0.16), 0 4px 16px rgba(27, 42, 74, 0.06); } /* one frame around both courses; slight shadow on the left edge (Ira) */
+.rows { list-style: none; margin: 0; padding: 0; background: var(--row-bg); border: 2px solid var(--box-edge); border-radius: 4px; overflow: hidden; } /* pale green, navy edge (Ira) */
+.row { position: relative; display: flex; align-items: center; gap: 18px; padding: 18px 22px; border-top: 2px solid var(--row-line); }
 .row:first-child { border-top: 0; }
-.row:hover { background: color-mix(in srgb, var(--card) 92%, var(--ctl)); }
+.row:hover { background: var(--row-hover); }
 .row:focus-within { outline: 3px solid var(--focus); outline-offset: -3px; }
 .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .tag { margin: 0; font-size: 14px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--green); }
-.row h3 { margin: 0; font-family: var(--sans); font-size: 18px; font-weight: 400; line-height: 1.35; }
-.row h3 a { color: var(--ink); text-decoration: none; }
+.row h3 { margin: 0; font-family: var(--sans); font-size: 18px; font-weight: 600; line-height: 1.35; } /* light bold (Ira, 2026-11-10) */
+.row h3 a { color: var(--navy); text-decoration: none; } /* activity names in navy (Ira, 2026-11-10) */
 .row h3 a::after { content: ""; position: absolute; inset: 0; }   /* the whole row opens the tool */
 .row h3 a:focus { outline: none; }
 .desc { margin: 0; color: var(--muted); font-size: 16px; }
-.go { flex: none; font: 700 16px var(--sans); padding: 10px 20px; min-height: 44px; border-radius: 10px; background: var(--ink); color: var(--btn-ink); display: inline-flex; align-items: center; }
+.sub { margin: 2px 0 0; color: var(--muted); font-size: 15px; } /* short subtitle under a tool name (Ira, 2026-11-10) */ /* short subtitle under a tool name (Ira, 2026-11-10) */
+.go { flex: none; font: 700 16px var(--sans); padding: 10px 20px; min-height: 44px; border-radius: 4px; background: var(--ink); color: var(--btn-ink); display: inline-flex; align-items: center; }
 @media (max-width: 560px) { .row { flex-direction: column; align-items: flex-start; gap: 12px; } }
 footer .wrap { padding-block: 56px 28px; display: flex; flex-direction: column; align-items: center; }
 .insignia { display: block; width: 60px; }
 .pr-a { stop-color: var(--rose-a); }
 .pr-b { stop-color: var(--rose-b); }
-.insignia-caption { font-size: 7.5px; letter-spacing: 1px; font-weight: 800; color: var(--rose-cap); margin-top: 2px; white-space: nowrap; }
+.insignia-caption { font-size: 9.5px; letter-spacing: 1.2px; font-weight: 800; color: var(--rose-cap); margin-top: 2px; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -79,6 +84,7 @@ footer .wrap { padding-block: 56px 28px; display: flex; flex-direction: column; 
 
 <main>
   <div class="wrap">
+  <div class="frame">
 
     <section aria-labelledby="calc1">
       <h2 id="calc1">Calculus I Activities</h2>
@@ -97,13 +103,22 @@ footer .wrap { padding-block: 56px 28px; display: flex; flex-direction: column; 
       <ul class="rows">
         <li class="row">
           <div class="txt">
-            <h3><a href="nth-term-test/">Convergence of a Sequence vs. Series</a></h3>
+            <h3><a href="nth-term-test/">Determining If a Series Converges or Diverges</a></h3>
+            <p class="sub">nth term test, p-series test, geometric series test, integral test</p>
+          </div>
+          <span class="go" aria-hidden="true">Open</span>
+        </li>
+        <li class="row">
+          <div class="txt">
+            <h3><a href="convergence-tests/">Choosing a Convergence Test</a></h3>
+            <p class="sub">Mixed practice: nth term, geometric series, p-series, integral, limit comparison, alternating series and ratio tests</p>
           </div>
           <span class="go" aria-hidden="true">Open</span>
         </li>
       </ul>
     </section>
 
+  </div>
   </div>
 </main>
 
