@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Distance &amp; Displacement</title>
+<title>Area Under a Curve, Distance, Displacement</title>
 <meta name="description" content="Six interactive problems: from the definite integrals of velocity over each sub-interval, find the integral over the entire interval, the total area, the total distance traveled and the total displacement.">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
@@ -113,7 +113,7 @@ body {
     position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
     overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
 }
-:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 10px; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
 .wrap {
     max-width: 1040px; margin: 0 auto;
     padding-left: max(16px, env(safe-area-inset-left, 0px));
@@ -123,15 +123,16 @@ body {
 /* ---------------------------------------------------------------- header band */
 header .wrap { padding-top: 24px; }
 .band {
-    background: var(--band); color: var(--band-ink); border-radius: 14px;
+    background: var(--band); color: var(--band-ink); border-radius: 4px;
     padding: 26px clamp(20px, 4vw, 34px) 28px;
+    box-shadow: -4px 3px 10px rgba(27, 42, 74, 0.22), 0 4px 16px rgba(27, 42, 74, 0.08); /* slight shadow (Ira, 2026-11-10) */
 }
 .eyebrow {
     margin: 0 0 6px; font-size: 13px; font-weight: 800; letter-spacing: .14em;
     text-transform: uppercase; color: var(--band-eyebrow);
 }
 h1 {
-    margin: 0; font-family: var(--head); font-weight: 650; font-size: clamp(30px, 5vw, 42px);
+    margin: 0; font-family: var(--head); font-weight: 650; font-size: clamp(28px, 5vw, 36px); /* long title: 36px max so it stays on one line in Georgia on a computer (Ira) */
     line-height: 1.12; letter-spacing: -.01em;
 }
 h1::after {
@@ -147,7 +148,7 @@ main .wrap { padding-top: 22px; padding-bottom: 44px; display: flex; flex-direct
 .steps { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .steps .label-p { font-weight: 800; margin-right: 6px; font-size: 16px; }
 .step {
-    min-width: 46px; height: 46px; padding: 0 10px; border-radius: 999px;
+    min-width: 46px; height: 46px; padding: 0 10px; border-radius: 4px;
     border: 2px solid var(--navy-mid); background: var(--card); color: var(--ink);
     font: 800 16px var(--ui); cursor: pointer; display: inline-flex; align-items: center;
     justify-content: center; gap: 4px;
@@ -161,14 +162,14 @@ main .wrap { padding-top: 22px; padding-bottom: 44px; display: flex; flex-direct
 
 /* ---------------------------------------------------------------- card */
 .card {
-    background: var(--card); border: 2px solid var(--navy); border-radius: 24px;
+    background: var(--card); border: 2px solid var(--navy); border-radius: 4px;
     box-shadow: 0 30px 60px -34px var(--shadow);
     padding: 26px 32px 30px; min-width: 0;
 }
 .card h2.ptitle { margin: 0 0 16px; font-family: var(--head); font-weight: 650; font-size: 24px; color: var(--navy); }
 
 /* ---------------------------------------------------------------- plot */
-.plot { margin: 0 0 22px; border-radius: 20px; background: var(--panel); border: 1.5px solid var(--navy); padding: 6px 8px 2px; }
+.plot { margin: 0 0 22px; border-radius: 4px; background: var(--panel); border: 1.5px solid var(--navy); padding: 6px 8px 2px; }
 /* graph colours come from tokens, so light and dark both work */
 .g-grid  { stroke: var(--g-grid); }
 .g-axis  { stroke: var(--g-axis); }
@@ -214,7 +215,7 @@ main .wrap { padding-top: 22px; padding-bottom: 44px; display: flex; flex-direct
 .given { margin-bottom: 24px; }
 .chips { display: flex; flex-wrap: wrap; gap: 12px; }
 .chip {
-    display: inline-flex; align-items: center; padding: 12px 22px 12px 18px; border-radius: 16px;
+    display: inline-flex; align-items: center; padding: 12px 22px 12px 18px; border-radius: 4px;
     font-size: 20px; border: 1.5px solid; min-height: 64px;
 }
 .chip.pos { background: var(--pos-soft); border-color: var(--pos-ink); }
@@ -225,7 +226,7 @@ main .wrap { padding-top: 22px; padding-bottom: 44px; display: flex; flex-direct
 /* ---------------------------------------------------------------- questions */
 .find { margin-bottom: 18px; }
 .qs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-items: start; }
-.q { background: var(--panel); border: 2px solid var(--q0); border-radius: 18px; padding: 14px 16px 16px; min-width: 0; }
+.q { background: var(--panel); border: 2px solid var(--q0); border-radius: 4px; padding: 14px 16px 16px; min-width: 0; }
 .q[data-k="0"] { border-color: var(--q0); }
 .q[data-k="1"] { border-color: var(--q1); }
 .q[data-k="2"] { border-color: var(--q2); }
@@ -235,7 +236,7 @@ main .wrap { padding-top: 22px; padding-bottom: 44px; display: flex; flex-direct
 .q .row { display: flex; justify-content: flex-start; align-items: center; flex-wrap: wrap; gap: 10px 14px; }
 .q .ans { display: flex; align-items: center; gap: 8px; }
 .q input {
-    width: 150px; height: 50px; border-radius: 12px; border: 2px solid var(--navy-mid);
+    width: 150px; height: 50px; border-radius: 4px; border: 2px solid var(--navy-mid);
     background: var(--field); font-family: var(--math); font-size: 22px; text-align: center; color: var(--ink);
 }
 .q input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
@@ -243,7 +244,7 @@ main .wrap { padding-top: 22px; padding-bottom: 44px; display: flex; flex-direct
 .q .u { font-family: var(--math); font-size: 21px; }
 .q .ctl { display: flex; gap: 8px; }
 .q .minus, .q .qcheck {
-    height: 50px; border-radius: 12px; background: var(--field); color: var(--ink); cursor: pointer; font-weight: 800;
+    height: 50px; border-radius: 4px; background: var(--field); color: var(--ink); cursor: pointer; font-weight: 800;
 }
 .q .minus { width: 50px; border: 2px solid var(--navy-mid); font: 700 24px var(--math); }
 .q .qcheck { padding: 0 18px; border: 2px solid var(--navy); font: 800 15px var(--ui); }
@@ -267,7 +268,7 @@ details.more { margin-top: 10px; }
 details.more summary {
     display: inline-flex; align-items: center; gap: 8px; cursor: pointer; list-style: none;
     font: 700 15px var(--ui); color: var(--ink); background: var(--select);
-    border: 2px solid var(--navy-mid); border-radius: 999px; padding: 6px 16px; min-height: 44px;
+    border: 2px solid var(--navy-mid); border-radius: 4px; padding: 6px 16px; min-height: 44px;
 }
 details.more summary::-webkit-details-marker { display: none; }
 details.more summary::before { content: "+"; content: "+" / ""; font-size: 19px; line-height: 1; color: var(--green-ink); font-weight: 800; }
@@ -275,7 +276,7 @@ details.more[open] summary::before { content: "\2212"; content: "\2212" / ""; }
 details.more .when-open { display: none; }
 details.more[open] .when-open { display: inline; }
 details.more[open] .when-closed { display: none; }
-.explain { margin-top: 10px; background: var(--explain); border-radius: 14px; padding: 14px 16px; overflow-x: auto; }
+.explain { margin-top: 10px; background: var(--explain); border-radius: 4px; padding: 14px 16px; overflow-x: auto; }
 .explain p { margin: 0 0 8px; font-size: 15px; line-height: 1.55; color: var(--ink-2); }
 .explain p:last-child { margin-bottom: 0; }
 .explain .line { display: flex; align-items: center; flex-wrap: wrap; row-gap: 6px; font-size: 18px; margin: 6px 0 8px; color: var(--ink); }
@@ -291,7 +292,7 @@ details.more[open] .when-closed { display: none; }
 
 /* ---------------------------------------------------------------- actions, finish */
 .actions { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: center; }
-.btn { font: 800 15.5px var(--ui); border-radius: 14px; padding: 0 22px; height: 50px; cursor: pointer; border: 2px solid var(--ink); }
+.btn { font: 800 15.5px var(--ui); border-radius: 4px; padding: 0 22px; height: 50px; cursor: pointer; border: 2px solid var(--ink); }
 .btn.primary { background: var(--ink); color: var(--card); }
 .btn.primary:hover { opacity: .9; }
 .btn.ghost { background: transparent; color: var(--ink); }
@@ -318,13 +319,13 @@ details.more[open] .when-closed { display: none; }
 
 /* ---------------------------------------------------------------- narrow */
 @media (max-width: 760px) {
-    .card { padding: 20px 16px 22px; border-radius: 20px; }
+    .card { padding: 20px 16px 22px; border-radius: 4px; }
     .qs { grid-template-columns: 1fr; }
     .q input { width: 96px; }
     .q .row { gap: 10px; }
     .q .qcheck { padding: 0 14px; }
     .chips { gap: 8px; }
-    .chip { font-size: 16px; flex: 1 1 0; min-width: 148px; padding: 9px 10px; min-height: 54px; border-radius: 13px; }
+    .chip { font-size: 16px; flex: 1 1 0; min-width: 148px; padding: 9px 10px; min-height: 54px; border-radius: 4px; }
 }
 @media (prefers-reduced-motion: reduce) {
     .region, .mark, .draw.go { transition: none !important; }
@@ -337,8 +338,7 @@ details.more[open] .when-closed { display: none; }
     <div class="wrap">
         <div class="band">
             <p class="eyebrow">Net change &middot; Definite integrals</p>
-            <h1>Distance <span class="amp">&amp;</span> Displacement</h1>
-            <p class="lead">Use the integrals of velocity over each sub-interval to find the integral over the entire interval, the total area, the distance traveled and the displacement.</p>
+            <h1>Area Under a Curve, Distance, Displacement</h1>
         </div>
     </div>
 </header>
